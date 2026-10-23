@@ -1,0 +1,450 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="三角色全操作逻辑图">
+    <mxGraphModel dx="2280" dy="3910" grid="1" gridSize="10" page="1" pageWidth="2280" pageHeight="3910" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="header" value="六育学生评价系统 · 三角色全操作逻辑关系图" style="text;html=1;align=left;fontSize=32;fontStyle=1;fontColor=#253D30;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="65" y="35" width="1600" height="60" />
+        </mxCell>
+        <mxCell id="subheader" value="基础配置 → 日常评价并行开展 → 综合核算 → 教师确认 / 管理发布 → 按需受控更正" style="text;html=1;align=left;fontSize=20;fontColor=#708276;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="65" y="120" width="2100" height="60" />
+        </mxCell>
+        <mxCell id="section-01" value="01  基础准备与统一入口" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="225" width="2200" height="245" />
+        </mxCell>
+        <mxCell id="section-02" value="02  实体卡评价 · B 模式" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="490" width="2200" height="385" />
+        </mxCell>
+        <mxCell id="section-03" value="03  无卡直评 · A 模式与统一积分账本" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="895" width="2200" height="260" />
+        </mxCell>
+        <mxCell id="section-04" value="04  荣誉申报、审核与撤销" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="1175" width="2200" height="355" />
+        </mxCell>
+        <mxCell id="section-05" value="05  月度故事与教师终审" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="1550" width="2200" height="295" />
+        </mxCell>
+        <mxCell id="section-06" value="06  成绩导入与批次对账" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="1865" width="2200" height="305" />
+        </mxCell>
+        <mxCell id="section-07" value="07  综合规则、完整性检查与核算" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="2190" width="2200" height="395" />
+        </mxCell>
+        <mxCell id="section-08" value="08  期末报告：内容汇集、教师确认、管理发布" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="2605" width="2200" height="430" />
+        </mxCell>
+        <mxCell id="section-09" value="09  差错更正、版本更新与学期归档" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="3055" width="2200" height="340" />
+        </mxCell>
+        <mxCell id="section-10" value="10  贯穿所有流程的消息、审计与自动任务" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCFDFC;strokeColor=#E2E9E3;align=left;verticalAlign=top;spacingTop=16;spacingLeft=22;fontSize=21;fontStyle=1;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="40" y="3415" width="2200" height="330" />
+        </mxCell>
+        <mxCell id="accounts" value="&lt;b&gt;管理员 · 配置账号与班级授权&lt;/b&gt;&lt;br&gt;建账号 / 启停 / 重置凭据 / 学生归班 / 教师任教班级授权；新操作按新权限&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M03&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="300" width="360" height="118" />
+        </mxCell>
+        <mxCell id="term" value="&lt;b&gt;管理员 · 配置学期与校历&lt;/b&gt;&lt;br&gt;当前学期、时区、提交与审核截止 / 当前展示 ≠ 是否允许业务写入&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M02&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="300" width="360" height="118" />
+        </mxCell>
+        <mxCell id="dictionary" value="&lt;b&gt;管理员 · 维护六育三级指标&lt;/b&gt;&lt;br&gt;指标启停与版本留痕，直评固定 +1 / 学期 / 指标配置共同约束后续业务&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M04&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="300" width="360" height="118" />
+        </mxCell>
+        <mxCell id="gate" value="&lt;b&gt;系统自动 · 统一鉴权与时间窗检查&lt;/b&gt;&lt;br&gt;学生仅本人 / 教师仅授权班级 / 管理员仅本校；归档后常规只读&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;FR-01&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="300" width="360" height="118" />
+        </mxCell>
+        <mxCell id="entry" value="&lt;b&gt;三端共用 · 登录 → 首页 / 工作台&lt;/b&gt;&lt;br&gt;登录 / 退出；查看身份、待办与消息 / 学生成长首页 / 教师待办 / 管理概览&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;C01 · S01 · T01 · M01&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F6F3;strokeColor=#A5B6A7;fontColor=#5D7562;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="300" width="360" height="118" />
+        </mxCell>
+        <mxCell id="cardgen" value="&lt;b&gt;管理员 · 月度配额、制卡与印刷&lt;/b&gt;&lt;br&gt;各指标配额之和 = 教师月度总额 N / 可作废未申领卡；不预先绑定学生&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M05&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="565" width="360" height="118" />
+        </mxCell>
+        <mxCell id="cardgive" value="&lt;b&gt;教师 · 查看本人配卡并线下发放&lt;/b&gt;&lt;br&gt;查看配额 / 未申领 / 待审 / 已用 / 教师不制卡，不创建学生发放登记&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T09&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="565" width="360" height="118" />
+        </mxCell>
+        <mxCell id="claim" value="&lt;b&gt;学生 · 扫码预览 → 确认申领&lt;/b&gt;&lt;br&gt;预览只读；有效卡提交后锁为待审 / PENDING：积分尚未增加&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S02&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="565" width="360" height="118" />
+        </mxCell>
+        <mxCell id="claimreview" value="&lt;b&gt;教师 · 审核本人名下卡申领&lt;/b&gt;&lt;br&gt;核对学生、三级指标与截止时间 / 通过 / 驳回；防重复提交&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T02&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="565" width="360" height="118" />
+        </mxCell>
+        <mxCell id="cardposted" value="&lt;b&gt;系统自动 · 卡已用 + 正式流水 +1&lt;/b&gt;&lt;br&gt;一次事务完成：审核、卡状态、记账 / 结果通知学生；进入 03 过程账本&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;USED · B_CARD&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="565" width="360" height="118" />
+        </mxCell>
+        <mxCell id="expired" value="&lt;b&gt;异常 / 限制 · 卡片过期 / 不可用&lt;/b&gt;&lt;br&gt;未用卡跨月、待审超宽限：自动过期 / 已用 / 作废 / 过期不再领取，不加分&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;EXPIRED&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF1EF;strokeColor=#D4A19A;fontColor=#A25D54;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="745" width="360" height="100" />
+        </mxCell>
+        <mxCell id="claimreject" value="&lt;b&gt;异常 / 限制 · 填写理由 → 驳回&lt;/b&gt;&lt;br&gt;申领 REJECTED，卡片永久 VOID / 积分不增加，通知学生审核结果&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T02&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF1EF;strokeColor=#D4A19A;fontColor=#A25D54;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="745" width="360" height="100" />
+        </mxCell>
+        <mxCell id="proxy" value="&lt;b&gt;管理员 · 满足条件才可代审&lt;/b&gt;&lt;br&gt;原教师已停用，或已登记授权转办 / 同校校验；记录专用代审身份&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M05&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="745" width="360" height="100" />
+        </mxCell>
+        <mxCell id="direct" value="&lt;b&gt;教师 · 选学生、三级指标与备注&lt;/b&gt;&lt;br&gt;任教班级可批量勾选，每人固定 +1 / 共用备注 + 逐生备注；逐人返回结果&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T03&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="970" width="360" height="118" />
+        </mxCell>
+        <mxCell id="ledger" value="&lt;b&gt;系统自动 · 只追加的过程积分账本&lt;/b&gt;&lt;br&gt;A_DIRECT / B_CARD：+1；冲销：−1 / 净分用于 07 的 P；原流水不可改删&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;P 数据来源&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="970" width="360" height="118" />
+        </mxCell>
+        <mxCell id="studentledger" value="&lt;b&gt;学生 · 查看本人积分与来源&lt;/b&gt;&lt;br&gt;按维度、时间、来源筛选 / 凭证、操作人、原记录 / 冲销关联&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S03&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="970" width="360" height="118" />
+        </mxCell>
+        <mxCell id="classview" value="&lt;b&gt;教师 · 查看任教班级成长&lt;/b&gt;&lt;br&gt;过程表现、正式成绩缺项、学生详情 / 综合分来自 07；不能越班查询&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T06&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="970" width="360" height="118" />
+        </mxCell>
+        <mxCell id="schoolledger" value="&lt;b&gt;管理员 · 全校查询与受控纠错&lt;/b&gt;&lt;br&gt;查看全校流水及关联凭证 / 不直接编辑；差错转入 09 冲销流程&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M11&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="970" width="360" height="118" />
+        </mxCell>
+        <mxCell id="honordraft" value="&lt;b&gt;学生 · 填写荣誉、上传证书&lt;/b&gt;&lt;br&gt;活动 / 届次 / 日期 / 省市区 / 奖项 / 保存草稿；每次材料修改保留版本&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S04&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="1250" width="360" height="118" />
+        </mxCell>
+        <mxCell id="honorsubmit" value="&lt;b&gt;学生 · 正式提交 / 补交材料&lt;/b&gt;&lt;br&gt;SUBMITTED：等待审核，暂不计分 / 退回后沿原成果链追加新材料版本&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S04&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="1250" width="360" height="118" />
+        </mxCell>
+        <mxCell id="honorreview" value="&lt;b&gt;教师 · 查验证书并审核&lt;/b&gt;&lt;br&gt;通过认定 / 退回补充 / 终态拒绝 / 退回和拒绝需填写原因&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T04&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="1250" width="360" height="118" />
+        </mxCell>
+        <mxCell id="honorpoints" value="&lt;b&gt;系统自动 · 只认定通过且未撤销荣誉&lt;/b&gt;&lt;br&gt;省 9/8/7，市 6/5/4，区 3/2/1 / 独立荣誉分汇入 07 的 H&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;H 数据来源&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="1250" width="360" height="118" />
+        </mxCell>
+        <mxCell id="honoradmin" value="&lt;b&gt;管理员 · 全校复核 / 撤销认定&lt;/b&gt;&lt;br&gt;撤销必须理由与审计，状态 REVOKED / 触发 07 重算；已发布时衔接 09 新版&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M06&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="1250" width="360" height="118" />
+        </mxCell>
+        <mxCell id="honorreturn" value="&lt;b&gt;学生 · 退回补充 → 重新提交&lt;/b&gt;&lt;br&gt;RETURNED：可补交，版本不覆盖&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S04&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="1430" width="360" height="86" />
+        </mxCell>
+        <mxCell id="honorreject" value="&lt;b&gt;异常 / 限制 · REJECTED：拒绝且不计分&lt;/b&gt;&lt;br&gt;终态，不等同于可补交的退回&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T04&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF1EF;strokeColor=#D4A19A;fontColor=#A25D54;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="1430" width="360" height="86" />
+        </mxCell>
+        <mxCell id="storytask" value="&lt;b&gt;管理员 · 配置月份任务与 AI 开关&lt;/b&gt;&lt;br&gt;任务说明、截止日期、量规待配置 / 按班级监控缺交、待审与 AI 异常&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M07&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="1625" width="360" height="118" />
+        </mxCell>
+        <mxCell id="storywrite" value="&lt;b&gt;学生 · 写故事、存草稿、提交&lt;/b&gt;&lt;br&gt;每生每月一条主记录，多版留痕 / 提交后可查看教师终审结果&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S05&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="1625" width="360" height="118" />
+        </mxCell>
+        <mxCell id="storyai" value="&lt;b&gt;系统自动 · 保存版本 / 生成 AI 建议&lt;/b&gt;&lt;br&gt;评估中、失败、关闭均可人工评阅 / AI 建议不得直接写作正式成绩&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;FR-06&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="1625" width="360" height="118" />
+        </mxCell>
+        <mxCell id="storyreview" value="&lt;b&gt;教师 · 人工复核与终审评分&lt;/b&gt;&lt;br&gt;输入 0—100 分及评语并确认 / 修改留审计；学期归档后只读&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T05&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="1625" width="360" height="118" />
+        </mxCell>
+        <mxCell id="storyresult" value="&lt;b&gt;系统自动 · 月度终审结果与 G 来源&lt;/b&gt;&lt;br&gt;月度结果存档；G 须按校规确认 / 外部故事分独立保存，不自动混合&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;G → 07 的 B&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="1625" width="360" height="118" />
+        </mxCell>
+        <mxCell id="importrole" value="&lt;b&gt;教师 / 管理员 · 选类型、班级并上传模板&lt;/b&gt;&lt;br&gt;教师：任教班级学科成绩 / 管理员：学科 / 五育 / 外部故事&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T07 · M08&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F6F3;strokeColor=#A5B6A7;fontColor=#5D7562;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="1940" width="360" height="118" />
+        </mxCell>
+        <mxCell id="importparse" value="&lt;b&gt;系统自动 · 校验身份与文件&lt;/b&gt;&lt;br&gt;唯一学号匹配，不能只凭姓名 / ≤ 2 MB / 1000 行；解析超时拒绝&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;FR-07&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="1940" width="360" height="118" />
+        </mxCell>
+        <mxCell id="importpreview" value="&lt;b&gt;教师 / 管理员 · 预览新增 / 变更 / 异常&lt;/b&gt;&lt;br&gt;列出具体行、字段与新旧值 / 有异常：修正原文件，重新预览&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T07 · M08&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F6F3;strokeColor=#A5B6A7;fontColor=#5D7562;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="1940" width="360" height="118" />
+        </mxCell>
+        <mxCell id="importcommit" value="&lt;b&gt;系统自动 · 人工确认 → 批次落库&lt;/b&gt;&lt;br&gt;确认后生成批次号，版本与来源留痕 / 失败全量回滚，不部分写入&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;batch_no&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="1940" width="360" height="118" />
+        </mxCell>
+        <mxCell id="importoutputs" value="&lt;b&gt;系统自动 · 分流保存与后续查阅&lt;/b&gt;&lt;br&gt;五育正式分 → 07 的 B；故事分另标来源 / 学科成绩 → 08 报告独立板块&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;B / 学科数据来源&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="1940" width="360" height="118" />
+        </mxCell>
+        <mxCell id="rule" value="&lt;b&gt;管理员 · 新建规则草稿并激活版本&lt;/b&gt;&lt;br&gt;权重合计 100%；阈值必须大于 0 / 激活新版 → 旧版只读 → 全校重算&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M09&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="2265" width="360" height="118" />
+        </mxCell>
+        <mxCell id="calcinputs" value="&lt;b&gt;系统自动 · 汇聚 B / P / H 三类数据&lt;/b&gt;&lt;br&gt;B：05 的已确认 G + 06 的五育正式分 / P：02/03 的净积分；H：04 的认定分&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;三类数据分别存储&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="2265" width="360" height="118" />
+        </mxCell>
+        <mxCell id="complete" value="&lt;b&gt;系统自动 · 六育正式成绩完整吗？&lt;/b&gt;&lt;br&gt;D / Z / T / M / L / G 均须 CONFIRMED / 有 ACTIVE 规则才按版本核算&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;完整性判断&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="2265" width="360" height="118" />
+        </mxCell>
+        <mxCell id="score" value="&lt;b&gt;系统自动 · 计算综合分 S 并留规则版本&lt;/b&gt;&lt;br&gt;B 六维均分；P / H 按各自阈值封顶 / S = round(wB·B + wP·P + wH·H, 2)&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;综合得分输出&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="2265" width="360" height="118" />
+        </mxCell>
+        <mxCell id="scoreview" value="&lt;b&gt;三端共用 · 查阅综合评价与分项&lt;/b&gt;&lt;br&gt;学生本人；教师任教班级；管理全校 / 正式六育 / 过程积分 / 荣誉分分别展示&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S06 · T06 · M09&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F6F3;strokeColor=#A5B6A7;fontColor=#5D7562;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="2265" width="360" height="118" />
+        </mxCell>
+        <mxCell id="incomplete" value="&lt;b&gt;异常 / 限制 · 缺项 → 待完善 INCOMPLETE&lt;/b&gt;&lt;br&gt;不把缺项当 0，不确认 / 发布报告 / 定位到 05/06 补齐成绩后再核算&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;阻断输出&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF1EF;strokeColor=#D4A19A;fontColor=#A25D54;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="2450" width="360" height="100" />
+        </mxCell>
+        <mxCell id="narratives" value="&lt;b&gt;学生 · 学生自述 / 代录家长寄语&lt;/b&gt;&lt;br&gt;个人基础信息只读，寄语非必填 / 家长寄语标注由学生代录&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S08&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="2680" width="360" height="118" />
+        </mxCell>
+        <mxCell id="reportsnapshot" value="&lt;b&gt;管理员 · 结算并生成报告草稿&lt;/b&gt;&lt;br&gt;汇入 07 综合结果 / 六育 / 过程 / 荣誉 / 及 06 学科、故事、评语与自述&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M10 · DRAFT&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="2680" width="360" height="118" />
+        </mxCell>
+        <mxCell id="reportconfirm" value="&lt;b&gt;教师 · AI 评语草稿 → 人工复核&lt;/b&gt;&lt;br&gt;班主任修改评语，核对各项数据 / 成绩齐全后显式确认草稿&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;T08 · CONFIRMED&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F5FB;strokeColor=#89A9CE;fontColor=#426E9B;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="2680" width="360" height="118" />
+        </mxCell>
+        <mxCell id="publish" value="&lt;b&gt;管理员 · 六项强校验 → 批量发布&lt;/b&gt;&lt;br&gt;任何一项不满足即阻断该生发布 / 成功后快照封存，发送发布通知&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M10 · PUBLISHED&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="2680" width="360" height="118" />
+        </mxCell>
+        <mxCell id="reportread" value="&lt;b&gt;学生 · 查看本人已发布报告&lt;/b&gt;&lt;br&gt;六育 / 流水摘要 / 学科 / 荣誉 / 评语 / 查看已发布版本，申请个人水印 PDF&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S07&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF7F2;strokeColor=#83AF95;fontColor=#2D7050;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="2680" width="360" height="118" />
+        </mxCell>
+        <mxCell id="publishblocked" value="&lt;b&gt;异常 / 限制 · 校验失败 → 返回补齐&lt;/b&gt;&lt;br&gt;成绩补齐转 05/06，重算转 07 / 教师确认回本行，归档学期不可发布&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;发布受阻&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF1EF;strokeColor=#D4A19A;fontColor=#A25D54;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="2860" width="360" height="112" />
+        </mxCell>
+        <mxCell id="pdf" value="&lt;b&gt;系统自动 · PDF 异步生成与重试&lt;/b&gt;&lt;br&gt;PENDING → READY（链接有效 5 分钟） / FAILED / 超 60 秒 → 提示重试 / 姓名、学号末 4 位、学期、时间水印&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;S07 导出任务&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="2860" width="360" height="134" />
+        </mxCell>
+        <mxCell id="correction" value="&lt;b&gt;管理员 · 发起受控冲销 / 荣誉撤销&lt;/b&gt;&lt;br&gt;冲销：发布前管理员，发布后需超管 / 荣誉撤销按学期状态与权限执行&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M11 · M06&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="3130" width="360" height="118" />
+        </mxCell>
+        <mxCell id="correctionwrite" value="&lt;b&gt;系统自动 · 保留原记录，追加变更&lt;/b&gt;&lt;br&gt;错评：追加 −1，原 +1 最多冲销一次 / 荣誉：置 REVOKED，不再计入 H&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;审计记录理由与原始内容&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="3130" width="360" height="118" />
+        </mxCell>
+        <mxCell id="recalculate" value="&lt;b&gt;系统自动 · 按规则重算并生成新版&lt;/b&gt;&lt;br&gt;受控更正重新核算，报告 version + 1 / 归档更正基于原规则版本&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;衔接 07 核算与 08 报告&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="3130" width="360" height="118" />
+        </mxCell>
+        <mxCell id="newreport" value="&lt;b&gt;系统自动 · 旧版保留 → 新版定向通知&lt;/b&gt;&lt;br&gt;原报告 SUPERSEDED，新版本可追溯 / 学生收到 REPORT_UPDATED 后查看&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;通知到学生 S07 / C02&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="3130" width="360" height="118" />
+        </mxCell>
+        <mxCell id="archive" value="&lt;b&gt;管理员 · 归档学期并关闭常规写入&lt;/b&gt;&lt;br&gt;active = 0：故事终审等原有数据只读 / 仅超管可追加冲销、生成新版报告&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M02&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="3130" width="360" height="118" />
+        </mxCell>
+        <mxCell id="event" value="&lt;b&gt;三端共用 · 业务事件与重要操作&lt;/b&gt;&lt;br&gt;申领、审核结果、报告发布 / 更新 / 制卡、直评、导入、冲销、撤销等&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;适用于 01—09&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F6F3;strokeColor=#A5B6A7;fontColor=#5D7562;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="80" y="3490" width="360" height="118" />
+        </mxCell>
+        <mxCell id="outbox" value="&lt;b&gt;系统自动 · 事务内记审计并写消息&lt;/b&gt;&lt;br&gt;业务成功与消息记录同事务提交 / 需审计的操作完整保留前后摘要&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;operation_audit / outbox&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="520" y="3490" width="360" height="118" />
+        </mxCell>
+        <mxCell id="notify" value="&lt;b&gt;系统自动 · 投递到各自消息与待办&lt;/b&gt;&lt;br&gt;学生看本人结果；教师接审核待办 / 失败按退避重试，最多 5 次&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;C02 · T01 · S01&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="960" y="3490" width="360" height="118" />
+        </mxCell>
+        <mxCell id="audit" value="&lt;b&gt;管理员 · 查审计、通知与失败任务&lt;/b&gt;&lt;br&gt;管理员定位投递异常和执行失败 / 有权限才可人工重试，保留操作记录&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;M12 · M01&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCF6EB;strokeColor=#C5AB78;fontColor=#916E32;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1400" y="3490" width="360" height="118" />
+        </mxCell>
+        <mxCell id="jobs" value="&lt;b&gt;系统自动 · 定时过期 / 重算 / PDF&lt;/b&gt;&lt;br&gt;卡月末过期，待审超宽限期过期 / 内部重算事件不发送成学生通知&lt;br&gt;&lt;font color=&quot;#89958D&quot;&gt;自动任务监控&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F6F8F9;strokeColor=#B1BEC5;fontColor=#526875;fontSize=14;align=left;spacing=16;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1840" y="3490" width="360" height="118" />
+        </mxCell>
+        <mxCell id="edge-0" value="准备" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="accounts" target="term">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-1" value="配置" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="term" target="dictionary">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-2" value="生效" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="dictionary" target="gate">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-3" value="按角色" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="gate" target="entry">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-4" value="配发" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cardgen" target="cardgive">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-5" value="实体卡" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="cardgive" target="claim">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-6" value="待审" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="claim" target="claimreview">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-7" value="通过" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="claimreview" target="cardposted">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-8" value="超期" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="claim" target="expired">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-9" value="驳回" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="claimreview" target="claimreject">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-10" value="代审同一流程" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.76;entryDx=0;entryDy=0;" edge="1" parent="1" source="proxy" target="claimreview">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="2020" y="715" />
+              <mxPoint x="1800" y="715" />
+              <mxPoint x="1800" y="654.6800000000001" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-11" value="+1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="direct" target="ledger">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-12" value="本人" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#80928B;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="ledger" target="studentledger">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="700" y="1125" />
+              <mxPoint x="1140.0" y="1125" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-13" value="任教班级" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#80928B;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="ledger" target="classview">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="700" y="1125" />
+              <mxPoint x="1580.0" y="1125" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-14" value="本校" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#80928B;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="ledger" target="schoolledger">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="700" y="1125" />
+              <mxPoint x="2020.0" y="1125" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-15" value="提交" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="honordraft" target="honorsubmit">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-16" value="待审" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="honorsubmit" target="honorreview">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-17" value="通过" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="honorreview" target="honorpoints">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-18" value="复核" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#80928B;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="honorpoints" target="honoradmin">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-19" value="退回" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="honorreview" target="honorreturn">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1068" y="1402" />
+              <mxPoint x="920" y="1402" />
+              <mxPoint x="920" y="1473" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-20" value="新版本" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="honorreturn" target="honorsubmit">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-21" value="拒绝" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.66;exitY=1;exitDx=0;exitDy=0;entryX=0.66;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="honorreview" target="honorreject">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-22" value="任务" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="storytask" target="storywrite">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-23" value="提交" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="storywrite" target="storyai">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-24" value="仅参考" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="storyai" target="storyreview">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-25" value="确认" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="storyreview" target="storyresult">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-26" value="学生查看终审结果" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#80928B;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="storyresult" target="storywrite">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="2020" y="1808" />
+              <mxPoint x="700" y="1808" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-27" value="上传" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="importrole" target="importparse">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-28" value="校验" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="importparse" target="importpreview">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-29" value="无异常" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="importpreview" target="importcommit">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-30" value="分流" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="importcommit" target="importoutputs">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-31" value="异常：修正源文件后重新预览" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="importpreview" target="importrole">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1140" y="2125" />
+              <mxPoint x="260" y="2125" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-32" value="生效" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="rule" target="calcinputs">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-33" value="核对" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="calcinputs" target="complete">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-34" value="齐全" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="complete" target="score">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-35" value="可查阅" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="score" target="scoreview">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-36" value="缺项" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="complete" target="incomplete">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-37" value="内容" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="narratives" target="reportsnapshot">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-38" value="草稿" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="reportsnapshot" target="reportconfirm">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-39" value="已确认" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="reportconfirm" target="publish">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-40" value="已发布" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="publish" target="reportread">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-41" value="任一不满足" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="publish" target="publishblocked">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1580" y="2830" />
+              <mxPoint x="910" y="2830" />
+              <mxPoint x="910" y="2916" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-42" value="申请导出" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#8C8CAA;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="reportread" target="pdf">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-43" value="理由必填" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="correction" target="correctionwrite">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-44" value="重算" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="correctionwrite" target="recalculate">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-45" value="已有报告" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="recalculate" target="newreport">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-46" value="事务" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#526F80;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="event" target="outbox">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-47" value="异步" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#8C8CAA;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="outbox" target="notify">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-48" value="异常" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#B57A61;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="notify" target="audit">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="edge-49" value="监控" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#80928B;strokeWidth=1.8;fontSize=13;labelBackgroundColor=#FCFDFC;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" edge="1" parent="1" source="jobs" target="audit">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="note-0" value="卡片终态不可逆：USED / VOID / EXPIRED。&lt;br&gt;月末待审可在校方配置的宽限期内审核；&lt;br&gt;宽限期内入账仍归属卡片原学期。" style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="90" y="743" width="500" height="86.80000000000001" />
+        </mxCell>
+        <mxCell id="note-1" value="管理员仅可应急代录并写审计；正常无卡直评由教师发起。" style="text;html=1;align=left;verticalAlign=top;fontSize=13;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="1124" width="358" height="30.8" />
+        </mxCell>
+        <mxCell id="note-2" value="同一学生 / 学期 / 赛事届次只能认定一次。&lt;br&gt;重复与更正以 SPEC 及最终校规为准。" style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1420" y="1418" width="388" height="61.2" />
+        </mxCell>
+        <mxCell id="note-3" value="故事缺月显示未完成，不自动按 0 分处理。" style="text;html=1;align=left;verticalAlign=top;fontSize=15;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="90" y="1790" width="335" height="34.0" />
+        </mxCell>
+        <mxCell id="note-4" value="钉钉 / 外部平台先模板导入，接口授权另行确认。" style="text;html=1;align=left;verticalAlign=top;fontSize=14;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1440" y="2112" width="356" height="32.400000000000006" />
+        </mxCell>
+        <mxCell id="note-5" value="重算触发：&lt;br&gt;管理员手动核算；正式六育成绩新增 / 更新；&lt;br&gt;荣誉通过 / 撤销；激活新规则触发全校重算。" style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="2432" width="372" height="86.80000000000001" />
+        </mxCell>
+        <mxCell id="note-6" value="试行示例：权重 80% / 15% / 5%，阈值 20 / 12。&lt;br&gt;实际读取 ACTIVE 规则，不在界面写死。&lt;br&gt;成绩更新后的异步重算仅在可操作学期进行。" style="text;html=1;align=left;verticalAlign=top;fontSize=15;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1420" y="2432" width="530" height="82.0" />
+        </mxCell>
+        <mxCell id="note-7" value="报告输入还包括：&lt;br&gt;07 综合分和规则版本；03 积分摘要；&lt;br&gt;04 已认定荣誉；05 故事；06 学科成绩。&lt;br&gt;快照独立保存，后续更正不覆盖旧报告。" style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="2846" width="388" height="112.4" />
+        </mxCell>
+        <mxCell id="note-8" value="发布六项门禁&lt;br&gt;① 六育均确认　② 规则 ACTIVE&lt;br&gt;③ 班主任已确认　④ 综合分已完成&lt;br&gt;⑤ 快照有效　⑥ 学期 active = 1" style="text;html=1;align=left;verticalAlign=top;fontSize=15;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="1410" y="2847" width="350" height="106.0" />
+        </mxCell>
+        <mxCell id="note-9" value="归档是 08 发布后的独立管理动作，不是等待更正后才归档；右侧归档约束同时作用于整张图。&lt;br&gt;归档后不能恢复正常评分、修改既有行或撤销荣誉；仅按授权走追加冲销与新版报告流程。" style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="3289" width="724" height="61.2" />
+        </mxCell>
+        <mxCell id="note-10" value="全局不变量：本校隔离 · 教师班级范围 · 学期时间窗 · 幂等防重 · 历史材料与报告多版本 · 最小化展示个人信息。&lt;br&gt;边界：不设家长账号、积分转赠 / 兑换、在线申诉工单；外部故事合成及试行评分参数待校方确认。" style="text;html=1;align=left;verticalAlign=top;fontSize=16;fontColor=#7D8982;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="100" y="3656" width="980" height="61.2" />
+        </mxCell>
+        <mxCell id="legend" value="实线：业务依赖 / 提交；灰虚线：只读查询；暖色：异常 / 退回；淡紫虚线：异步任务。&lt;br&gt;02—06 日常业务并行；07 汇合评价数据，08 汇集报告内容。依据 SPEC V2.1，2026-10-23。" style="text;html=1;align=left;fontSize=17;fontColor=#708276;" vertex="1" parent="1">
+          <mxGeometry as="geometry" x="70" y="3770" width="2120" height="90" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,55 @@
+# ==============================================================================
+# 六育学生成长评价系统 - Nginx 站点配置模板
+# ==============================================================================
+
+server {
+    listen 80;
+    server_name __DOMAIN__;
+
+    # 客户端上传限制（支持导入名单、评价佐证材料等）
+    client_max_body_size 20M;
+
+    # 静态前端资源目录
+    root __SERVER_PATH__/backend/dist;
+    index index.html;
+
+    # 开启 Gzip 压缩
+    gzip on;
+    gzip_min_length 1k;
+    gzip_buffers 4 16k;
+    gzip_http_version 1.1;
+    gzip_comp_level 6;
+    gzip_types text/plain application/javascript application/x-javascript text/css application/xml text/javascript application/json image/svg+xml;
+    gzip_vary on;
+
+    # 后端 API 反向代理
+    location /api/ {
+        proxy_pass http://127.0.0.1:__BACKEND_PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 60s;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+
+    # 前端静态资源缓存优化
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|woff2?|eot|ttf|svg)$ {
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800, immutable";
+        try_files $uri =404;
+    }
+
+    # SPA 单页路由支持：所有前端路由请求回退至 index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 日志输出
+    access_log __SERVER_PATH__/logs/nginx_access.log;
+    error_log __SERVER_PATH__/logs/nginx_error.log;
+}

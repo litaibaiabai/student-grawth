@@ -1,0 +1,219 @@
+@primary-green: #277460;
+@primary-green-hover: #1f604e;
+@soft-green: #edf5ef;
+@text-main: #25332d;
+@text-sub: #7b8780;
+@border-color: #e6ebe7;
+
+.login {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 24px;
+  background: #f5f7f6;
+  box-sizing: border-box;
+}
+
+.loginCard {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1080px;
+  border: 1px solid #e1ebe3;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(39, 116, 96, 0.08);
+  background: #ffffff;
+  overflow: hidden;
+
+  :global {
+    .ant-card-body {
+      padding: 0;
+    }
+
+    .ant-form-item {
+      margin-bottom: 18px;
+    }
+
+    .ant-input-affix-wrapper {
+      height: 46px;
+      border-radius: 8px;
+      border-color: #dce5df;
+      padding: 0 14px;
+
+      &:hover,
+      &:focus,
+      &.ant-input-affix-wrapper-focused {
+        border-color: @primary-green;
+        box-shadow: 0 0 0 3px rgba(39, 116, 96, 0.12);
+      }
+
+      input {
+        font-size: 14px;
+        color: #25332d;
+      }
+    }
+
+    .ant-btn-primary {
+      height: 46px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      background: @primary-green;
+      box-shadow: 0 6px 16px rgba(39, 116, 96, 0.2);
+
+      &:hover,
+      &:focus {
+        background: @primary-green-hover;
+      }
+    }
+  }
+}
+
+.loginLayout {
+  display: flex;
+  min-height: 580px;
+}
+
+.leftPanel {
+  width: 48%;
+  padding: 48px 40px;
+  background: #edf5ef;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid #e1ebe3;
+  box-sizing: border-box;
+}
+
+.rightPanel {
+  width: 52%;
+  padding: 44px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.brandWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.brandLogo {
+  width: 38px;
+  height: 38px;
+  color: @primary-green;
+}
+
+.brandText {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #1e382b;
+}
+
+.leftTitle {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 2px;
+  color: #1e382b;
+  margin: 16px 0 12px;
+}
+
+.leftDesc {
+  color: #667c6b;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.formHeader {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: #8d9c90;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.formTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e382b;
+  margin: 0 0 6px;
+}
+
+.formTip {
+  color: #7b8a80;
+  font-size: 13px;
+  margin: 0;
+}
+
+.rolePresetList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.rolePresetCard {
+  border: 1px solid #e6ebe7;
+  border-radius: 8px;
+  background: #fafcfa;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: @primary-green;
+    background: #edf5f0;
+  }
+
+  &.active {
+    border-color: @primary-green;
+    background: #edf5f0;
+    color: @primary-green;
+    font-weight: 600;
+  }
+}
+
+.footerNote {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 11px;
+  color: #a4afa7;
+}
+
+@media (max-width: 860px) {
+  .loginLayout {
+    flex-direction: column;
+  }
+
+  .leftPanel,
+  .rightPanel {
+    width: 100%;
+  }
+
+  .leftPanel {
+    padding: 32px 24px;
+    border-right: none;
+    border-bottom: 1px solid #e1ebe3;
+  }
+
+  .rightPanel {
+    padding: 32px 24px;
+  }
+}

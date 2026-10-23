@@ -1,0 +1,36 @@
+{
+  "document": "学生学期综合素质评价系统-概要设计-V1.0-当前实现评审稿.html",
+  "date": "2026-10-23",
+  "basis": "current implementation; static source inspection only",
+  "counts": {
+    "chapters": 7,
+    "subsections": 37,
+    "lazy_views": 22,
+    "non_error_views": 19,
+    "api_v1_routes": 35,
+    "ddl_tables": 17
+  },
+  "source_sha256": {
+    "frontend/src/App.jsx": "21efa95cc0d8694b077e2dee52be138256c80dc4b838bbea9e731159555bc44f",
+    "frontend/src/constant/menu.jsx": "9453f96f8800ccf410b1f4eee363da36815c35d854a5f92e67fe513767c16b40",
+    "frontend/src/constant/urls.js": "6acc02b16a01117759c444d55cc5f9eeaab62b905543f9a9a3bd47d273c9b87d",
+    "backend/routes/api.js": "db2947999b4c127e60e5dc82a37f02f1187fe05dd32e33e6f9bcaf3512f57477",
+    "backend/routes/auth.js": "4d20c20b6535940d89b1e25d0dc38a7f0d0971d6e27aac8a4d8e5982c63158b6",
+    "backend/app.js": "13f80aeecd2909c04dd27b85a9fa1da603e07b6a720a8f5d112413be124aaa86",
+    "backend/db.js": "bb724d06721fd7aa5955110af474e99c0d06233e6abf50858ef65bae40fa5d35",
+    "backend/middleware/auth.js": "16ef7fba59d8daaa0eeee05b92f672ebc428c2eeb8624b6962c329da3d4f0705",
+    "backend/middleware/security.js": "175aceff83befbe1a475fe94ade6b2824e6f95d96f8c3b79b5e92c561565c6d5",
+    "backend/controllers/cardController.js": "34e04b64ab0fcb33418b231a376bf986ab4eb4e7930ec7cd2ce80430ed0b3a8f",
+    "backend/controllers/scoreController.js": "196f8166ed1e4ba38277268b2a3e1bf195b08a58e2d3724fcd0ab1c7868a7e11",
+    "backend/controllers/honorController.js": "46b533a9d9c7f08bd245bd33622164f479915ebd39bd3cc388e3a826e7384213",
+    "backend/controllers/storyController.js": "a764c62b7d8bd0c096e84abb45029d878678b6d77f0514c11bda9b86b15f9a93",
+    "backend/controllers/importController.js": "b2edc8dce4b42811e86e642a43fd6ab818a0c379c8e8c671124800e699786e80",
+    "backend/controllers/evaluationController.js": "b1b150696dbb9e8024f69134ed6cf2cd6a4bd1a4f9f0e8bdc31756dd8ab1c01f",
+    "backend/controllers/reportController.js": "995f1e06fc507a0aa7df288cf249ed603bfa43f241000af2b22a7c84b73e5ecc",
+    "backend/services/evaluationEngine.js": "c6f1e4e796c3b828e6b7b89dcade2465bee11a06ff9937d5d2efc1503fdb6c77",
+    "backend/services/scheduler.js": "8cfcd091760ec6514557d4dbbefb715677f20bfa1072b375264ea540ffb006dc",
+    "sql/00_full_schema.sql": "e03fff9c6aceceef4728403ad009eb256c226c26f33beb214cc1756ad83ce56c",
+    "frontend/Dockerfile": "a65e42500a6bf4f82a963494469ff8c079dc169b080427c9cfa1f8b4e535d3bf",
+    "backend/Dockerfile": "e6416b6155c30c21d2067a6333267de7788198fcf8301c4d5b6242183526dfe3"
+  }
+}

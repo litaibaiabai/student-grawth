@@ -1,0 +1,737 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2280" height="3910" viewBox="0 0 2280 3910" role="img" aria-labelledby="title desc">
+<title id="title">六育学生评价系统：三角色全操作逻辑关系图</title>
+<desc id="desc">管理员配置基础数据，教师和学生完成日常评价与材料审核，系统分别汇聚六育正式分、过程积分和荣誉分，进行综合核算、报告确认发布与受控更正。图含异常分支、消息审计和自动任务。</desc>
+<style>text{font-family:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif} .node{cursor:default}</style>
+<defs>
+<marker id="arrow-main" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L9 3.5L0 7Z" fill="#526F80"/></marker>
+<marker id="arrow-read" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L9 3.5L0 7Z" fill="#80928B"/></marker>
+<marker id="arrow-alt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L9 3.5L0 7Z" fill="#B57A61"/></marker>
+<marker id="arrow-async" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth"><path d="M0 0L9 3.5L0 7Z" fill="#8C8CAA"/></marker>
+</defs>
+<rect width="2280" height="3910" fill="#FFFFFF"/>
+<text x="70" y="76" font-size="36" fill="#253D30" font-weight="650" text-anchor="start">六育学生评价系统</text>
+<text x="70" y="116" font-size="22" fill="#78887D" font-weight="400" text-anchor="start">三个角色 · 全操作逻辑关系图</text>
+<text x="2210" y="81" font-size="15" fill="#8A968E" font-weight="400" text-anchor="end">依据 SPEC V2.1 与全模块界面设计  |  2026-10-23</text>
+<rect x="1645" y="108" width="18" height="18" rx="4" fill="#EFF7F2" stroke="#83AF95"/>
+<text x="1672" y="122" font-size="15" fill="#2D7050" font-weight="400" text-anchor="start">学生</text>
+<rect x="1790" y="108" width="18" height="18" rx="4" fill="#F0F5FB" stroke="#89A9CE"/>
+<text x="1817" y="122" font-size="15" fill="#426E9B" font-weight="400" text-anchor="start">教师</text>
+<rect x="1935" y="108" width="18" height="18" rx="4" fill="#FCF6EB" stroke="#C5AB78"/>
+<text x="1962" y="122" font-size="15" fill="#916E32" font-weight="400" text-anchor="start">管理员</text>
+<rect x="2080" y="108" width="18" height="18" rx="4" fill="#F6F8F9" stroke="#B1BEC5"/>
+<text x="2107" y="122" font-size="15" fill="#526875" font-weight="400" text-anchor="start">系统自动</text>
+<rect x="80" y="157" width="360" height="42" rx="8" fill="#EEF4EF"/>
+<text x="260" y="184" font-size="17" fill="#52715B" font-weight="550" text-anchor="middle">基础配置</text>
+<path d="M456 178H502" stroke="#91A49A" stroke-width="1.8" marker-end="url(#arrow-read)"/>
+<rect x="520" y="157" width="360" height="42" rx="8" fill="#EEF4EF"/>
+<text x="700" y="184" font-size="17" fill="#52715B" font-weight="550" text-anchor="middle">日常评价并行开展</text>
+<path d="M896 178H942" stroke="#91A49A" stroke-width="1.8" marker-end="url(#arrow-read)"/>
+<rect x="960" y="157" width="360" height="42" rx="8" fill="#EEF4EF"/>
+<text x="1140" y="184" font-size="17" fill="#52715B" font-weight="550" text-anchor="middle">综合核算</text>
+<path d="M1336 178H1382" stroke="#91A49A" stroke-width="1.8" marker-end="url(#arrow-read)"/>
+<rect x="1400" y="157" width="360" height="42" rx="8" fill="#EEF4EF"/>
+<text x="1580" y="184" font-size="17" fill="#52715B" font-weight="550" text-anchor="middle">确认与发布报告</text>
+<path d="M1776 178H1822" stroke="#91A49A" stroke-width="1.8" marker-end="url(#arrow-read)"/>
+<rect x="1840" y="157" width="360" height="42" rx="8" fill="#EEF4EF"/>
+<text x="2020" y="184" font-size="17" fill="#52715B" font-weight="550" text-anchor="middle">按需受控更正</text>
+<rect x="40" y="225" width="2200" height="245" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="244" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="264" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">01</text>
+<text x="114" y="264" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">基础准备与统一入口</text>
+<text x="2205" y="262" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">先配置业务边界，再按会话身份进入各自工作台</text>
+<rect x="40" y="490" width="2200" height="385" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="509" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="529" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">02</text>
+<text x="114" y="529" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">实体卡评价 · B 模式</text>
+<text x="2205" y="527" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">配额制卡 → 线下发放 → 学生申领 → 教师审核；审核前绝不加分</text>
+<rect x="40" y="895" width="2200" height="260" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="914" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="934" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">03</text>
+<text x="114" y="934" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">无卡直评 · A 模式与统一积分账本</text>
+<text x="2205" y="932" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">A / B 两种评价共用同一本过程账本；查看范围随身份不同</text>
+<rect x="40" y="1175" width="2200" height="355" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="1194" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="1214" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">04</text>
+<text x="114" y="1214" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">荣誉申报、审核与撤销</text>
+<text x="2205" y="1212" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">荣誉分单独认定，不产生过程积分 +1；相同赛事届次防重复</text>
+<rect x="40" y="1550" width="2200" height="295" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="1569" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="1589" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">05</text>
+<text x="114" y="1589" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">月度故事与教师终审</text>
+<text x="2205" y="1587" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">AI 是建议来源；教师显式确认才产生终审分，AI 失败不阻断人工</text>
+<rect x="40" y="1865" width="2200" height="305" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="1884" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="1904" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">06</text>
+<text x="114" y="1904" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">成绩导入与批次对账</text>
+<text x="2205" y="1902" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">先预览差异，确认无误后才写入；学科考分与六育正式分物理分开</text>
+<rect x="40" y="2190" width="2200" height="395" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="2209" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="2229" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">07</text>
+<text x="114" y="2229" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">综合规则、完整性检查与核算</text>
+<text x="2205" y="2227" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">三类评价数据在这里汇合：B 六育均分、P 过程标准分、H 荣誉标准分</text>
+<rect x="40" y="2605" width="2200" height="430" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="2624" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="2644" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">08</text>
+<text x="114" y="2644" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">期末报告：内容汇集、教师确认、管理发布</text>
+<text x="2205" y="2642" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">学生看不到草稿；教师只确认，管理员统一发布；学科成绩不混入六育均分</text>
+<rect x="40" y="3055" width="2200" height="340" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="3074" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="3094" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">09</text>
+<text x="114" y="3094" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">差错更正、版本更新与学期归档</text>
+<text x="2205" y="3092" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">修正通过新增记录完成；不删除积分流水，不覆盖已发布的旧报告</text>
+<rect x="40" y="3415" width="2200" height="330" rx="15" fill="#FCFDFC" stroke="#E2E9E3"/>
+<rect x="64" y="3434" width="37" height="28" rx="6" fill="#EAF1EB"/>
+<text x="82.5" y="3454" font-size="15" fill="#55765C" font-weight="600" text-anchor="middle">10</text>
+<text x="114" y="3454" font-size="21" fill="#344D3C" font-weight="600" text-anchor="start">贯穿所有流程的消息、审计与自动任务</text>
+<text x="2205" y="3452" font-size="14" fill="#86938A" font-weight="400" text-anchor="end">这些是系统保障能力，不是第四种用户角色</text>
+<path d="M440,359 L520,359" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,359 L960,359" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,359 L1400,359" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,359 L1840,359" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M440,624 L520,624" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,624 L960,624" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,624 L1400,624" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,624 L1840,624" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1140,683 L1140,745" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M1580,683 L1580,745" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M2020,745 L2020,715 L1800,715 L1800,654.68 L1760,654.68" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M440,1029 L520,1029" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M700,1088 L700,1125 L1140,1125 L1140,1088" fill="none" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<path d="M700,1088 L700,1125 L1580,1125 L1580,1088" fill="none" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<path d="M700,1088 L700,1125 L2020,1125 L2020,1088" fill="none" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<path d="M440,1309 L520,1309" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,1309 L960,1309" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,1309 L1400,1309" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,1309 L1840,1309" fill="none" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<path d="M1068,1368 L1068,1402 L920,1402 L920,1473 L880,1473" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M700,1430 L700,1368" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M1197.6,1368 L1197.6,1430" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M440,1684 L520,1684" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,1684 L960,1684" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,1684 L1400,1684" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,1684 L1840,1684" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M2020,1743 L2020,1808 L700,1808 L700,1743" fill="none" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<path d="M440,1999 L520,1999" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,1999 L960,1999" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,1999 L1400,1999" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,1999 L1840,1999" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1140,2058 L1140,2125 L260,2125 L260,2058" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M440,2324 L520,2324" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,2324 L960,2324" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,2324 L1400,2324" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,2324 L1840,2324" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1140,2383 L1140,2450" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M440,2739 L520,2739" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,2739 L960,2739" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,2739 L1400,2739" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1760,2739 L1840,2739" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1580,2798 L1580,2830 L910,2830 L910,2916 L960,2916" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M2020,2798 L2020,2860" fill="none" stroke="#8C8CAA" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-async)"/>
+<path d="M440,3189 L520,3189" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,3189 L960,3189" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M1320,3189 L1400,3189" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M440,3549 L520,3549" fill="none" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<path d="M880,3549 L960,3549" fill="none" stroke="#8C8CAA" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-async)"/>
+<path d="M1320,3549 L1400,3549" fill="none" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<path d="M1840,3549 L1760,3549" fill="none" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<g class="node" id="accounts"><title>管理员：配置账号与班级授权；建账号 / 启停 / 重置凭据 / 学生归班；教师任教班级授权；新操作按新权限</title>
+<rect x="80" y="300" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="98" y="323" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="425" y="323" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M03</text>
+<text x="98" y="350" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">配置账号与班级授权</text>
+<text x="98" y="375" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">建账号 / 启停 / 重置凭据 / 学生归班</text>
+<text x="98" y="396" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">教师任教班级授权；新操作按新权限</text>
+</g>
+<g class="node" id="term"><title>管理员：配置学期与校历；当前学期、时区、提交与审核截止；当前展示 ≠ 是否允许业务写入</title>
+<rect x="520" y="300" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="538" y="323" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="865" y="323" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M02</text>
+<text x="538" y="350" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">配置学期与校历</text>
+<text x="538" y="375" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">当前学期、时区、提交与审核截止</text>
+<text x="538" y="396" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">当前展示 ≠ 是否允许业务写入</text>
+</g>
+<g class="node" id="dictionary"><title>管理员：维护六育三级指标；指标启停与版本留痕，直评固定 +1；学期 / 指标配置共同约束后续业务</title>
+<rect x="960" y="300" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="978" y="323" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="1305" y="323" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M04</text>
+<text x="978" y="350" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">维护六育三级指标</text>
+<text x="978" y="375" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">指标启停与版本留痕，直评固定 +1</text>
+<text x="978" y="396" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学期 / 指标配置共同约束后续业务</text>
+</g>
+<g class="node" id="gate"><title>系统自动：统一鉴权与时间窗检查；学生仅本人 / 教师仅授权班级；管理员仅本校；归档后常规只读</title>
+<rect x="1400" y="300" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1418" y="323" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1745" y="323" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">FR-01</text>
+<text x="1418" y="350" font-size="18" fill="#526875" font-weight="600" text-anchor="start">统一鉴权与时间窗检查</text>
+<text x="1418" y="375" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学生仅本人 / 教师仅授权班级</text>
+<text x="1418" y="396" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">管理员仅本校；归档后常规只读</text>
+</g>
+<g class="node" id="entry"><title>三端共用：登录 → 首页 / 工作台；登录 / 退出；查看身份、待办与消息；学生成长首页 / 教师待办 / 管理概览</title>
+<rect x="1840" y="300" width="360" height="118" rx="9" fill="#F3F6F3" stroke="#A5B6A7" stroke-width="1.3"/>
+<text x="1858" y="323" font-size="11" fill="#5D7562" font-weight="500" text-anchor="start">三端共用</text>
+<text x="2185" y="323" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">C01 · S01 · T01 · M01</text>
+<text x="1858" y="350" font-size="18" fill="#5D7562" font-weight="600" text-anchor="start">登录 → 首页 / 工作台</text>
+<text x="1858" y="375" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">登录 / 退出；查看身份、待办与消息</text>
+<text x="1858" y="396" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学生成长首页 / 教师待办 / 管理概览</text>
+</g>
+<g class="node" id="cardgen"><title>管理员：月度配额、制卡与印刷；各指标配额之和 = 教师月度总额 N；可作废未申领卡；不预先绑定学生</title>
+<rect x="80" y="565" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="98" y="588" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="425" y="588" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M05</text>
+<text x="98" y="615" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">月度配额、制卡与印刷</text>
+<text x="98" y="640" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">各指标配额之和 = 教师月度总额 N</text>
+<text x="98" y="661" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">可作废未申领卡；不预先绑定学生</text>
+</g>
+<g class="node" id="cardgive"><title>教师：查看本人配卡并线下发放；查看配额 / 未申领 / 待审 / 已用；教师不制卡，不创建学生发放登记</title>
+<rect x="520" y="565" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="538" y="588" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="865" y="588" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T09</text>
+<text x="538" y="615" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">查看本人配卡并线下发放</text>
+<text x="538" y="640" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">查看配额 / 未申领 / 待审 / 已用</text>
+<text x="538" y="661" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">教师不制卡，不创建学生发放登记</text>
+</g>
+<g class="node" id="claim"><title>学生：扫码预览 → 确认申领；预览只读；有效卡提交后锁为待审；PENDING：积分尚未增加</title>
+<rect x="960" y="565" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="978" y="588" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="1305" y="588" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S02</text>
+<text x="978" y="615" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">扫码预览 → 确认申领</text>
+<text x="978" y="640" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">预览只读；有效卡提交后锁为待审</text>
+<text x="978" y="661" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">PENDING：积分尚未增加</text>
+</g>
+<g class="node" id="claimreview"><title>教师：审核本人名下卡申领；核对学生、三级指标与截止时间；通过 / 驳回；防重复提交</title>
+<rect x="1400" y="565" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="1418" y="588" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="1745" y="588" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T02</text>
+<text x="1418" y="615" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">审核本人名下卡申领</text>
+<text x="1418" y="640" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">核对学生、三级指标与截止时间</text>
+<text x="1418" y="661" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">通过 / 驳回；防重复提交</text>
+</g>
+<g class="node" id="cardposted"><title>系统自动：卡已用 + 正式流水 +1；一次事务完成：审核、卡状态、记账；结果通知学生；进入 03 过程账本</title>
+<rect x="1840" y="565" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1858" y="588" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="2185" y="588" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">USED · B_CARD</text>
+<text x="1858" y="615" font-size="18" fill="#526875" font-weight="600" text-anchor="start">卡已用 + 正式流水 +1</text>
+<text x="1858" y="640" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">一次事务完成：审核、卡状态、记账</text>
+<text x="1858" y="661" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">结果通知学生；进入 03 过程账本</text>
+</g>
+<g class="node" id="expired"><title>异常 / 限制：卡片过期 / 不可用；未用卡跨月、待审超宽限：自动过期；已用 / 作废 / 过期不再领取，不加分</title>
+<rect x="960" y="745" width="360" height="100" rx="9" fill="#FCF1EF" stroke="#D4A19A" stroke-width="1.3"/>
+<text x="978" y="768" font-size="11" fill="#A25D54" font-weight="500" text-anchor="start">异常 / 限制</text>
+<text x="1305" y="768" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">EXPIRED</text>
+<text x="978" y="795" font-size="18" fill="#A25D54" font-weight="600" text-anchor="start">卡片过期 / 不可用</text>
+<text x="978" y="820" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">未用卡跨月、待审超宽限：自动过期</text>
+<text x="978" y="841" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">已用 / 作废 / 过期不再领取，不加分</text>
+</g>
+<g class="node" id="claimreject"><title>异常 / 限制：填写理由 → 驳回；申领 REJECTED，卡片永久 VOID；积分不增加，通知学生审核结果</title>
+<rect x="1400" y="745" width="360" height="100" rx="9" fill="#FCF1EF" stroke="#D4A19A" stroke-width="1.3"/>
+<text x="1418" y="768" font-size="11" fill="#A25D54" font-weight="500" text-anchor="start">异常 / 限制</text>
+<text x="1745" y="768" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T02</text>
+<text x="1418" y="795" font-size="18" fill="#A25D54" font-weight="600" text-anchor="start">填写理由 → 驳回</text>
+<text x="1418" y="820" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">申领 REJECTED，卡片永久 VOID</text>
+<text x="1418" y="841" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">积分不增加，通知学生审核结果</text>
+</g>
+<g class="node" id="proxy"><title>管理员：满足条件才可代审；原教师已停用，或已登记授权转办；同校校验；记录专用代审身份</title>
+<rect x="1840" y="745" width="360" height="100" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="1858" y="768" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="2185" y="768" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M05</text>
+<text x="1858" y="795" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">满足条件才可代审</text>
+<text x="1858" y="820" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">原教师已停用，或已登记授权转办</text>
+<text x="1858" y="841" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">同校校验；记录专用代审身份</text>
+</g>
+<g class="node" id="direct"><title>教师：选学生、三级指标与备注；任教班级可批量勾选，每人固定 +1；共用备注 + 逐生备注；逐人返回结果</title>
+<rect x="80" y="970" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="98" y="993" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="425" y="993" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T03</text>
+<text x="98" y="1020" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">选学生、三级指标与备注</text>
+<text x="98" y="1045" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">任教班级可批量勾选，每人固定 +1</text>
+<text x="98" y="1066" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">共用备注 + 逐生备注；逐人返回结果</text>
+</g>
+<g class="node" id="ledger"><title>系统自动：只追加的过程积分账本；A_DIRECT / B_CARD：+1；冲销：−1；净分用于 07 的 P；原流水不可改删</title>
+<rect x="520" y="970" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="538" y="993" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="865" y="993" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">P 数据来源</text>
+<text x="538" y="1020" font-size="18" fill="#526875" font-weight="600" text-anchor="start">只追加的过程积分账本</text>
+<text x="538" y="1045" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">A_DIRECT / B_CARD：+1；冲销：−1</text>
+<text x="538" y="1066" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">净分用于 07 的 P；原流水不可改删</text>
+</g>
+<g class="node" id="studentledger"><title>学生：查看本人积分与来源；按维度、时间、来源筛选；凭证、操作人、原记录 / 冲销关联</title>
+<rect x="960" y="970" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="978" y="993" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="1305" y="993" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S03</text>
+<text x="978" y="1020" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">查看本人积分与来源</text>
+<text x="978" y="1045" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">按维度、时间、来源筛选</text>
+<text x="978" y="1066" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">凭证、操作人、原记录 / 冲销关联</text>
+</g>
+<g class="node" id="classview"><title>教师：查看任教班级成长；过程表现、正式成绩缺项、学生详情；综合分来自 07；不能越班查询</title>
+<rect x="1400" y="970" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="1418" y="993" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="1745" y="993" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T06</text>
+<text x="1418" y="1020" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">查看任教班级成长</text>
+<text x="1418" y="1045" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">过程表现、正式成绩缺项、学生详情</text>
+<text x="1418" y="1066" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">综合分来自 07；不能越班查询</text>
+</g>
+<g class="node" id="schoolledger"><title>管理员：全校查询与受控纠错；查看全校流水及关联凭证；不直接编辑；差错转入 09 冲销流程</title>
+<rect x="1840" y="970" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="1858" y="993" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="2185" y="993" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M11</text>
+<text x="1858" y="1020" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">全校查询与受控纠错</text>
+<text x="1858" y="1045" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">查看全校流水及关联凭证</text>
+<text x="1858" y="1066" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">不直接编辑；差错转入 09 冲销流程</text>
+</g>
+<g class="node" id="honordraft"><title>学生：填写荣誉、上传证书；活动 / 届次 / 日期 / 省市区 / 奖项；保存草稿；每次材料修改保留版本</title>
+<rect x="80" y="1250" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="98" y="1273" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="425" y="1273" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S04</text>
+<text x="98" y="1300" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">填写荣誉、上传证书</text>
+<text x="98" y="1325" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">活动 / 届次 / 日期 / 省市区 / 奖项</text>
+<text x="98" y="1346" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">保存草稿；每次材料修改保留版本</text>
+</g>
+<g class="node" id="honorsubmit"><title>学生：正式提交 / 补交材料；SUBMITTED：等待审核，暂不计分；退回后沿原成果链追加新材料版本</title>
+<rect x="520" y="1250" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="538" y="1273" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="865" y="1273" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S04</text>
+<text x="538" y="1300" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">正式提交 / 补交材料</text>
+<text x="538" y="1325" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">SUBMITTED：等待审核，暂不计分</text>
+<text x="538" y="1346" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">退回后沿原成果链追加新材料版本</text>
+</g>
+<g class="node" id="honorreview"><title>教师：查验证书并审核；通过认定 / 退回补充 / 终态拒绝；退回和拒绝需填写原因</title>
+<rect x="960" y="1250" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="978" y="1273" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="1305" y="1273" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T04</text>
+<text x="978" y="1300" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">查验证书并审核</text>
+<text x="978" y="1325" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">通过认定 / 退回补充 / 终态拒绝</text>
+<text x="978" y="1346" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">退回和拒绝需填写原因</text>
+</g>
+<g class="node" id="honorpoints"><title>系统自动：只认定通过且未撤销荣誉；省 9/8/7，市 6/5/4，区 3/2/1；独立荣誉分汇入 07 的 H</title>
+<rect x="1400" y="1250" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1418" y="1273" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1745" y="1273" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">H 数据来源</text>
+<text x="1418" y="1300" font-size="18" fill="#526875" font-weight="600" text-anchor="start">只认定通过且未撤销荣誉</text>
+<text x="1418" y="1325" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">省 9/8/7，市 6/5/4，区 3/2/1</text>
+<text x="1418" y="1346" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">独立荣誉分汇入 07 的 H</text>
+</g>
+<g class="node" id="honoradmin"><title>管理员：全校复核 / 撤销认定；撤销必须理由与审计，状态 REVOKED；触发 07 重算；已发布时衔接 09 新版</title>
+<rect x="1840" y="1250" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="1858" y="1273" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="2185" y="1273" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M06</text>
+<text x="1858" y="1300" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">全校复核 / 撤销认定</text>
+<text x="1858" y="1325" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">撤销必须理由与审计，状态 REVOKED</text>
+<text x="1858" y="1346" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">触发 07 重算；已发布时衔接 09 新版</text>
+</g>
+<g class="node" id="honorreturn"><title>学生：退回补充 → 重新提交；RETURNED：可补交，版本不覆盖</title>
+<rect x="520" y="1430" width="360" height="86" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="538" y="1453" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="865" y="1453" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S04</text>
+<text x="538" y="1480" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">退回补充 → 重新提交</text>
+<text x="538" y="1505" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">RETURNED：可补交，版本不覆盖</text>
+</g>
+<g class="node" id="honorreject"><title>异常 / 限制：REJECTED：拒绝且不计分；终态，不等同于可补交的退回</title>
+<rect x="960" y="1430" width="360" height="86" rx="9" fill="#FCF1EF" stroke="#D4A19A" stroke-width="1.3"/>
+<text x="978" y="1453" font-size="11" fill="#A25D54" font-weight="500" text-anchor="start">异常 / 限制</text>
+<text x="1305" y="1453" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T04</text>
+<text x="978" y="1480" font-size="18" fill="#A25D54" font-weight="600" text-anchor="start">REJECTED：拒绝且不计分</text>
+<text x="978" y="1505" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">终态，不等同于可补交的退回</text>
+</g>
+<g class="node" id="storytask"><title>管理员：配置月份任务与 AI 开关；任务说明、截止日期、量规待配置；按班级监控缺交、待审与 AI 异常</title>
+<rect x="80" y="1625" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="98" y="1648" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="425" y="1648" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M07</text>
+<text x="98" y="1675" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">配置月份任务与 AI 开关</text>
+<text x="98" y="1700" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">任务说明、截止日期、量规待配置</text>
+<text x="98" y="1721" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">按班级监控缺交、待审与 AI 异常</text>
+</g>
+<g class="node" id="storywrite"><title>学生：写故事、存草稿、提交；每生每月一条主记录，多版留痕；提交后可查看教师终审结果</title>
+<rect x="520" y="1625" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="538" y="1648" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="865" y="1648" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S05</text>
+<text x="538" y="1675" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">写故事、存草稿、提交</text>
+<text x="538" y="1700" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">每生每月一条主记录，多版留痕</text>
+<text x="538" y="1721" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">提交后可查看教师终审结果</text>
+</g>
+<g class="node" id="storyai"><title>系统自动：保存版本 / 生成 AI 建议；评估中、失败、关闭均可人工评阅；AI 建议不得直接写作正式成绩</title>
+<rect x="960" y="1625" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="978" y="1648" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1305" y="1648" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">FR-06</text>
+<text x="978" y="1675" font-size="18" fill="#526875" font-weight="600" text-anchor="start">保存版本 / 生成 AI 建议</text>
+<text x="978" y="1700" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">评估中、失败、关闭均可人工评阅</text>
+<text x="978" y="1721" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">AI 建议不得直接写作正式成绩</text>
+</g>
+<g class="node" id="storyreview"><title>教师：人工复核与终审评分；输入 0—100 分及评语并确认；修改留审计；学期归档后只读</title>
+<rect x="1400" y="1625" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="1418" y="1648" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="1745" y="1648" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T05</text>
+<text x="1418" y="1675" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">人工复核与终审评分</text>
+<text x="1418" y="1700" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">输入 0—100 分及评语并确认</text>
+<text x="1418" y="1721" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">修改留审计；学期归档后只读</text>
+</g>
+<g class="node" id="storyresult"><title>系统自动：月度终审结果与 G 来源；月度结果存档；G 须按校规确认；外部故事分独立保存，不自动混合</title>
+<rect x="1840" y="1625" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1858" y="1648" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="2185" y="1648" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">G → 07 的 B</text>
+<text x="1858" y="1675" font-size="18" fill="#526875" font-weight="600" text-anchor="start">月度终审结果与 G 来源</text>
+<text x="1858" y="1700" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">月度结果存档；G 须按校规确认</text>
+<text x="1858" y="1721" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">外部故事分独立保存，不自动混合</text>
+</g>
+<g class="node" id="importrole"><title>教师 / 管理员：选类型、班级并上传模板；教师：任教班级学科成绩；管理员：学科 / 五育 / 外部故事</title>
+<rect x="80" y="1940" width="360" height="118" rx="9" fill="#F3F6F3" stroke="#A5B6A7" stroke-width="1.3"/>
+<text x="98" y="1963" font-size="11" fill="#5D7562" font-weight="500" text-anchor="start">教师 / 管理员</text>
+<text x="425" y="1963" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T07 · M08</text>
+<text x="98" y="1990" font-size="18" fill="#5D7562" font-weight="600" text-anchor="start">选类型、班级并上传模板</text>
+<text x="98" y="2015" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">教师：任教班级学科成绩</text>
+<text x="98" y="2036" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">管理员：学科 / 五育 / 外部故事</text>
+</g>
+<g class="node" id="importparse"><title>系统自动：校验身份与文件；唯一学号匹配，不能只凭姓名；≤ 2 MB / 1000 行；解析超时拒绝</title>
+<rect x="520" y="1940" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="538" y="1963" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="865" y="1963" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">FR-07</text>
+<text x="538" y="1990" font-size="18" fill="#526875" font-weight="600" text-anchor="start">校验身份与文件</text>
+<text x="538" y="2015" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">唯一学号匹配，不能只凭姓名</text>
+<text x="538" y="2036" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">≤ 2 MB / 1000 行；解析超时拒绝</text>
+</g>
+<g class="node" id="importpreview"><title>教师 / 管理员：预览新增 / 变更 / 异常；列出具体行、字段与新旧值；有异常：修正原文件，重新预览</title>
+<rect x="960" y="1940" width="360" height="118" rx="9" fill="#F3F6F3" stroke="#A5B6A7" stroke-width="1.3"/>
+<text x="978" y="1963" font-size="11" fill="#5D7562" font-weight="500" text-anchor="start">教师 / 管理员</text>
+<text x="1305" y="1963" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T07 · M08</text>
+<text x="978" y="1990" font-size="18" fill="#5D7562" font-weight="600" text-anchor="start">预览新增 / 变更 / 异常</text>
+<text x="978" y="2015" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">列出具体行、字段与新旧值</text>
+<text x="978" y="2036" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">有异常：修正原文件，重新预览</text>
+</g>
+<g class="node" id="importcommit"><title>系统自动：人工确认 → 批次落库；确认后生成批次号，版本与来源留痕；失败全量回滚，不部分写入</title>
+<rect x="1400" y="1940" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1418" y="1963" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1745" y="1963" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">batch_no</text>
+<text x="1418" y="1990" font-size="18" fill="#526875" font-weight="600" text-anchor="start">人工确认 → 批次落库</text>
+<text x="1418" y="2015" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">确认后生成批次号，版本与来源留痕</text>
+<text x="1418" y="2036" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">失败全量回滚，不部分写入</text>
+</g>
+<g class="node" id="importoutputs"><title>系统自动：分流保存与后续查阅；五育正式分 → 07 的 B；故事分另标来源；学科成绩 → 08 报告独立板块</title>
+<rect x="1840" y="1940" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1858" y="1963" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="2185" y="1963" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">B / 学科数据来源</text>
+<text x="1858" y="1990" font-size="18" fill="#526875" font-weight="600" text-anchor="start">分流保存与后续查阅</text>
+<text x="1858" y="2015" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">五育正式分 → 07 的 B；故事分另标来源</text>
+<text x="1858" y="2036" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学科成绩 → 08 报告独立板块</text>
+</g>
+<g class="node" id="rule"><title>管理员：新建规则草稿并激活版本；权重合计 100%；阈值必须大于 0；激活新版 → 旧版只读 → 全校重算</title>
+<rect x="80" y="2265" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="98" y="2288" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="425" y="2288" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M09</text>
+<text x="98" y="2315" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">新建规则草稿并激活版本</text>
+<text x="98" y="2340" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">权重合计 100%；阈值必须大于 0</text>
+<text x="98" y="2361" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">激活新版 → 旧版只读 → 全校重算</text>
+</g>
+<g class="node" id="calcinputs"><title>系统自动：汇聚 B / P / H 三类数据；B：05 的已确认 G + 06 的五育正式分；P：02/03 的净积分；H：04 的认定分</title>
+<rect x="520" y="2265" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="538" y="2288" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="865" y="2288" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">三类数据分别存储</text>
+<text x="538" y="2315" font-size="18" fill="#526875" font-weight="600" text-anchor="start">汇聚 B / P / H 三类数据</text>
+<text x="538" y="2340" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">B：05 的已确认 G + 06 的五育正式分</text>
+<text x="538" y="2361" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">P：02/03 的净积分；H：04 的认定分</text>
+</g>
+<g class="node" id="complete"><title>系统自动：六育正式成绩完整吗？；D / Z / T / M / L / G 均须 CONFIRMED；有 ACTIVE 规则才按版本核算</title>
+<rect x="960" y="2265" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="978" y="2288" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1305" y="2288" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">完整性判断</text>
+<text x="978" y="2315" font-size="18" fill="#526875" font-weight="600" text-anchor="start">六育正式成绩完整吗？</text>
+<text x="978" y="2340" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">D / Z / T / M / L / G 均须 CONFIRMED</text>
+<text x="978" y="2361" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">有 ACTIVE 规则才按版本核算</text>
+</g>
+<g class="node" id="score"><title>系统自动：计算综合分 S 并留规则版本；B 六维均分；P / H 按各自阈值封顶；S = round(wB·B + wP·P + wH·H, 2)</title>
+<rect x="1400" y="2265" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1418" y="2288" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1745" y="2288" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">综合得分输出</text>
+<text x="1418" y="2315" font-size="18" fill="#526875" font-weight="600" text-anchor="start">计算综合分 S 并留规则版本</text>
+<text x="1418" y="2340" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">B 六维均分；P / H 按各自阈值封顶</text>
+<text x="1418" y="2361" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">S = round(wB·B + wP·P + wH·H, 2)</text>
+</g>
+<g class="node" id="scoreview"><title>三端共用：查阅综合评价与分项；学生本人；教师任教班级；管理全校；正式六育 / 过程积分 / 荣誉分分别展示</title>
+<rect x="1840" y="2265" width="360" height="118" rx="9" fill="#F3F6F3" stroke="#A5B6A7" stroke-width="1.3"/>
+<text x="1858" y="2288" font-size="11" fill="#5D7562" font-weight="500" text-anchor="start">三端共用</text>
+<text x="2185" y="2288" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S06 · T06 · M09</text>
+<text x="1858" y="2315" font-size="18" fill="#5D7562" font-weight="600" text-anchor="start">查阅综合评价与分项</text>
+<text x="1858" y="2340" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学生本人；教师任教班级；管理全校</text>
+<text x="1858" y="2361" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">正式六育 / 过程积分 / 荣誉分分别展示</text>
+</g>
+<g class="node" id="incomplete"><title>异常 / 限制：缺项 → 待完善 INCOMPLETE；不把缺项当 0，不确认 / 发布报告；定位到 05/06 补齐成绩后再核算</title>
+<rect x="960" y="2450" width="360" height="100" rx="9" fill="#FCF1EF" stroke="#D4A19A" stroke-width="1.3"/>
+<text x="978" y="2473" font-size="11" fill="#A25D54" font-weight="500" text-anchor="start">异常 / 限制</text>
+<text x="1305" y="2473" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">阻断输出</text>
+<text x="978" y="2500" font-size="18" fill="#A25D54" font-weight="600" text-anchor="start">缺项 → 待完善 INCOMPLETE</text>
+<text x="978" y="2525" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">不把缺项当 0，不确认 / 发布报告</text>
+<text x="978" y="2546" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">定位到 05/06 补齐成绩后再核算</text>
+</g>
+<g class="node" id="narratives"><title>学生：学生自述 / 代录家长寄语；个人基础信息只读，寄语非必填；家长寄语标注由学生代录</title>
+<rect x="80" y="2680" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="98" y="2703" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="425" y="2703" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S08</text>
+<text x="98" y="2730" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">学生自述 / 代录家长寄语</text>
+<text x="98" y="2755" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">个人基础信息只读，寄语非必填</text>
+<text x="98" y="2776" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">家长寄语标注由学生代录</text>
+</g>
+<g class="node" id="reportsnapshot"><title>管理员：结算并生成报告草稿；汇入 07 综合结果 / 六育 / 过程 / 荣誉；及 06 学科、故事、评语与自述</title>
+<rect x="520" y="2680" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="538" y="2703" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="865" y="2703" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M10 · DRAFT</text>
+<text x="538" y="2730" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">结算并生成报告草稿</text>
+<text x="538" y="2755" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">汇入 07 综合结果 / 六育 / 过程 / 荣誉</text>
+<text x="538" y="2776" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">及 06 学科、故事、评语与自述</text>
+</g>
+<g class="node" id="reportconfirm"><title>教师：AI 评语草稿 → 人工复核；班主任修改评语，核对各项数据；成绩齐全后显式确认草稿</title>
+<rect x="960" y="2680" width="360" height="118" rx="9" fill="#F0F5FB" stroke="#89A9CE" stroke-width="1.3"/>
+<text x="978" y="2703" font-size="11" fill="#426E9B" font-weight="500" text-anchor="start">教师</text>
+<text x="1305" y="2703" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">T08 · CONFIRMED</text>
+<text x="978" y="2730" font-size="18" fill="#426E9B" font-weight="600" text-anchor="start">AI 评语草稿 → 人工复核</text>
+<text x="978" y="2755" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">班主任修改评语，核对各项数据</text>
+<text x="978" y="2776" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">成绩齐全后显式确认草稿</text>
+</g>
+<g class="node" id="publish"><title>管理员：六项强校验 → 批量发布；任何一项不满足即阻断该生发布；成功后快照封存，发送发布通知</title>
+<rect x="1400" y="2680" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="1418" y="2703" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="1745" y="2703" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M10 · PUBLISHED</text>
+<text x="1418" y="2730" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">六项强校验 → 批量发布</text>
+<text x="1418" y="2755" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">任何一项不满足即阻断该生发布</text>
+<text x="1418" y="2776" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">成功后快照封存，发送发布通知</text>
+</g>
+<g class="node" id="reportread"><title>学生：查看本人已发布报告；六育 / 流水摘要 / 学科 / 荣誉 / 评语；查看已发布版本，申请个人水印 PDF</title>
+<rect x="1840" y="2680" width="360" height="118" rx="9" fill="#EFF7F2" stroke="#83AF95" stroke-width="1.3"/>
+<text x="1858" y="2703" font-size="11" fill="#2D7050" font-weight="500" text-anchor="start">学生</text>
+<text x="2185" y="2703" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S07</text>
+<text x="1858" y="2730" font-size="18" fill="#2D7050" font-weight="600" text-anchor="start">查看本人已发布报告</text>
+<text x="1858" y="2755" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">六育 / 流水摘要 / 学科 / 荣誉 / 评语</text>
+<text x="1858" y="2776" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">查看已发布版本，申请个人水印 PDF</text>
+</g>
+<g class="node" id="publishblocked"><title>异常 / 限制：校验失败 → 返回补齐；成绩补齐转 05/06，重算转 07；教师确认回本行，归档学期不可发布</title>
+<rect x="960" y="2860" width="360" height="112" rx="9" fill="#FCF1EF" stroke="#D4A19A" stroke-width="1.3"/>
+<text x="978" y="2883" font-size="11" fill="#A25D54" font-weight="500" text-anchor="start">异常 / 限制</text>
+<text x="1305" y="2883" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">发布受阻</text>
+<text x="978" y="2910" font-size="18" fill="#A25D54" font-weight="600" text-anchor="start">校验失败 → 返回补齐</text>
+<text x="978" y="2935" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">成绩补齐转 05/06，重算转 07</text>
+<text x="978" y="2956" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">教师确认回本行，归档学期不可发布</text>
+</g>
+<g class="node" id="pdf"><title>系统自动：PDF 异步生成与重试；PENDING → READY（链接有效 5 分钟）；FAILED / 超 60 秒 → 提示重试；姓名、学号末 4 位、学期、时间水印</title>
+<rect x="1840" y="2860" width="360" height="134" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1858" y="2883" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="2185" y="2883" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">S07 导出任务</text>
+<text x="1858" y="2910" font-size="18" fill="#526875" font-weight="600" text-anchor="start">PDF 异步生成与重试</text>
+<text x="1858" y="2935" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">PENDING → READY（链接有效 5 分钟）</text>
+<text x="1858" y="2956" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">FAILED / 超 60 秒 → 提示重试</text>
+<text x="1858" y="2977" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">姓名、学号末 4 位、学期、时间水印</text>
+</g>
+<g class="node" id="correction"><title>管理员：发起受控冲销 / 荣誉撤销；冲销：发布前管理员，发布后需超管；荣誉撤销按学期状态与权限执行</title>
+<rect x="80" y="3130" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="98" y="3153" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="425" y="3153" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M11 · M06</text>
+<text x="98" y="3180" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">发起受控冲销 / 荣誉撤销</text>
+<text x="98" y="3205" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">冲销：发布前管理员，发布后需超管</text>
+<text x="98" y="3226" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">荣誉撤销按学期状态与权限执行</text>
+</g>
+<g class="node" id="correctionwrite"><title>系统自动：保留原记录，追加变更；错评：追加 −1，原 +1 最多冲销一次；荣誉：置 REVOKED，不再计入 H</title>
+<rect x="520" y="3130" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="538" y="3153" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="865" y="3153" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">审计记录理由与原始内容</text>
+<text x="538" y="3180" font-size="18" fill="#526875" font-weight="600" text-anchor="start">保留原记录，追加变更</text>
+<text x="538" y="3205" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">错评：追加 −1，原 +1 最多冲销一次</text>
+<text x="538" y="3226" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">荣誉：置 REVOKED，不再计入 H</text>
+</g>
+<g class="node" id="recalculate"><title>系统自动：按规则重算并生成新版；受控更正重新核算，报告 version + 1；归档更正基于原规则版本</title>
+<rect x="960" y="3130" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="978" y="3153" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1305" y="3153" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">衔接 07 核算与 08 报告</text>
+<text x="978" y="3180" font-size="18" fill="#526875" font-weight="600" text-anchor="start">按规则重算并生成新版</text>
+<text x="978" y="3205" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">受控更正重新核算，报告 version + 1</text>
+<text x="978" y="3226" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">归档更正基于原规则版本</text>
+</g>
+<g class="node" id="newreport"><title>系统自动：旧版保留 → 新版定向通知；原报告 SUPERSEDED，新版本可追溯；学生收到 REPORT_UPDATED 后查看</title>
+<rect x="1400" y="3130" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1418" y="3153" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1745" y="3153" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">通知到学生 S07 / C02</text>
+<text x="1418" y="3180" font-size="18" fill="#526875" font-weight="600" text-anchor="start">旧版保留 → 新版定向通知</text>
+<text x="1418" y="3205" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">原报告 SUPERSEDED，新版本可追溯</text>
+<text x="1418" y="3226" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学生收到 REPORT_UPDATED 后查看</text>
+</g>
+<g class="node" id="archive"><title>管理员：归档学期并关闭常规写入；active = 0：故事终审等原有数据只读；仅超管可追加冲销、生成新版报告</title>
+<rect x="1840" y="3130" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="1858" y="3153" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="2185" y="3153" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M02</text>
+<text x="1858" y="3180" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">归档学期并关闭常规写入</text>
+<text x="1858" y="3205" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">active = 0：故事终审等原有数据只读</text>
+<text x="1858" y="3226" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">仅超管可追加冲销、生成新版报告</text>
+</g>
+<g class="node" id="event"><title>三端共用：业务事件与重要操作；申领、审核结果、报告发布 / 更新；制卡、直评、导入、冲销、撤销等</title>
+<rect x="80" y="3490" width="360" height="118" rx="9" fill="#F3F6F3" stroke="#A5B6A7" stroke-width="1.3"/>
+<text x="98" y="3513" font-size="11" fill="#5D7562" font-weight="500" text-anchor="start">三端共用</text>
+<text x="425" y="3513" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">适用于 01—09</text>
+<text x="98" y="3540" font-size="18" fill="#5D7562" font-weight="600" text-anchor="start">业务事件与重要操作</text>
+<text x="98" y="3565" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">申领、审核结果、报告发布 / 更新</text>
+<text x="98" y="3586" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">制卡、直评、导入、冲销、撤销等</text>
+</g>
+<g class="node" id="outbox"><title>系统自动：事务内记审计并写消息；业务成功与消息记录同事务提交；需审计的操作完整保留前后摘要</title>
+<rect x="520" y="3490" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="538" y="3513" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="865" y="3513" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">operation_audit / outbox</text>
+<text x="538" y="3540" font-size="18" fill="#526875" font-weight="600" text-anchor="start">事务内记审计并写消息</text>
+<text x="538" y="3565" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">业务成功与消息记录同事务提交</text>
+<text x="538" y="3586" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">需审计的操作完整保留前后摘要</text>
+</g>
+<g class="node" id="notify"><title>系统自动：投递到各自消息与待办；学生看本人结果；教师接审核待办；失败按退避重试，最多 5 次</title>
+<rect x="960" y="3490" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="978" y="3513" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="1305" y="3513" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">C02 · T01 · S01</text>
+<text x="978" y="3540" font-size="18" fill="#526875" font-weight="600" text-anchor="start">投递到各自消息与待办</text>
+<text x="978" y="3565" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">学生看本人结果；教师接审核待办</text>
+<text x="978" y="3586" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">失败按退避重试，最多 5 次</text>
+</g>
+<g class="node" id="audit"><title>管理员：查审计、通知与失败任务；管理员定位投递异常和执行失败；有权限才可人工重试，保留操作记录</title>
+<rect x="1400" y="3490" width="360" height="118" rx="9" fill="#FCF6EB" stroke="#C5AB78" stroke-width="1.3"/>
+<text x="1418" y="3513" font-size="11" fill="#916E32" font-weight="500" text-anchor="start">管理员</text>
+<text x="1745" y="3513" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">M12 · M01</text>
+<text x="1418" y="3540" font-size="18" fill="#916E32" font-weight="600" text-anchor="start">查审计、通知与失败任务</text>
+<text x="1418" y="3565" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">管理员定位投递异常和执行失败</text>
+<text x="1418" y="3586" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">有权限才可人工重试，保留操作记录</text>
+</g>
+<g class="node" id="jobs"><title>系统自动：定时过期 / 重算 / PDF；卡月末过期，待审超宽限期过期；内部重算事件不发送成学生通知</title>
+<rect x="1840" y="3490" width="360" height="118" rx="9" fill="#F6F8F9" stroke="#B1BEC5" stroke-width="1.3"/>
+<text x="1858" y="3513" font-size="11" fill="#526875" font-weight="500" text-anchor="start">系统自动</text>
+<text x="2185" y="3513" font-size="10" fill="#89958D" font-weight="400" text-anchor="end">自动任务监控</text>
+<text x="1858" y="3540" font-size="18" fill="#526875" font-weight="600" text-anchor="start">定时过期 / 重算 / PDF</text>
+<text x="1858" y="3565" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">卡月末过期，待审超宽限期过期</text>
+<text x="1858" y="3586" font-size="14" fill="#65776A" font-weight="400" text-anchor="start">内部重算事件不发送成学生通知</text>
+</g>
+<rect x="461" y="335" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="352" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">准备</text>
+<rect x="901" y="335" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="352" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">配置</text>
+<rect x="1341" y="335" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="352" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">生效</text>
+<rect x="1774.5" y="335" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="352" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">按角色</text>
+<rect x="461" y="600" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="617" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">配发</text>
+<rect x="894.5" y="600" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="617" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">实体卡</text>
+<rect x="1341" y="600" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="617" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">待审</text>
+<rect x="1781" y="600" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="617" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">通过</text>
+<rect x="1121" y="702" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1140" y="719" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">超期</text>
+<rect x="1561" y="702" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1580" y="719" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">驳回</text>
+<rect x="1855" y="703" width="90" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1900" y="720" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">代审同一流程</text>
+<rect x="467" y="1005" width="26" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="1022" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">+1</text>
+<rect x="1121" y="1095" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1140" y="1112" font-size="13" fill="#80928B" font-weight="400" text-anchor="middle">本人</text>
+<rect x="1548" y="1095" width="64" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1580" y="1112" font-size="13" fill="#80928B" font-weight="400" text-anchor="middle">任教班级</text>
+<rect x="2001" y="1095" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="2020" y="1112" font-size="13" fill="#80928B" font-weight="400" text-anchor="middle">本校</text>
+<rect x="461" y="1285" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="1302" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">提交</text>
+<rect x="901" y="1285" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="1302" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">待审</text>
+<rect x="1341" y="1285" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="1302" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">通过</text>
+<rect x="1781" y="1285" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="1302" font-size="13" fill="#80928B" font-weight="400" text-anchor="middle">复核</text>
+<rect x="986" y="1390" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1005" y="1407" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">退回</text>
+<rect x="674.5" y="1389" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="700" y="1406" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">新版本</text>
+<rect x="1121" y="1388" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1140" y="1405" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">拒绝</text>
+<rect x="461" y="1660" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="1677" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">任务</text>
+<rect x="901" y="1660" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="1677" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">提交</text>
+<rect x="1334.5" y="1660" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="1677" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">仅参考</text>
+<rect x="1781" y="1660" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="1677" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">确认</text>
+<rect x="1302" y="1796" width="116" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="1813" font-size="13" fill="#80928B" font-weight="400" text-anchor="middle">学生查看终审结果</text>
+<rect x="461" y="1975" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="1992" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">上传</text>
+<rect x="901" y="1975" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="1992" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">校验</text>
+<rect x="1334.5" y="1975" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="1992" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">无异常</text>
+<rect x="1781" y="1975" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="1992" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">分流</text>
+<rect x="609.5" y="2113" width="181" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="700" y="2130" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">异常：修正源文件后重新预览</text>
+<rect x="461" y="2300" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="2317" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">生效</text>
+<rect x="901" y="2300" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="2317" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">核对</text>
+<rect x="1341" y="2300" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="2317" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">齐全</text>
+<rect x="1774.5" y="2300" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="2317" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">可查阅</text>
+<rect x="1121" y="2408" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1140" y="2425" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">缺项</text>
+<rect x="461" y="2715" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="2732" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">内容</text>
+<rect x="901" y="2715" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="2732" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">草稿</text>
+<rect x="1334.5" y="2715" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="2732" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">已确认</text>
+<rect x="1774.5" y="2715" width="51" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="2732" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">已发布</text>
+<rect x="1221.5" y="2818" width="77" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1260" y="2835" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">任一不满足</text>
+<rect x="1988" y="2818" width="64" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="2020" y="2835" font-size="13" fill="#8C8CAA" font-weight="400" text-anchor="middle">申请导出</text>
+<rect x="448" y="3165" width="64" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="3182" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">理由必填</text>
+<rect x="901" y="3165" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="3182" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">重算</text>
+<rect x="1328" y="3165" width="64" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="3182" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">已有报告</text>
+<rect x="461" y="3525" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="480" y="3542" font-size="13" fill="#526F80" font-weight="400" text-anchor="middle">事务</text>
+<rect x="901" y="3525" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="920" y="3542" font-size="13" fill="#8C8CAA" font-weight="400" text-anchor="middle">异步</text>
+<rect x="1341" y="3525" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1360" y="3542" font-size="13" fill="#B57A61" font-weight="400" text-anchor="middle">异常</text>
+<rect x="1781" y="3525" width="38" height="23" rx="4" fill="#FCFDFC" opacity=".98"/>
+<text x="1800" y="3542" font-size="13" fill="#80928B" font-weight="400" text-anchor="middle">监控</text>
+<text x="90" y="761" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">卡片终态不可逆：USED / VOID / EXPIRED。</text>
+<text x="90" y="786" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">月末待审可在校方配置的宽限期内审核；</text>
+<text x="90" y="811" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">宽限期内入账仍归属卡片原学期。</text>
+<text x="100" y="1142" font-size="13" fill="#7D8982" font-weight="400" text-anchor="start">管理员仅可应急代录并写审计；正常无卡直评由教师发起。</text>
+<text x="1420" y="1436" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">同一学生 / 学期 / 赛事届次只能认定一次。</text>
+<text x="1420" y="1461" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">重复与更正以 SPEC 及最终校规为准。</text>
+<text x="90" y="1808" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">故事缺月显示未完成，不自动按 0 分处理。</text>
+<text x="1440" y="2130" font-size="14" fill="#7D8982" font-weight="400" text-anchor="start">钉钉 / 外部平台先模板导入，接口授权另行确认。</text>
+<text x="100" y="2450" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">重算触发：</text>
+<text x="100" y="2475" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">管理员手动核算；正式六育成绩新增 / 更新；</text>
+<text x="100" y="2500" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">荣誉通过 / 撤销；激活新规则触发全校重算。</text>
+<text x="1420" y="2450" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">试行示例：权重 80% / 15% / 5%，阈值 20 / 12。</text>
+<text x="1420" y="2473" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">实际读取 ACTIVE 规则，不在界面写死。</text>
+<text x="1420" y="2496" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">成绩更新后的异步重算仅在可操作学期进行。</text>
+<text x="100" y="2864" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">报告输入还包括：</text>
+<text x="100" y="2889" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">07 综合分和规则版本；03 积分摘要；</text>
+<text x="100" y="2914" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">04 已认定荣誉；05 故事；06 学科成绩。</text>
+<text x="100" y="2939" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">快照独立保存，后续更正不覆盖旧报告。</text>
+<text x="1410" y="2865" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">发布六项门禁</text>
+<text x="1410" y="2888" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">① 六育均确认　② 规则 ACTIVE</text>
+<text x="1410" y="2911" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">③ 班主任已确认　④ 综合分已完成</text>
+<text x="1410" y="2934" font-size="15" fill="#7D8982" font-weight="400" text-anchor="start">⑤ 快照有效　⑥ 学期 active = 1</text>
+<text x="100" y="3307" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">归档是 08 发布后的独立管理动作，不是等待更正后才归档；右侧归档约束同时作用于整张图。</text>
+<text x="100" y="3332" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">归档后不能恢复正常评分、修改既有行或撤销荣誉；仅按授权走追加冲销与新版报告流程。</text>
+<text x="100" y="3674" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">全局不变量：本校隔离 · 教师班级范围 · 学期时间窗 · 幂等防重 · 历史材料与报告多版本 · 最小化展示个人信息。</text>
+<text x="100" y="3699" font-size="16" fill="#7D8982" font-weight="400" text-anchor="start">边界：不设家长账号、积分转赠 / 兑换、在线申诉工单；外部故事合成及试行评分参数待校方确认。</text>
+<text x="75" y="3793" font-size="17" fill="#57705D" font-weight="600" text-anchor="start">阅读图例</text>
+<path d="M220 3787h47" stroke="#526F80" stroke-width="1.8" marker-end="url(#arrow-main)"/>
+<text x="280" y="3793" font-size="14" fill="#7C8A80" font-weight="400" text-anchor="start">实线：业务提交 / 依赖</text>
+<path d="M710 3787h47" stroke="#80928B" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-read)"/>
+<text x="770" y="3793" font-size="14" fill="#7C8A80" font-weight="400" text-anchor="start">虚线：只读查询 / 监控</text>
+<path d="M1200 3787h47" stroke="#B57A61" stroke-width="1.8" marker-end="url(#arrow-alt)"/>
+<text x="1260" y="3793" font-size="14" fill="#7C8A80" font-weight="400" text-anchor="start">暖色：异常 / 退回 / 更正</text>
+<path d="M1690 3787h47" stroke="#8C8CAA" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow-async)"/>
+<text x="1750" y="3793" font-size="14" fill="#7C8A80" font-weight="400" text-anchor="start">淡紫虚线：异步任务 / 通知</text>
+<text x="75" y="3833" font-size="16" fill="#708276" font-weight="400" text-anchor="start">02—06 是并行日常业务，不要求逐段按编号执行；数据来源编号在 07 / 08 中明确汇合。归档能力属于管理员授权，不新增第四个登录角色。</text>
+<text x="75" y="3867" font-size="14" fill="#98A398" font-weight="400" text-anchor="start">业务关系图不代表功能已经上线。未确认的校规参数保留为配置项；各业务操作最终由服务端校验权限、时间窗及并发状态。</text>
+</svg>
