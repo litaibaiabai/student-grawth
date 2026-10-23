@@ -5,3 +5,4 @@ dist/
 coverage/
 .superpowers/
 deploy/backend.env
+backend/uploads/

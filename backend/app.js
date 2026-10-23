@@ -1,5 +1,5 @@
 // app.js — Express 后端入口（模板化版本）
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -17,11 +17,32 @@ const { startSchedulers } = require("./services/scheduler");
 
 const app = express();
 
+// 部署在 Nginx 之后时按 X-Forwarded-For 计数；后端端口直接对外暴露时请设 TRUST_PROXY=0
+const trustProxy = process.env.TRUST_PROXY === undefined ? 1 : Number(process.env.TRUST_PROXY);
+app.set("trust proxy", trustProxy > 0 ? trustProxy : false);
+
 // 中间件配置
 app.use(requestIdMiddleware); // 请求追踪（生成 requestId）
-app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173', credentials: true }));
-app.use(helmet({ contentSecurityPolicy: false })); // 允许安全内嵌打印报告
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500, message: { code: 429, message: '请求过于频繁，请稍后重试' } }));
+app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", credentials: true }));
+app.use(helmet({ contentSecurityPolicy: false })); // 报告页自带 CSP meta
+// 登录暂力破解防护：仅失败请求计数
+app.post(
+  ["/api/v1/auth/login", "/api/auth/login"],
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: Number(process.env.LOGIN_RATE_LIMIT_MAX) || 20,
+    skipSuccessfulRequests: true,
+    message: { code: 429, message: "登录尝试过于频繁，请 15 分钟后再试" }
+  })
+);
+app.use(
+  "/api",
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: Number(process.env.RATE_LIMIT_MAX) || 3000,
+    message: { code: 429, message: "请求过于频繁，请稍后重试" }
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));

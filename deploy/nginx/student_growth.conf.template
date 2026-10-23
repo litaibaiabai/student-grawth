@@ -22,8 +22,8 @@ server {
     gzip_types text/plain application/javascript application/x-javascript text/css application/xml text/javascript application/json image/svg+xml;
     gzip_vary on;
 
-    # 后端 API 反向代理
-    location /api/ {
+    # 后端 API 反向代理（^~ 使其优先于下方图片后缀正则，否则 /api/.../x.png 会被当作静态文件）
+    location ^~ /api/ {
         proxy_pass http://127.0.0.1:__BACKEND_PORT__;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;

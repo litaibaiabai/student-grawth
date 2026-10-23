@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Card, Table, Tag, Typography, Space, Row, Col, Spin, message, Alert, Divider } from "antd";
 import {
-  Card, Table, Tag, Typography, Space, Row, Col,
-  Spin, message, Alert, Divider
-} from "antd";
-import {
-  LineChartOutlined, CheckCircleOutlined,
-  ExclamationCircleOutlined, ArrowRightOutlined
+  LineChartOutlined,
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  ArrowRightOutlined
 } from "@ant-design/icons";
 import { get } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -16,28 +15,32 @@ const RadarChartSvg = ({ scores = {} }) => {
   // 六育：德、智、体、美、劳、故事
   const keys = ["D", "Z", "T", "M", "L", "G"];
   const labels = ["德育", "智育", "体育", "美育", "劳育", "故事"];
-  const vals = keys.map(k => scores[k] ?? 85);
+  const vals = keys.map((k) => scores[k] ?? 85);
 
   // 六边形顶点计算
   const center = { x: 150, y: 130 };
   const maxR = 90;
-  const angles = [0, 60, 120, 180, 240, 300].map(a => (a - 90) * (Math.PI / 180));
+  const angles = [0, 60, 120, 180, 240, 300].map((a) => (a - 90) * (Math.PI / 180));
 
   const getPoints = (scale = 1) => {
-    return angles.map(ang => {
-      const x = center.x + Math.cos(ang) * maxR * scale;
-      const y = center.y + Math.sin(ang) * maxR * scale;
-      return `${x},${y}`;
-    }).join(" ");
+    return angles
+      .map((ang) => {
+        const x = center.x + Math.cos(ang) * maxR * scale;
+        const y = center.y + Math.sin(ang) * maxR * scale;
+        return `${x},${y}`;
+      })
+      .join(" ");
   };
 
-  const dataPoints = angles.map((ang, idx) => {
-    const val = vals[idx] || 50;
-    const r = (val / 100) * maxR;
-    const x = center.x + Math.cos(ang) * r;
-    const y = center.y + Math.sin(ang) * r;
-    return `${x},${y}`;
-  }).join(" ");
+  const dataPoints = angles
+    .map((ang, idx) => {
+      const val = vals[idx] || 50;
+      const r = (val / 100) * maxR;
+      const x = center.x + Math.cos(ang) * r;
+      const y = center.y + Math.sin(ang) * r;
+      return `${x},${y}`;
+    })
+    .join(" ");
 
   return (
     <svg viewBox="0 0 300 270" style={{ maxWidth: 280, display: "block", margin: "0 auto", width: "100%" }}>
@@ -60,12 +63,7 @@ const RadarChartSvg = ({ scores = {} }) => {
       })}
 
       {/* 数据多边形 */}
-      <polygon
-        points={dataPoints}
-        fill="rgba(39, 116, 96, 0.25)"
-        stroke="#277460"
-        strokeWidth="2"
-      />
+      <polygon points={dataPoints} fill="rgba(39, 116, 96, 0.25)" stroke="#277460" strokeWidth="2" />
 
       {/* 数据点 */}
       {angles.map((ang, idx) => {
@@ -82,15 +80,7 @@ const RadarChartSvg = ({ scores = {} }) => {
         const x = center.x + Math.cos(ang) * textR;
         const y = center.y + Math.sin(ang) * textR + 4;
         return (
-          <text
-            key={idx}
-            x={x}
-            y={y}
-            textAnchor="middle"
-            fontSize="11"
-            fill="#56695b"
-            fontWeight="600"
-          >
+          <text key={idx} x={x} y={y} textAnchor="middle" fontSize="11" fill="#56695b" fontWeight="600">
             {labels[idx]}
           </text>
         );
@@ -100,6 +90,7 @@ const RadarChartSvg = ({ scores = {} }) => {
 };
 
 const StudentEvaluation = () => {
+  const DIM_NAMES = { D: "德育", Z: "智育", T: "体育", M: "美育", L: "劳育", G: "生活故事" };
   const [loading, setLoading] = useState(true);
   const [evalData, setEvalData] = useState(null);
 
@@ -137,32 +128,30 @@ const StudentEvaluation = () => {
     <div>
       {/* 标题 */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+        <div
+          style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+        >
           COMPREHENSIVE EVALUATION
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-          综合评价
-        </h1>
-        <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-          成长有不同的刻度，每一份数据都保留清楚的来源。
-        </p>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>综合评价</h1>
+        <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>成长有不同的刻度，每一份数据都保留清楚的来源。</p>
       </div>
 
       {/* 综合得分横幅 Banner */}
-      <div style={{
-        background: "#eef5ee",
-        border: "1px solid #dbe8dd",
-        borderRadius: 12,
-        padding: "28px 32px",
-        marginBottom: 24,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center"
-      }}>
+      <div
+        style={{
+          background: "#eef5ee",
+          border: "1px solid #dbe8dd",
+          borderRadius: 12,
+          padding: "28px 32px",
+          marginBottom: 24,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}
+      >
         <div>
-          <div style={{ fontSize: 12, color: "#6b866e", fontWeight: 600 }}>
-            本学期综合评价 · 规则 V1.0 (试行)
-          </div>
+          <div style={{ fontSize: 12, color: "#6b866e", fontWeight: 600 }}>本学期综合评价 · 规则 V1.0 (试行)</div>
           <div style={{ fontSize: 44, fontWeight: 700, color: "#1e382b", margin: "8px 0 4px" }}>
             {isComplete ? calc.comprehensive_score : "待完善"}
             {isComplete && <small style={{ fontSize: 16, color: "#6b866e", marginLeft: 8 }}>/ 100 分</small>}
@@ -173,16 +162,16 @@ const StudentEvaluation = () => {
         </div>
 
         <div style={{ textAlign: "right", fontSize: 12, color: "#56695b", lineHeight: 1.8 }}>
-          <div>六育底表均分 ({comps.B?.raw_value ?? "--"}) × 80%</div>
-          <div>过程激励标准分 ({comps.P?.standard_score ?? "--"}) × 15%</div>
-          <div>荣誉成果标准分 ({comps.H?.standard_score ?? "--"}) × 5%</div>
+          <div>六育底表均分 ({comps.B?.raw_value ?? "待录入"}) × 80%</div>
+          <div>过程激励标准分 ({comps.P?.standard_score ?? "待计算"}) × 15%</div>
+          <div>荣誉成果标准分 ({comps.H?.standard_score ?? "待计算"}) × 5%</div>
         </div>
       </div>
 
       {!isComplete && (
         <Alert
           message="六育成绩未齐备提示"
-          description={`当前缺失维度：[${evalData?.missing_dimensions?.join(", ") || "部分维度"}]。根据系统安全规范，缺项维度不会被置 0 计算，需等待科任老师录入并确认。`}
+          description={`${(evalData?.missing_dimensions || []).map((c) => DIM_NAMES[c] || c).join("、") || "部分维度"}尚未录入。缺项维度不会按 0 分计算，需等待老师录入并确认后才能生成综合分。`}
           type="warning"
           showIcon
           style={{ marginBottom: 24, borderRadius: 8 }}
@@ -220,9 +209,7 @@ const StudentEvaluation = () => {
                     }}
                   >
                     <span>{item.label}</span>
-                    <strong style={{ color: "#25332d" }}>
-                      {item.val !== undefined ? `${item.val} 分` : "待录入"}
-                    </strong>
+                    <strong style={{ color: "#25332d" }}>{item.val !== undefined ? `${item.val} 分` : "待录入"}</strong>
                   </div>
                 ))}
               </div>
@@ -239,25 +226,23 @@ const StudentEvaluation = () => {
             bordered={false}
             style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
           >
-            <div style={{
-              background: "#fafbf8",
-              padding: 20,
-              borderRadius: 8,
-              border: "1px solid #eef2eb",
-              marginBottom: 16
-            }}>
+            <div
+              style={{
+                background: "#fafbf8",
+                padding: 20,
+                borderRadius: 8,
+                border: "1px solid #eef2eb",
+                marginBottom: 16
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around" }}>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: 700, color: "#25332d" }}>
-                    {comps.P?.raw_value ?? 0}
-                  </div>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: "#25332d" }}>{comps.P?.raw_value ?? 0}</div>
                   <div style={{ fontSize: 11, color: "#7a8a7f" }}>过程净积分 / 次</div>
                 </div>
                 <ArrowRightOutlined style={{ color: "#9ba89f", fontSize: 16 }} />
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: 700, color: "#277460" }}>
-                    {comps.P?.standard_score ?? 0}
-                  </div>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: "#277460" }}>{comps.P?.standard_score ?? 0}</div>
                   <div style={{ fontSize: 11, color: "#7a8a7f" }}>过程标准分 (满分100)</div>
                 </div>
               </div>
@@ -266,25 +251,23 @@ const StudentEvaluation = () => {
               </div>
             </div>
 
-            <div style={{
-              background: "#fafbf8",
-              padding: 20,
-              borderRadius: 8,
-              border: "1px solid #eef2eb",
-              marginBottom: 16
-            }}>
+            <div
+              style={{
+                background: "#fafbf8",
+                padding: 20,
+                borderRadius: 8,
+                border: "1px solid #eef2eb",
+                marginBottom: 16
+              }}
+            >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around" }}>
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: 700, color: "#25332d" }}>
-                    {comps.H?.raw_value ?? 0}
-                  </div>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: "#25332d" }}>{comps.H?.raw_value ?? 0}</div>
                   <div style={{ fontSize: 11, color: "#7a8a7f" }}>已认定荣誉积分</div>
                 </div>
                 <ArrowRightOutlined style={{ color: "#9ba89f", fontSize: 16 }} />
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: 700, color: "#277460" }}>
-                    {comps.H?.standard_score ?? 0}
-                  </div>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: "#277460" }}>{comps.H?.standard_score ?? 0}</div>
                   <div style={{ fontSize: 11, color: "#7a8a7f" }}>荣誉标准分 (满分100)</div>
                 </div>
               </div>

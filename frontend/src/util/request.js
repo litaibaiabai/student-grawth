@@ -1,8 +1,6 @@
 // utils/request.js
 import axios from "axios";
 import { message } from "antd";
-import token from "@/util/token";
-import { ErrorCodes, getErrorMessage } from "@/constant/errorCodes";
 
 /**
  * 创建 Axios 实例
@@ -119,48 +117,6 @@ const handleNetworkError = (errStatus, silentErrors = []) => {
 };
 
 /**
- * 处理认证错误
- * @param {Number} errno 错误码
- */
-const handleAuthError = (errno) => {
-  const authErrMap = {
-    [ErrorCodes.UNAUTHORIZED]: "未授权，请重新登录",
-    [ErrorCodes.FORBIDDEN]: "拒绝访问"
-  };
-
-  const errMessage = authErrMap[errno] || "认证失败";
-  message.error(errMessage);
-
-  // 清除 token 并跳转到登录页
-  if (errno === ErrorCodes.UNAUTHORIZED) {
-    token.clear();
-    window.location.hash = "#/login";
-  }
-};
-
-/**
- * 处理通用错误
- * @param {Number} code 错误码
- * @param {String} message 错误信息
- */
-const handleGeneralError = (code, msg) => {
-  const errorMessages = {
-    400: "请求参数错误",
-    404: "请求资源不存在",
-    405: "请求方法未允许",
-    408: "请求超时",
-    500: "服务器内部错误",
-    501: "网络未实现",
-    502: "网关错误",
-    503: "服务不可用",
-    504: "网关超时"
-  };
-
-  const errMessage = msg || errorMessages[code] || `未知错误${code}`;
-  message.error(errMessage);
-};
-
-/**
  * 请求拦截器：处理请求头和认证信息
  */
 service.interceptors.request.use(
@@ -194,30 +150,25 @@ service.interceptors.response.use(
 
     // 处理网络错误
     if (error.response) {
-      const { status } = error.response;
+      const { status, data } = error.response;
+      const serverMsg = data?.message || data?.msg;
+      const silenced = silentErrors.includes(status) || (data?.code && silentErrors.includes(data.code));
 
-      // 如果跳过全局错误处理，只显示错误信息，不触发其他操作
-      if (skipGlobalError) {
-        // 不做任何处理，让调用方自己处理错误
-      } else {
-        // 将静默错误列表传递给 handleNetworkError
-        handleNetworkError(status, silentErrors);
-
-        // 处理认证错误（401 和 403 始终显示）
-        if (status === 401 || status === 403) {
-          handleAuthError(status);
+      // 优先展示后端的中文提示，只弹一条；handled 标记让页面 catch 不再重复弹出
+      if (serverMsg) error.message = serverMsg;
+      if (!skipGlobalError && !silenced) {
+        if (serverMsg && status !== 401) {
+          message.error(serverMsg);
+        } else {
+          handleNetworkError(status);
         }
-
-        // 处理通用错误
-        const { data } = error.response;
-        if (data && data.code && !silentErrors.includes(data.code)) {
-          handleGeneralError(data.code, data.message);
-        }
+        error.handled = true;
       }
     } else {
       // 网络异常始终显示
       if (!skipGlobalError) {
         handleNetworkError(null, silentErrors);
+        error.handled = true;
       }
     }
 
@@ -366,5 +317,30 @@ const download = async (url, params = {}, filename = "") => {
   window.URL.revokeObjectURL(downloadUrl);
 };
 
-export { get, post, put, del, upload, download };
+// 需登录凭证的文件：带 token 请求后在新标签页打开
+const showInNewTab = async (loadBlob) => {
+  const win = window.open("", "_blank");
+  if (!win) {
+    message.warning("浏览器拦截了新窗口，请允许弹出窗口后重试");
+    return;
+  }
+  try {
+    const blobUrl = URL.createObjectURL(await loadBlob());
+    win.location.href = blobUrl;
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  } catch (err) {
+    win.close();
+    throw err;
+  }
+};
+
+const openReportHtml = (url) =>
+  showInNewTab(async () => {
+    const html = await service({ url, method: "get", responseType: "text", transformResponse: (d) => d });
+    return new Blob([html], { type: "text/html;charset=utf-8" });
+  });
+
+const openProtectedFile = (url) => showInNewTab(() => service({ url, method: "get", responseType: "blob" }));
+
+export { get, post, put, del, upload, download, openReportHtml, openProtectedFile };
 export default service;

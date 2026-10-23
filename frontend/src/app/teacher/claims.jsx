@@ -41,13 +41,17 @@ const TeacherClaims = () => {
       });
 
       if (res.code === 200) {
-        message.success(decision === "APPROVE" ? "审核已通过：积分已正式入账 +1，实体卡已置为失效终态！" : "已驳回该申领单据，实体卡已作废");
+        message.success(
+          decision === "APPROVE"
+            ? "审核已通过：积分已正式入账 +1，实体卡已置为失效终态！"
+            : "已驳回该申领单据，实体卡已作废"
+        );
         fetchClaims(filterStatus);
       } else {
         message.error(res.message || "审核操作失败");
       }
     } catch (err) {
-      message.error(err.message || "操作失败");
+      if (!err.handled) message.error(err.message || "操作失败");
     } finally {
       setActionLoading(false);
     }
@@ -66,9 +70,7 @@ const TeacherClaims = () => {
       render: (_, r) => (
         <div>
           <span style={{ fontWeight: 600, color: "#1e3a8a" }}>{r.student_name}</span>
-          <div style={{ fontSize: 12, color: "#64748b" }}>
-            {r.grade ? `${r.grade}年级${r.class_no}班` : "学生"}
-          </div>
+          <div style={{ fontSize: 12, color: "#64748b" }}>{r.grade ? `${r.grade}年级${r.class_no}班` : "学生"}</div>
         </div>
       )
     },
@@ -95,7 +97,7 @@ const TeacherClaims = () => {
       title: "扫码提交时间",
       dataIndex: "claim_time",
       key: "claim_time",
-      render: (t) => t ? new Date(t).toLocaleString("zh-CN") : "--"
+      render: (t) => (t ? new Date(t).toLocaleString("zh-CN") : "--")
     },
     {
       title: "状态",
@@ -142,12 +144,7 @@ const TeacherClaims = () => {
               okText="确认驳回"
               cancelText="取消"
             >
-              <Button
-                danger
-                size="small"
-                icon={<CloseCircleOutlined />}
-                loading={actionLoading}
-              >
+              <Button danger size="small" icon={<CloseCircleOutlined />} loading={actionLoading}>
                 驳回作废
               </Button>
             </Popconfirm>
@@ -162,11 +159,7 @@ const TeacherClaims = () => {
       title="学生实体卡扫码申领审核工作台 (B模式核心事务审核)"
       extra={
         <Space>
-          <Radio.Group
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            buttonStyle="solid"
-          >
+          <Radio.Group value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} buttonStyle="solid">
             <Radio.Button value="PENDING">待审单据</Radio.Button>
             <Radio.Button value="APPROVED">已通过</Radio.Button>
             <Radio.Button value="REJECTED">已驳回</Radio.Button>

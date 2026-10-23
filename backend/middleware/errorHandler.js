@@ -30,8 +30,13 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // 业务层直接 throw { code, message } 的情形（如班级越权校验），code 即 HTTP 状态码
+  if (typeof err.code === "number" && err.code >= 400 && err.code < 600 && err.message) {
+    return res.status(err.code).json({ code: err.code, message: err.message });
+  }
+
   // 数据库错误
-  if (err.code && err.code.startsWith("ER_")) {
+  if (typeof err.code === "string" && err.code.startsWith("ER_")) {
     return res.status(500).json({
       code: 500,
       message: "数据库操作失败"

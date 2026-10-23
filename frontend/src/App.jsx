@@ -1,6 +1,7 @@
 import { Suspense, lazy, useState, useEffect, useCallback } from "react";
 import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Spin, ConfigProvider } from "antd";
+import zhCN from "antd/locale/zh_CN";
 import token from "@/util/token";
 import { get } from "@/util/request";
 import { API_AUTH_ME } from "@/constant/urls";
@@ -39,7 +40,9 @@ const Forbidden = lazy(() => import("./app/forbidden"));
 const ServerError = lazy(() => import("./app/server-error"));
 
 const Loading = () => (
-  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f5f7f6" }}>
+  <div
+    style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f5f7f6" }}
+  >
     <Spin size="large" />
   </div>
 );
@@ -50,9 +53,7 @@ const Layout = ({ children }) => (
     <Sidebar />
     <div className="app-workspace">
       <Topbar />
-      <main className="app-content">
-        {children}
-      </main>
+      <main className="app-content">{children}</main>
       <p className="footer-note">六育 · 学生综合素质评价系统　 /　 记录成长的每一种可能</p>
     </div>
   </div>
@@ -122,6 +123,7 @@ function App() {
 
   return (
     <ConfigProvider
+      locale={zhCN}
       theme={{
         token: {
           colorPrimary: "#277460",
@@ -141,36 +143,159 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             {/* 登录页 */}
-            <Route
-              path="/login"
-              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />}
-            />
+            <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
 
             {/* 首页仪表盘 */}
-            <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+            <Route
+              path="/dashboard"
+              element={
+                <RequireAuth>
+                  <Dashboard />
+                </RequireAuth>
+              }
+            />
 
             {/* 学生端路由 */}
-            <Route path="/student/claim" element={<RequireAuth><StudentClaim /></RequireAuth>} />
-            <Route path="/student/ledger" element={<RequireAuth><StudentLedger /></RequireAuth>} />
-            <Route path="/student/honors" element={<RequireAuth><StudentHonors /></RequireAuth>} />
-            <Route path="/student/stories" element={<RequireAuth><StudentStories /></RequireAuth>} />
-            <Route path="/student/evaluation" element={<RequireAuth><StudentEvaluation /></RequireAuth>} />
-            <Route path="/student/report" element={<RequireAuth><StudentReport /></RequireAuth>} />
+            <Route
+              path="/student/claim"
+              element={
+                <RequireAuth>
+                  <StudentClaim />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/student/ledger"
+              element={
+                <RequireAuth>
+                  <StudentLedger />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/student/honors"
+              element={
+                <RequireAuth>
+                  <StudentHonors />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/student/stories"
+              element={
+                <RequireAuth>
+                  <StudentStories />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/student/evaluation"
+              element={
+                <RequireAuth>
+                  <StudentEvaluation />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/student/report"
+              element={
+                <RequireAuth>
+                  <StudentReport />
+                </RequireAuth>
+              }
+            />
 
             {/* 教师端路由 */}
-            <Route path="/teacher/claims" element={<RequireAuth><TeacherClaims /></RequireAuth>} />
-            <Route path="/teacher/direct-score" element={<RequireAuth><TeacherDirectScore /></RequireAuth>} />
-            <Route path="/teacher/honors" element={<RequireAuth><TeacherHonors /></RequireAuth>} />
-            <Route path="/teacher/stories" element={<RequireAuth><TeacherStories /></RequireAuth>} />
+            <Route
+              path="/teacher/claims"
+              element={
+                <RequireAuth>
+                  <TeacherClaims />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/teacher/direct-score"
+              element={
+                <RequireAuth>
+                  <TeacherDirectScore />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/teacher/honors"
+              element={
+                <RequireAuth>
+                  <TeacherHonors />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/teacher/stories"
+              element={
+                <RequireAuth>
+                  <TeacherStories />
+                </RequireAuth>
+              }
+            />
 
             {/* 管理员端路由 */}
-            <Route path="/admin/terms" element={<RequireAuth><AdminTerms /></RequireAuth>} />
-            <Route path="/admin/cards" element={<RequireAuth><AdminCards /></RequireAuth>} />
-            <Route path="/admin/categories" element={<RequireAuth><AdminCategories /></RequireAuth>} />
-            <Route path="/admin/import" element={<RequireAuth><AdminImport /></RequireAuth>} />
-            <Route path="/admin/rules" element={<RequireAuth><AdminRules /></RequireAuth>} />
-            <Route path="/admin/reports" element={<RequireAuth><AdminReports /></RequireAuth>} />
-            <Route path="/admin/audits" element={<RequireAuth><AdminAudits /></RequireAuth>} />
+            <Route
+              path="/admin/terms"
+              element={
+                <RequireAuth>
+                  <AdminTerms />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/cards"
+              element={
+                <RequireAuth>
+                  <AdminCards />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <RequireAuth>
+                  <AdminCategories />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/import"
+              element={
+                <RequireAuth>
+                  <AdminImport />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/rules"
+              element={
+                <RequireAuth>
+                  <AdminRules />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/reports"
+              element={
+                <RequireAuth>
+                  <AdminReports />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/audits"
+              element={
+                <RequireAuth>
+                  <AdminAudits />
+                </RequireAuth>
+              }
+            />
 
             {/* 兼容旧重定向 */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

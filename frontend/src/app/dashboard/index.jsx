@@ -179,7 +179,7 @@ const Dashboard = () => {
             </div>
             <div>
               <div className="stat-value">
-                {compData?.status === "COMPLETE" ? compData.calculation.comprehensive_score : "计算中"}
+                {compData?.status === "COMPLETE" ? compData.calculation.comprehensive_score : "待完善"}
               </div>
               <div className="stat-label">期末综合评定分 (80/15/5)</div>
             </div>

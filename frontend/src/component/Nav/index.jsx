@@ -40,7 +40,7 @@ const Topbar = () => {
   };
 
   const displayName = user?.real_name || user?.username || "演示用户";
-  const avatarLetter = displayName.slice(-2);
+  const avatarLetter = displayName.slice(0, 1);
 
   return (
     <header className="app-topbar">
@@ -56,17 +56,11 @@ const Topbar = () => {
         <span className="term-tag-label">2026—2027 学年　第一学期</span>
 
         <Tooltip title="系统通知">
-          <Button
-            type="text"
-            shape="circle"
-            icon={<BellOutlined style={{ fontSize: 16, color: "#6e8074" }} />}
-          />
+          <Button type="text" shape="circle" icon={<BellOutlined style={{ fontSize: 16, color: "#6e8074" }} />} />
         </Tooltip>
 
         <div className="user-identity-box">
-          <span className={`avatar-circle ${role}`}>
-            {avatarLetter}
-          </span>
+          <span className={`avatar-circle ${role}`}>{avatarLetter}</span>
           <div className="user-text-info">
             <div className="user-name-text">{displayName}</div>
             <div className="user-role-text">{roleNameMap[role] || role}</div>
@@ -92,9 +86,7 @@ const Topbar = () => {
         cancelText="取消"
         okButtonProps={{ danger: true }}
       >
-        <p style={{ color: "#64748b", margin: "12px 0 4px" }}>
-          退出后将清除本机会话凭据，需要重新验证身份登录。
-        </p>
+        <p style={{ color: "#64748b", margin: "12px 0 4px" }}>退出后将清除本机会话凭据，需要重新验证身份登录。</p>
       </Modal>
     </header>
   );

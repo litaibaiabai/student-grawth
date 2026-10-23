@@ -333,6 +333,7 @@ zip -q -r backend.zip backend sql \
        "*.log" \
        "backend/.git/*" \
        "backend/.DS_Store" \
+       "backend/uploads/*" \
        "sql/.DS_Store"
 
 if [ $? -ne 0 ]; then

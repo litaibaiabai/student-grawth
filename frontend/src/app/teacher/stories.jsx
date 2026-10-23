@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card, Table, Tag, Button, Space, message, Modal, Input,
-  InputNumber, Slider, Typography, Alert, Row, Col, Divider, Progress
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  message,
+  Modal,
+  Input,
+  InputNumber,
+  Slider,
+  Typography,
+  Alert,
+  Row,
+  Col,
+  Divider,
+  Progress
 } from "antd";
 import {
-  BookOutlined, EditOutlined, RobotOutlined, CheckCircleOutlined,
-  ReloadOutlined, ReadOutlined
+  BookOutlined,
+  EditOutlined,
+  RobotOutlined,
+  CheckCircleOutlined,
+  ReloadOutlined,
+  ReadOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -67,7 +85,7 @@ const TeacherStories = () => {
         message.error(res.message || "评阅提交失败");
       }
     } catch (err) {
-      message.error(err.message || "操作失败");
+      if (!err.handled) message.error(err.message || "操作失败");
     } finally {
       setSubmitting(false);
     }
@@ -109,12 +127,14 @@ const TeacherStories = () => {
       key: "ai",
       width: 160,
       render: (_, r) => (
-        <div style={{
-          background: "#f0fdf4",
-          border: "1px solid #bbf7d0",
-          borderRadius: 8,
-          padding: "6px 10px"
-        }}>
+        <div
+          style={{
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            borderRadius: 8,
+            padding: "6px 10px"
+          }}
+        >
           <Space orientation="horizontal" size={4}>
             <RobotOutlined style={{ color: "#16a34a" }} />
             <span style={{ fontSize: 12, color: "#166534", fontWeight: 600 }}>预评分: {r.ai_score ?? "--"}</span>
@@ -129,45 +149,37 @@ const TeacherStories = () => {
       title: "教师最终得分",
       key: "score",
       width: 130,
-      render: (_, r) => (
+      render: (_, r) =>
         r.teacher_score !== null ? (
-          <div style={{
-            background: "#eff6ff",
-            border: "1px solid #bfdbfe",
-            borderRadius: 8,
-            padding: "4px 10px",
-            textAlign: "center"
-          }}>
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#1d4ed8" }}>
-              {r.teacher_score}
-            </span>
+          <div
+            style={{
+              background: "#eff6ff",
+              border: "1px solid #bfdbfe",
+              borderRadius: 8,
+              padding: "4px 10px",
+              textAlign: "center"
+            }}
+          >
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#1d4ed8" }}>{r.teacher_score}</span>
             <span style={{ fontSize: 11, color: "#3b82f6" }}> / 100</span>
           </div>
         ) : (
           <Tag color="orange">待批阅打分</Tag>
         )
-      )
     },
     {
       title: "批阅状态",
       dataIndex: "status",
       key: "status",
       width: 110,
-      render: (st) => (
-        st === "REVIEWED" ? <Tag color="green">已核定归档</Tag> : <Tag color="gold">待教师终审</Tag>
-      )
+      render: (st) => (st === "REVIEWED" ? <Tag color="green">已核定归档</Tag> : <Tag color="gold">待教师终审</Tag>)
     },
     {
       title: "操作",
       key: "action",
       width: 120,
       render: (_, r) => (
-        <Button
-          type="primary"
-          size="small"
-          icon={<EditOutlined />}
-          onClick={() => handleOpenReview(r)}
-        >
+        <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => handleOpenReview(r)}>
           {r.teacher_score !== null ? "复核修订" : "批阅评分"}
         </Button>
       )
@@ -177,33 +189,40 @@ const TeacherStories = () => {
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto" }}>
       {/* 顶栏 */}
-      <div style={{
-        background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
-        borderRadius: 16,
-        padding: "24px 32px",
-        color: "#fff",
-        marginBottom: 24,
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-      }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+          borderRadius: 16,
+          padding: "24px 32px",
+          color: "#fff",
+          marginBottom: 24,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+        }}
+      >
         <Row justify="space-between" align="middle">
           <Col>
-            <Tag color="#38bdf8" style={{ fontWeight: 600, padding: "2px 8px" }}>主观心育成长篇章</Tag>
+            <Tag color="#38bdf8" style={{ fontWeight: 600, padding: "2px 8px" }}>
+              主观心育成长篇章
+            </Tag>
             <Title level={3} style={{ color: "#fff", margin: "8px 0 4px" }}>
               学生月度生活故事与自我反思评阅台
             </Title>
             <Text style={{ color: "#cbd5e1", fontSize: 13 }}>
-              支持结合自然语言大模型（AI Pre-scoring）语义预评分建议，给出具有人文关怀的教师期终评语并核定终审分数（占综合评分5%权重）。
+              支持结合自然语言大模型（AI
+              Pre-scoring）语义预评分建议，给出具有人文关怀的教师期终评语并核定终审分数（占综合评分5%权重）。
             </Text>
           </Col>
           <Col>
-            <div style={{
-              background: "rgba(255,255,255,0.08)",
-              backdropFilter: "blur(8px)",
-              padding: "12px 20px",
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.15)",
-              textAlign: "center"
-            }}>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                backdropFilter: "blur(8px)",
+                padding: "12px 20px",
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,0.15)",
+                textAlign: "center"
+              }}
+            >
               <ReadOutlined style={{ fontSize: 24, color: "#38bdf8" }} />
               <div style={{ fontSize: 12, color: "#cbd5e1", marginTop: 4 }}>综合评分权重</div>
               <div style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>5 % 标准权</div>
@@ -215,7 +234,11 @@ const TeacherStories = () => {
       <Card
         title="学生故事提交列表"
         bordered={false}
-        extra={<Button icon={<ReloadOutlined />} onClick={fetchStories}>刷新列表</Button>}
+        extra={
+          <Button icon={<ReloadOutlined />} onClick={fetchStories}>
+            刷新列表
+          </Button>
+        }
         style={{ borderRadius: 16, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}
       >
         <Table
@@ -248,51 +271,54 @@ const TeacherStories = () => {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <Space>
                 <Tag color="blue">{selectedStory.month_key} 故事</Tag>
-                <Text strong style={{ fontSize: 16 }}>{selectedStory.title}</Text>
+                <Text strong style={{ fontSize: 16 }}>
+                  {selectedStory.title}
+                </Text>
               </Space>
-              <Text type="secondary">
-                作者：{selectedStory.student_name || `学号:${selectedStory.student_id}`}
-              </Text>
+              <Text type="secondary">作者：{selectedStory.student_name || `学号:${selectedStory.student_id}`}</Text>
             </div>
 
-            <div style={{
-              background: "#f8fafc",
-              padding: 16,
-              borderRadius: 8,
-              border: "1px solid #e2e8f0",
-              maxHeight: 220,
-              overflowY: "auto",
-              marginBottom: 16,
-              lineHeight: 1.8,
-              fontSize: 14,
-              color: "#334155"
-            }}>
+            <div
+              style={{
+                background: "#f8fafc",
+                padding: 16,
+                borderRadius: 8,
+                border: "1px solid #e2e8f0",
+                maxHeight: 220,
+                overflowY: "auto",
+                marginBottom: 16,
+                lineHeight: 1.8,
+                fontSize: 14,
+                color: "#334155"
+              }}
+            >
               {selectedStory.content}
             </div>
 
             {/* AI 辅助评分卡片 */}
-            <div style={{
-              background: "#f0fdf4",
-              border: "1px solid #bbf7d0",
-              borderRadius: 8,
-              padding: 12,
-              marginBottom: 16
-            }}>
+            <div
+              style={{
+                background: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 16
+              }}
+            >
               <Row align="middle" justify="space-between">
                 <Col>
                   <Space>
                     <RobotOutlined style={{ color: "#16a34a", fontSize: 16 }} />
-                    <Text strong style={{ color: "#166534" }}>AI 智能语言模型预评分建议：</Text>
+                    <Text strong style={{ color: "#166534" }}>
+                      AI 智能语言模型预评分建议：
+                    </Text>
                     <Tag color="green" style={{ fontSize: 13, fontWeight: 700 }}>
                       {selectedStory.ai_score ?? 85} 分
                     </Tag>
                   </Space>
                 </Col>
                 <Col>
-                  <Button
-                    size="small"
-                    onClick={() => setTeacherScore(selectedStory.ai_score ?? 85)}
-                  >
+                  <Button size="small" onClick={() => setTeacherScore(selectedStory.ai_score ?? 85)}>
                     采纳 AI 建议分
                   </Button>
                 </Col>
@@ -325,7 +351,9 @@ const TeacherStories = () => {
             </div>
 
             <div>
-              <Text strong style={{ display: "block", marginBottom: 6 }}>教师人文寄语与评语：</Text>
+              <Text strong style={{ display: "block", marginBottom: 6 }}>
+                教师人文寄语与评语：
+              </Text>
               <TextArea
                 rows={3}
                 value={teacherComment}

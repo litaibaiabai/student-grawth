@@ -8,22 +8,28 @@ const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 const MONTHS = [
-  { key: "09", label: "9 月", status: "已评分", tagType: "green" },
-  { key: "10", label: "10 月", status: "写作中", tagType: "gold" },
-  { key: "11", label: "11 月", status: "未开始", tagType: "default" },
-  { key: "12", label: "12 月", status: "未开始", tagType: "default" },
-  { key: "01", label: "1 月", status: "未开始", tagType: "default" }
+  { key: "09", label: "9 月" },
+  { key: "10", label: "10 月" },
+  { key: "11", label: "11 月" },
+  { key: "12", label: "12 月" },
+  { key: "01", label: "1 月" }
 ];
+
+const monthKeyOf = (m) => (m === "01" ? "2027-01" : `2026-${m}`);
+
+const STATUS_TAG = {
+  REVIEWED: { text: "已评分", color: "green" },
+  SUBMITTED: { text: "已提交", color: "blue" },
+  DRAFT: { text: "写作中", color: "gold" }
+};
 
 const StudentStories = () => {
   const [selectedMonth, setSelectedMonth] = useState("10");
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [title, setTitle] = useState("一张属于我们的小小自然笔记");
-  const [content, setContent] = useState(
-    "这个月，我们班开展了一次校园观察活动。\n\n我和小组同学一起寻找秋天的变化，记录落叶的颜色，也观察种植角里的小生命。刚开始我总是急着说出自己的发现，后来才明白，认真听同伴分享，也是一种收获。\n\n我们把每个人的观察画在一张大纸上，完成了一份属于我们的小小自然笔记。我最开心的不是得到了表扬，而是发现大家一起合作，真的能把事情做得更好。\n\n下个月，我想继续记录身边的变化，也想学会更有耐心地听别人说话。"
-  );
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [aiFeedback, setAiFeedback] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -33,18 +39,21 @@ const StudentStories = () => {
       const res = await get(urls.API_STORIES);
       if (res.code === 200 && res.data) {
         setStories(res.data);
-        const thisMonthStory = res.data.find(s => s.month_key === `2026-${selectedMonth}`);
-        if (thisMonthStory) {
-          setTitle(thisMonthStory.title || "");
-          setContent(thisMonthStory.content || "");
-          setIsSubmitted(thisMonthStory.status === "REVIEWED" || thisMonthStory.status === "SUBMITTED");
-          if (thisMonthStory.ai_score) {
-            setAiFeedback({
-              score: thisMonthStory.ai_score,
-              suggestion: "文稿情感真实，体现了观察、责任与合作意识。"
-            });
-          }
+        const thisMonthStory = res.data.find((s) => s.month_key === monthKeyOf(selectedMonth));
+        // 标题与正文同存于 text_content：第一行为标题
+        const text = thisMonthStory?.text_content || "";
+        const nl = text.indexOf("\n");
+        setTitle(nl >= 0 ? text.slice(0, nl) : "");
+        setContent(nl >= 0 ? text.slice(nl + 1) : text);
+        setIsSubmitted(thisMonthStory?.status === "REVIEWED" || thisMonthStory?.status === "SUBMITTED");
+        let ai = null;
+        try {
+          const raw = thisMonthStory?.llm_suggestion;
+          ai = typeof raw === "string" ? JSON.parse(raw) : raw;
+        } catch {
+          ai = null;
         }
+        setAiFeedback(ai?.score ? { score: ai.score, suggestion: ai.suggestion } : null);
       }
     } catch {
       // 容错
@@ -66,19 +75,19 @@ const StudentStories = () => {
     setSubmitting(true);
     try {
       const res = await post(urls.API_SUBMIT_STORY, {
-        month_key: `2026-${selectedMonth}`,
+        month_key: monthKeyOf(selectedMonth),
         title: title.trim(),
-        content: content.trim(),
+        content: `${title.trim()}\n${content.trim()}`,
         is_draft: isDraft
       });
 
       if (res.code === 200) {
         message.success(isDraft ? "草稿保存成功！" : "生活故事已正式提交！等待教师终审");
         if (!isDraft) setIsSubmitted(true);
-        if (res.data?.ai_score) {
+        if (res.data?.aiScore) {
           setAiFeedback({
-            score: res.data.ai_score,
-            suggestion: res.data.ai_suggestion || "文稿情感真挚，展现了敏锐的观察力与团队合作精神。"
+            score: res.data.aiScore,
+            suggestion: res.data.aiSuggestion
           });
         }
         fetchStories();
@@ -86,7 +95,7 @@ const StudentStories = () => {
         message.error(res.message || "提交失败");
       }
     } catch (err) {
-      message.error(err.message || "操作失败");
+      if (!err.handled) message.error(err.message || "操作失败");
     } finally {
       setSubmitting(false);
     }
@@ -96,15 +105,13 @@ const StudentStories = () => {
     <div>
       {/* 标题 */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+        <div
+          style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+        >
           MONTHLY GROWTH STORIES
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-          月度故事
-        </h1>
-        <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-          把一个真实的瞬间，写成属于自己的成长故事。
-        </p>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>月度故事</h1>
+        <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>把一个真实的瞬间，写成属于自己的成长故事。</p>
       </div>
 
       {/* 月份横向时间条 */}
@@ -129,7 +136,13 @@ const StudentStories = () => {
               <div style={{ fontSize: 15, fontWeight: 600, color: isActive ? "#277460" : "#25332d", marginBottom: 4 }}>
                 {m.label}
               </div>
-              <Tag color={m.tagType}>{m.status}</Tag>
+              <Tag
+                color={
+                  (STATUS_TAG[stories.find((s) => s.month_key === monthKeyOf(m.key))?.status] || {}).color || "default"
+                }
+              >
+                {(STATUS_TAG[stories.find((s) => s.month_key === monthKeyOf(m.key))?.status] || {}).text || "未开始"}
+              </Tag>
             </button>
           );
         })}
@@ -140,7 +153,7 @@ const StudentStories = () => {
           <Card
             title={
               <Space>
-                <Tag color="green">10月28日截止</Tag>
+                <Tag color="green">{MONTHS.find((m) => m.key === selectedMonth)?.label}故事</Tag>
                 <Tag color={isSubmitted ? "blue" : "default"}>{isSubmitted ? "已提交" : "草稿状态"}</Tag>
               </Space>
             }
@@ -180,15 +193,17 @@ const StudentStories = () => {
               }}
             />
 
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderTop: "1px solid #f0f4f1",
-              paddingTop: 16,
-              fontSize: 12,
-              color: "#9ca89f"
-            }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderTop: "1px solid #f0f4f1",
+                paddingTop: 16,
+                fontSize: 12,
+                color: "#9ca89f"
+              }}
+            >
               <span>{isSubmitted ? "已提交，等待教师人工终审打分" : "草稿保存在系统云端"}</span>
               <span>{content.length} 字</span>
             </div>
@@ -200,11 +215,7 @@ const StudentStories = () => {
                 </Tag>
               ) : (
                 <Space>
-                  <Button
-                    icon={<SaveOutlined />}
-                    onClick={() => handleSubmit(true)}
-                    loading={submitting}
-                  >
+                  <Button icon={<SaveOutlined />} onClick={() => handleSubmit(true)} loading={submitting}>
                     保存草稿
                   </Button>
                   <Button
@@ -225,13 +236,15 @@ const StudentStories = () => {
             </div>
 
             {aiFeedback && (
-              <div style={{
-                marginTop: 20,
-                background: "#f0fdf4",
-                border: "1px solid #bbf7d0",
-                borderRadius: 8,
-                padding: 16
-              }}>
+              <div
+                style={{
+                  marginTop: 20,
+                  background: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                  borderRadius: 8,
+                  padding: 16
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#166534", fontWeight: 600 }}>
                   <RobotOutlined style={{ color: "#16a34a" }} />
                   <span>AI 智能语义预评参考 (建议分: {aiFeedback.score} 分)</span>
@@ -251,20 +264,28 @@ const StudentStories = () => {
             bordered={false}
             style={{ borderRadius: 12, border: "1px solid #e6ebe7", marginBottom: 20 }}
           >
-            <div style={{
-              background: "#f6f8f5",
-              borderRadius: 8,
-              padding: "16px 20px",
-              lineHeight: 1.8,
-              color: "#4e6252",
-              fontSize: 13
-            }}>
+            <div
+              style={{
+                background: "#f6f8f5",
+                borderRadius: 8,
+                padding: "16px 20px",
+                lineHeight: 1.8,
+                color: "#4e6252",
+                fontSize: 13
+              }}
+            >
               "不必写一件了不起的大事。一次合作、一份坚持、一个小小的生活发现，都可以成为你最动人的成长印记。"
             </div>
             <div style={{ fontSize: 13, color: "#56685c", lineHeight: 2.2, marginTop: 16 }}>
-              <div><strong>① 发生了什么？</strong> 写一个具体的场景或瞬间</div>
-              <div><strong>② 你做了什么？</strong> 记录真实的行动与内心独白</div>
-              <div><strong>③ 你有什么收获？</strong> 发现自己细微却坚定的改变</div>
+              <div>
+                <strong>① 发生了什么？</strong> 写一个具体的场景或瞬间
+              </div>
+              <div>
+                <strong>② 你做了什么？</strong> 记录真实的行动与内心独白
+              </div>
+              <div>
+                <strong>③ 你有什么收获？</strong> 发现自己细微却坚定的改变
+              </div>
             </div>
           </Card>
         </Col>

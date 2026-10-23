@@ -4,71 +4,19 @@ import { QrcodeOutlined, CheckCircleOutlined, InfoCircleOutlined, SafetyCertific
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
 
-const DEMO_TOKEN = "DEMO-CARD-OCT-2026-TOKEN-1";
+const DIM_NAMES = { D: "德育", Z: "智育", T: "体育", M: "美育", L: "劳育", G: "故事" };
 
-const DEMO_PRESETS = {
-  UNUSED: {
-    serial_no: 101,
-    teacher_name: "张老师",
-    dimension_name: "德育",
-    dimension_code: "D",
-    category_name: "主动帮助同学",
-    month_key: "2026-10",
-    valid_until: "2026-10-31 23:59",
-    status: "UNUSED",
-    statusLabel: "可领取"
-  },
-  PENDING: {
-    serial_no: 102,
-    teacher_name: "张老师",
-    dimension_name: "智育",
-    dimension_code: "Z",
-    category_name: "认真完成课堂任务",
-    month_key: "2026-10",
-    valid_until: "2026-11-03 23:59 (宽限期)",
-    status: "PENDING",
-    statusLabel: "他人申领中"
-  },
-  USED: {
-    serial_no: 103,
-    teacher_name: "陈老师",
-    dimension_name: "德育",
-    dimension_code: "D",
-    category_name: "文明礼貌问候",
-    month_key: "2026-10",
-    valid_until: "2026-10-31 23:59",
-    status: "USED",
-    statusLabel: "已使用"
-  },
-  EXPIRED: {
-    serial_no: 88,
-    teacher_name: "周老师",
-    dimension_name: "劳育",
-    dimension_code: "L",
-    category_name: "主动参与班级劳动",
-    month_key: "2026-09",
-    valid_until: "2026-09-30 23:59",
-    status: "EXPIRED",
-    statusLabel: "已过期"
-  },
-  VOID: {
-    serial_no: 99,
-    teacher_name: "李老师",
-    dimension_name: "体育",
-    dimension_code: "T",
-    category_name: "积极参与体育活动",
-    month_key: "2026-10",
-    valid_until: "2026-10-31 23:59",
-    status: "VOID",
-    statusLabel: "已作废"
-  }
+// 卡片当月有效，月末失效
+const monthEnd = (monthKey) => {
+  const [y, m] = String(monthKey).split("-").map(Number);
+  if (!y || !m) return "--";
+  return `${monthKey}-${new Date(y, m, 0).getDate()} 23:59`;
 };
 
 const StudentClaimCard = () => {
-  const [tokenInput, setTokenInput] = useState(DEMO_TOKEN);
-  const [selectedDemoKey, setSelectedDemoKey] = useState("UNUSED");
+  const [tokenInput, setTokenInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [previewData, setPreviewData] = useState(DEMO_PRESETS.UNUSED);
+  const [previewData, setPreviewData] = useState(null);
   const [claimSuccess, setClaimSuccess] = useState(null);
 
   // 1. 扫描/输入令牌获取只读预览
@@ -83,15 +31,16 @@ const StudentClaimCard = () => {
     try {
       const res = await get(urls.API_CARD_PREVIEW, { token: tokenToQuery });
       if (res.code === 200 && res.data) {
+        const code = res.data.categoryCode || "";
         setPreviewData({
-          serial_no: res.data.serialNo || res.data.serial_no || 101,
-          teacher_name: res.data.teacherName || res.data.teacher_name || "任课教师",
-          dimension_name: res.data.dimensionName || "六育标准指标",
-          dimension_code: res.data.categoryCode ? res.data.categoryCode.charAt(0) : "D",
-          category_name: res.data.categoryName || res.data.category_name || "成长表现",
-          month_key: res.data.monthKey || res.data.month_key || "2026-10",
-          valid_until: "2026-10-31 23:59",
-          status: res.data.status || "UNUSED",
+          serial_no: res.data.serialNo,
+          teacher_name: res.data.teacherName || "任课教师",
+          dimension_name: DIM_NAMES[code.charAt(0)] || "六育指标",
+          dimension_code: code.charAt(0),
+          category_name: res.data.categoryName || "成长表现",
+          month_key: res.data.monthKey,
+          valid_until: monthEnd(res.data.monthKey),
+          status: res.data.status,
           statusLabel: res.data.status === "UNUSED" ? "可领取" : res.data.status
         });
         message.success("卡片信息已读取成功");
@@ -99,23 +48,10 @@ const StudentClaimCard = () => {
         message.error(res.message || "未能识别该卡片信息");
       }
     } catch (err) {
-      // 若后端卡片未在数据库找到，保持当前演示卡展示并提示
-      message.info("已切换为演示预览卡片模式");
+      setPreviewData(null);
+      if (!err.handled) message.error(err.message || "读取卡片失败");
     } finally {
       setLoading(false);
-    }
-  };
-
-  // 切换演示状态芯片
-  const handleSelectDemo = (key) => {
-    setSelectedDemoKey(key);
-    setClaimSuccess(null);
-    if (key === "UNUSED") {
-      setTokenInput(DEMO_TOKEN);
-      setPreviewData(DEMO_PRESETS.UNUSED);
-    } else {
-      setPreviewData(DEMO_PRESETS[key]);
-      setTokenInput(`DEMO-${key}-${Date.now().toString().slice(-4)}`);
     }
   };
 
@@ -147,7 +83,7 @@ const StudentClaimCard = () => {
       }
     } catch (err) {
       // 演示兜底
-      message.error(err.message || "申领提交失败");
+      if (!err.handled) message.error(err.message || "申领提交失败");
     } finally {
       setLoading(false);
     }
@@ -164,15 +100,13 @@ const StudentClaimCard = () => {
     <div style={{ maxWidth: 880, margin: "0 auto" }}>
       {/* 标题 */}
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+        <div
+          style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+        >
           PHYSICAL REWARD CARD CLAIM
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-          扫卡领取
-        </h1>
-        <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-          先看看卡片上的成长记录，确认后交给老师审核。
-        </p>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>扫卡领取</h1>
+        <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>先看看卡片上的成长记录，确认后交给老师审核。</p>
       </div>
 
       <Row gutter={24}>
@@ -212,37 +146,6 @@ const StudentClaimCard = () => {
               </Space.Compact>
             </div>
 
-            {/* 原型状态演示切换标签 */}
-            <div style={{ marginBottom: 16 }}>
-              <span style={{ fontSize: 12, color: "#8d9c90", marginRight: 8 }}>原型状态展示:</span>
-              <Space size={6} wrap>
-                {[
-                  ["UNUSED", "可领取"],
-                  ["PENDING", "他人申领中"],
-                  ["USED", "已使用"],
-                  ["EXPIRED", "已过期"],
-                  ["VOID", "已作废"]
-                ].map(([k, l]) => (
-                  <Tag.CheckableTag
-                    key={k}
-                    checked={selectedDemoKey === k}
-                    onChange={() => handleSelectDemo(k)}
-                    style={{
-                      borderRadius: 12,
-                      padding: "2px 10px",
-                      fontSize: 12,
-                      cursor: "pointer",
-                      border: selectedDemoKey === k ? "1px solid #277460" : "1px solid #e2e8e3",
-                      background: selectedDemoKey === k ? "#eef6f2" : "#fdfefe",
-                      color: selectedDemoKey === k ? "#277460" : "#5a6e60"
-                    }}
-                  >
-                    {l}
-                  </Tag.CheckableTag>
-                ))}
-              </Space>
-            </div>
-
             {previewData ? (
               <div>
                 {/* 仿真实体卡卡面 */}
@@ -253,29 +156,39 @@ const StudentClaimCard = () => {
                   <Tag color="green" style={{ fontWeight: 600 }}>
                     {previewData.dimension_name || "德育"} · {previewData.dimension_code || "D"}
                   </Tag>
-                  <div className="scan-category">
-                    {previewData.category_name}
-                  </div>
+                  <div className="scan-category">{previewData.category_name}</div>
                   <div className="reward">
                     +1<small>过程积分</small>
                   </div>
-                  <p style={{ fontSize: 12, color: "#7b8a80", margin: "6px 0 16px" }}>
-                    谢谢你让善意与成长发生。
-                  </p>
+                  <p style={{ fontSize: 12, color: "#7b8a80", margin: "6px 0 16px" }}>谢谢你让善意与成长发生。</p>
                   <div style={{ borderTop: "1px dashed #dbe5dc", margin: "16px 0" }} />
 
                   <div style={{ textAlign: "left", fontSize: 12, color: "#55675b", lineHeight: 2 }}>
-                    <div><strong>流水编号</strong>：No.{previewData.serial_no}</div>
-                    <div><strong>归属教师</strong>：{previewData.teacher_name || "任课教师"}</div>
-                    <div><strong>生效月份</strong>：{previewData.month_key}</div>
-                    <div><strong>有效期至</strong>：{previewData.valid_until}</div>
+                    <div>
+                      <strong>流水编号</strong>：No.{previewData.serial_no}
+                    </div>
+                    <div>
+                      <strong>归属教师</strong>：{previewData.teacher_name || "任课教师"}
+                    </div>
+                    <div>
+                      <strong>生效月份</strong>：{previewData.month_key}
+                    </div>
+                    <div>
+                      <strong>有效期至</strong>：{previewData.valid_until}
+                    </div>
                     <div>
                       <strong>卡片状态</strong>：
-                      <Tag color={
-                        previewData.status === "UNUSED" ? "success" :
-                        previewData.status === "PENDING" ? "warning" :
-                        previewData.status === "USED" ? "default" : "error"
-                      }>
+                      <Tag
+                        color={
+                          previewData.status === "UNUSED"
+                            ? "success"
+                            : previewData.status === "PENDING"
+                              ? "warning"
+                              : previewData.status === "USED"
+                                ? "default"
+                                : "error"
+                        }
+                      >
                         {previewData.statusLabel || previewData.status}
                       </Tag>
                     </div>
@@ -321,13 +234,15 @@ const StudentClaimCard = () => {
                 )}
               </div>
             ) : (
-              <div style={{
-                padding: "48px 0",
-                textAlign: "center",
-                color: "#9aa59d",
-                border: "2px dashed #e6ebe7",
-                borderRadius: 8
-              }}>
+              <div
+                style={{
+                  padding: "48px 0",
+                  textAlign: "center",
+                  color: "#9aa59d",
+                  border: "2px dashed #e6ebe7",
+                  borderRadius: 8
+                }}
+              >
                 <QrcodeOutlined style={{ fontSize: 36, color: "#b4c4b8", marginBottom: 12 }} />
                 <div>请在上方输入卡片 Token 或扫描实体卡背面的二维码</div>
               </div>
@@ -336,15 +251,17 @@ const StudentClaimCard = () => {
         </Col>
 
         <Col span={10}>
-          <Card
-            title="领取小提示"
-            bordered={false}
-            style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-          >
+          <Card title="领取小提示" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
             <div style={{ fontSize: 13, color: "#56685c", lineHeight: 2.2 }}>
-              <div><strong>① 先核对卡片</strong>：确认指标、归属教师和有效期</div>
-              <div><strong>② 确认申领</strong>：提交后锁定该卡，进入老师审核队列</div>
-              <div><strong>③ 审核通过，正式入账</strong>：通过后在积分账本查看 +1 分</div>
+              <div>
+                <strong>① 先核对卡片</strong>：确认指标、归属教师和有效期
+              </div>
+              <div>
+                <strong>② 确认申领</strong>：提交后锁定该卡，进入老师审核队列
+              </div>
+              <div>
+                <strong>③ 审核通过，正式入账</strong>：通过后在积分账本查看 +1 分
+              </div>
             </div>
 
             <Divider style={{ margin: "16px 0" }} />

@@ -265,7 +265,7 @@ async function getStudentScores(req, res, next) {
     // 2. 积分明细流水（时间倒序）
     const [records] = await conn.query(
       `SELECT
-         s.id, s.delta, s.source, s.remark, s.created_at,
+         s.id, s.delta, s.source, s.remark, s.created_at, s.dimension_code,
          s.original_id,
          c.category_name, c.category_code,
          u.real_name AS operator_name,
@@ -282,6 +282,10 @@ async function getStudentScores(req, res, next) {
     success(res, {
       studentId: Number(studentId),
       totalPoints,
+      summary: {
+        total_process_score: totalPoints,
+        dimensions: Object.fromEntries(Object.values(dimensionMap).map((d) => [d.code, d.score]))
+      },
       dimensions: Object.values(dimensionMap),
       records
     });

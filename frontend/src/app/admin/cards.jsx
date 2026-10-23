@@ -31,12 +31,14 @@ import {
   MinusCircleOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
+import token from "@/util/token";
 import * as urls from "@/constant/urls";
 
 const { Text, Title, Paragraph } = Typography;
 const { Option } = Select;
 
 const AdminCards = () => {
+  const isManager = token.loadUser()?.role === "manager";
   const [cards, setCards] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -98,9 +100,10 @@ const AdminCards = () => {
     setSubmitting(true);
     try {
       const res = await post(urls.API_GENERATE_CARDS, {
-        teacher_id: values.teacher_id,
-        category_code: values.category_code,
-        month_key: values.month_key,
+        termId,
+        teacherId: values.teacher_id,
+        categoryId: categories.find((c) => c.category_code === values.category_code)?.id,
+        monthKey: values.month_key,
         count: values.count
       });
 
@@ -115,7 +118,7 @@ const AdminCards = () => {
         message.error(res.message || "批量制卡失败");
       }
     } catch (err) {
-      message.error(err.message || "制卡失败");
+      if (!err.handled) message.error(err.message || "制卡失败");
     } finally {
       setSubmitting(false);
     }
@@ -147,7 +150,7 @@ const AdminCards = () => {
         message.error(res.message || "配额设置失败");
       }
     } catch (err) {
-      message.error(err.message || "配额操作失败");
+      if (!err.handled) message.error(err.message || "配额操作失败");
     } finally {
       setSubmitting(false);
     }
@@ -207,11 +210,11 @@ const AdminCards = () => {
       key: "status",
       width: 120,
       render: (st) => {
-        if (st === "UNUSED") return <Tag color="blue">待使用 (UNUSED)</Tag>;
-        if (st === "CLAIMED") return <Tag color="gold">已扫待审 (CLAIMED)</Tag>;
-        if (st === "USED") return <Tag color="green">已核销 (USED)</Tag>;
-        if (st === "VOID") return <Tag color="red">已作废 (VOID)</Tag>;
-        if (st === "EXPIRED") return <Tag color="default">已过期 (EXPIRED)</Tag>;
+        if (st === "UNUSED") return <Tag color="blue">待使用</Tag>;
+        if (st === "CLAIMED" || st === "PENDING") return <Tag color="gold">已扫待审</Tag>;
+        if (st === "USED") return <Tag color="green">已核销</Tag>;
+        if (st === "VOID") return <Tag color="red">已作废</Tag>;
+        if (st === "EXPIRED") return <Tag color="default">已过期</Tag>;
         return <Tag>{st}</Tag>;
       }
     },
@@ -250,30 +253,32 @@ const AdminCards = () => {
             </Text>
           </Col>
           <Col>
-            <Space>
-              <Button
-                icon={<ClockCircleOutlined />}
-                onClick={triggerExpireTask}
-                style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "none" }}
-              >
-                触发超期扫描
-              </Button>
-              <Button type="default" onClick={() => setQuotaModalOpen(true)}>
-                配置教师月配额
-              </Button>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setGenerateModalOpen(true)}
-                style={{
-                  background: "#52c41a",
-                  borderColor: "#52c41a",
-                  fontWeight: 600
-                }}
-              >
-                批量制卡 (发卡)
-              </Button>
-            </Space>
+            {isManager && (
+              <Space>
+                <Button
+                  icon={<ClockCircleOutlined />}
+                  onClick={triggerExpireTask}
+                  style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "none" }}
+                >
+                  触发超期扫描
+                </Button>
+                <Button type="default" onClick={() => setQuotaModalOpen(true)}>
+                  配置教师月配额
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => setGenerateModalOpen(true)}
+                  style={{
+                    background: "#52c41a",
+                    borderColor: "#52c41a",
+                    fontWeight: 600
+                  }}
+                >
+                  批量制卡 (发卡)
+                </Button>
+              </Space>
+            )}
           </Col>
         </Row>
       </div>
@@ -335,7 +340,7 @@ const AdminCards = () => {
             <Select placeholder="选择领用卡片的任课教师">
               {teachers.map((t) => (
                 <Option key={t.id} value={t.id}>
-                  {t.real_name || t.username} ({t.classes ? JSON.stringify(t.classes) : "教师"})
+                  {t.real_name || t.username}
                 </Option>
               ))}
             </Select>
@@ -493,8 +498,8 @@ const AdminCards = () => {
               }}
             >
               <div>
-                <Tag color="green">No.{c.serial_no}</Tag>
-                <Text strong>{c.month_key} 激励卡</Text>
+                <Tag color="green">卡号 {c.serialNo}</Tag>
+                <Text strong>{c.monthKey} 激励卡</Text>
               </div>
               <Space>
                 <Text code copyable>

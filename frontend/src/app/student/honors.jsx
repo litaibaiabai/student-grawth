@@ -1,10 +1,71 @@
 import React, { useState, useEffect } from "react";
-import { Card, Table, Button, Modal, Form, Input, Select, DatePicker, Tag, message, Space, Alert, Typography } from "antd";
-import { TrophyOutlined, PlusOutlined, EditOutlined, FileImageOutlined } from "@ant-design/icons";
-import { get, post } from "@/util/request";
+import {
+  Card,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  Tag,
+  message,
+  Space,
+  Alert,
+  Typography,
+  Upload
+} from "antd";
+import { TrophyOutlined, PlusOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
+import { get, post, upload, openProtectedFile } from "@/util/request";
 import * as urls from "@/constant/urls";
 
 const { Text } = Typography;
+
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// 作为 Form.Item 的子控件，值为服务端返回的 fileRef
+const CertificateUpload = ({ value, onChange }) => {
+  const [preview, setPreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const beforeUpload = async (file) => {
+    if (!IMAGE_TYPES.includes(file.type)) {
+      message.error("仅支持 JPG、PNG、WebP 格式的图片");
+      return Upload.LIST_IGNORE;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      message.error("图片不能超过 5MB");
+      return Upload.LIST_IGNORE;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await upload(urls.API_UPLOAD_HONOR_CERT, formData);
+      onChange?.(res.data.fileRef);
+      setPreview(URL.createObjectURL(file));
+    } catch (err) {
+      if (!err.handled) message.error(err.message || "上传失败");
+    } finally {
+      setUploading(false);
+    }
+    return false;
+  };
+
+  return (
+    <Space direction="vertical">
+      <Upload accept=".jpg,.jpeg,.png,.webp" showUploadList={false} beforeUpload={beforeUpload}>
+        <Button icon={<UploadOutlined />} loading={uploading}>
+          {value ? "重新选择图片" : "选择证书图片"}
+        </Button>
+      </Upload>
+      <Text type="secondary" style={{ fontSize: 12 }}>
+        支持 JPG / PNG / WebP，不超过 5MB
+      </Text>
+      {preview && <img src={preview} alt="证书预览" style={{ maxWidth: "100%", maxHeight: 160, borderRadius: 8 }} />}
+    </Space>
+  );
+};
 
 const StudentHonors = () => {
   const [honors, setHonors] = useState([]);
@@ -53,7 +114,7 @@ const StudentHonors = () => {
         message.error(res.message || "提交失败");
       }
     } catch (err) {
-      message.error(err.message || "提交失败");
+      if (!err.handled) message.error(err.message || "提交失败");
     }
   };
 
@@ -73,7 +134,7 @@ const StudentHonors = () => {
         message.error(res.message || "重新提交失败");
       }
     } catch (err) {
-      message.error(err.message || "重新提交失败");
+      if (!err.handled) message.error(err.message || "重新提交失败");
     }
   };
 
@@ -108,7 +169,20 @@ const StudentHonors = () => {
       title: "材料版本",
       dataIndex: "material_version",
       key: "material_version",
-      render: (v) => <Tag>V{v}</Tag>
+      render: (v, r) => (
+        <Space>
+          <Tag>V{v}</Tag>
+          {r.certificate_url?.startsWith("honor/") && (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => openProtectedFile(urls.API_HONOR_CERT_FILE(r.certificate_url)).catch(() => {})}
+            >
+              查看证书
+            </Button>
+          )}
+        </Space>
+      )
     },
     {
       title: "审核状态",
@@ -196,27 +270,31 @@ const StudentHonors = () => {
           </Form.Item>
 
           <Form.Item name="awardLevel" label="奖项级别" initialValue="CITY" rules={[{ required: true }]}>
-            <Select options={[
-              { label: "省级赛事 (7~9分)", value: "PROVINCE" },
-              { label: "市级赛事 (4~6分)", value: "CITY" },
-              { label: "区/县级赛事 (1~3分)", value: "DISTRICT" }
-            ]} />
+            <Select
+              options={[
+                { label: "省级赛事 (7~9分)", value: "PROVINCE" },
+                { label: "市级赛事 (4~6分)", value: "CITY" },
+                { label: "区/县级赛事 (1~3分)", value: "DISTRICT" }
+              ]}
+            />
           </Form.Item>
 
           <Form.Item name="prizeLevel" label="获奖等次" initialValue="FIRST" rules={[{ required: true }]}>
-            <Select options={[
-              { label: "一等奖", value: "FIRST" },
-              { label: "二等奖", value: "SECOND" },
-              { label: "三等奖", value: "THIRD" }
-            ]} />
+            <Select
+              options={[
+                { label: "一等奖", value: "FIRST" },
+                { label: "二等奖", value: "SECOND" },
+                { label: "三等奖", value: "THIRD" }
+              ]}
+            />
           </Form.Item>
 
           <Form.Item name="awardDate" label="证书颁发日期">
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item name="certificateUrl" label="证书原图访问路径/标识" initialValue="/uploads/honor/cert_sample.png">
-            <Input prefix={<FileImageOutlined />} placeholder="证书扫描件图片URL" />
+          <Form.Item name="certificateUrl" label="证书图片（选填）">
+            <CertificateUpload />
           </Form.Item>
 
           <Form.Item name="description" label="成果简介或心得体会">
@@ -224,8 +302,12 @@ const StudentHonors = () => {
           </Form.Item>
 
           <div style={{ textAlign: "right" }}>
-            <Button onClick={() => setModalVisible(false)} style={{ marginRight: 8 }}>取消</Button>
-            <Button type="primary" htmlType="submit" style={{ background: "#7c3aed", borderColor: "#7c3aed" }}>确认申报</Button>
+            <Button onClick={() => setModalVisible(false)} style={{ marginRight: 8 }}>
+              取消
+            </Button>
+            <Button type="primary" htmlType="submit" style={{ background: "#7c3aed", borderColor: "#7c3aed" }}>
+              确认申报
+            </Button>
           </div>
         </Form>
       </Modal>
@@ -239,9 +321,18 @@ const StudentHonors = () => {
         destroyOnClose
       >
         <Form form={resubmitForm} layout="vertical" onFinish={handleResubmit}>
-          <Alert message={`退回原因：${currentHonor?.reject_reason || "材料需补充"}`} type="warning" showIcon style={{ marginBottom: 16 }} />
-          <Form.Item name="certificateUrl" label="更新后的证书图片路径" rules={[{ required: true, message: "请提供新证书文件路径" }]}>
-            <Input prefix={<FileImageOutlined />} placeholder="请输入新上传的清晰扫描件路径" />
+          <Alert
+            message={`退回原因：${currentHonor?.reject_reason || "材料需补充"}`}
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+          <Form.Item
+            name="certificateUrl"
+            label="更新后的证书图片"
+            rules={[{ required: true, message: "请上传新的证书图片" }]}
+          >
+            <CertificateUpload />
           </Form.Item>
           <Form.Item name="reason" label="修订原因说明" initialValue="根据退回意见重新上传盖章页">
             <Input />
@@ -250,8 +341,12 @@ const StudentHonors = () => {
             <Input.TextArea rows={3} />
           </Form.Item>
           <div style={{ textAlign: "right" }}>
-            <Button onClick={() => setResubmitModal(false)} style={{ marginRight: 8 }}>取消</Button>
-            <Button type="primary" htmlType="submit">重新提交审阅</Button>
+            <Button onClick={() => setResubmitModal(false)} style={{ marginRight: 8 }}>
+              取消
+            </Button>
+            <Button type="primary" htmlType="submit">
+              重新提交审阅
+            </Button>
           </div>
         </Form>
       </Modal>

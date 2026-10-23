@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card, Table, Tag, Button, Space, Typography,
-  Row, Col, Alert, Divider, message, Modal, Tabs, Form, Input, InputNumber
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Typography,
+  Row,
+  Col,
+  Alert,
+  Divider,
+  message,
+  Modal,
+  Tabs,
+  Form,
+  Input,
+  InputNumber
 } from "antd";
 import {
-  SafetyCertificateOutlined, ReloadOutlined, RollbackOutlined,
-  SearchOutlined, FileTextOutlined
+  SafetyCertificateOutlined,
+  ReloadOutlined,
+  RollbackOutlined,
+  SearchOutlined,
+  FileTextOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -55,7 +72,7 @@ const AdminAudits = () => {
         message.error(res.message || "冲销操作失败");
       }
     } catch (err) {
-      message.error(err.message || "冲销失败");
+      if (!err.handled) message.error(err.message || "冲销失败");
     } finally {
       setSubmitting(false);
     }
@@ -74,7 +91,7 @@ const AdminAudits = () => {
       dataIndex: "created_at",
       key: "created_at",
       width: 170,
-      render: (t) => t ? new Date(t).toLocaleString("zh-CN") : "--"
+      render: (t) => (t ? new Date(t).toLocaleString("zh-CN") : "--")
     },
     {
       title: "操作人",
@@ -93,14 +110,16 @@ const AdminAudits = () => {
       key: "action",
       width: 160,
       render: (act) => (
-        <span style={{
-          fontSize: 11,
-          fontWeight: 600,
-          background: "#f0f4ef",
-          color: "#277460",
-          padding: "3px 8px",
-          borderRadius: 4
-        }}>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            background: "#f0f4ef",
+            color: "#277460",
+            padding: "3px 8px",
+            borderRadius: 4
+          }}
+        >
           {act}
         </span>
       )
@@ -136,12 +155,12 @@ const AdminAudits = () => {
       {/* 标题 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+          <div
+            style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+          >
             AUDIT TRAIL & CONTROLLED CORRECTION
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-            审计与受控更正
-          </h1>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>审计与受控更正</h1>
           <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
             保留原始记录，以新增冲销流水进行受控纠错；关键操作完整留痕。
           </p>
@@ -170,11 +189,7 @@ const AdminAudits = () => {
         style={{ marginBottom: 20, borderRadius: 8 }}
       />
 
-      <Card
-        title="系统不可变审计流水"
-        bordered={false}
-        style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-      >
+      <Card title="系统不可变审计流水" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
         <Table
           dataSource={audits}
           columns={columns}
@@ -200,12 +215,7 @@ const AdminAudits = () => {
         okButtonProps={{ danger: true }}
         cancelText="取消"
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleExecuteReversal}
-          style={{ marginTop: 16 }}
-        >
+        <Form form={form} layout="vertical" onFinish={handleExecuteReversal} style={{ marginTop: 16 }}>
           <Form.Item
             name="original_score_id"
             label="原考评记录 ID (流水展示号)"

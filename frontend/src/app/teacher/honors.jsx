@@ -1,13 +1,31 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card, Table, Tag, Button, Space, message, Modal, Input,
-  Radio, Typography, Alert, Row, Col, Badge, Tooltip
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  message,
+  Modal,
+  Input,
+  Radio,
+  Typography,
+  Alert,
+  Row,
+  Col,
+  Badge,
+  Tooltip
 } from "antd";
 import {
-  TrophyOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  ReloadOutlined, HistoryOutlined, LinkOutlined, FileTextOutlined
+  TrophyOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ReloadOutlined,
+  HistoryOutlined,
+  LinkOutlined,
+  FileTextOutlined
 } from "@ant-design/icons";
-import { get, post } from "@/util/request";
+import { get, post, openProtectedFile } from "@/util/request";
 import * as urls from "@/constant/urls";
 
 const { Text, Title, Paragraph } = Typography;
@@ -70,13 +88,17 @@ const TeacherHonors = () => {
     try {
       const requestKey = `DECISION_HONOR_${selectedHonor.id}_${actionType}_${Date.now()}`;
       const res = await post(urls.API_REVIEW_HONOR(selectedHonor.id), {
-        decision: actionType,
-        reject_reason: rejectReason,
+        decision: actionType === "APPROVE" ? "APPROVED" : "REJECTED",
+        rejectReason: rejectReason,
         request_key: requestKey
       });
 
       if (res.code === 200) {
-        message.success(actionType === "APPROVE" ? "荣誉核验通过！荣誉积分已生成并纳入学期期末汇算" : "已驳回该申报单据，已通知学生修改重提");
+        message.success(
+          actionType === "APPROVE"
+            ? "荣誉核验通过！荣誉积分已生成并纳入学期期末汇算"
+            : "已驳回该申报单据，已通知学生修改重提"
+        );
         setSelectedHonor(null);
         setActionType(null);
         fetchHonors(filterStatus);
@@ -84,7 +106,7 @@ const TeacherHonors = () => {
         message.error(res.message || "审核提交失败");
       }
     } catch (err) {
-      message.error(err.message || "审核操作失败");
+      if (!err.handled) message.error(err.message || "审核操作失败");
     } finally {
       setSubmitting(false);
     }
@@ -105,9 +127,7 @@ const TeacherHonors = () => {
       render: (_, r) => (
         <div>
           <div style={{ fontWeight: 600, color: "#1e3a8a" }}>{r.student_name || `学号:${r.student_id}`}</div>
-          <div style={{ fontSize: 12, color: "#64748b" }}>
-            {r.grade ? `${r.grade}年级${r.class_no}班` : "在读学生"}
-          </div>
+          <div style={{ fontSize: 12, color: "#64748b" }}>{r.grade ? `${r.grade}年级${r.class_no}班` : "在读学生"}</div>
         </div>
       )
     },
@@ -139,13 +159,15 @@ const TeacherHonors = () => {
       key: "points",
       width: 150,
       render: (_, r) => (
-        <div style={{
-          background: "#ecfdf5",
-          border: "1px solid #a7f3d0",
-          borderRadius: 8,
-          padding: "6px 10px",
-          textAlign: "center"
-        }}>
+        <div
+          style={{
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            borderRadius: 8,
+            padding: "6px 10px",
+            textAlign: "center"
+          }}
+        >
           <div style={{ fontSize: 11, color: "#065f46" }}>系统生成权重分</div>
           <div style={{ fontSize: 18, fontWeight: 700, color: "#047857" }}>
             +{r.honor_points || "--"} <span style={{ fontSize: 12 }}>分</span>
@@ -157,30 +179,22 @@ const TeacherHonors = () => {
       title: "佐证附件",
       key: "material",
       width: 120,
-      render: (_, r) => {
-        let files = [];
-        try {
-          files = typeof r.attachments === "string" ? JSON.parse(r.attachments) : r.attachments || [];
-        } catch {
-          files = [];
-        }
-        return (
-          <Space>
-            {files.length > 0 ? (
-              <Button
-                type="link"
-                size="small"
-                icon={<LinkOutlined />}
-                onClick={() => window.open(files[0]?.url || "#", "_blank")}
-              >
-                查看证明 ({files.length})
-              </Button>
-            ) : (
-              <Text type="secondary">无附件</Text>
-            )}
-          </Space>
-        );
-      }
+      render: (_, r) => (
+        <Space>
+          {r.certificate_url?.startsWith("honor/") ? (
+            <Button
+              type="link"
+              size="small"
+              icon={<LinkOutlined />}
+              onClick={() => openProtectedFile(urls.API_HONOR_CERT_FILE(r.certificate_url)).catch(() => {})}
+            >
+              查看证书
+            </Button>
+          ) : (
+            <Text type="secondary">无附件</Text>
+          )}
+        </Space>
+      )
     },
     {
       title: "当前审核状态",
@@ -217,12 +231,7 @@ const TeacherHonors = () => {
             >
               核准
             </Button>
-            <Button
-              danger
-              size="small"
-              icon={<CloseCircleOutlined />}
-              onClick={() => handleOpenReview(r, "REJECT")}
-            >
+            <Button danger size="small" icon={<CloseCircleOutlined />} onClick={() => handleOpenReview(r, "REJECT")}>
               驳回
             </Button>
           </Space>
@@ -234,17 +243,21 @@ const TeacherHonors = () => {
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto" }}>
       {/* 顶栏卡片 */}
-      <div style={{
-        background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
-        borderRadius: 16,
-        padding: "24px 32px",
-        color: "#fff",
-        marginBottom: 24,
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-      }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+          borderRadius: 16,
+          padding: "24px 32px",
+          color: "#fff",
+          marginBottom: 24,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+        }}
+      >
         <Row justify="space-between" align="middle">
           <Col>
-            <Tag color="#818cf8" style={{ fontWeight: 600, padding: "2px 8px" }}>资质成果复核</Tag>
+            <Tag color="#818cf8" style={{ fontWeight: 600, padding: "2px 8px" }}>
+              资质成果复核
+            </Tag>
             <Title level={3} style={{ color: "#fff", margin: "8px 0 4px" }}>
               学生校外赛事与综合荣誉审阅工作台
             </Title>
@@ -253,14 +266,16 @@ const TeacherHonors = () => {
             </Text>
           </Col>
           <Col>
-            <div style={{
-              background: "rgba(255,255,255,0.08)",
-              backdropFilter: "blur(8px)",
-              padding: "12px 20px",
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.15)",
-              textAlign: "center"
-            }}>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                backdropFilter: "blur(8px)",
+                padding: "12px 20px",
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,0.15)",
+                textAlign: "center"
+              }}
+            >
               <TrophyOutlined style={{ fontSize: 24, color: "#fbbf24" }} />
               <div style={{ fontSize: 12, color: "#c7d2fe", marginTop: 4 }}>荣誉法定分值</div>
               <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>1 ~ 9 分/项</div>
@@ -274,11 +289,7 @@ const TeacherHonors = () => {
         bordered={false}
         extra={
           <Space>
-            <Radio.Group
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              buttonStyle="solid"
-            >
+            <Radio.Group value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} buttonStyle="solid">
               <Radio.Button value="PENDING">待我审核</Radio.Button>
               <Radio.Button value="APPROVED">已核准</Radio.Button>
               <Radio.Button value="REJECTED">已退回</Radio.Button>
@@ -315,7 +326,10 @@ const TeacherHonors = () => {
         }
         open={!!selectedHonor}
         onOk={submitDecision}
-        onCancel={() => { setSelectedHonor(null); setActionType(null); }}
+        onCancel={() => {
+          setSelectedHonor(null);
+          setActionType(null);
+        }}
         confirmLoading={submitting}
         okText={actionType === "APPROVE" ? "确认核准通过" : "确认驳回并退回学生"}
         okButtonProps={{
@@ -327,7 +341,15 @@ const TeacherHonors = () => {
       >
         {selectedHonor && (
           <div style={{ padding: "12px 0" }}>
-            <div style={{ background: "#f8fafc", padding: 16, borderRadius: 8, border: "1px solid #e2e8f0", marginBottom: 16 }}>
+            <div
+              style={{
+                background: "#f8fafc",
+                padding: 16,
+                borderRadius: 8,
+                border: "1px solid #e2e8f0",
+                marginBottom: 16
+              }}
+            >
               <div style={{ marginBottom: 6 }}>
                 <Text type="secondary">申报学生：</Text>
                 <Text strong>{selectedHonor.student_name || selectedHonor.student_id}</Text>
@@ -360,11 +382,7 @@ const TeacherHonors = () => {
                 />
               </div>
             ) : (
-              <Alert
-                type="success"
-                showIcon
-                message="核准后荣誉积分将直接纳入学期终期综合素质评分（封顶12分）。"
-              />
+              <Alert type="success" showIcon message="核准后荣誉积分将直接纳入学期终期综合素质评分（封顶12分）。" />
             )}
           </div>
         )}

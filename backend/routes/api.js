@@ -8,11 +8,17 @@ const { login, getMe } = require("../controllers/authController");
 const { getCurrentTerm, getTerms, saveTerm } = require("../controllers/termController");
 const { getCategories } = require("../controllers/categoryController");
 const {
-  setCardQuota, generateMonthCards, getCards, previewCard,
-  claimCard, getTeacherClaims, decideClaim
+  setCardQuota,
+  generateMonthCards,
+  getCards,
+  previewCard,
+  claimCard,
+  getTeacherClaims,
+  decideClaim
 } = require("../controllers/cardController");
 const { directScoreBatch, reverseScore, getStudentScores } = require("../controllers/scoreController");
 const { submitHonor, resubmitHonor, reviewHonor, getHonors } = require("../controllers/honorController");
+const { uploadHonorCertificate, uploadLimiter, getHonorCertificate } = require("../controllers/uploadController");
 const { submitStory, reviewStory, getStories } = require("../controllers/storyController");
 const { previewImport, commitImport } = require("../controllers/importController");
 const { getComprehensiveScore, getRules, saveRule } = require("../controllers/evaluationController");
@@ -55,6 +61,8 @@ router.post("/student/honors", requireAuth, requireRole("student"), submitHonor)
 router.post("/student/honors/:id/resubmit", requireAuth, requireRole("student"), resubmitHonor);
 router.post("/teacher/honors/:id/review", requireAuth, requireRole("teacher", "manager"), reviewHonor);
 router.get("/honors", requireAuth, getHonors);
+router.post("/uploads/honor-certificate", requireAuth, requireRole("student"), uploadLimiter, uploadHonorCertificate);
+router.get("/uploads/honor/:name", requireAuth, getHonorCertificate);
 
 // ---------------------- 月度故事 & AI 预评 ----------------------
 router.post("/student/stories", requireAuth, requireRole("student"), submitStory);
@@ -73,7 +81,7 @@ router.post("/admin/evaluation-rules", requireAuth, requireRole("manager"), save
 // ---------------------- 期末报告 & 导出 ----------------------
 router.post("/admin/reports/publish-batch", requireAuth, requireRole("manager"), publishBatch);
 router.get("/student/reports/current", requireAuth, getCurrentReport);
-router.get("/student/reports/:id/export-pdf", exportReportHtml);
+router.get("/student/reports/:id/export-pdf", requireAuth, exportReportHtml);
 
 // ---------------------- 定时任务触发 ----------------------
 router.post("/admin/tasks/trigger-card-expiration", requireAuth, requireRole("manager"), async (req, res) => {
@@ -82,13 +90,28 @@ router.post("/admin/tasks/trigger-card-expiration", requireAuth, requireRole("ma
 });
 
 // ---------------------- 辅助用户数据查询 ----------------------
-router.get("/users/students", requireAuth, async (req, res, next) => {
+router.get("/users/students", requireAuth, requireRole("teacher", "manager"), async (req, res, next) => {
   try {
     const schoolId = req.user?.schoolId || 1;
-    const [rows] = await pool.query(
-      "SELECT id, username, real_name, grade, class_no FROM users WHERE school_id = ? AND role = 'student' ORDER BY grade ASC, class_no ASC, id ASC",
-      [schoolId]
-    );
+    let sql = "SELECT id, username, real_name, grade, class_no FROM users WHERE school_id = ? AND role = 'student'";
+    const params = [schoolId];
+
+    // 教师仅可见任教班级的学生
+    if (req.user?.role === "teacher") {
+      let classes = req.user.classes;
+      if (typeof classes === "string") {
+        try {
+          classes = JSON.parse(classes);
+        } catch {
+          classes = [];
+        }
+      }
+      if (!Array.isArray(classes) || classes.length === 0) return success(res, []);
+      sql += ` AND (${classes.map(() => "(grade = ? AND class_no = ?)").join(" OR ")})`;
+      classes.forEach((c) => params.push(Number(c.grade), Number(c.class_no)));
+    }
+
+    const [rows] = await pool.query(`${sql} ORDER BY grade ASC, class_no ASC, id ASC`, params);
     success(res, rows);
   } catch (err) {
     next(err);

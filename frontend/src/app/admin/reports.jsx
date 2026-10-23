@@ -23,7 +23,7 @@ import {
   FileProtectOutlined,
   SafetyCertificateOutlined
 } from "@ant-design/icons";
-import { get, post } from "@/util/request";
+import { get, post, openReportHtml } from "@/util/request";
 import * as urls from "@/constant/urls";
 
 const { Title, Text, Paragraph } = Typography;
@@ -34,6 +34,7 @@ const AdminReports = () => {
   const [publishing, setPublishing] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
   const [publishResult, setPublishResult] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -41,6 +42,7 @@ const AdminReports = () => {
       const res = await get(urls.API_STUDENTS_LIST);
       if (res.code === 200) {
         setStudents(res.data || []);
+        setSelectedIds((res.data || []).map((s) => s.id));
       }
     } catch (err) {
       message.error("获取学生名单失败");
@@ -59,7 +61,7 @@ const AdminReports = () => {
       const termRes = await get(urls.API_CURRENT_TERM);
       const res = await post(urls.API_PUBLISH_REPORTS, {
         termId: termRes.data?.termId,
-        studentIds: students.map((s) => s.id)
+        studentIds: selectedIds
       });
 
       if (res.code === 200) {
@@ -69,7 +71,7 @@ const AdminReports = () => {
         message.error(res.message || "批量发布失败");
       }
     } catch (err) {
-      message.error(err.message || "发布操作失败");
+      if (!err.handled) message.error(err.message || "发布操作失败");
     } finally {
       setPublishing(false);
     }
@@ -90,60 +92,39 @@ const AdminReports = () => {
       )
     },
     {
-      title: "1. 六育齐全",
-      key: "c1",
-      width: 100,
-      render: () => <Tag color="green">✓ 齐全</Tag>
-    },
-    {
-      title: "2. 规则生效",
-      key: "c2",
-      width: 100,
-      render: () => <Tag color="green">✓ V1.0</Tag>
-    },
-    {
-      title: "3. 教师确认",
-      key: "c3",
-      width: 100,
-      render: () => <Tag color="green">✓ 已评语</Tag>
-    },
-    {
-      title: "4. 综合完成",
-      key: "c4",
-      width: 100,
-      render: () => <Tag color="green">✓ 已算出</Tag>
-    },
-    {
-      title: "5. 快照有效",
-      key: "c5",
-      width: 100,
-      render: () => <Tag color="green">✓ 校验通过</Tag>
-    },
-    {
-      title: "6. 学期可操作",
-      key: "c6",
-      width: 110,
-      render: () => <Tag color="green">✓ ACTIVE</Tag>
-    },
-    {
-      title: "门禁总检",
+      title: "门禁检查结果",
       key: "status",
-      width: 110,
-      render: () => <Tag color="cyan">满足条件</Tag>
+      render: (_, r) => {
+        const blocked = publishResult?.blocked?.find((b) => b.studentId === r.id);
+        if (blocked) {
+          return (
+            <>
+              <Tag color="red">受阻</Tag>
+              <span style={{ fontSize: 12, color: "#c45757" }}>{blocked.reason}</span>
+            </>
+          );
+        }
+        if (publishResult?.published?.some((p) => p.studentId === r.id)) return <Tag color="green">已发布</Tag>;
+        return <Tag>待检查（点击右上角按钮发布时自动校验）</Tag>;
+      }
     },
     {
       title: "操作",
       key: "action",
       width: 100,
-      render: (_, r) => (
-        <Button
-          type="link"
-          size="small"
-          onClick={() => window.open(`${urls.API_SERVER}/api/v1/student/reports/1/export-pdf`, "_blank")}
-        >
-          预览报告
-        </Button>
-      )
+      render: (_, r) => {
+        const reportId = publishResult?.published?.find((p) => p.studentId === r.id)?.reportId;
+        return (
+          <Button
+            type="link"
+            size="small"
+            disabled={!reportId}
+            onClick={() => openReportHtml(urls.API_REPORT_PDF(reportId)).catch(() => {})}
+          >
+            {reportId ? "预览报告" : "发布后可预览"}
+          </Button>
+        );
+      }
     }
   ];
 
@@ -165,6 +146,7 @@ const AdminReports = () => {
           icon={<SendOutlined />}
           onClick={handleBatchPublish}
           loading={publishing}
+          disabled={selectedIds.length === 0}
           style={{
             background: "#277460",
             borderColor: "#277460",
@@ -173,7 +155,7 @@ const AdminReports = () => {
             fontWeight: 600
           }}
         >
-          检查并批量发布可发布报告
+          检查并发布所选报告（{selectedIds.length} 人）
         </Button>
       </div>
 
@@ -213,6 +195,7 @@ const AdminReports = () => {
           dataSource={students}
           columns={columns}
           rowKey="id"
+          rowSelection={{ selectedRowKeys: selectedIds, onChange: setSelectedIds }}
           loading={loading}
           locale={{ emptyText: "暂无待发布学生名单" }}
         />

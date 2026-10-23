@@ -30,6 +30,8 @@ export const API_REVERSE_SCORE = BASE + "/admin/scores/reversal";
 
 // 荣誉奖项
 export const API_HONORS = BASE + "/honors";
+export const API_UPLOAD_HONOR_CERT = BASE + "/uploads/honor-certificate";
+export const API_HONOR_CERT_FILE = (fileRef) => `${BASE}/uploads/${fileRef}`;
 export const API_SUBMIT_HONOR = BASE + "/student/honors";
 export const API_RESUBMIT_HONOR = (id) => `${BASE}/student/honors/${id}/resubmit`;
 export const API_REVIEW_HONOR = (id) => `${BASE}/teacher/honors/${id}/review`;

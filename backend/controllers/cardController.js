@@ -78,7 +78,9 @@ async function generateMonthCards(req, res, next) {
     // 默认分配给首个教师
     let targetTeacherId = teacherId;
     if (!targetTeacherId) {
-      const [tRows] = await conn.query("SELECT id FROM users WHERE role = 'teacher' AND school_id = ? LIMIT 1", [schoolId]);
+      const [tRows] = await conn.query("SELECT id FROM users WHERE role = 'teacher' AND school_id = ? LIMIT 1", [
+        schoolId
+      ]);
       targetTeacherId = tRows.length > 0 ? tRows[0].id : 2;
     }
 
@@ -137,7 +139,8 @@ async function getCards(req, res, next) {
   try {
     conn = await pool.getConnection();
     const schoolId = req.user?.schoolId || 1;
-    const { monthKey, status, teacherId } = req.query;
+    const { monthKey, status } = req.query;
+    const teacherId = req.user?.role === "teacher" ? req.user.id || req.user.userId : req.query.teacherId;
 
     let sql = `
       SELECT c.id, c.teacher_id, c.month_key, c.serial_no, c.token_hash, c.status, c.created_at,
@@ -311,15 +314,19 @@ async function claimCard(req, res, next) {
 
     await conn.commit();
 
-    success(res, {
-      claimId: claimInsert.insertId,
-      cardId: card.id,
-      status: "PENDING",
-      cardStatus: "PENDING",
-      category: card.category_name,
-      pointsPending: 1,
-      pointsCredited: 0
-    }, "申领已提交，等待教师审核");
+    success(
+      res,
+      {
+        claimId: claimInsert.insertId,
+        cardId: card.id,
+        status: "PENDING",
+        cardStatus: "PENDING",
+        category: card.category_name,
+        pointsPending: 1,
+        pointsCredited: 0
+      },
+      "申领已提交，等待教师审核"
+    );
   } catch (err) {
     if (conn) await conn.rollback();
     if (String(err.code) === "ER_DUP_ENTRY") {
@@ -423,15 +430,17 @@ async function decideClaim(req, res, next) {
 
     if (decision === "APPROVE") {
       // 通过申领
-      await conn.query(
-        "UPDATE card_claim SET status = 'APPROVED', reviewer_id = ?, reviewed_at = ? WHERE id = ?",
-        [teacherId, now, claimId]
-      );
+      await conn.query("UPDATE card_claim SET status = 'APPROVED', reviewer_id = ?, reviewed_at = ? WHERE id = ?", [
+        teacherId,
+        now,
+        claimId
+      ]);
       // 卡片置为终态 USED，绑定 used_student_id
-      await conn.query(
-        "UPDATE reward_card SET status = 'USED', used_student_id = ?, used_at = ? WHERE id = ?",
-        [claim.student_id, now, claim.card_id]
-      );
+      await conn.query("UPDATE reward_card SET status = 'USED', used_student_id = ?, used_at = ? WHERE id = ?", [
+        claim.student_id,
+        now,
+        claim.card_id
+      ]);
 
       // 原子写入不可篡改积分流水 score_record (+1)
       const reqKey = requestKey || `DECISION_SCORE_${claimId}_${Date.now()}`;
@@ -440,7 +449,17 @@ async function decideClaim(req, res, next) {
           school_id, term_id, student_id, class_snapshot, dimension_code, category_id,
           source, delta, card_claim_id, operator_id, request_key
         ) VALUES (?, ?, ?, ?, ?, ?, 'B_CARD', 1, ?, ?, ?)`,
-        [schoolId, claim.term_id, claim.student_id, classSnapshot, dimCode, claim.category_id, claim.id, teacherId, reqKey]
+        [
+          schoolId,
+          claim.term_id,
+          claim.student_id,
+          classSnapshot,
+          dimCode,
+          claim.category_id,
+          claim.id,
+          teacherId,
+          reqKey
+        ]
       );
       scoreRecordId = scoreRes.insertId;
 
@@ -449,7 +468,14 @@ async function decideClaim(req, res, next) {
         `INSERT INTO operation_audit (
           school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
         ) VALUES (?, ?, ?, 'CARD_CLAIM', ?, 'CLAIM_APPROVE', ?, ?)`,
-        [schoolId, teacherId, req.user?.role || "teacher", claimId, reqKey || `REQ_CLAIM_${claimId}_${Date.now()}`, JSON.stringify({ scoreRecordId, delta: 1 })]
+        [
+          schoolId,
+          teacherId,
+          req.user?.role || "teacher",
+          claimId,
+          reqKey || `REQ_CLAIM_${claimId}_${Date.now()}`,
+          JSON.stringify({ scoreRecordId, delta: 1 })
+        ]
       );
     } else {
       // 驳回申领
@@ -465,20 +491,31 @@ async function decideClaim(req, res, next) {
         `INSERT INTO operation_audit (
           school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
         ) VALUES (?, ?, ?, 'CARD_CLAIM', ?, 'CLAIM_REJECT', ?, ?)`,
-        [schoolId, teacherId, req.user?.role || "teacher", claimId, `REQ_REJECT_${claimId}_${Date.now()}`, JSON.stringify({ status: "REJECTED", reason: rejectReason })]
+        [
+          schoolId,
+          teacherId,
+          req.user?.role || "teacher",
+          claimId,
+          `REQ_REJECT_${claimId}_${Date.now()}`,
+          JSON.stringify({ status: "REJECTED", reason: rejectReason })
+        ]
       );
     }
 
     await conn.commit();
 
-    success(res, {
-      claimId: Number(claimId),
-      claimStatus: decision === "APPROVE" ? "APPROVED" : "REJECTED",
-      cardStatus: decision === "APPROVE" ? "USED" : "VOID",
-      scoreRecordId,
-      delta: decision === "APPROVE" ? 1 : 0,
-      creditedAt: now.toISOString()
-    }, decision === "APPROVE" ? "审核通过，积分已正式入账，实体卡已置为失效终态" : "申领已驳回作废");
+    success(
+      res,
+      {
+        claimId: Number(claimId),
+        claimStatus: decision === "APPROVE" ? "APPROVED" : "REJECTED",
+        cardStatus: decision === "APPROVE" ? "USED" : "VOID",
+        scoreRecordId,
+        delta: decision === "APPROVE" ? 1 : 0,
+        creditedAt: now.toISOString()
+      },
+      decision === "APPROVE" ? "审核通过，积分已正式入账，实体卡已置为失效终态" : "申领已驳回作废"
+    );
   } catch (err) {
     if (conn) await conn.rollback();
     next(err);

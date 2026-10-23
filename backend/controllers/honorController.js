@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const { pool } = require("../db");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
+const { FILE_REF_RE } = require("./uploadController");
 
 /**
  * POST /api/v1/student/honors
@@ -13,11 +14,20 @@ const { success, fail } = require("../utils/response");
  */
 async function submitHonor(req, res, next) {
   const {
-    title, awardName, awardLevel = "CITY", prizeLevel = "FIRST",
-    awardDate, certificateUrl, description, requestKey
+    title,
+    awardName,
+    awardLevel = "CITY",
+    prizeLevel = "FIRST",
+    awardDate,
+    certificateUrl,
+    description,
+    requestKey
   } = req.body;
 
   const eventTitle = title || awardName;
+  if (certificateUrl && !FILE_REF_RE.test(certificateUrl)) {
+    return fail(res, ErrorCodes.VALIDATION_ERROR, "证书图片无效，请重新上传", 422);
+  }
   if (!eventTitle) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "请填写荣誉/赛事项目名称", 422);
   }
@@ -49,15 +59,24 @@ async function submitHonor(req, res, next) {
         status, award_date, material_version
       ) VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, 1)`,
       [
-        schoolId, studentId, termId, eventKey, eventTitle, lvl, prize,
+        schoolId,
+        studentId,
+        termId,
+        eventKey,
+        eventTitle,
+        lvl,
+        prize,
         awardDate || new Date().toISOString().slice(0, 10)
       ]
     );
     const honorId = resInsert.insertId;
 
     // 3. 写入材料版本留痕表 material_revision
-    const fileRef = certificateUrl || "/uploads/honor/mock_cert.png";
-    const contentHash = crypto.createHash("sha256").update(fileRef + (description || "")).digest("hex");
+    const fileRef = certificateUrl || null;
+    const contentHash = crypto
+      .createHash("sha256")
+      .update((fileRef || "") + (description || ""))
+      .digest("hex");
 
     await conn.query(
       `INSERT INTO material_revision (
@@ -69,11 +88,15 @@ async function submitHonor(req, res, next) {
     // 查询自动计算的荣誉积分 honor_points
     const [[honorRow]] = await conn.query("SELECT honor_points FROM honor_record WHERE id = ?", [honorId]);
 
-    success(res, {
-      id: honorId,
-      status: "PENDING",
-      honorPoints: Number(honorRow.honor_points)
-    }, "荣誉申报已提交，等待教师审阅");
+    success(
+      res,
+      {
+        id: honorId,
+        status: "PENDING",
+        honorPoints: Number(honorRow.honor_points)
+      },
+      "荣誉申报已提交，等待教师审阅"
+    );
   } catch (err) {
     if (String(err.code) === "ER_DUP_ENTRY") {
       return fail(res, ErrorCodes.CONFLICT, "该荣誉项目已在当前学期申报过，请勿重复提交", 409);
@@ -91,6 +114,9 @@ async function submitHonor(req, res, next) {
 async function resubmitHonor(req, res, next) {
   const honorId = req.params.id;
   const { certificateUrl, description, reason } = req.body;
+  if (certificateUrl && !FILE_REF_RE.test(certificateUrl)) {
+    return fail(res, ErrorCodes.VALIDATION_ERROR, "证书图片无效，请重新上传", 422);
+  }
   const studentId = req.user?.id || req.user?.userId;
   const schoolId = req.user?.schoolId || 1;
 
@@ -99,10 +125,10 @@ async function resubmitHonor(req, res, next) {
     conn = await pool.getConnection();
     await conn.beginTransaction();
 
-    const [rows] = await conn.query(
-      "SELECT * FROM honor_record WHERE id = ? AND student_id = ? FOR UPDATE",
-      [honorId, studentId]
-    );
+    const [rows] = await conn.query("SELECT * FROM honor_record WHERE id = ? AND student_id = ? FOR UPDATE", [
+      honorId,
+      studentId
+    ]);
 
     if (rows.length === 0) {
       await conn.rollback();
@@ -110,9 +136,24 @@ async function resubmitHonor(req, res, next) {
     }
 
     const prev = rows[0];
+    if (prev.status !== "REJECTED") {
+      await conn.rollback();
+      return fail(res, ErrorCodes.CONFLICT, "仅被退回的荣誉申报可补充材料重新提交", 409);
+    }
     const nextVersion = Number(prev.material_version) + 1;
-    const fileRef = certificateUrl || "/uploads/honor/resubmit_cert.png";
-    const contentHash = crypto.createHash("sha256").update(fileRef + (description || "")).digest("hex");
+    let fileRef = certificateUrl || null;
+    if (!fileRef) {
+      // 未重传证书时沿用上一版材料
+      const [[lastRev]] = await conn.query(
+        "SELECT file_ref FROM material_revision WHERE owner_type = 'HONOR' AND owner_id = ? AND version_no = ?",
+        [honorId, prev.material_version]
+      );
+      fileRef = lastRev?.file_ref || null;
+    }
+    const contentHash = crypto
+      .createHash("sha256")
+      .update((fileRef || "") + (description || ""))
+      .digest("hex");
 
     // 1. 写入新材料版本留痕
     await conn.query(
@@ -171,7 +212,7 @@ async function reviewHonor(req, res, next) {
       `UPDATE honor_record
        SET status = ?, reviewer_id = ?, reviewed_at = NOW(), reject_reason = ?
        WHERE id = ?`,
-      [decision, teacherId, decision === "REJECTED" ? (rejectReason || comment || "材料不符要求") : null, honorId]
+      [decision, teacherId, decision === "REJECTED" ? rejectReason || comment || "材料不符要求" : null, honorId]
     );
 
     // 写入审计
@@ -179,7 +220,14 @@ async function reviewHonor(req, res, next) {
       `INSERT INTO operation_audit (
         school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
       ) VALUES (?, ?, ?, 'HONOR_RECORD', ?, 'REVIEW_HONOR', ?, ?)`,
-      [schoolId, teacherId, req.user?.role || "teacher", honorId, `REQ_HONOR_REV_${honorId}_${Date.now()}`, JSON.stringify({ decision, honorPoints: prev.honor_points })]
+      [
+        schoolId,
+        teacherId,
+        req.user?.role || "teacher",
+        honorId,
+        `REQ_HONOR_REV_${honorId}_${Date.now()}`,
+        JSON.stringify({ decision, honorPoints: prev.honor_points })
+      ]
     );
 
     await conn.commit();

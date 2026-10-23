@@ -1,11 +1,30 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card, Table, Tag, Button, Space, message, Modal, Form,
-  Input, DatePicker, Switch, Typography, Alert, Row, Col, Badge
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  message,
+  Modal,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  Switch,
+  Typography,
+  Alert,
+  Row,
+  Col,
+  Badge
 } from "antd";
 import {
-  CalendarOutlined, PlusOutlined, ReloadOutlined, CheckCircleOutlined,
-  LockOutlined, SafetyCertificateOutlined
+  CalendarOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  CheckCircleOutlined,
+  LockOutlined,
+  SafetyCertificateOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -41,10 +60,11 @@ const AdminTerms = () => {
     setSubmitting(true);
     try {
       const payload = {
-        term_name: values.term_name,
-        start_date: values.date_range[0].format("YYYY-MM-DD"),
-        end_date: values.date_range[1].format("YYYY-MM-DD"),
-        is_current: values.is_current ? 1 : 0
+        academicYear: values.academic_year,
+        semester: values.semester,
+        startDate: values.date_range[0].format("YYYY-MM-DD"),
+        endDate: values.date_range[1].format("YYYY-MM-DD"),
+        isCurrent: !!values.is_current
       };
 
       const res = await post(urls.API_ADMIN_TERMS, payload);
@@ -57,7 +77,7 @@ const AdminTerms = () => {
         message.error(res.message || "创建学期失败");
       }
     } catch (err) {
-      message.error(err.message || "提交失败");
+      if (!err.handled) message.error(err.message || "提交失败");
     } finally {
       setSubmitting(false);
     }
@@ -75,11 +95,15 @@ const AdminTerms = () => {
       title: "学期名称",
       dataIndex: "term_name",
       key: "term_name",
-      render: (text, r) => (
+      render: (_, r) => (
         <Space>
-          <span style={{ fontWeight: 600, fontSize: 14 }}>{text}</span>
+          <span style={{ fontWeight: 600, fontSize: 14 }}>
+            {r.academic_year}学年第{r.semester === 1 ? "一" : "二"}学期
+          </span>
           {r.is_current === 1 && (
-            <Tag color="cyan" style={{ fontWeight: 600 }}>当前活跃学期</Tag>
+            <Tag color="cyan" style={{ fontWeight: 600 }}>
+              当前活跃学期
+            </Tag>
           )}
         </Space>
       )
@@ -97,19 +121,15 @@ const AdminTerms = () => {
     },
     {
       title: "运行状态",
-      dataIndex: "status",
+      dataIndex: "active",
       key: "status",
-      render: (st) => {
-        if (st === "ACTIVE") return <Tag color="green">运行中 (ACTIVE)</Tag>;
-        if (st === "ARCHIVED") return <Tag color="default">已结课封存 (ARCHIVED)</Tag>;
-        return <Tag color="blue">{st}</Tag>;
-      }
+      render: (active) => (active ? <Tag color="green">运行中</Tag> : <Tag color="default">已停用</Tag>)
     },
     {
       title: "评价数据封存状态",
       key: "lock",
-      render: (_, r) => (
-        r.status === "ARCHIVED" ? (
+      render: (_, r) =>
+        !r.active ? (
           <Space>
             <LockOutlined style={{ color: "#ef4444" }} />
             <Text type="secondary">只读封存</Text>
@@ -120,24 +140,27 @@ const AdminTerms = () => {
             <Text style={{ color: "#059669" }}>可录入/评价中</Text>
           </Space>
         )
-      )
     }
   ];
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto" }}>
       {/* 顶栏卡片 */}
-      <div style={{
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-        borderRadius: 16,
-        padding: "24px 32px",
-        color: "#fff",
-        marginBottom: 24,
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-      }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          borderRadius: 16,
+          padding: "24px 32px",
+          color: "#fff",
+          marginBottom: 24,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+        }}
+      >
         <Row justify="space-between" align="middle">
           <Col>
-            <Tag color="#38bdf8" style={{ fontWeight: 600, padding: "2px 8px" }}>校级系统底座配置</Tag>
+            <Tag color="#38bdf8" style={{ fontWeight: 600, padding: "2px 8px" }}>
+              校级系统底座配置
+            </Tag>
             <Title level={3} style={{ color: "#fff", margin: "8px 0 4px" }}>
               学期与校历周期管理
             </Title>
@@ -167,7 +190,11 @@ const AdminTerms = () => {
       <Card
         title="学校学期档案列表"
         bordered={false}
-        extra={<Button icon={<ReloadOutlined />} onClick={fetchTerms}>刷新</Button>}
+        extra={
+          <Button icon={<ReloadOutlined />} onClick={fetchTerms}>
+            刷新
+          </Button>
+        }
         style={{ borderRadius: 16, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}
       >
         <Alert
@@ -178,12 +205,7 @@ const AdminTerms = () => {
           style={{ marginBottom: 16, borderRadius: 8 }}
         />
 
-        <Table
-          dataSource={terms}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-        />
+        <Table dataSource={terms} columns={columns} rowKey="id" loading={loading} />
       </Card>
 
       {/* 创建学期对话框 */}
@@ -209,11 +231,24 @@ const AdminTerms = () => {
           style={{ marginTop: 16 }}
         >
           <Form.Item
-            name="term_name"
-            label="学期完整名称"
-            rules={[{ required: true, message: "请输入学期名称，如 2026-2027学年第一学期" }]}
+            name="academic_year"
+            label="学年"
+            rules={[
+              { required: true, message: "请输入学年，如 2026-2027" },
+              { pattern: /^\d{4}-\d{4}$/, message: "格式应为 2026-2027" }
+            ]}
           >
-            <Input placeholder="例如：2026-2027学年第一学期" />
+            <Input placeholder="例如：2026-2027" />
+          </Form.Item>
+
+          <Form.Item name="semester" label="学期" rules={[{ required: true, message: "请选择学期" }]}>
+            <Select
+              placeholder="选择学期"
+              options={[
+                { value: 1, label: "第一学期（上学期）" },
+                { value: 2, label: "第二学期（下学期）" }
+              ]}
+            />
           </Form.Item>
 
           <Form.Item
@@ -224,11 +259,7 @@ const AdminTerms = () => {
             <DatePicker.RangePicker style={{ width: "100%" }} />
           </Form.Item>
 
-          <Form.Item
-            name="is_current"
-            label="设为当前活跃学期"
-            valuePropName="checked"
-          >
+          <Form.Item name="is_current" label="设为当前活跃学期" valuePropName="checked">
             <Switch />
           </Form.Item>
         </Form>

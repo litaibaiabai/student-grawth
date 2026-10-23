@@ -90,7 +90,7 @@ const AdminImport = () => {
         message.error(res.message || "比对失败");
       }
     } catch (err) {
-      message.error(err.message || "预览请求失败");
+      if (!err.handled) message.error(err.message || "预览请求失败");
     } finally {
       setPreviewing(false);
     }
@@ -118,7 +118,7 @@ const AdminImport = () => {
         message.error(res.message || "提交入库失败");
       }
     } catch (err) {
-      message.error(err.message || "提交失败");
+      if (!err.handled) message.error(err.message || "提交失败");
     } finally {
       setCommitting(false);
     }

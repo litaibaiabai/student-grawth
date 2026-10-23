@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card, Form, Input, InputNumber, Button, Tag, Space, Typography,
-  Row, Col, Alert, Divider, message, Modal, Statistic
+  Card,
+  Form,
+  Input,
+  InputNumber,
+  Button,
+  Tag,
+  Space,
+  Typography,
+  Row,
+  Col,
+  Alert,
+  Divider,
+  message,
+  Modal,
+  Statistic
 } from "antd";
 import {
-  ExperimentOutlined, CheckCircleOutlined, ReloadOutlined,
-  ThunderboltOutlined, HistoryOutlined
+  ExperimentOutlined,
+  CheckCircleOutlined,
+  ReloadOutlined,
+  ThunderboltOutlined,
+  HistoryOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -24,13 +40,17 @@ const AdminRules = () => {
       const res = await get(urls.API_EVALUATION_RULES);
       if (res.code === 200) {
         setRules(res.data || []);
-        const active = res.data?.find(r => (r.rule_status || r.status) === "ACTIVE") || res.data?.[0];
+        const active = res.data?.find((r) => (r.rule_status || r.status) === "ACTIVE") || res.data?.[0];
         if (active) {
-          const b = active.six_weight !== undefined ? Math.round(Number(active.six_weight) * 100) : (active.weight_b ?? 80);
-          const p = active.process_weight !== undefined ? Math.round(Number(active.process_weight) * 100) : (active.weight_p ?? 15);
-          const h = active.honor_weight !== undefined ? Math.round(Number(active.honor_weight) * 100) : (active.weight_h ?? 5);
+          const b =
+            active.six_weight !== undefined ? Math.round(Number(active.six_weight) * 100) : (active.weight_b ?? 80);
+          const p =
+            active.process_weight !== undefined
+              ? Math.round(Number(active.process_weight) * 100)
+              : (active.weight_p ?? 15);
+          const h =
+            active.honor_weight !== undefined ? Math.round(Number(active.honor_weight) * 100) : (active.weight_h ?? 5);
           form.setFieldsValue({
-            rule_name: active.rule_version || active.rule_name || "V1.0 (试行)",
             weight_b: b,
             weight_p: p,
             weight_h: h,
@@ -77,7 +97,7 @@ const AdminRules = () => {
         message.error(res.message || "规则更新失败");
       }
     } catch (err) {
-      message.error(err.message || "提交失败");
+      if (!err.handled) message.error(err.message || "提交失败");
     } finally {
       setSubmitting(false);
     }
@@ -88,15 +108,13 @@ const AdminRules = () => {
       {/* 标题 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+          <div
+            style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+          >
             EVALUATION RULE ENGINE
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-            综合核算与规则引擎
-          </h1>
-          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-            先完善六育正式成绩，再按已生效规则计算综合结果。
-          </p>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>综合核算与规则引擎</h1>
+          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>先完善六育正式成绩，再按已生效规则计算综合结果。</p>
         </div>
         <Button icon={<ReloadOutlined />} onClick={fetchRules}>
           刷新
@@ -135,40 +153,39 @@ const AdminRules = () => {
               <Form.Item
                 name="rule_name"
                 label="规则版本标识"
-                rules={[{ required: true, message: "请输入规则名称" }]}
+                rules={[
+                  { required: true, message: "请输入新的规则版本标识" },
+                  { max: 30, message: "不超过 30 个字符" }
+                ]}
               >
-                <Input placeholder="例如：2026-2027学年第1学期标准规则 V1.0" />
+                <Input placeholder="填写一个新的版本名，如 V2026-1（不能与已有版本重名）" />
               </Form.Item>
 
-              <div style={{ background: "#f8faf9", padding: "16px 20px", borderRadius: 8, border: "1px solid #e8eee9", marginBottom: 16 }}>
+              <div
+                style={{
+                  background: "#f8faf9",
+                  padding: "16px 20px",
+                  borderRadius: 8,
+                  border: "1px solid #e8eee9",
+                  marginBottom: 16
+                }}
+              >
                 <div style={{ fontWeight: 600, color: "#1e382b", marginBottom: 12, fontSize: 13 }}>
                   综合评价公式权重三元组 (权重之和必须等于 100%)
                 </div>
                 <Row gutter={16}>
                   <Col span={8}>
-                    <Form.Item
-                      name="weight_b"
-                      label="B · 六育底表均分 (%)"
-                      rules={[{ required: true }]}
-                    >
+                    <Form.Item name="weight_b" label="B · 六育底表均分 (%)" rules={[{ required: true }]}>
                       <InputNumber min={0} max={100} style={{ width: "100%" }} />
                     </Form.Item>
                   </Col>
                   <Col span={8}>
-                    <Form.Item
-                      name="weight_p"
-                      label="P · 过程标准分 (%)"
-                      rules={[{ required: true }]}
-                    >
+                    <Form.Item name="weight_p" label="P · 过程标准分 (%)" rules={[{ required: true }]}>
                       <InputNumber min={0} max={100} style={{ width: "100%" }} />
                     </Form.Item>
                   </Col>
                   <Col span={8}>
-                    <Form.Item
-                      name="weight_h"
-                      label="H · 荣誉标准分 (%)"
-                      rules={[{ required: true }]}
-                    >
+                    <Form.Item name="weight_h" label="H · 荣誉标准分 (%)" rules={[{ required: true }]}>
                       <InputNumber min={0} max={100} style={{ width: "100%" }} />
                     </Form.Item>
                   </Col>
@@ -240,19 +257,23 @@ const AdminRules = () => {
             />
             <Divider style={{ margin: "16px 0" }} />
             <div style={{ fontSize: 13, color: "#56685c", lineHeight: 2 }}>
-              <div>📋 <strong>六育齐全率</strong>：1232 / 1260 (98%)</div>
-              <div>⚖️ <strong>当前生效版本</strong>：V1.0 · ACTIVE</div>
-              <div>⚠️ <strong>防缺项原则</strong>：缺任一维度显示待完善，不按 0 分计算</div>
+              <div>
+                📋 <strong>六育齐全率</strong>：1232 / 1260 (98%)
+              </div>
+              <div>
+                ⚖️ <strong>当前生效版本</strong>：V1.0 · ACTIVE
+              </div>
+              <div>
+                ⚠️ <strong>防缺项原则</strong>：缺任一维度显示待完善，不按 0 分计算
+              </div>
             </div>
           </Card>
 
-          <Card
-            title="规则变更审计留痕"
-            bordered={false}
-            style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-          >
+          <Card title="规则变更审计留痕" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
             <div style={{ fontSize: 12, color: "#748578", lineHeight: 1.8 }}>
-              <div>• <strong>2026-10-22</strong>：系统初始化 80/15/5 标准规则，阈值 20/12</div>
+              <div>
+                • <strong>2026-10-22</strong>：系统初始化 80/15/5 标准规则，阈值 20/12
+              </div>
               <div>• 任何新规则激活均触发全局不可变日志记录</div>
             </div>
           </Card>

@@ -236,6 +236,13 @@ async function getCurrentReport(req, res, next) {
  */
 async function exportReportHtml(req, res, next) {
   const reportId = req.params.id;
+  const esc = (v) =>
+    String(v ?? "").replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
+  const levelOf = (s) =>
+    s === undefined || s === null ? "--" : s >= 90 ? "优秀" : s >= 80 ? "良好" : s >= 60 ? "合格" : "待提升";
   let conn;
   try {
     conn = await pool.getConnection();
@@ -246,8 +253,8 @@ async function exportReportHtml(req, res, next) {
        FROM term_report r
        JOIN users u ON r.student_id = u.id
        JOIN academic_year a ON r.term_id = a.id
-       WHERE r.id = ? LIMIT 1`,
-      [reportId]
+       WHERE r.id = ? AND r.school_id = ? LIMIT 1`,
+      [reportId, req.user?.schoolId || 1]
     );
 
     if (rows.length === 0) {
@@ -255,9 +262,31 @@ async function exportReportHtml(req, res, next) {
     }
 
     const rep = rows[0];
+
+    // 学生仅能查看本人报告，教师仅能查看任教班级，管理员不限
+    const role = req.user?.role;
+    const uid = req.user?.id || req.user?.userId;
+    if (role === "student" && (Number(rep.student_id) !== Number(uid) || rep.status !== "PUBLISHED")) {
+      return res.status(403).send("无权查看该报告");
+    }
+    if (role === "teacher") {
+      let classes = req.user.classes;
+      if (typeof classes === "string") {
+        try {
+          classes = JSON.parse(classes);
+        } catch {
+          classes = [];
+        }
+      }
+      const ok =
+        Array.isArray(classes) &&
+        classes.some((c) => Number(c.grade) === Number(rep.grade) && Number(c.class_no) === Number(rep.class_no));
+      if (!ok) return res.status(403).send("无权查看该报告");
+    }
+
     const snapshot = typeof rep.snapshot_json === "string" ? JSON.parse(rep.snapshot_json) : rep.snapshot_json;
     const downloadTime = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
-    const watermarkText = `${rep.student_name} (${rep.username}) · 查验时间：${downloadTime}`;
+    const watermarkText = esc(`${rep.student_name} (${rep.username}) · 查验时间：${downloadTime}`);
     const securityHash = crypto
       .createHash("sha256")
       .update(`${rep.id}-${rep.student_id}-${rep.comprehensive_score}`)
@@ -271,7 +300,8 @@ async function exportReportHtml(req, res, next) {
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>${rep.student_name} - ${rep.academic_year}学年第${rep.semester}学期综合素质评价报告</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+  <title>${esc(rep.student_name)} - ${esc(rep.academic_year)}学年第${Number(rep.semester)}学期综合素质评价报告</title>
   <style>
     @page { size: A4 portrait; margin: 15mm; }
     body {
@@ -403,14 +433,14 @@ async function exportReportHtml(req, res, next) {
   <div class="report-card">
     <div class="header">
       <h1>中小学学生学期综合素质发展报告</h1>
-      <p>${rep.academic_year} 学年 第 ${rep.semester} 学期 · 官方正式版</p>
+      <p>${esc(rep.academic_year)} 学年 第 ${Number(rep.semester)} 学期 · 官方正式版</p>
     </div>
 
     <div class="info-bar">
-      <div><strong>姓名：</strong>${rep.student_name}</div>
-      <div><strong>学号：</strong>${rep.username}</div>
-      <div><strong>班级：</strong>${rep.grade ? `${rep.grade}年级${rep.class_no}班` : "未分配"}</div>
-      <div><strong>版本：</strong>第 ${rep.version} 版</div>
+      <div><strong>姓名：</strong>${esc(rep.student_name)}</div>
+      <div><strong>学号：</strong>${esc(rep.username)}</div>
+      <div><strong>班级：</strong>${rep.grade ? `${Number(rep.grade)}年级${Number(rep.class_no)}班` : "未分配"}</div>
+      <div><strong>版本：</strong>第 ${Number(rep.version)} 版</div>
     </div>
 
     <div class="score-summary">
@@ -419,11 +449,11 @@ async function exportReportHtml(req, res, next) {
         <div class="label">综合素质总分</div>
       </div>
       <div class="score-box">
-        <div class="num">${rep.comprehensive_grade}</div>
+        <div class="num">${esc(rep.comprehensive_grade)}</div>
         <div class="label">评定等级</div>
       </div>
       <div class="score-box">
-        <div class="num">${snapshot.evaluation?.process?.netPoints || 0}</div>
+        <div class="num">${Number(snapshot.evaluation?.process?.netPoints) || 0}</div>
         <div class="label">过程净积分</div>
       </div>
       <div class="score-box">
@@ -444,32 +474,39 @@ async function exportReportHtml(req, res, next) {
           </tr>
         </thead>
         <tbody>
-          <tr><td>德育</td><td>D</td><td>${snapshot.evaluation?.dimensions?.D ?? "--"} 分</td><td>良好</td></tr>
-          <tr><td>智育</td><td>Z</td><td>${snapshot.evaluation?.dimensions?.Z ?? "--"} 分</td><td>优秀</td></tr>
-          <tr><td>体育</td><td>T</td><td>${snapshot.evaluation?.dimensions?.T ?? "--"} 分</td><td>良好</td></tr>
-          <tr><td>美育</td><td>M</td><td>${snapshot.evaluation?.dimensions?.M ?? "--"} 分</td><td>合格</td></tr>
-          <tr><td>劳育</td><td>L</td><td>${snapshot.evaluation?.dimensions?.L ?? "--"} 分</td><td>优秀</td></tr>
-          <tr><td>故事</td><td>G</td><td>${snapshot.evaluation?.dimensions?.G ?? "--"} 分</td><td>优秀</td></tr>
+          ${[
+            ["德育", "D"],
+            ["智育", "Z"],
+            ["体育", "T"],
+            ["美育", "M"],
+            ["劳育", "L"],
+            ["故事", "G"]
+          ]
+            .map(([name, code]) => {
+              const v = snapshot.evaluation?.dimensions?.[code];
+              return `<tr><td>${name}</td><td>${code}</td><td>${v === undefined || v === null ? "--" : Number(v)} 分</td><td>${levelOf(v)}</td></tr>`;
+            })
+            .join("")}
         </tbody>
       </table>
     </div>
 
     <div class="section">
       <div class="section-title">班主任审定评语</div>
-      <div class="comment-box">${rep.teacher_comment || "暂无评语"}</div>
+      <div class="comment-box">${esc(rep.teacher_comment || "暂无评语")}</div>
     </div>
 
     <div class="section">
       <div class="section-title">学生学期自述与反思</div>
       <div class="comment-box" style="background:#f0fdf4; border-color:#dcfce7;">
-        ${rep.student_statement || "未填写自述"}
+        ${esc(rep.student_statement || "未填写自述")}
       </div>
     </div>
 
     <div class="section">
       <div class="section-title">家长寄语</div>
       <div class="comment-box" style="background:#fffbeb; border-color:#fef3c7;">
-        ${rep.family_message || "未填写家长寄语"}
+        ${esc(rep.family_message || "未填写家长寄语")}
       </div>
     </div>
 
