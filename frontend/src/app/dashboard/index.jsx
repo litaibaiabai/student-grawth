@@ -109,15 +109,19 @@ const Dashboard = () => {
         {/* 标题 */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: 1.5,
+                color: "#8d9c90",
+                fontWeight: 700,
+                textTransform: "uppercase"
+              }}
+            >
               MY LITTLE GROWTH
             </div>
-            <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-              成长首页
-            </h1>
-            <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-              {name}，今天的你，也在悄悄发芽。
-            </p>
+            <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>成长首页</h1>
+            <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>{name}，今天的你，也在悄悄发芽。</p>
           </div>
           <Button
             type="primary"
@@ -152,7 +156,9 @@ const Dashboard = () => {
               <CompassOutlined />
             </div>
             <div>
-              <div className="stat-value">{totalProcess} <small style={{ fontSize: 13 }}>分</small></div>
+              <div className="stat-value">
+                {totalProcess} <small style={{ fontSize: 13 }}>分</small>
+              </div>
               <div className="stat-label">学期累计过程净积分</div>
             </div>
           </div>
@@ -161,7 +167,9 @@ const Dashboard = () => {
               <TrophyOutlined />
             </div>
             <div>
-              <div className="stat-value">{compData?.calculation?.components?.H?.raw_value || 0} <small style={{ fontSize: 13 }}>分</small></div>
+              <div className="stat-value">
+                {compData?.calculation?.components?.H?.raw_value || 0} <small style={{ fontSize: 13 }}>分</small>
+              </div>
               <div className="stat-label">已认定荣誉分 (12分封顶)</div>
             </div>
           </div>
@@ -170,7 +178,9 @@ const Dashboard = () => {
               <BookOutlined />
             </div>
             <div>
-              <div className="stat-value">{compData?.status === "COMPLETE" ? compData.calculation.comprehensive_score : "计算中"}</div>
+              <div className="stat-value">
+                {compData?.status === "COMPLETE" ? compData.calculation.comprehensive_score : "计算中"}
+              </div>
               <div className="stat-label">期末综合评定分 (80/15/5)</div>
             </div>
           </div>
@@ -195,7 +205,11 @@ const Dashboard = () => {
             <Card
               title="最近成长足迹 (不可篡改过程账本)"
               bordered={false}
-              extra={<Button type="link" onClick={() => navigate("/student/ledger")}>查看完整账本 <RightOutlined /></Button>}
+              extra={
+                <Button type="link" onClick={() => navigate("/student/ledger")}>
+                  查看完整账本 <RightOutlined />
+                </Button>
+              }
               style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
             >
               <Table
@@ -209,7 +223,7 @@ const Dashboard = () => {
                     dataIndex: "created_at",
                     key: "created_at",
                     width: 140,
-                    render: (t) => t ? new Date(t).toLocaleDateString("zh-CN") : "--"
+                    render: (t) => (t ? new Date(t).toLocaleDateString("zh-CN") : "--")
                   },
                   {
                     title: "成长指标",
@@ -245,34 +259,38 @@ const Dashboard = () => {
               bordered={false}
               style={{ borderRadius: 12, border: "1px solid #e6ebe7", marginBottom: 20 }}
             >
-              <div style={{
-                background: "#f6f8f5",
-                borderRadius: 8,
-                padding: "16px 20px",
-                lineHeight: 1.8,
-                color: "#4e6252",
-                fontSize: 13
-              }}>
-                "{name}，这学期你总能主动发现身边的同学需要帮助，并耐心伸出援手。愿你带着这份<strong>善意与探索精神</strong>，向着更宽广的世界坚定生长。"
+              <div
+                style={{
+                  background: "#f6f8f5",
+                  borderRadius: 8,
+                  padding: "16px 20px",
+                  lineHeight: 1.8,
+                  color: "#4e6252",
+                  fontSize: 13
+                }}
+              >
+                "{name}，这学期你总能主动发现身边的同学需要帮助，并耐心伸出援手。愿你带着这份
+                <strong>善意与探索精神</strong>，向着更宽广的世界坚定生长。"
                 <div style={{ textAlign: "right", marginTop: 8, color: "#8a9b8e", fontSize: 11 }}>
                   — 班主任 · 陈老师
                 </div>
               </div>
             </Card>
 
-            <Card
-              title="成长快报与指引"
-              bordered={false}
-              style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12, color: "#6c7d71" }}>
+            <Card title="成长快报与指引" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                  fontSize: 12,
+                  color: "#6c7d71"
+                }}
+              >
                 <span>过程净分目标达成度 (20分封顶)</span>
                 <span style={{ fontWeight: 600, color: "#277460" }}>{Math.min(totalProcess, 20)} / 20 分</span>
               </div>
-              <Progress
-                percent={Math.min(100, Math.round((totalProcess / 20) * 100))}
-                strokeColor="#277460"
-              />
+              <Progress percent={Math.min(100, Math.round((totalProcess / 20) * 100))} strokeColor="#277460" />
               <div style={{ marginTop: 16 }}>
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <Button block onClick={() => navigate("/student/stories")}>
@@ -296,12 +314,18 @@ const Dashboard = () => {
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
-            <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: 1.5,
+                color: "#8d9c90",
+                fontWeight: 700,
+                textTransform: "uppercase"
+              }}
+            >
               TEACHER WORKBENCH
             </div>
-            <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-              教师工作台
-            </h1>
+            <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>教师工作台</h1>
             <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
               {name}老师，早上好。今天也有值得被看见的小小进步。
             </p>
@@ -337,65 +361,106 @@ const Dashboard = () => {
               <QrcodeOutlined />
             </div>
             <div>
-              <div className="stat-value">{claimsCount} <small style={{ fontSize: 13 }}>条</small></div>
+              <div className="stat-value">
+                {claimsCount} <small style={{ fontSize: 13 }}>条</small>
+              </div>
               <div className="stat-label">扫卡待审核单据</div>
             </div>
-            <Button type="link" onClick={() => navigate("/teacher/claims")}>去审核 <RightOutlined /></Button>
+            <Button type="link" onClick={() => navigate("/teacher/claims")}>
+              去审核 <RightOutlined />
+            </Button>
           </div>
           <div className="overview-item">
             <div className="soft-icon amber">
               <TrophyOutlined />
             </div>
             <div>
-              <div className="stat-value">{honorsCount} <small style={{ fontSize: 13 }}>条</small></div>
+              <div className="stat-value">
+                {honorsCount} <small style={{ fontSize: 13 }}>条</small>
+              </div>
               <div className="stat-label">荣誉申报待审阅</div>
             </div>
-            <Button type="link" onClick={() => navigate("/teacher/honors")}>去查验 <RightOutlined /></Button>
+            <Button type="link" onClick={() => navigate("/teacher/honors")}>
+              去查验 <RightOutlined />
+            </Button>
           </div>
           <div className="overview-item">
             <div className="soft-icon blue">
               <BookOutlined />
             </div>
             <div>
-              <div className="stat-value">5 <small style={{ fontSize: 13 }}>篇</small></div>
+              <div className="stat-value">
+                5 <small style={{ fontSize: 13 }}>篇</small>
+              </div>
               <div className="stat-label">生活故事待终审</div>
             </div>
-            <Button type="link" onClick={() => navigate("/teacher/stories")}>去评阅 <RightOutlined /></Button>
+            <Button type="link" onClick={() => navigate("/teacher/stories")}>
+              去评阅 <RightOutlined />
+            </Button>
           </div>
         </div>
 
         <Row gutter={24}>
           <Col span={14}>
-            <Card
-              title="待处理事项"
-              bordered={false}
-              style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-            >
+            <Card title="待处理事项" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #f0f4f1" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    borderBottom: "1px solid #f0f4f1"
+                  }}
+                >
                   <div>
-                    <div style={{ fontWeight: 600, color: "#25332d", fontSize: 13 }}>实体卡扫码审核 ({claimsCount} 项待办)</div>
-                    <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>学生已扫码提交，等待教师核准写入不可篡改账本 (+1分)</div>
+                    <div style={{ fontWeight: 600, color: "#25332d", fontSize: 13 }}>
+                      实体卡扫码审核 ({claimsCount} 项待办)
+                    </div>
+                    <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>
+                      学生已扫码提交，等待教师核准写入不可篡改账本 (+1分)
+                    </div>
                   </div>
-                  <Button type="primary" size="small" onClick={() => navigate("/teacher/claims")} style={{ background: "#277460", borderColor: "#277460" }}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => navigate("/teacher/claims")}
+                    style={{ background: "#277460", borderColor: "#277460" }}
+                  >
                     立即审核
                   </Button>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid #f0f4f1" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    borderBottom: "1px solid #f0f4f1"
+                  }}
+                >
                   <div>
-                    <div style={{ fontWeight: 600, color: "#25332d", fontSize: 13 }}>官方荣誉佐证复核 ({honorsCount} 项待办)</div>
-                    <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>查验市级/区级白名单赛事证书并核定荣誉点数 (1~9分)</div>
+                    <div style={{ fontWeight: 600, color: "#25332d", fontSize: 13 }}>
+                      官方荣誉佐证复核 ({honorsCount} 项待办)
+                    </div>
+                    <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>
+                      查验市级/区级白名单赛事证书并核定荣誉点数 (1~9分)
+                    </div>
                   </div>
                   <Button type="default" size="small" onClick={() => navigate("/teacher/honors")}>
                     审阅认定
                   </Button>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0" }}
+                >
                   <div>
                     <div style={{ fontWeight: 600, color: "#25332d", fontSize: 13 }}>月度成长故事终审</div>
-                    <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>结合 AI 语义预评分给出人文寄语与终审锁定分 (0-100)</div>
+                    <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>
+                      结合 AI 语义预评分给出人文寄语与终审锁定分 (0-100)
+                    </div>
                   </div>
                   <Button type="default" size="small" onClick={() => navigate("/teacher/stories")}>
                     评阅打分
@@ -412,27 +477,34 @@ const Dashboard = () => {
               style={{ borderRadius: 12, border: "1px solid #e6ebe7", marginBottom: 20 }}
             >
               <div style={{ fontSize: 12, color: "#56685c", lineHeight: 2 }}>
-                <div>🌿 <strong>第 8 教学周</strong>：日常考评与荣誉认定有序推进</div>
-                <div>📝 <strong>10月28日</strong>：月度生活故事提交截止</div>
-                <div>💳 <strong>10月31日</strong>：10月实体卡发放与使用截止</div>
-                <div>⚖️ <strong>11月03日</strong>：10月申领单宽限期终审截止</div>
+                <div>
+                  🌿 <strong>第 8 教学周</strong>：日常考评与荣誉认定有序推进
+                </div>
+                <div>
+                  📝 <strong>10月28日</strong>：月度生活故事提交截止
+                </div>
+                <div>
+                  💳 <strong>10月31日</strong>：10月实体卡发放与使用截止
+                </div>
+                <div>
+                  ⚖️ <strong>11月03日</strong>：10月申领单宽限期终审截止
+                </div>
               </div>
             </Card>
 
-            <Card
-              title="教育小记"
-              bordered={false}
-              style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-            >
-              <div style={{
-                background: "#f6f8f5",
-                borderRadius: 8,
-                padding: "16px 20px",
-                lineHeight: 1.8,
-                color: "#4e6252",
-                fontSize: 13
-              }}>
-                "教育的美好，藏在每一次<strong>耐心的倾听</strong>与及时的回应里。记录成长的点滴，是在孩子心底种下自信的种子。"
+            <Card title="教育小记" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
+              <div
+                style={{
+                  background: "#f6f8f5",
+                  borderRadius: 8,
+                  padding: "16px 20px",
+                  lineHeight: 1.8,
+                  color: "#4e6252",
+                  fontSize: 13
+                }}
+              >
+                "教育的美好，藏在每一次<strong>耐心的倾听</strong>
+                与及时的回应里。记录成长的点滴，是在孩子心底种下自信的种子。"
               </div>
             </Card>
           </Col>
@@ -446,15 +518,13 @@ const Dashboard = () => {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+          <div
+            style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+          >
             SCHOOL OVERVIEW
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-            管理概览
-          </h1>
-          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-            让流程有序推进，让每份成长记录准确抵达。
-          </p>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>管理概览</h1>
+          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>让流程有序推进，让每份成长记录准确抵达。</p>
         </div>
         <Button
           type="primary"
@@ -498,7 +568,9 @@ const Dashboard = () => {
             <div className="stat-value">6 / 6</div>
             <div className="stat-label">六育维度底表状态</div>
           </div>
-          <Button type="link" onClick={() => navigate("/admin/import")}>去导入 <RightOutlined /></Button>
+          <Button type="link" onClick={() => navigate("/admin/import")}>
+            去导入 <RightOutlined />
+          </Button>
         </div>
         <div className="overview-item">
           <div className="soft-icon blue">
@@ -508,17 +580,15 @@ const Dashboard = () => {
             <div className="stat-value">V1.0</div>
             <div className="stat-label">当前生效评分规则 (80/15/5)</div>
           </div>
-          <Button type="link" onClick={() => navigate("/admin/rules")}>调参 <RightOutlined /></Button>
+          <Button type="link" onClick={() => navigate("/admin/rules")}>
+            调参 <RightOutlined />
+          </Button>
         </div>
       </div>
 
       <Row gutter={24}>
         <Col span={14}>
-          <Card
-            title="本学期三阶段推进路径"
-            bordered={false}
-            style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-          >
+          <Card title="本学期三阶段推进路径" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
               <div style={{ padding: 16, background: "#f8faf9", borderRadius: 8, border: "1px solid #e8eee9" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#277460" }}>01 日常记录</div>
@@ -528,7 +598,9 @@ const Dashboard = () => {
 
               <div style={{ padding: 16, background: "#f8faf9", borderRadius: 8, border: "1px solid #e8eee9" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#277460" }}>02 成绩核算</div>
-                <div style={{ fontSize: 12, color: "#6e7e73", margin: "8px 0" }}>成绩导入对比 · 规则校验 · 缺项检查</div>
+                <div style={{ fontSize: 12, color: "#6e7e73", margin: "8px 0" }}>
+                  成绩导入对比 · 规则校验 · 缺项检查
+                </div>
                 <Button type="link" size="small" onClick={() => navigate("/admin/import")} style={{ padding: 0 }}>
                   进入核对
                 </Button>
@@ -546,16 +618,20 @@ const Dashboard = () => {
         </Col>
 
         <Col span={10}>
-          <Card
-            title="当前学期与校历档案"
-            bordered={false}
-            style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
-          >
+          <Card title="当前学期与校历档案" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
             <div style={{ fontSize: 13, color: "#3d4e42", lineHeight: 2 }}>
-              <div><strong>当前学年学期</strong>：2026—2027 · 第一学期</div>
-              <div><strong>校历教学周期</strong>：2026-09-01 ~ 2027-01-31</div>
-              <div><strong>业务运行状态</strong>：<Tag color="green">可操作 (ACTIVE)</Tag></div>
-              <div><strong>发卡宽限期</strong>：次月3日 23:59 截止</div>
+              <div>
+                <strong>当前学年学期</strong>：2026—2027 · 第一学期
+              </div>
+              <div>
+                <strong>校历教学周期</strong>：2026-09-01 ~ 2027-01-31
+              </div>
+              <div>
+                <strong>业务运行状态</strong>：<Tag color="green">可操作 (ACTIVE)</Tag>
+              </div>
+              <div>
+                <strong>发卡宽限期</strong>：次月3日 23:59 截止
+              </div>
             </div>
             <div style={{ marginTop: 16, textAlign: "right" }}>
               <Button onClick={() => navigate("/admin/terms")}>校历配置与归档</Button>

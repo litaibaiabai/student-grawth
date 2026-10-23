@@ -1,11 +1,28 @@
 import React, { useState } from "react";
 import {
-  Card, Tabs, Table, Tag, Button, Space, message, Input,
-  Row, Col, Typography, Alert, Divider, Statistic, Modal
+  Card,
+  Tabs,
+  Table,
+  Tag,
+  Button,
+  Space,
+  message,
+  Input,
+  Row,
+  Col,
+  Typography,
+  Alert,
+  Divider,
+  Statistic,
+  Modal
 } from "antd";
 import {
-  CloudUploadOutlined, DiffOutlined, CheckCircleOutlined,
-  FileTextOutlined, ArrowRightOutlined, SyncOutlined
+  CloudUploadOutlined,
+  DiffOutlined,
+  CheckCircleOutlined,
+  FileTextOutlined,
+  ArrowRightOutlined,
+  SyncOutlined
 } from "@ant-design/icons";
 import { post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -80,7 +97,7 @@ const AdminImport = () => {
   };
 
   const handleCommit = async () => {
-    const validItems = (previewData?.diffs || []).filter(d => d.valid);
+    const validItems = (previewData?.diffs || []).filter((d) => d.valid);
     if (validItems.length === 0) {
       message.warning("没有可导入的有效数据，请先预览并修正错误行");
       return;
@@ -134,25 +151,27 @@ const AdminImport = () => {
     {
       title: "现有成绩",
       key: "oldScore",
-      render: (_, r) => (
+      render: (_, r) =>
         !r.valid ? null : r.oldScore !== undefined && r.oldScore !== null ? (
-          <Text delete style={{ color: "#94a3b8" }}>{r.oldScore} 分</Text>
+          <Text delete style={{ color: "#94a3b8" }}>
+            {r.oldScore} 分
+          </Text>
         ) : (
           <Text type="secondary">无 (首次录入)</Text>
         )
-      )
     },
     {
       title: "导入后成绩",
       key: "newScore",
-      render: (_, r) => (
+      render: (_, r) =>
         r.valid ? (
           <Space>
             <ArrowRightOutlined style={{ color: "#3b82f6", fontSize: 12 }} />
-            <Text strong style={{ color: r.action === "UPDATE" ? "#ea580c" : "#16a34a" }}>{r.newScore} 分</Text>
+            <Text strong style={{ color: r.action === "UPDATE" ? "#ea580c" : "#16a34a" }}>
+              {r.newScore} 分
+            </Text>
           </Space>
         ) : null
-      )
     }
   ];
 
@@ -162,17 +181,21 @@ const AdminImport = () => {
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto" }}>
       {/* 顶栏 */}
-      <div style={{
-        background: "linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%)",
-        borderRadius: 16,
-        padding: "24px 32px",
-        color: "#fff",
-        marginBottom: 24,
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-      }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%)",
+          borderRadius: 16,
+          padding: "24px 32px",
+          color: "#fff",
+          marginBottom: 24,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+        }}
+      >
         <Row justify="space-between" align="middle">
           <Col>
-            <Tag color="#60a5fa" style={{ fontWeight: 600, padding: "2px 8px" }}>双模态高可靠导入</Tag>
+            <Tag color="#60a5fa" style={{ fontWeight: 600, padding: "2px 8px" }}>
+              双模态高可靠导入
+            </Tag>
             <Title level={3} style={{ color: "#fff", margin: "8px 0 4px" }}>
               成绩导入中心
             </Title>
@@ -244,25 +267,35 @@ const AdminImport = () => {
           <Col span={14}>
             {previewData ? (
               <div>
-                <div style={{
-                  background: "#f8fafc",
-                  padding: "16px 20px",
-                  borderRadius: 12,
-                  border: "1px solid #e2e8f0",
-                  marginBottom: 16
-                }}>
+                <div
+                  style={{
+                    background: "#f8fafc",
+                    padding: "16px 20px",
+                    borderRadius: 12,
+                    border: "1px solid #e2e8f0",
+                    marginBottom: 16
+                  }}
+                >
                   <Row gutter={16}>
                     <Col span={6}>
                       <Statistic title="总行数" value={diffs.length} />
                     </Col>
                     <Col span={6}>
-                      <Statistic title="新增" value={countBy(d => d.valid && d.action === "NEW")} valueStyle={{ color: "#16a34a" }} />
+                      <Statistic
+                        title="新增"
+                        value={countBy((d) => d.valid && d.action === "NEW")}
+                        valueStyle={{ color: "#16a34a" }}
+                      />
                     </Col>
                     <Col span={6}>
-                      <Statistic title="修改" value={countBy(d => d.valid && d.action === "UPDATE")} valueStyle={{ color: "#ea580c" }} />
+                      <Statistic
+                        title="修改"
+                        value={countBy((d) => d.valid && d.action === "UPDATE")}
+                        valueStyle={{ color: "#ea580c" }}
+                      />
                     </Col>
                     <Col span={6}>
-                      <Statistic title="错误行" value={countBy(d => !d.valid)} valueStyle={{ color: "#dc2626" }} />
+                      <Statistic title="错误行" value={countBy((d) => !d.valid)} valueStyle={{ color: "#dc2626" }} />
                     </Col>
                   </Row>
                 </div>
@@ -294,35 +327,42 @@ const AdminImport = () => {
                 </div>
               </div>
             ) : commitResult ? (
-              <div style={{
-                background: "#ecfdf5",
-                border: "1px solid #a7f3d0",
-                padding: 24,
-                borderRadius: 12,
-                textAlign: "center"
-              }}>
+              <div
+                style={{
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  padding: 24,
+                  borderRadius: 12,
+                  textAlign: "center"
+                }}
+              >
                 <CheckCircleOutlined style={{ fontSize: 48, color: "#059669" }} />
                 <Title level={4} style={{ color: "#065f46", margin: "16px 0 8px" }}>
                   成绩导入批次已提交完成！
                 </Title>
                 <div style={{ fontSize: 14, color: "#047857", marginBottom: 12 }}>
-                  导入批次号：<Text copyable strong>{commitResult.batchNo}</Text>
+                  导入批次号：
+                  <Text copyable strong>
+                    {commitResult.batchNo}
+                  </Text>
                 </div>
                 <div style={{ color: "#065f46" }}>
                   本次共导入 <strong>{commitResult.committedCount}</strong> 条成绩。
                 </div>
               </div>
             ) : (
-              <div style={{
-                height: 320,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                background: "#f8fafc",
-                borderRadius: 12,
-                border: "2px dashed #cbd5e1"
-              }}>
+              <div
+                style={{
+                  height: 320,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "#f8fafc",
+                  borderRadius: 12,
+                  border: "2px dashed #cbd5e1"
+                }}
+              >
                 <FileTextOutlined style={{ fontSize: 40, color: "#94a3b8", marginBottom: 12 }} />
                 <Text type="secondary">点击左侧【预览变更】查看导入前后的成绩对比</Text>
               </div>

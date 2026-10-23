@@ -95,7 +95,7 @@ export function getMenuGroupsByRole(role) {
 
 export function getFlattenMenusByRole(role) {
   const groups = getMenuGroupsByRole(role);
-  return groups.flatMap(g => g.items);
+  return groups.flatMap((g) => g.items);
 }
 
 export default menuGroups;
