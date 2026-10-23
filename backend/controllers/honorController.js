@@ -24,8 +24,11 @@ async function submitHonor(req, res, next) {
     requestKey
   } = req.body;
 
-  const eventTitle = title || awardName;
-  if (certificateUrl && !FILE_REF_RE.test(certificateUrl)) {
+  let cleanCertUrl = certificateUrl;
+  if (cleanCertUrl) {
+    cleanCertUrl = cleanCertUrl.replace(/^(\/api\/v1)?\/uploads\//, "");
+  }
+  if (cleanCertUrl && !FILE_REF_RE.test(cleanCertUrl)) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "证书图片无效，请重新上传", 422);
   }
   if (!eventTitle) {
@@ -72,7 +75,7 @@ async function submitHonor(req, res, next) {
     const honorId = resInsert.insertId;
 
     // 3. 写入材料版本留痕表 material_revision
-    const fileRef = certificateUrl || null;
+    const fileRef = cleanCertUrl || null;
     const contentHash = crypto
       .createHash("sha256")
       .update((fileRef || "") + (description || ""))
@@ -187,7 +190,9 @@ async function resubmitHonor(req, res, next) {
  */
 async function reviewHonor(req, res, next) {
   const honorId = req.params.id;
-  const { decision, rejectReason, comment } = req.body;
+  let { decision, rejectReason, comment } = req.body;
+  if (decision === "APPROVE") decision = "APPROVED";
+  if (decision === "REJECT") decision = "REJECTED";
 
   if (!["APPROVED", "REJECTED"].includes(decision)) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "审核决定只能是 APPROVED 或 REJECTED", 422);

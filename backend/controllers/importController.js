@@ -12,8 +12,10 @@ const { success, fail } = require("../utils/response");
  * 上传数据预览比对，内存解析返回逐行差异（只读，不落库）
  */
 async function previewImport(req, res, next) {
-  const { type = "SUBJECT", items } = req.body;
-  if (!Array.isArray(items) || items.length === 0) {
+  const type = (req.body.type || "SUBJECT").toUpperCase();
+  const rawItems = req.body.items || req.body.records;
+  const items = Array.isArray(rawItems) ? rawItems : [];
+  if (items.length === 0) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "导入数据行不能为空", 422);
   }
   if (items.length > 1000) {
@@ -119,8 +121,11 @@ async function previewImport(req, res, next) {
  * 确认导入，生成 batch_no，原子写入正式表
  */
 async function commitImport(req, res, next) {
-  const { type = "SUBJECT", items, termId = 1 } = req.body;
-  if (!Array.isArray(items) || items.length === 0) {
+  const type = (req.body.type || "SUBJECT").toUpperCase();
+  const rawItems = req.body.items || req.body.records;
+  const items = Array.isArray(rawItems) ? rawItems : [];
+  const termId = req.body.termId || req.body.term_id || 1;
+  if (items.length === 0) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "提交导入数据不能为空", 422);
   }
 

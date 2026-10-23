@@ -1,5 +1,6 @@
 // db.js — MySQL 数据库连接池（模板化版本）
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 const mysql = require("mysql2/promise");
 
 const pool = mysql.createPool({

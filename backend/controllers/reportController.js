@@ -13,8 +13,10 @@ const { computeStudentScore } = require("../services/evaluationEngine");
  * 批量将已审定报告正式发布给学生（前置 6 项完整性强校验）
  */
 async function publishBatch(req, res, next) {
-  const { studentIds, termId = 1 } = req.body;
-  if (!Array.isArray(studentIds) || studentIds.length === 0) {
+  const rawStudentIds = req.body.studentIds || req.body.student_ids;
+  const studentIds = Array.isArray(rawStudentIds) ? rawStudentIds : [];
+  const termId = req.body.termId || req.body.term_id || 1;
+  if (studentIds.length === 0) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "请指定要发布报告的学生列表", 422);
   }
 

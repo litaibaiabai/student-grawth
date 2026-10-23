@@ -17,9 +17,13 @@ function sha256(str) {
  * 配置教师月度卡配额
  */
 async function setCardQuota(req, res, next) {
-  const { termId, teacherId, monthKey, quotaN, allocationJson } = req.body;
-  if (!termId || !teacherId || !monthKey || quotaN === undefined || !allocationJson) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "请填写完整配额参数", 422);
+  const teacherId = req.body.teacherId || req.body.teacher_id;
+  const monthKey = req.body.monthKey || req.body.month_key;
+  const quotaN = req.body.quotaN !== undefined ? req.body.quotaN : (req.body.quota_count !== undefined ? req.body.quota_count : req.body.quota_n);
+  const rawAlloc = req.body.allocationJson || req.body.allocation_json || req.body.allocations;
+
+  if (!teacherId || !monthKey || quotaN === undefined) {
+    return fail(res, ErrorCodes.VALIDATION_ERROR, "请填写完整配额参数 (教师、月份与配额总额度)", 422);
   }
 
   let conn;
@@ -28,9 +32,30 @@ async function setCardQuota(req, res, next) {
     const schoolId = req.user?.schoolId || 1;
     const adminId = req.user?.id || req.user?.userId || 1;
 
-    const alloc = typeof allocationJson === "string" ? JSON.parse(allocationJson) : allocationJson;
+    let termId = req.body.termId || req.body.term_id;
+    if (!termId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      termId = termRows.length > 0 ? termRows[0].id : 1;
+    }
+
+    let alloc = {};
+    if (typeof rawAlloc === "string") {
+      try { alloc = JSON.parse(rawAlloc); } catch { alloc = {}; }
+    } else if (typeof rawAlloc === "object" && rawAlloc !== null) {
+      if (Array.isArray(rawAlloc)) {
+        rawAlloc.forEach((a) => {
+          if (a?.code && a?.count) alloc[a.code] = Number(a.count);
+        });
+      } else {
+        alloc = rawAlloc;
+      }
+    }
+
     const totalAlloc = Object.values(alloc).reduce((sum, val) => sum + Number(val || 0), 0);
-    if (totalAlloc !== Number(quotaN)) {
+    if (Object.keys(alloc).length > 0 && totalAlloc !== Number(quotaN)) {
       return fail(res, ErrorCodes.VALIDATION_ERROR, `指标分配卡片总数(${totalAlloc})必须等于配额N(${quotaN})`, 422);
     }
 
