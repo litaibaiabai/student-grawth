@@ -89,10 +89,13 @@ async function previewImport(req, res, next) {
         username: student.username,
         grade: student.grade,
         classNo: student.class_no,
-        target: type === "SUBJECT" ? (item.subjectName || item.subjectCode) : `【${item.dimension}】五育维度分`,
+        target: type === "SUBJECT" ? item.subjectName || item.subjectCode : `【${item.dimension}】五育维度分`,
+        subjectCode: item.subjectCode || "CHINESE",
+        subjectName: item.subjectName || item.subjectCode || "语文",
+        dimension: item.dimension || "D",
         oldScore,
         newScore: scoreNum,
-        action: oldScore === null ? "NEW" : (oldScore === scoreNum ? "SAME" : "UPDATE"),
+        action: oldScore === null ? "NEW" : oldScore === scoreNum ? "SAME" : "UPDATE",
         valid: true
       });
       validCount++;
@@ -144,7 +147,9 @@ async function commitImport(req, res, next) {
             raw_score = VALUES(raw_score),
             batch_no = VALUES(batch_no)`,
           [
-            schoolId, termId, item.studentId,
+            schoolId,
+            termId,
+            item.studentId,
             item.subjectCode || "CHINESE",
             item.subjectName || "语文",
             Number(item.newScore ?? item.score),
@@ -154,16 +159,19 @@ async function commitImport(req, res, next) {
       } else {
         await conn.query(
           `INSERT INTO student_dimension_score (
-            school_id, term_id, student_id, dimension_code, score_100, batch_no, status
-          ) VALUES (?, ?, ?, ?, ?, ?, 'CONFIRMED')
+            school_id, term_id, student_id, dimension_code, score_100, batch_no, status, confirmed_by, confirmed_at
+          ) VALUES (?, ?, ?, ?, ?, ?, 'CONFIRMED', ?, NOW(6))
           ON DUPLICATE KEY UPDATE
             score_100 = VALUES(score_100),
             batch_no = VALUES(batch_no)`,
           [
-            schoolId, termId, item.studentId,
+            schoolId,
+            termId,
+            item.studentId,
             item.dimension || "D",
             Number(item.newScore ?? item.score),
-            batchNo
+            batchNo,
+            operatorId
           ]
         );
       }
@@ -176,7 +184,9 @@ async function commitImport(req, res, next) {
         school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
       ) VALUES (?, ?, ?, ?, 0, 'IMPORT_DIFF', ?, ?)`,
       [
-        schoolId, operatorId, req.user?.role || "teacher",
+        schoolId,
+        operatorId,
+        req.user?.role || "teacher",
         type === "SUBJECT" ? "SUBJECT_SCORE" : "STUDENT_DIMENSION_SCORE",
         batchNo || `REQ_IMPORT_${Date.now()}`,
         JSON.stringify({ batchNo, committedCount, type })
@@ -185,11 +195,15 @@ async function commitImport(req, res, next) {
 
     await conn.commit();
 
-    success(res, {
-      batchNo,
-      committedCount,
-      type
-    }, "数据批量导入入账成功");
+    success(
+      res,
+      {
+        batchNo,
+        committedCount,
+        type
+      },
+      "数据批量导入入账成功"
+    );
   } catch (err) {
     if (conn) await conn.rollback();
     next(err);

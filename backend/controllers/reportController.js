@@ -57,13 +57,13 @@ async function publishBatch(req, res, next) {
 
       // 3. 读取学科成绩快照
       const [subjects] = await conn.query(
-        "SELECT subject_code, subject_name, score FROM subject_score WHERE student_id = ? AND term_id = ?",
+        "SELECT subject_code, subject_name, raw_score AS score FROM subject_score WHERE student_id = ? AND term_id = ?",
         [sid, termId]
       );
 
       // 4. 读取荣誉奖项快照
       const [honors] = await conn.query(
-        "SELECT award_name, award_level, award_date, points FROM honor_record WHERE student_id = ? AND term_id = ? AND status = 'APPROVED'",
+        "SELECT title AS award_name, award_level, award_date, honor_points AS points FROM honor_record WHERE student_id = ? AND term_id = ? AND status = 'APPROVED'",
         [sid, termId]
       );
 
@@ -112,9 +112,17 @@ async function publishBatch(req, res, next) {
           student_statement, family_message, family_source, status, published_at
         ) VALUES (?, ?, ?, ?, 'V1', ?, ?, ?, ?, ?, ?, ?, 'STUDENT_TRANSCRIBED', 'PUBLISHED', NOW())`,
         [
-          schoolId, sid, termId, version, JSON.stringify(snapshot),
-          score, grade, defaultTeacherComment, defaultTeacherComment,
-          "本学期我在各方面都有所收获，未来会更加努力！", "孩子本学期成长明显，感谢老师们的辛勤付出！"
+          schoolId,
+          sid,
+          termId,
+          version,
+          JSON.stringify(snapshot),
+          score,
+          grade,
+          defaultTeacherComment,
+          defaultTeacherComment,
+          "本学期我在各方面都有所收获，未来会更加努力！",
+          "孩子本学期成长明显，感谢老师们的辛勤付出！"
         ]
       );
 
@@ -123,7 +131,14 @@ async function publishBatch(req, res, next) {
         `INSERT INTO operation_audit (
           school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
         ) VALUES (?, ?, ?, 'TERM_REPORT', ?, 'PUBLISH_REPORT', ?, ?)`,
-        [schoolId, adminId, req.user?.role || "manager", resInsert.insertId, `REQ_PUB_${resInsert.insertId}_${Date.now()}`, JSON.stringify({ studentId: sid, score, grade })]
+        [
+          schoolId,
+          adminId,
+          req.user?.role || "manager",
+          resInsert.insertId,
+          `REQ_PUB_${resInsert.insertId}_${Date.now()}`,
+          JSON.stringify({ studentId: sid, score, grade })
+        ]
       );
 
       published.push({
@@ -135,13 +150,17 @@ async function publishBatch(req, res, next) {
       });
     }
 
-    success(res, {
-      total: studentIds.length,
-      publishedCount: published.length,
-      blockedCount: blocked.length,
-      published,
-      blocked
-    }, `批量报告发布完成：成功 ${published.length} 份，阻断 ${blocked.length} 份`);
+    success(
+      res,
+      {
+        total: studentIds.length,
+        publishedCount: published.length,
+        blockedCount: blocked.length,
+        published,
+        blocked
+      },
+      `批量报告发布完成：成功 ${published.length} 份，阻断 ${blocked.length} 份`
+    );
   } catch (err) {
     next(err);
   } finally {
@@ -239,7 +258,12 @@ async function exportReportHtml(req, res, next) {
     const snapshot = typeof rep.snapshot_json === "string" ? JSON.parse(rep.snapshot_json) : rep.snapshot_json;
     const downloadTime = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
     const watermarkText = `${rep.student_name} (${rep.username}) · 查验时间：${downloadTime}`;
-    const securityHash = crypto.createHash("sha256").update(`${rep.id}-${rep.student_id}-${rep.comprehensive_score}`).digest("hex").slice(0, 16).toUpperCase();
+    const securityHash = crypto
+      .createHash("sha256")
+      .update(`${rep.id}-${rep.student_id}-${rep.comprehensive_score}`)
+      .digest("hex")
+      .slice(0, 16)
+      .toUpperCase();
 
     // 构建排版优美的证书式防伪打印页面
     const html = `

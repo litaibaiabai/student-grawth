@@ -14,18 +14,18 @@ const { Text, Title, Paragraph } = Typography;
 const { TextArea } = Input;
 
 const SAMPLE_SUBJECT_RECORDS = [
-  { student_id: 1, term_id: 1, subject_name: "语文", raw_score: 92.5, full_score: 100, exam_type: "FINAL" },
-  { student_id: 1, term_id: 1, subject_name: "数学", raw_score: 98.0, full_score: 100, exam_type: "FINAL" },
-  { student_id: 1, term_id: 1, subject_name: "英语", raw_score: 95.0, full_score: 100, exam_type: "FINAL" }
+  { studentId: 4, subjectCode: "CHINESE", subjectName: "语文", score: 92.5 },
+  { studentId: 4, subjectCode: "MATH", subjectName: "数学", score: 98.0 },
+  { studentId: 4, subjectCode: "ENGLISH", subjectName: "英语", score: 95.0 }
 ];
 
 const SAMPLE_DIMENSION_RECORDS = [
-  { student_id: 1, term_id: 1, dimension_code: "D", score_100: 95.0 },
-  { student_id: 1, term_id: 1, dimension_code: "Z", score_100: 92.0 },
-  { student_id: 1, term_id: 1, dimension_code: "T", score_100: 88.5 },
-  { student_id: 1, term_id: 1, dimension_code: "M", score_100: 90.0 },
-  { student_id: 1, term_id: 1, dimension_code: "L", score_100: 94.0 },
-  { student_id: 1, term_id: 1, dimension_code: "X", score_100: 96.0 }
+  { studentId: 4, dimension: "D", score: 95.0 },
+  { studentId: 4, dimension: "Z", score: 92.0 },
+  { studentId: 4, dimension: "T", score: 88.5 },
+  { studentId: 4, dimension: "M", score: 90.0 },
+  { studentId: 4, dimension: "L", score: 94.0 },
+  { studentId: 4, dimension: "G", score: 96.0 }
 ];
 
 const AdminImport = () => {
@@ -62,13 +62,13 @@ const AdminImport = () => {
     setPreviewing(true);
     try {
       const res = await post(urls.API_IMPORT_PREVIEW, {
-        type: activeType,
-        records: parsedRecords
+        type: activeType.toUpperCase(),
+        items: parsedRecords
       });
 
       if (res.code === 200) {
         setPreviewData(res.data);
-        message.success("内存比对完成！请复核差异项");
+        message.success("对比完成，请核对下方变更明细");
       } else {
         message.error(res.message || "比对失败");
       }
@@ -80,22 +80,22 @@ const AdminImport = () => {
   };
 
   const handleCommit = async () => {
-    if (!previewData || !previewData.diff_items) {
-      message.warning("请先执行内存比对");
+    const validItems = (previewData?.diffs || []).filter(d => d.valid);
+    if (validItems.length === 0) {
+      message.warning("没有可导入的有效数据，请先预览并修正错误行");
       return;
     }
 
     setCommitting(true);
     try {
-      const parsedRecords = JSON.parse(jsonText);
       const res = await post(urls.API_IMPORT_COMMIT, {
-        type: activeType,
-        records: parsedRecords
+        type: activeType.toUpperCase(),
+        items: validItems
       });
 
       if (res.code === 200) {
         setCommitResult(res.data);
-        message.success(`原子提交成功！导入批次号: ${res.data.batch_no}`);
+        message.success(`导入成功，批次号：${res.data.batchNo}`);
         setPreviewData(null);
       } else {
         message.error(res.message || "提交入库失败");
@@ -113,54 +113,51 @@ const AdminImport = () => {
       dataIndex: "action",
       key: "action",
       width: 120,
-      render: (act) => {
-        if (act === "INSERT") return <Tag color="green">新增记录 (INSERT)</Tag>;
-        if (act === "UPDATE") return <Tag color="orange">更新覆盖 (UPDATE)</Tag>;
-        return <Tag color="default">数据一致 (UNCHANGED)</Tag>;
+      render: (act, r) => {
+        if (!r.valid) return <Tag color="red">错误</Tag>;
+        if (act === "NEW") return <Tag color="green">新增</Tag>;
+        if (act === "UPDATE") return <Tag color="orange">修改</Tag>;
+        return <Tag color="default">无变化</Tag>;
       }
     },
     {
-      title: "学生 ID",
-      dataIndex: "student_id",
-      key: "student_id",
-      width: 100,
-      render: (id) => <Text code>#{id}</Text>
+      title: "学生",
+      key: "student",
+      width: 140,
+      render: (_, r) => (r.studentName ? `${r.studentName} (${r.username})` : <Text code>{r.username || "-"}</Text>)
     },
     {
-      title: activeType === "subject" ? "学科名称" : "六育维度代码",
+      title: activeType === "subject" ? "学科" : "六育维度",
       key: "target",
+      render: (_, r) => (r.valid ? <Tag color="blue">{r.target}</Tag> : <Text type="danger">{r.error}</Text>)
+    },
+    {
+      title: "现有成绩",
+      key: "oldScore",
       render: (_, r) => (
-        activeType === "subject" ? (
-          <Tag color="blue">{r.subject_name}</Tag>
+        !r.valid ? null : r.oldScore !== undefined && r.oldScore !== null ? (
+          <Text delete style={{ color: "#94a3b8" }}>{r.oldScore} 分</Text>
         ) : (
-          <Tag color="cyan">{r.dimension_code}</Tag>
+          <Text type="secondary">无 (首次录入)</Text>
         )
       )
     },
     {
-      title: "比对前原始分",
-      key: "old_score",
+      title: "导入后成绩",
+      key: "newScore",
       render: (_, r) => (
-        r.old_score !== undefined && r.old_score !== null ? (
-          <Text delete style={{ color: "#94a3b8" }}>{r.old_score} 分</Text>
-        ) : (
-          <Text type="secondary">空 (新录入)</Text>
-        )
-      )
-    },
-    {
-      title: "本次导入目标分",
-      key: "new_score",
-      render: (_, r) => (
-        <Space>
-          <ArrowRightOutlined style={{ color: "#3b82f6", fontSize: 12 }} />
-          <Text strong style={{ color: r.action === "UPDATE" ? "#ea580c" : "#16a34a" }}>
-            {r.new_score ?? r.raw_score ?? r.score_100} 分
-          </Text>
-        </Space>
+        r.valid ? (
+          <Space>
+            <ArrowRightOutlined style={{ color: "#3b82f6", fontSize: 12 }} />
+            <Text strong style={{ color: r.action === "UPDATE" ? "#ea580c" : "#16a34a" }}>{r.newScore} 分</Text>
+          </Space>
+        ) : null
       )
     }
   ];
+
+  const diffs = previewData?.diffs || [];
+  const countBy = (fn) => diffs.filter(fn).length;
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -177,10 +174,10 @@ const AdminImport = () => {
           <Col>
             <Tag color="#60a5fa" style={{ fontWeight: 600, padding: "2px 8px" }}>双模态高可靠导入</Tag>
             <Title level={3} style={{ color: "#fff", margin: "8px 0 4px" }}>
-              教务成绩与六育底表 Diff 比对导入中心
+              成绩导入中心
             </Title>
             <Text style={{ color: "#bfdbfe", fontSize: 13 }}>
-              支持在落盘前于内存中进行精确全量比对，标注新增与更新差异，并赋予全局批次号 (Batch No) 保证追溯性。
+              导入前先与系统现有成绩对比，标出新增和修改的记录，确认无误后再入库，每次导入生成批次号便于追溯。
             </Text>
           </Col>
           <Col>
@@ -207,8 +204,8 @@ const AdminImport = () => {
         />
 
         <Alert
-          message="防覆盖风控原则"
-          description="系统绝不执行盲目覆盖写入。点击【内存比对】后，引擎将与数据库现存记录进行主键和内容对比，并生成可视化变更凭据。"
+          message="导入前先预览"
+          description="点击【预览变更】后，系统会把填写的成绩与现有成绩逐条对比，列出新增、修改和有错误的行；确认无误后再点【确认导入】才会写入。"
           type="info"
           showIcon
           style={{ marginBottom: 16, borderRadius: 8 }}
@@ -217,7 +214,7 @@ const AdminImport = () => {
         <Row gutter={24}>
           <Col span={10}>
             <div style={{ marginBottom: 8, fontWeight: 600, color: "#1e293b" }}>
-              导入数据载荷 (JSON Array 格式)：
+              导入数据 (JSON 数组，每条含学生ID和分数)：
             </div>
             <TextArea
               rows={12}
@@ -239,7 +236,7 @@ const AdminImport = () => {
                   fontWeight: 600
                 }}
               >
-                计算 Diff 比对 (In-Memory Preview)
+                预览变更 (与现有成绩对比)
               </Button>
             </div>
           </Col>
@@ -256,24 +253,24 @@ const AdminImport = () => {
                 }}>
                   <Row gutter={16}>
                     <Col span={6}>
-                      <Statistic title="待处理总数" value={previewData.summary?.total || 0} />
+                      <Statistic title="总行数" value={diffs.length} />
                     </Col>
                     <Col span={6}>
-                      <Statistic title="拟新增 (INSERT)" value={previewData.summary?.insert || 0} valueStyle={{ color: "#16a34a" }} />
+                      <Statistic title="新增" value={countBy(d => d.valid && d.action === "NEW")} valueStyle={{ color: "#16a34a" }} />
                     </Col>
                     <Col span={6}>
-                      <Statistic title="拟更新 (UPDATE)" value={previewData.summary?.update || 0} valueStyle={{ color: "#ea580c" }} />
+                      <Statistic title="修改" value={countBy(d => d.valid && d.action === "UPDATE")} valueStyle={{ color: "#ea580c" }} />
                     </Col>
                     <Col span={6}>
-                      <Statistic title="无变化 (IDENTICAL)" value={previewData.summary?.unchanged || 0} valueStyle={{ color: "#64748b" }} />
+                      <Statistic title="错误行" value={countBy(d => !d.valid)} valueStyle={{ color: "#dc2626" }} />
                     </Col>
                   </Row>
                 </div>
 
                 <Table
-                  dataSource={previewData.diff_items || []}
+                  dataSource={diffs}
                   columns={diffColumns}
-                  rowKey={(r, i) => `${r.student_id}_${r.subject_name || r.dimension_code}_${i}`}
+                  rowKey="row"
                   pagination={{ pageSize: 5 }}
                   size="small"
                 />
@@ -292,7 +289,7 @@ const AdminImport = () => {
                       fontWeight: 600
                     }}
                   >
-                    原子事务提交入库 (Commit)
+                    确认导入
                   </Button>
                 </div>
               </div>
@@ -309,10 +306,10 @@ const AdminImport = () => {
                   成绩导入批次已提交完成！
                 </Title>
                 <div style={{ fontSize: 14, color: "#047857", marginBottom: 12 }}>
-                  全局追踪流水号：<Text copyable strong>{commitResult.batch_no}</Text>
+                  导入批次号：<Text copyable strong>{commitResult.batchNo}</Text>
                 </div>
                 <div style={{ color: "#065f46" }}>
-                  本次已入库新增 <strong>{commitResult.inserted}</strong> 条，覆盖更新 <strong>{commitResult.updated}</strong> 条。
+                  本次共导入 <strong>{commitResult.committedCount}</strong> 条成绩。
                 </div>
               </div>
             ) : (
@@ -327,7 +324,7 @@ const AdminImport = () => {
                 border: "2px dashed #cbd5e1"
               }}>
                 <FileTextOutlined style={{ fontSize: 40, color: "#94a3b8", marginBottom: 12 }} />
-                <Text type="secondary">点击左侧【计算 Diff 比对】以激活差异审计面板</Text>
+                <Text type="secondary">点击左侧【预览变更】查看导入前后的成绩对比</Text>
               </div>
             )}
           </Col>

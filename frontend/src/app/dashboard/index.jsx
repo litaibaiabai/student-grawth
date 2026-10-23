@@ -528,7 +528,7 @@ const Dashboard = () => {
 
               <div style={{ padding: 16, background: "#f8faf9", borderRadius: 8, border: "1px solid #e8eee9" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#277460" }}>02 成绩核算</div>
-                <div style={{ fontSize: 12, color: "#6e7e73", margin: "8px 0" }}>Diff比对导入 · 规则校验 · 缺项检查</div>
+                <div style={{ fontSize: 12, color: "#6e7e73", margin: "8px 0" }}>成绩导入对比 · 规则校验 · 缺项检查</div>
                 <Button type="link" size="small" onClick={() => navigate("/admin/import")} style={{ padding: 0 }}>
                   进入核对
                 </Button>

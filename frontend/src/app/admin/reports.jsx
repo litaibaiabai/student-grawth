@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card, Table, Tag, Button, Space, Typography,
-  Row, Col, Alert, Divider, message, Modal, Tabs, Statistic
+  Card,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Typography,
+  Row,
+  Col,
+  Alert,
+  Divider,
+  message,
+  Modal,
+  Tabs,
+  Statistic
 } from "antd";
 import {
-  SendOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  ReloadOutlined, FileProtectOutlined, SafetyCertificateOutlined
+  SendOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ReloadOutlined,
+  FileProtectOutlined,
+  SafetyCertificateOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -40,14 +56,15 @@ const AdminReports = () => {
   const handleBatchPublish = async () => {
     setPublishing(true);
     try {
+      const termRes = await get(urls.API_CURRENT_TERM);
       const res = await post(urls.API_PUBLISH_REPORTS, {
-        term_id: 1,
-        student_ids: students.map(s => s.id)
+        termId: termRes.data?.termId,
+        studentIds: students.map((s) => s.id)
       });
 
       if (res.code === 200) {
         setPublishResult(res.data);
-        message.success(`期末报告批量发布完成！已成功发布 ${res.data.published_count} 份学生报告快照！`);
+        message.success(res.message);
       } else {
         message.error(res.message || "批量发布失败");
       }
@@ -66,7 +83,9 @@ const AdminReports = () => {
       render: (_, r) => (
         <div>
           <div style={{ fontWeight: 600, color: "#1e382b" }}>{r.real_name || r.username}</div>
-          <div style={{ fontSize: 11, color: "#8a9990" }}>{r.grade}年级{r.class_no}班</div>
+          <div style={{ fontSize: 11, color: "#8a9990" }}>
+            {r.grade}年级{r.class_no}班
+          </div>
         </div>
       )
     },
@@ -133,15 +152,13 @@ const AdminReports = () => {
       {/* 标题 */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
+          <div
+            style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
+          >
             TERM REPORT PUBLISHING GATEWAY
           </div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>
-            期末报告发布中心
-          </h1>
-          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-            六项条件全部通过，才能把报告交到学生手里。
-          </p>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>期末报告发布中心</h1>
+          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>六项条件全部通过，才能把报告交到学生手里。</p>
         </div>
         <Button
           type="primary"
@@ -170,9 +187,13 @@ const AdminReports = () => {
 
       {publishResult && (
         <Alert
-          message={`批次发布成功：已固化发布 ${publishResult.published_count} 份不可变报告快照！`}
-          description="学生端现已可查阅本人本学期报告。系统已自动生成防伪哈希与核验码。"
-          type="success"
+          message={`本次发布结果：成功 ${publishResult.publishedCount} 份，阻断 ${publishResult.blockedCount} 份`}
+          description={
+            publishResult.blockedCount > 0
+              ? publishResult.blocked.map((b) => `${b.studentName || `学生ID ${b.studentId}`}：${b.reason}`).join("；")
+              : "学生端现已可查阅本人本学期报告。系统已自动生成防伪哈希与核验码。"
+          }
+          type={publishResult.publishedCount > 0 ? (publishResult.blockedCount > 0 ? "warning" : "success") : "error"}
           showIcon
           style={{ marginBottom: 20, borderRadius: 8 }}
         />
@@ -181,7 +202,11 @@ const AdminReports = () => {
       <Card
         title="全校学生期末报告门禁核验表"
         bordered={false}
-        extra={<Button icon={<ReloadOutlined />} onClick={fetchStudents}>刷新列表</Button>}
+        extra={
+          <Button icon={<ReloadOutlined />} onClick={fetchStudents}>
+            刷新列表
+          </Button>
+        }
         style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
       >
         <Table

@@ -12,8 +12,9 @@ const { assertStudentInScope } = require("../middleware/security");
  * A模式教师批量直评发分 (delta: +1, source: 'A_DIRECT')
  */
 async function directScoreBatch(req, res, next) {
-  const { studentIds, student_ids, categoryId, category_id, categoryCode, category_code, remark, requestKey } = req.body;
-  const sIds = Array.isArray(studentIds) ? studentIds : (Array.isArray(student_ids) ? student_ids : []);
+  const { studentIds, student_ids, categoryId, category_id, categoryCode, category_code, remark, requestKey } =
+    req.body;
+  const sIds = Array.isArray(studentIds) ? studentIds : Array.isArray(student_ids) ? student_ids : [];
   const cId = categoryId || category_id;
   const cCode = categoryCode || category_code;
 
@@ -90,9 +91,16 @@ async function directScoreBatch(req, res, next) {
     // 4. 写入审计
     await conn.query(
       `INSERT INTO operation_audit (
-        school_id, operator_id, operator_role, action_type, target_type, target_id, payload_after
-      ) VALUES (?, ?, ?, 'DIRECT_SCORE_BATCH', 'score_record', ?, ?)`,
-      [schoolId, teacherId, req.user?.role || "teacher", createdRecords[0]?.scoreRecordId || 0, JSON.stringify({ count: createdRecords.length, categoryId })]
+        school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
+      ) VALUES (?, ?, ?, 'SCORE_RECORD', ?, 'DIRECT_SCORE_BATCH', ?, ?)`,
+      [
+        schoolId,
+        teacherId,
+        req.user?.role || "teacher",
+        createdRecords[0]?.scoreRecordId || 0,
+        `REQ_DIRECT_${createdRecords[0]?.scoreRecordId || 0}_${Date.now()}`,
+        JSON.stringify({ count: createdRecords.length, categoryId: targetCategoryId })
+      ]
     );
 
     await conn.commit();
@@ -127,10 +135,7 @@ async function reverseScore(req, res, next) {
     await conn.beginTransaction();
 
     // 1. 悲观锁锁定原流水
-    const [origRows] = await conn.query(
-      "SELECT * FROM score_record WHERE id = ? FOR UPDATE",
-      [originalScoreId]
-    );
+    const [origRows] = await conn.query("SELECT * FROM score_record WHERE id = ? FOR UPDATE", [originalScoreId]);
     if (origRows.length === 0) {
       await conn.rollback();
       return fail(res, ErrorCodes.NOT_FOUND, "原积分流水记录不存在", 404);
@@ -143,10 +148,7 @@ async function reverseScore(req, res, next) {
     }
 
     // 2. 检查是否已经存在该原流水的冲销记录
-    const [revCheck] = await conn.query(
-      "SELECT id FROM score_record WHERE original_id = ? LIMIT 1",
-      [originalScoreId]
-    );
+    const [revCheck] = await conn.query("SELECT id FROM score_record WHERE original_id = ? LIMIT 1", [originalScoreId]);
     if (revCheck.length > 0) {
       await conn.rollback();
       return fail(res, ErrorCodes.REVERSAL_ALREADY_EXISTS, "该笔原始正向流水已被冲销过，严禁重复扣减", 409);
@@ -154,9 +156,10 @@ async function reverseScore(req, res, next) {
 
     // 3. 写入负向冲销流水 (-1)
     const reqKey = requestKey || `REV_${originalScoreId}_${Date.now()}`;
-    const classSnapshot = typeof orig.class_snapshot === "object" && orig.class_snapshot !== null
-      ? JSON.stringify(orig.class_snapshot)
-      : orig.class_snapshot;
+    const classSnapshot =
+      typeof orig.class_snapshot === "object" && orig.class_snapshot !== null
+        ? JSON.stringify(orig.class_snapshot)
+        : orig.class_snapshot;
 
     const [revInsert] = await conn.query(
       `INSERT INTO score_record (
@@ -194,12 +197,16 @@ async function reverseScore(req, res, next) {
     );
 
     await conn.commit();
-    success(res, {
-      reversalScoreId: revInsert.insertId,
-      originalScoreId,
-      delta: -1,
-      reversedAt: new Date().toISOString()
-    }, "积分冲销成功");
+    success(
+      res,
+      {
+        reversalScoreId: revInsert.insertId,
+        originalScoreId,
+        delta: -1,
+        reversedAt: new Date().toISOString()
+      },
+      "积分冲销成功"
+    );
   } catch (err) {
     if (conn) await conn.rollback();
     if (String(err.code) === "ER_DUP_ENTRY") {
