@@ -6,3 +6,5 @@ coverage/
 .superpowers/
 deploy/backend.env
 backend/uploads/
+.workbuddy/
+scratch/
