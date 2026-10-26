@@ -587,7 +587,9 @@ const Dashboard = () => {
             <CompassOutlined />
           </div>
           <div>
-            <div className="stat-value">{studentsCount > 0 ? studentsCount.toLocaleString() : "1,260"}</div>
+            <div className="stat-value">
+              {studentsCount > 0 ? studentsCount.toLocaleString() : (studentsCount === 0 ? "0" : "—")}
+            </div>
             <div className="stat-label">全校在读受评学生</div>
           </div>
         </div>
