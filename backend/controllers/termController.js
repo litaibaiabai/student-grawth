@@ -135,14 +135,29 @@ async function saveTerm(req, res, next) {
          WHERE id = ? AND (school_id = ? OR school_id IS NULL)`,
         [academicYear, Number(semester), startDate, endDate, isCurrentVal, active ? 1 : 0, id, schoolId]
       );
-      success(res, { id }, "学期更新成功");
+      success(
+        res,
+        { id, academicYear, semester: Number(semester), startDate, endDate, isCurrent: Boolean(isCurrentVal) },
+        "学期更新成功"
+      );
     } else {
       const [result] = await conn.query(
         `INSERT INTO academic_year (school_id, academic_year, semester, start_date, end_date, is_current, active, effective_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
         [schoolId, academicYear, Number(semester), startDate, endDate, isCurrentVal, active ? 1 : 0]
       );
-      success(res, { id: result.insertId }, "学期创建成功");
+      success(
+        res,
+        {
+          id: result.insertId,
+          academicYear,
+          semester: Number(semester),
+          startDate,
+          endDate,
+          isCurrent: Boolean(isCurrentVal)
+        },
+        "学期创建成功"
+      );
     }
   } catch (err) {
     console.error("saveTerm error:", err);

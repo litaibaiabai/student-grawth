@@ -567,7 +567,9 @@ async function decideClaim(req, res, next) {
       res,
       {
         claimId: Number(claimId),
+        decision,
         claimStatus: decision === "APPROVE" ? "APPROVED" : "REJECTED",
+        status: decision === "APPROVE" ? "APPROVED" : "REJECTED",
         cardStatus: decision === "APPROVE" ? "USED" : "VOID",
         scoreRecordId,
         delta: decision === "APPROVE" ? 1 : 0,

@@ -71,7 +71,7 @@ async function computeStudentScore(studentId, termId = 1, schoolId = 1) {
      WHERE student_id = ? AND term_id = ?`,
     [studentId, termId]
   );
-  const netProcessPoints = Number(procRows[0].total_process || 0);
+  const netProcessPoints = Number(procRows?.[0]?.total_process || 0);
   const processTarget = Number(rule.process_target || 20);
   const processScaled = Math.min(100, Math.max(0, (netProcessPoints / processTarget) * 100));
 
@@ -82,7 +82,7 @@ async function computeStudentScore(studentId, termId = 1, schoolId = 1) {
      WHERE student_id = ? AND term_id = ? AND status = 'APPROVED'`,
     [studentId, termId]
   );
-  const approvedHonorPoints = Number(honorRows[0].total_honor || 0);
+  const approvedHonorPoints = Number(honorRows?.[0]?.total_honor || 0);
   const honorTarget = Number(rule.honor_target || 12);
   const honorScaled = Math.min(100, Math.max(0, (approvedHonorPoints / honorTarget) * 100));
 
