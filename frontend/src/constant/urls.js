@@ -20,8 +20,12 @@ export const API_CARD_CLAIM = BASE + "/student/card-claims";
 export const API_TEACHER_CLAIMS = BASE + "/teacher/card-claims";
 export const API_DECIDE_CLAIM = (id) => `${BASE}/teacher/card-claims/${id}/decision`;
 export const API_CARDS = BASE + "/cards";
-export const API_GENERATE_CARDS = BASE + "/admin/cards/generate-month";
-export const API_CARD_QUOTAS = BASE + "/admin/card-quotas";
+export const API_CARD_SUBJECTS = BASE + "/admin/card-subjects";
+export const API_CARD_TEACHERS = BASE + "/admin/card-teachers";
+export const API_SUBJECT_CARD_POLICIES = BASE + "/admin/subject-card-policies";
+export const API_CARD_ALLOCATIONS = BASE + "/card-allocations";
+export const API_CARD_GENERATION_ISSUES = BASE + "/admin/card-generation-issues";
+export const API_CARD_PRINT_PACKS = BASE + "/admin/card-print-packs";
 
 // 积分流水 & 冲销
 export const API_STUDENT_SCORES = BASE + "/student/scores";

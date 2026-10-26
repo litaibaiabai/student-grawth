@@ -1,535 +1,117 @@
-import React, { useState, useEffect } from "react";
-import {
-  Card,
-  Table,
-  Tag,
-  Button,
-  Space,
-  message,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Typography,
-  Alert,
-  Row,
-  Col,
-  Tabs,
-  Statistic,
-  Popconfirm,
-  Tooltip
-} from "antd";
-import {
-  CreditCardOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  QrcodeOutlined,
-  ThunderboltOutlined,
-  ClockCircleOutlined,
-  PrinterOutlined,
-  MinusCircleOutlined
-} from "@ant-design/icons";
-import { get, post } from "@/util/request";
-import token from "@/util/token";
-import * as urls from "@/constant/urls";
+import React,{useState,useEffect,useCallback} from 'react';
+import {Card,Table,Tag,Button,Space,message,Modal,Form,Input,InputNumber,Select,Typography,Alert,Tabs,DatePicker,Switch,Row,Col} from 'antd';
+import {ReloadOutlined,PlusOutlined,PrinterOutlined} from '@ant-design/icons';
+import dayjs from 'dayjs';
+import {get,post,put,download} from '@/util/request';
+import token from '@/util/token';
+import * as urls from '@/constant/urls';
+import {downloadCardPrintPack} from '@/util/cardPrintRecovery';
+import {DIMENSIONS,DIM_NAMES,previewAllocation} from '@/util/cardAllocation';
+const {Text,Title}=Typography;
+const countsView=counts=><Space size={[4,6]} wrap>{DIMENSIONS.map(k=><Tag key={k}>{DIM_NAMES[k]} {counts?.[k]||0}</Tag>)}</Space>;
+const reportError=e=>{if(!e.handled)message.error(e.message||'操作失败');};
 
-const { Text, Title, Paragraph } = Typography;
-const { Option } = Select;
-
-const formatTeacher = (t) => {
-  const name = t.real_name || t.username;
-  if (!t.classes) return name;
-  let cls = t.classes;
-  if (typeof cls === "string") {
-    try { cls = JSON.parse(cls); } catch (e) { return `${name} (${cls})`; }
-  }
-  if (Array.isArray(cls) && cls.length > 0) {
-    const classDesc = cls.map((c) => `${c.grade || c.grade_no || ""}年级${c.class_no || ""}班`).join("、");
-    return `${name} (${classDesc})`;
-  }
-  return name;
-};
-
-const AdminCards = () => {
-  const isManager = token.loadUser()?.role === "manager";
-  const [cards, setCards] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [termId, setTermId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [generateModalOpen, setGenerateModalOpen] = useState(false);
-  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [generatedBatch, setGeneratedBatch] = useState(null);
-  const [printModalOpen, setPrintModalOpen] = useState(false);
-  const [genForm] = Form.useForm();
-  const [quotaForm] = Form.useForm();
-
-  const fetchCards = async () => {
-    setLoading(true);
-    try {
-      const res = await get(urls.API_CARDS);
-      if (res.code === 200) {
-        setCards(res.data || []);
-      }
-    } catch (err) {
-      message.error("获取实体卡列表失败");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const initData = async () => {
-      fetchCards();
-      try {
-        const [tRes, cRes, termRes] = await Promise.all([
-          get(urls.API_TEACHERS_LIST),
-          get(urls.API_CATEGORIES),
-          get(urls.API_CURRENT_TERM)
-        ]);
-        if (tRes.code === 200) setTeachers(tRes.data || []);
-        if (termRes.code === 200) setTermId(termRes.data?.termId);
-        if (cRes.code === 200) {
-          // 提取扁平指标
-          const leaves = [];
-          const trav = (nodes) => {
-            nodes.forEach((n) => {
-              if (!n.children || n.children.length === 0) leaves.push(n);
-              else trav(n.children);
-            });
-          };
-          trav(cRes.data || []);
-          setCategories(leaves);
-        }
-      } catch (e) {
-        // 静默
-      }
-    };
-    initData();
-  }, []);
-
-  const handleGenerateCards = async (values) => {
-    setSubmitting(true);
-    try {
-      const selectedCategory = categories.find(
-        (c) => c.category_code === values.category_code || c.id === values.category_code
-      );
-      const res = await post(urls.API_GENERATE_CARDS, {
-        termId,
-        teacherId: values.teacher_id,
-        categoryId: selectedCategory?.id || values.category_code,
-        monthKey: values.month_key,
-        count: values.count
-      });
-
-      if (res.code === 200) {
-        message.success(`成功制卡！已批量生成 ${res.data.cards?.length || values.count} 张防伪实体卡！`);
-        setGeneratedBatch(res.data.cards || []);
-        setGenerateModalOpen(false);
-        genForm.resetFields();
-        setPrintModalOpen(true);
-        fetchCards();
-      } else {
-        message.error(res.message || "批量制卡失败");
-      }
-    } catch (err) {
-      if (!err.handled) message.error(err.message || "制卡失败");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSetQuota = async (values) => {
-    if (!termId) {
-      message.error("暂无当前活动学期，无法设置配额");
-      return;
-    }
-    const allocationJson = {};
-    (values.allocations || []).forEach((a) => {
-      allocationJson[a.code] = (allocationJson[a.code] || 0) + Number(a.count);
-    });
-    setSubmitting(true);
-    try {
-      const res = await post(urls.API_CARD_QUOTAS, {
-        termId,
-        teacherId: values.teacher_id,
-        monthKey: values.month_key,
-        quotaN: values.quota_count,
-        allocationJson
-      });
-      if (res.code === 200) {
-        message.success("教师月度配额已更新！");
-        setQuotaModalOpen(false);
-        quotaForm.resetFields();
-      } else {
-        message.error(res.message || "配额设置失败");
-      }
-    } catch (err) {
-      if (!err.handled) message.error(err.message || "配额操作失败");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const triggerExpireTask = async () => {
-    try {
-      const res = await post(urls.API_SERVER + "/api/v1/admin/tasks/trigger-card-expiration");
-      if (res.code === 200) {
-        message.success(res.message || "超期实体卡过期扫描完成！");
-        fetchCards();
-      }
-    } catch (err) {
-      message.error("触发扫描失败");
-    }
-  };
-
-  const columns = [
-    {
-      title: "流水序号",
-      dataIndex: "serial_no",
-      key: "serial_no",
-      width: 140,
-      render: (sn) => (
-        <Text code strong>
-          {sn}
-        </Text>
-      )
-    },
-    {
-      title: "归属教师",
-      dataIndex: "teacher_name",
-      key: "teacher_name",
-      width: 120,
-      render: (t, r) => <span style={{ fontWeight: 600, color: "#1e3a8a" }}>{t || `ID:${r.teacher_id}`}</span>
-    },
-    {
-      title: "生效月份",
-      dataIndex: "month_key",
-      key: "month_key",
-      width: 100,
-      render: (m) => <Tag color="geekblue">{m}</Tag>
-    },
-    {
-      title: "评价指标",
-      key: "cat",
-      render: (_, r) => (
-        <Space>
-          <Tag color="cyan">{r.category_code}</Tag>
-          <span>{r.category_name || "六育标准指标"}</span>
-        </Space>
-      )
-    },
-    {
-      title: "状态",
-      dataIndex: "status",
-      key: "status",
-      width: 120,
-      render: (st) => {
-        if (st === "UNUSED") return <Tag color="blue">待使用</Tag>;
-        if (st === "CLAIMED" || st === "PENDING") return <Tag color="gold">已扫待审</Tag>;
-        if (st === "USED") return <Tag color="green">已核销</Tag>;
-        if (st === "VOID") return <Tag color="red">已作废</Tag>;
-        if (st === "EXPIRED") return <Tag color="default">已过期</Tag>;
-        return <Tag>{st}</Tag>;
-      }
-    },
-    {
-      title: "生成时间",
-      dataIndex: "created_at",
-      key: "created_at",
-      width: 170,
-      render: (t) => (t ? new Date(t).toLocaleString("zh-CN") : "--")
-    }
-  ];
-
-  return (
-    <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-      {/* 顶栏 */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #092b00 0%, #135200 100%)",
-          borderRadius: 16,
-          padding: "24px 32px",
-          color: "#fff",
-          marginBottom: 24,
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-        }}
-      >
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Tag color="#73d13d" style={{ fontWeight: 600, padding: "2px 8px" }}>
-              B模式实体通兑管理
-            </Tag>
-            <Title level={3} style={{ color: "#fff", margin: "8px 0 4px" }}>
-              月度配额与防伪实体卡制发中心
-            </Title>
-            <Text style={{ color: "#d9f7be", fontSize: 13 }}>
-              采用 SHA-256 密态散列防伪技术，按月批量向教师分配物理卡片，并在月底自动执行过期巡检保障时效。
-            </Text>
-          </Col>
-          <Col>
-            {isManager && (
-              <Space>
-                <Button
-                  icon={<ClockCircleOutlined />}
-                  onClick={triggerExpireTask}
-                  style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "none" }}
-                >
-                  触发超期扫描
-                </Button>
-                <Button type="default" onClick={() => setQuotaModalOpen(true)}>
-                  配置教师月配额
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setGenerateModalOpen(true)}
-                  style={{
-                    background: "#52c41a",
-                    borderColor: "#52c41a",
-                    fontWeight: 600
-                  }}
-                >
-                  批量制卡 (发卡)
-                </Button>
-              </Space>
-            )}
-          </Col>
-        </Row>
-      </div>
-
-      <Card
-        title="学校实体激励卡流水表"
-        bordered={false}
-        extra={
-          <Button icon={<ReloadOutlined />} onClick={fetchCards}>
-            刷新
-          </Button>
-        }
-        style={{ borderRadius: 16, boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}
-      >
-        <Alert
-          message="防伪与唯一性机制"
-          description="每张实体卡在制卡时生成高熵安全 Token，并计算 SHA-256 存入数据库。真实明文 Token 仅在制卡打印单导出，杜绝内鬼泄露与伪造攻击。"
-          type="info"
-          showIcon
-          style={{ marginBottom: 16, borderRadius: 8 }}
-        />
-
-        <Table
-          dataSource={cards}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          locale={{ emptyText: "暂无实体卡记录" }}
-        />
-      </Card>
-
-      {/* 批量制卡弹窗 */}
-      <Modal
-        title={
-          <Space>
-            <CreditCardOutlined style={{ color: "#52c41a" }} />
-            <span>批量制发实体防伪激励卡</span>
-          </Space>
-        }
-        open={generateModalOpen}
-        onOk={() => genForm.submit()}
-        onCancel={() => setGenerateModalOpen(false)}
-        confirmLoading={submitting}
-        okText="立即批量生成"
-        cancelText="取消"
-        width={540}
-      >
-        <Form
-          form={genForm}
-          layout="vertical"
-          onFinish={handleGenerateCards}
-          initialValues={{
-            month_key: "2026-10",
-            count: 5
-          }}
-          style={{ marginTop: 16 }}
-        >
-          <Form.Item name="teacher_id" label="持卡/赋分教师" rules={[{ required: true, message: "请选择领卡教师" }]}>
-            <Select placeholder="选择领用卡片的任课教师">
-              {teachers.map((t) => (
-                <Option key={t.id} value={t.id}>
-                  {formatTeacher(t)}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="category_code"
-            label="卡面印制细分评价指标"
-            rules={[{ required: true, message: "请选择评价指标" }]}
-          >
-            <Select showSearch optionFilterProp="children" placeholder="搜索六育考评行为指标">
-              {categories.map((c) => (
-                <Option key={c.category_code} value={c.category_code}>
-                  [{c.category_code}] {c.category_name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="month_key"
-                label="生效月份 (YYYY-MM)"
-                rules={[{ required: true, message: "请输入自然月" }]}
-              >
-                <Input placeholder="例如：2026-10" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="count" label="发卡数量 (张)" rules={[{ required: true, message: "请输入制卡张数" }]}>
-                <InputNumber min={1} max={50} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
-
-      {/* 配置配额弹窗 */}
-      <Modal
-        title="设置教师月度发卡配额"
-        open={quotaModalOpen}
-        onOk={() => quotaForm.submit()}
-        onCancel={() => setQuotaModalOpen(false)}
-        confirmLoading={submitting}
-        okText="保存配额"
-        cancelText="取消"
-      >
-        <Form
-          form={quotaForm}
-          layout="vertical"
-          onFinish={handleSetQuota}
-          initialValues={{ month_key: "2026-10", quota_count: 30 }}
-        >
-          <Form.Item name="teacher_id" label="教师" rules={[{ required: true, message: "请选择教师" }]}>
-            <Select placeholder="选择教师">
-              {teachers.map((t) => (
-                <Option key={t.id} value={t.id}>
-                  {formatTeacher(t)}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="month_key" label="月份 (YYYY-MM)" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="quota_count" label="月度总额度 (张)" rules={[{ required: true }]}>
-                <InputNumber min={1} max={200} style={{ width: "100%" }} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.List
-            name="allocations"
-            rules={[
-              {
-                validator: async (_, list) => {
-                  const sum = (list || []).reduce((s, a) => s + Number(a?.count || 0), 0);
-                  const n = quotaForm.getFieldValue("quota_count");
-                  if (!list || list.length === 0) throw new Error("请至少分配一个三级指标");
-                  if (sum !== Number(n)) throw new Error(`指标分配总数(${sum})必须等于月度总额度(${n})`);
-                }
-              }
-            ]}
-          >
-            {(fields, { add, remove }, { errors }) => (
-              <>
-                {fields.map(({ key, name, ...rest }) => (
-                  <Space key={key} align="baseline" style={{ display: "flex" }}>
-                    <Form.Item {...rest} name={[name, "code"]} rules={[{ required: true, message: "请选择指标" }]}>
-                      <Select placeholder="三级指标" style={{ width: 260 }}>
-                        {categories.map((c) => (
-                          <Option key={c.category_code || c.code} value={c.category_code || c.code}>
-                            [{c.category_code || c.code}] {c.category_name || c.name}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                    <Form.Item {...rest} name={[name, "count"]} rules={[{ required: true, message: "请输入张数" }]}>
-                      <InputNumber min={1} placeholder="张数" />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />} block>
-                    添加指标分配
-                  </Button>
-                  <Form.ErrorList errors={errors} />
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
-        </Form>
-      </Modal>
-
-      {/* 打印/查看导出 Token 弹窗 */}
-      <Modal
-        title={
-          <Space>
-            <PrinterOutlined style={{ color: "#16a34a" }} />
-            <span>制卡成功！实体防伪印制凭单 (请妥善保存明文Token)</span>
-          </Space>
-        }
-        open={printModalOpen}
-        onOk={() => setPrintModalOpen(false)}
-        onCancel={() => setPrintModalOpen(false)}
-        okText="完成打印并关闭"
-        cancelButtonProps={{ style: { display: "none" } }}
-        width={700}
-      >
-        <Alert
-          message="高密防伪提示"
-          description="系统已对下列明文 Token 进行 SHA-256 单向散列存证。该明文令牌关闭后将不再对任何人公开显示，请立即交付印刷或复制发放。"
-          type="warning"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-
-        <div style={{ maxHeight: 300, overflowY: "auto" }}>
-          {generatedBatch?.map((c, idx) => (
-            <div
-              key={idx}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "10px 14px",
-                borderRadius: 8,
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                marginBottom: 8
-              }}
-            >
-              <div>
-                <Tag color="green">卡号 {c.serialNo ?? c.serial_no ?? c.id}</Tag>
-                <Text strong>{c.monthKey || c.month_key} 激励卡</Text>
-              </div>
-              <Space>
-                <Text code copyable>
-                  {c.token}
-                </Text>
-              </Space>
-            </div>
-          ))}
-        </div>
-      </Modal>
-    </div>
-  );
-};
-
-export default AdminCards;
+export default function AdminCards(){
+ const manager=token.loadUser()?.role==='manager';
+ const [month,setMonth]=useState(dayjs().format('YYYY-MM'));
+ const [subjects,setSubjects]=useState([]),[teachers,setTeachers]=useState([]),[policies,setPolicies]=useState([]),[allocations,setAllocations]=useState([]),[issues,setIssues]=useState([]);
+ const [loading,setLoading]=useState(false),[saving,setSaving]=useState(false),[editing,setEditing]=useState(null),[pack,setPack]=useState(null),[printing,setPrinting]=useState(false);
+ const [form]=Form.useForm();
+ const watched=Form.useWatch([],form)||{};
+ const preview=previewAllocation(Number(watched.monthlyTotal),watched.ratios);
+ const sum=DIMENSIONS.reduce((n,k)=>n+Number(watched.ratios?.[k]||0),0);
+ const load=useCallback(async()=>{
+   setLoading(true);
+   try{
+     const a=await get(urls.API_CARD_ALLOCATIONS,{monthKey:month});setAllocations(a.data||[]);
+     if(manager){const [s,t,p,i]=await Promise.all([get(urls.API_CARD_SUBJECTS),get(urls.API_CARD_TEACHERS),get(urls.API_SUBJECT_CARD_POLICIES,{monthKey:month}),get(urls.API_CARD_GENERATION_ISSUES,{monthKey:month})]);setSubjects(s.data||[]);setTeachers(t.data||[]);setPolicies(p.data||[]);setIssues(i.data||[]);}
+   }catch(e){reportError(e);}finally{setLoading(false);}
+ },[manager,month]);
+ useEffect(()=>{load();},[load]);
+ useEffect(()=>{
+   if(!pack||pack.status!=='PENDING')return;
+   let active=true;
+   const timer=setInterval(()=>get(`${urls.API_CARD_PRINT_PACKS}/${pack.id}`).then(r=>{if(active)setPack(current=>current?.id===pack.id?r.data:current);}).catch(reportError),2000);
+   return()=>{active=false;clearInterval(timer);};
+ },[pack?.id,pack?.status]);
+ function open(kind,row){form.resetFields();setEditing({kind,row});}
+ useEffect(()=>{
+   if(!editing)return;
+   const {kind,row}=editing;
+   if(kind==='teacher')form.setFieldsValue({subjectIds:row.subjectIds,primarySubjectId:row.primarySubjectId});
+   if(kind==='subject')form.setFieldsValue(row||{status:1});
+   if(kind==='policy')form.setFieldsValue(row.latestPolicy||{monthlyTotal:100,enabled:true,ratios:{D:20,Z:70,T:0,M:0,L:10,G:0}});
+ },[editing,form]);
+ async function save(values){
+   setSaving(true);
+   try{
+     const {kind,row}=editing;let result;
+     if(kind==='teacher')result=await put(`${urls.API_CARD_TEACHERS}/${row.id}/subjects`,values);
+     if(kind==='subject')result=await (row?put(`${urls.API_CARD_SUBJECTS}/${row.id}`,values):post(urls.API_CARD_SUBJECTS,values));
+     if(kind==='policy'){
+       if(!preview){message.warning('六育比例合计必须为100%，请检查总张数和比例');return;}
+       result=await put(`${urls.API_SUBJECT_CARD_POLICIES}/${row.subjectId}`,values);
+     }
+     message.success(kind==='policy'?`策略已保存，${result.data.effectiveMonth}生效`:'已保存，系统将自动检查当月配卡');setEditing(null);await load();
+   }catch(e){reportError(e);}finally{setSaving(false);}
+ }
+ async function preparePrint(){
+   setPrinting(true);
+   try{const r=await post(urls.API_CARD_PRINT_PACKS,{monthKey:month});setPack(r.data);}catch(e){reportError(e);}finally{setPrinting(false);}
+ }
+ async function downloadPack(){
+   const selected=pack;
+   try{await downloadCardPrintPack({id:selected.id,
+     download:id=>download(`${urls.API_CARD_PRINT_PACKS}/${id}/download`,{},`评价卡-${selected.monthKey}.pdf`),
+     getPack:async id=>(await get(`${urls.API_CARD_PRINT_PACKS}/${id}`)).data,
+     onPack:value=>setPack(current=>current?.id===selected.id?value:current)
+   });}catch(e){reportError(e);}
+ }
+ async function refresh(){await load();if(pack){try{const r=await get(`${urls.API_CARD_PRINT_PACKS}/${pack.id}`);setPack(current=>current?.id===pack.id?r.data:current);}catch(e){reportError(e);}}}
+ const allocationColumns=[
+   {title:'教师',dataIndex:'teacherName'}, {title:'主教学科',render:(_,r)=><Space direction="vertical" size={4}><span>{r.subjectName}</span>{r.subjectChanged&&<Text type="warning">{r.subjectChangeNotice}</Text>}</Space>},
+   {title:'当月卡片',render:(_,r)=><div><Text strong>{r.monthlyTotal} 张</Text><div style={{marginTop:6}}>{countsView(r.counts)}</div></div>},
+   {title:'使用进度',render:(_,r)=><Space direction="vertical" size={0}><span>未用 {r.unusedCount} · 待审 {r.pendingCount} · 已用 {r.usedCount}</span><Text type="secondary">已生成 {r.generatedCount} 张</Text></Space>},
+   {title:'分配状态',render:(_,r)=><Space direction="vertical"><Tag color={r.status==='READY'?'green':r.status==='FAILED'?'red':'gold'}>{({READY:'已就绪',FAILED:'生成失败',GENERATING:'生成中'})[r.status]}</Tag>{r.errorMessage&&<Text type="danger">{r.errorMessage}</Text>}</Space>}
+ ];
+ const monthly=<>
+   <Space wrap style={{marginBottom:20}}><DatePicker picker="month" allowClear={false} value={dayjs(month)} onChange={v=>{if(v){setMonth(v.format('YYYY-MM'));setPack(null);}}}/><Button icon={<ReloadOutlined/>} onClick={refresh}>刷新分配</Button>{manager&&<Button type="primary" icon={<PrinterOutlined/>} loading={printing} onClick={preparePrint} disabled={!allocations.some(a=>a.status==='READY')}>准备打印 PDF</Button>}</Space>
+   <Table rowKey="id" dataSource={allocations} columns={allocationColumns} loading={loading} scroll={{x:850}} locale={{emptyText:'该月暂无卡片分配；系统仅在有效学期内自动发卡'}}/>
+   {manager&&issues.length>0&&<Card size="small" title="需要处理的发卡事项" style={{marginTop:20}}><Table size="small" rowKey="id" dataSource={issues} pagination={false} columns={[{title:'教师',dataIndex:'teacherName',width:160},{title:'原因',dataIndex:'message'}]}/></Card>}
+   {manager&&pack&&<Card size="small" title={`${pack.monthKey} 打印资料`} style={{marginTop:20}} extra={<Tag color={pack.status==='READY'?'green':pack.status==='FAILED'?'red':'gold'}>{({READY:'可以下载',PENDING:'正在准备',FAILED:'准备失败'})[pack.status]}</Tag>}>
+      <Space direction="vertical" style={{width:'100%'}}><Text>包含 {pack.teacherCount} 位教师、{pack.cardCount} 张卡，按教师分组排版。请按实际大小单面打印。</Text>
+      {pack.issues?.length>0&&<Alert type="warning" showIcon message={`有 ${pack.issues.length} 项未就绪事项，清单已列入PDF首页`} description={pack.issues.map((i,n)=><div key={n}>{i.teacherName||'校历'}：{i.message}</div>)}/>}
+      {pack.errorMessage&&<Alert type="error" message={pack.errorMessage}/>}
+      <Space><Button type="primary" disabled={pack.status!=='READY'} onClick={downloadPack}>下载打印 PDF</Button>{pack.status==='FAILED'&&<Button onClick={preparePrint}>重试准备</Button>}</Space></Space>
+   </Card>}
+ </>;
+ const teacherTab=<><Alert showIcon type="info" message="每位教师每月只领取一份卡，兼课时按主教学科的策略分配。补齐学科后，系统会补生成当月尚未领取的一整份卡。" style={{marginBottom:20}}/>
+   <Table rowKey="id" dataSource={teachers} loading={loading} columns={[
+    {title:'教师',dataIndex:'realName'}, {title:'任教班级',render:(_,r)=>r.classes?.map(c=>`${c.grade}年级${c.class_no}班`).join('、')||'—'},
+    {title:'任教学科',render:(_,r)=>r.subjectIds.map(id=>subjects.find(s=>s.id===id)?.subjectName||id).join('、')||<Text type="warning">未配置</Text>},
+    {title:'主教学科',render:(_,r)=>r.primarySubjectName?<Tag color="green">{r.primarySubjectName}</Tag>:<Text type="warning">待指定</Text>},
+    {title:'账号',render:(_,r)=>r.status===0?'正常':'已停用'}, {title:'操作',render:(_,r)=><Button type="link" onClick={()=>open('teacher',r)}>设置学科</Button>}
+   ]}/></>;
+ const policyTab=<><Space style={{marginBottom:20}}><Button icon={<PlusOutlined/>} onClick={()=>open('subject',null)}>新增学科</Button><Text type="secondary">填写月总张数与六育比例，比例合计100%。</Text></Space>
+   <Table rowKey="subjectId" dataSource={policies} loading={loading} scroll={{x:850}} columns={[
+     {title:'学科',render:(_,r)=><Space direction="vertical" size={0}><Text strong>{r.subjectName}</Text><Text type="secondary">{r.subjectCode}{r.status===0?' · 已停用':''}</Text></Space>},
+     {title:'本月策略',render:(_,r)=>r.currentPolicy?<Space direction="vertical" size={6}><Text>{r.currentPolicy.enabled?`${r.currentPolicy.monthlyTotal} 张 / 月`:'暂停发卡'}</Text>{countsView(r.currentPolicy.counts)}</Space>:<Text type="warning">尚未生效</Text>},
+     {title:'待生效调整',render:(_,r)=>r.scheduledPolicy?<Space direction="vertical" size={6}><Text>{r.scheduledPolicy.effectiveMonth} · {r.scheduledPolicy.enabled?`${r.scheduledPolicy.monthlyTotal} 张`:'暂停发卡'}</Text>{countsView(r.scheduledPolicy.counts)}</Space>:'—'},
+     {title:'操作',render:(_,r)=><Space><Button type="link" onClick={()=>open('policy',r)}>设置策略</Button><Button type="link" onClick={()=>open('subject',subjects.find(s=>s.id===r.subjectId))}>编辑学科</Button></Space>}
+   ]}/></>;
+ return <div style={{maxWidth:1240,margin:'0 auto'}}>
+  <div style={{padding:'24px 28px',background:'#173f32',color:'#fff',borderRadius:14,marginBottom:24}}><Text style={{color:'#bfd7c9'}}>六育评价卡</Text><Title level={3} style={{color:'#fff',margin:'8px 0'}}>{manager?'学科策略与月度发卡':'我的月度评价卡'}</Title><Text style={{color:'#d7e9dd'}}>有效学期内每月1日自动发卡；老师发卡后，由学生扫码、教师审核分类并加1分。</Text></div>
+  <Card>{manager?<Tabs defaultActiveKey="monthly" items={[{key:'teachers',label:'教师学科',children:teacherTab},{key:'policies',label:'学科发卡策略',children:policyTab},{key:'monthly',label:'月度分配与打印',children:monthly}]}/>:monthly}</Card>
+  <Modal forceRender title={editing?.kind==='teacher'?`设置学科 · ${editing.row.realName}`:editing?.kind==='subject'?'维护学科':`学科发卡策略 · ${editing?.row.subjectName||''}`} open={!!editing} onCancel={()=>setEditing(null)} onOk={()=>form.submit()} confirmLoading={saving} destroyOnClose width={640}>
+   <Form form={form} layout="vertical" onFinish={save} style={{marginTop:20}}>
+    {editing?.kind==='teacher'&&<><Form.Item name="subjectIds" label="任教学科" rules={[{required:true,message:'请选择任教学科'}]}><Select mode="multiple" options={subjects.filter(s=>s.status===1).map(s=>({value:s.id,label:s.subjectName}))} onChange={ids=>{if(!ids.includes(form.getFieldValue('primarySubjectId')))form.setFieldValue('primarySubjectId',null);}}/></Form.Item><Form.Item name="primarySubjectId" label="主教学科（按此学科领取一份卡）" rules={[{required:true,message:'请指定主教学科'}]}><Select options={subjects.filter(s=>s.status===1&&watched.subjectIds?.includes(s.id)).map(s=>({value:s.id,label:s.subjectName}))}/></Form.Item></>}
+    {editing?.kind==='subject'&&<><Form.Item name="subjectCode" label="学科代码（创建后固定）" rules={[{required:true},{pattern:/^[A-Za-z][A-Za-z0-9_]{0,29}$/,message:'使用字母开头，支持数字与下划线'}]}><Input disabled={!!editing.row} placeholder="如 CHINESE" maxLength={30}/></Form.Item><Form.Item name="subjectName" label="学科名称" rules={[{required:true}]}><Input maxLength={60} placeholder="如 语文"/></Form.Item><Form.Item name="status" label="学科状态" extra="可恢复启用停用学科；已有策略的学科，请在策略中暂停发卡。"><Select options={[{value:1,label:'启用'},{value:0,label:'停用'}]}/></Form.Item></>}
+    {editing?.kind==='policy'&&<><Alert style={{marginBottom:20}} type="info" showIcon message="当月已有分配时，修改从下月生效；当月尚未分配时，保存后自动补发。"/>
+     <Row gutter={20}><Col span={12}><Form.Item name="monthlyTotal" label="每月总张数" rules={[{required:true}]}><InputNumber min={0} max={100000} precision={0} style={{width:'100%'}}/></Form.Item></Col><Col span={12}><Form.Item name="enabled" label="自动发卡" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="暂停"/></Form.Item></Col></Row>
+     <Row gutter={16}>{DIMENSIONS.map(k=><Col span={8} key={k}><Form.Item name={['ratios',k]} label={`${DIM_NAMES[k]}比例`} rules={[{required:true}]}><InputNumber min={0} max={100} precision={2} addonAfter="%" style={{width:'100%'}}/></Form.Item></Col>)}</Row>
+     <Alert type={preview?'success':'warning'} message={`比例合计 ${Number(sum.toFixed(2))}%`} description={preview?countsView(preview):'比例需合计100%，系统才能计算各方向卡片张数。'}/>
+    </>}
+   </Form>
+  </Modal>
+ </div>;
+}

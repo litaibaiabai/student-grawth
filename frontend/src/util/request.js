@@ -19,7 +19,7 @@ const service = axios.create({
 const handleRequestHeader = (config) => {
   // 设置默认 Content-Type
   if (!config.headers["Content-Type"]) {
-    if (config.method === "post" || config.method === "POST") {
+    if (["post", "put", "patch"].includes(String(config.method).toLowerCase())) {
       config.headers["Content-Type"] = "application/json; charset=utf-8";
     } else {
       config.headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
@@ -157,7 +157,8 @@ service.interceptors.response.use(
       // 优先展示后端的中文提示，只弹一条；handled 标记让页面 catch 不再重复弹出
       if (serverMsg) error.message = serverMsg;
       if (!skipGlobalError && !silenced) {
-        if (serverMsg && status !== 401) {
+        const isLoginRequest = error.config?.url?.includes("/auth/login") || window.location.hash.includes("/login");
+        if (serverMsg && (status !== 401 || isLoginRequest)) {
           message.error(serverMsg);
         } else {
           handleNetworkError(status);

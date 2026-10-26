@@ -5,29 +5,32 @@
 const { pool } = require("../db");
 const { getMonthKey } = require("../utils/monthKey");
 const { logger } = require("../utils/logger");
+const { reconcileMonth } = require('./cardAllocationService');
+const {schoolTimestamp}=require('./cardRules');
+const {processPrintJobs}=require('./cardPrintService');
 
 /**
  * 卡片自然月过期任务
- * 将所有历史月份未申领的 ACTIVE 卡片原子批量置为 EXPIRED
+ * 未申领卡按申领截止到期，待审卡按最终审核截止到期。
  */
-async function expireOldCards() {
-  const currentMonth = getMonthKey(new Date());
+async function expireOldCards(now=new Date()) {
+  const stamp=schoolTimestamp(now);
   let conn;
   try {
     conn = await pool.getConnection();
-    const [result] = await conn.query(
-      `UPDATE reward_card
-       SET status = 'EXPIRED'
-       WHERE status = 'ACTIVE' AND month_key < ?`,
-      [currentMonth]
-    );
-
-    if (result.affectedRows > 0) {
-      console.log(`⏰ [定时任务] 已将 ${result.affectedRows} 张超期实体卡置为 EXPIRED (当前月: ${currentMonth})`);
+    await conn.beginTransaction();
+    const [cards]=await conn.query(`SELECT c.id,c.status,cl.id claim_id FROM reward_card c JOIN academic_year t ON c.term_id=t.id LEFT JOIN card_claim cl ON cl.card_id=c.id AND cl.status='PENDING'
+      WHERE c.is_legacy_test=0 AND ((c.status='UNUSED' AND LEAST(c.valid_until,COALESCE(t.review_deadline_at,c.valid_until))<?)
+      OR (c.status='PENDING' AND LEAST(COALESCE(c.review_deadline_at,c.valid_until),COALESCE(t.review_deadline_at,c.review_deadline_at,c.valid_until))<?)) FOR UPDATE`,[stamp,stamp]);
+    for(const card of cards){
+      if(card.claim_id) await conn.query("UPDATE card_claim SET status='EXPIRED' WHERE id=? AND status='PENDING'",[card.claim_id]);
+      await conn.query("UPDATE reward_card SET status='EXPIRED' WHERE id=? AND status IN ('UNUSED','PENDING')",[card.id]);
     }
-    return result.affectedRows;
+    await conn.commit();
+    return cards.length;
   } catch (err) {
-    console.error("❌ 卡片过期定时任务执行失败:", err.message);
+    if(conn)await conn.rollback();
+    console.error("❌ 卡片过期定时任务执行失败:", err.code||err.name);
     return 0;
   } finally {
     if (conn) conn.release();
@@ -78,6 +81,12 @@ function startSchedulers() {
   console.log("⏱️ 后台调度器与 Outbox 投递守护服务已启动");
   // 启动即执行一次卡片检查
   expireOldCards();
+  const reconcile=()=>reconcileMonth().catch(e=>console.error('自动发卡任务失败:',e.code||e.name));
+  reconcile();
+  setInterval(reconcile,60*1000);
+  const prints=()=>processPrintJobs().catch(e=>console.error('打印任务重试失败:',e.code||e.name));
+  prints();
+  setInterval(prints,60*1000);
 
   // 每 10 分钟检查一次超期卡片
   setInterval(expireOldCards, 10 * 60 * 1000);

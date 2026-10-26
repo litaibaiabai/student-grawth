@@ -17,6 +17,7 @@ const {
   getTeacherClaims,
   decideClaim
 } = require("../controllers/cardController");
+const {retiredPreview}=require('../controllers/cardController');
 const { directScoreBatch, reverseScore, getStudentScores } = require("../controllers/scoreController");
 const { submitHonor, resubmitHonor, reviewHonor, getHonors } = require("../controllers/honorController");
 const { uploadHonorCertificate, uploadLimiter, getHonorCertificate } = require("../controllers/uploadController");
@@ -26,7 +27,12 @@ const { getComprehensiveScore, getRules, saveRule } = require("../controllers/ev
 const { publishBatch, getCurrentReport, exportReportHtml } = require("../controllers/reportController");
 const { expireOldCards } = require("../services/scheduler");
 const { pool } = require("../db");
+const cardPolicies = require('../controllers/cardPolicyController');
+const cardPrint = require('../controllers/cardPrintController');
+const { requireCardAccount } = require('../middleware/cardAccount');
 const { success } = require("../utils/response");
+const {queueReconcile}=require('../services/cardAllocationService');
+const reconcileCalendar=(req,res,next)=>{res.once('finish',()=>{if(res.statusCode<300)queueReconcile(req.user.schoolId);});next();};
 
 const router = express.Router();
 
@@ -37,24 +43,37 @@ router.get("/me", requireAuth, getMe);
 // ---------------------- 学期管理 ----------------------
 router.get("/terms/current", getCurrentTerm);
 router.get("/terms", requireAuth, getTerms);
-router.post("/admin/terms", requireAuth, requireRole("manager"), saveTerm);
-router.put("/admin/terms/:id", requireAuth, requireRole("manager"), saveTerm);
-router.post("/admin/terms/:id", requireAuth, requireRole("manager"), saveTerm);
+router.post('/admin/terms',requireAuth,requireRole('manager'),requireCardAccount,reconcileCalendar,saveTerm);
+router.put('/admin/terms/:id',requireAuth,requireRole('manager'),requireCardAccount,reconcileCalendar,saveTerm);
+router.post('/admin/terms/:id',requireAuth,requireRole('manager'),requireCardAccount,reconcileCalendar,saveTerm);
 router.post("/admin/terms/:id/set-current", requireAuth, requireRole("manager"), setCurrentTerm);
 
 // ---------------------- 六育指标字典 ----------------------
 router.get("/evaluation-categories", getCategories);
 
 // ---------------------- 实体卡管理 & 扫码申领 ----------------------
-router.get("/student/cards/preview", requireAuth, previewCard);
-router.post("/student/card-claims", requireAuth, requireRole("student"), claimCard);
-router.get("/teacher/card-claims", requireAuth, requireRole("teacher", "manager"), getTeacherClaims);
-router.post("/teacher/card-claims/:id/decision", requireAuth, requireRole("teacher", "manager"), decideClaim);
+router.get('/student/cards/preview',requireAuth,retiredPreview);
+router.post('/student/cards/preview',requireAuth,requireRole('student'),requireCardAccount,previewCard);
+router.post('/student/card-claims',requireAuth,requireRole('student'),requireCardAccount,claimCard);
+router.get('/teacher/card-claims',requireAuth,requireRole('teacher','manager'),requireCardAccount,getTeacherClaims);
+router.post('/teacher/card-claims/:id/decision',requireAuth,requireRole('teacher','manager'),requireCardAccount,decideClaim);
 
-router.get("/admin/card-quotas", requireAuth, requireRole("manager", "teacher"), getCardQuotas);
-router.post("/admin/card-quotas", requireAuth, requireRole("manager"), setCardQuota);
-router.post("/admin/cards/generate-month", requireAuth, requireRole("manager"), generateMonthCards);
-router.get("/cards", requireAuth, getCards);
+router.get('/admin/card-subjects',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.getSubjects);
+router.post('/admin/card-subjects',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.saveSubject);
+router.put('/admin/card-subjects/:id',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.saveSubject);
+router.get('/admin/card-teachers',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.getTeachers);
+router.put('/admin/card-teachers/:id/subjects',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.saveTeacherSubjects);
+router.get('/admin/subject-card-policies',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.getPolicies);
+router.put('/admin/subject-card-policies/:subjectId',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.savePolicy);
+router.get('/card-allocations',requireAuth,requireRole('manager','teacher'),requireCardAccount,cardPolicies.getAllocations);
+router.get('/admin/card-generation-issues',requireAuth,requireRole('manager'),requireCardAccount,cardPolicies.getGenerationIssues);
+router.post('/admin/card-print-packs',requireAuth,requireRole('manager'),requireCardAccount,cardPrint.create);
+router.get('/admin/card-print-packs/:id',requireAuth,requireRole('manager'),requireCardAccount,cardPrint.get);
+router.get('/admin/card-print-packs/:id/download',requireAuth,requireRole('manager'),requireCardAccount,cardPrint.download);
+router.get('/admin/card-quotas',requireAuth,requireRole('manager','teacher'),cardPolicies.retiredCardEndpoint);
+router.post('/admin/card-quotas',requireAuth,requireRole('manager'),cardPolicies.retiredCardEndpoint);
+router.post('/admin/cards/generate-month',requireAuth,requireRole('manager'),cardPolicies.retiredCardEndpoint);
+router.get('/cards',requireAuth,requireRole('manager','teacher'),requireCardAccount,getCards);
 
 // ---------------------- 过程积分 & 冲销 ----------------------
 router.post("/teacher/scores/direct-batch", requireAuth, requireRole("teacher", "manager"), directScoreBatch);

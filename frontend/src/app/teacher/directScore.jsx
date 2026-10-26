@@ -354,7 +354,7 @@ const TeacherDirectScore = () => {
                           marginRight: 10
                         }}
                       >
-                        {(stu.real_name || stu.username || "生").slice(-2)}
+                        {(stu.real_name || stu.username || "生").slice(0, 1)}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 14, fontWeight: 600, color: "#25332d" }}>

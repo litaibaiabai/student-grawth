@@ -13,7 +13,8 @@ import {
   message,
   Modal,
   Tabs,
-  Statistic
+  Statistic,
+  Select
 } from "antd";
 import {
   SendOutlined,
@@ -35,17 +36,31 @@ const AdminReports = () => {
   const [activeTab, setActiveTab] = useState("ALL");
   const [publishResult, setPublishResult] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [selectedTermId, setSelectedTermId] = useState(null);
 
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const res = await get(urls.API_STUDENTS_LIST);
-      if (res.code === 200) {
-        setStudents(res.data || []);
-        setSelectedIds((res.data || []).map((s) => s.id));
+      const [stuRes, termRes, termsListRes] = await Promise.all([
+        get(urls.API_STUDENTS_LIST),
+        get(urls.API_CURRENT_TERM),
+        get(urls.API_TERMS)
+      ]);
+      if (stuRes.code === 200) {
+        setStudents(stuRes.data || []);
+        setSelectedIds((stuRes.data || []).map((s) => s.id));
+      }
+      if (termsListRes.code === 200) {
+        setTerms(termsListRes.data || []);
+      }
+      if (termRes.code === 200 && termRes.data) {
+        setSelectedTermId(termRes.data.termId || termRes.data.id);
+      } else if (termsListRes.code === 200 && termsListRes.data?.length > 0) {
+        setSelectedTermId(termsListRes.data[0].id);
       }
     } catch (err) {
-      message.error("获取学生名单失败");
+      message.error("获取基础数据失败");
     } finally {
       setLoading(false);
     }
@@ -56,12 +71,17 @@ const AdminReports = () => {
   }, []);
 
   const handleBatchPublish = async () => {
+    if (!selectedTermId) {
+      message.warning("请选择要发布的学期");
+      return;
+    }
     setPublishing(true);
     try {
-      const termRes = await get(urls.API_CURRENT_TERM);
       const res = await post(urls.API_PUBLISH_REPORTS, {
-        termId: termRes.data?.termId,
-        studentIds: selectedIds
+        termId: selectedTermId,
+        term_id: selectedTermId,
+        studentIds: selectedIds,
+        student_ids: selectedIds
       });
 
       if (res.code === 200) {
@@ -141,22 +161,36 @@ const AdminReports = () => {
           <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>期末报告发布中心</h1>
           <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>六项条件全部通过，才能把报告交到学生手里。</p>
         </div>
-        <Button
-          type="primary"
-          icon={<SendOutlined />}
-          onClick={handleBatchPublish}
-          loading={publishing}
-          disabled={selectedIds.length === 0}
-          style={{
-            background: "#277460",
-            borderColor: "#277460",
-            height: 38,
-            borderRadius: 8,
-            fontWeight: 600
-          }}
-        >
-          检查并发布所选报告（{selectedIds.length} 人）
-        </Button>
+        <Space size="middle">
+          <Space>
+            <span style={{ fontSize: 13, color: "#56685c", fontWeight: 600 }}>目标发布学期：</span>
+            <Select
+              value={selectedTermId}
+              onChange={setSelectedTermId}
+              style={{ width: 280 }}
+              options={terms.map((t) => ({
+                value: t.id,
+                label: `${t.term_name || `${t.academic_year}第${t.semester === 1 ? "一" : "二"}学期`} ${t.is_current ? "（当前活跃）" : ""}`
+              }))}
+            />
+          </Space>
+          <Button
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={handleBatchPublish}
+            loading={publishing}
+            disabled={selectedIds.length === 0}
+            style={{
+              background: "#277460",
+              borderColor: "#277460",
+              height: 38,
+              borderRadius: 8,
+              fontWeight: 600
+            }}
+          >
+            检查并发布所选报告（{selectedIds.length} 人）
+          </Button>
+        </Space>
       </div>
 
       <Alert

@@ -1,596 +1,144 @@
-/**
- * cardController.js — 实体卡配额、制卡与扫码申领审核控制器 (严格对接 SPEC V2.0 数据库架构)
- */
+/** Direction-only physical cards; classification is selected when approving. */
+const crypto=require('crypto');
+const {pool}=require('../db');
+const {success,fail}=require('../utils/response');
+const {AppError}=require('../middleware/errorHandler');
+const {ErrorCodes}=require('../constants/errorCodes');
+const {DIMENSION_NAMES,schoolTimestamp,validateMonth}=require('../services/cardRules');
+const {tokenHash}=require('../services/cardCredentials');
+const {json}=require('../services/cardAllocationService');
+const {retiredCardEndpoint}=require('./cardPolicyController');
 
-const crypto = require("crypto");
-const { pool } = require("../db");
-const { ErrorCodes } = require("../constants/errorCodes");
-const { success, fail } = require("../utils/response");
-const { getMonthKey } = require("../utils/monthKey");
-
-function sha256(str) {
-  return crypto.createHash("sha256").update(str).digest("hex");
+function requestKey(value){
+  if(value===undefined||value===null||value==='') return crypto.randomUUID();
+  if(typeof value!=='string'||value.length>64) throw new AppError(422,'请求标识无效',422);
+  return value;
 }
-
-/**
- * POST /api/v1/admin/card-quotas
- * 配置教师月度卡配额
- */
-async function setCardQuota(req, res, next) {
-  const teacherId = req.body.teacherId || req.body.teacher_id;
-  const monthKey = req.body.monthKey || req.body.month_key;
-  const quotaN = req.body.quotaN !== undefined ? req.body.quotaN : (req.body.quota_count !== undefined ? req.body.quota_count : req.body.quota_n);
-  const rawAlloc = req.body.allocationJson || req.body.allocation_json || req.body.allocations;
-
-  if (!teacherId || !monthKey || quotaN === undefined) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "请填写完整配额参数 (教师、月份与配额总额度)", 422);
-  }
-
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const schoolId = req.user?.schoolId || 1;
-    const adminId = req.user?.id || req.user?.userId || 1;
-
-    let termId = req.body.termId || req.body.term_id;
-    if (!termId) {
-      const [termRows] = await conn.query(
-        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
-        [schoolId]
-      );
-      termId = termRows.length > 0 ? termRows[0].id : 1;
+function usable(card,req){
+  if(!card) throw new AppError(404,'未找到该实体卡',404);
+  if(Number(card.school_id)!==Number(req.user.schoolId)) throw new AppError(403,'该卡片不属于本校',403);
+  if(Number(card.is_legacy_test)!==0||!card.allocation_id) throw new AppError(410,'该卡片为旧测试卡，不能用于正式申领',410);
+}
+function canClaim(card){
+  if(card.status==='USED') throw new AppError(ErrorCodes.CARD_USED,'该卡已审核入账，不能再次申领',409);
+  if(card.status==='PENDING') throw new AppError(ErrorCodes.CARD_PENDING,'该卡正在审核中，请勿重复申领',409);
+  if(card.status==='VOID') throw new AppError(ErrorCodes.CARD_VOID,'该卡已作废',409);
+  const now=schoolTimestamp();
+  if(card.status==='EXPIRED'||now>card.effective_valid_until) throw new AppError(ErrorCodes.CARD_EXPIRED,'该卡已超过申领截止时间',400);
+  if(card.status!=='UNUSED'||now<card.valid_from_local) throw new AppError(ErrorCodes.TERM_CLOSED,'该卡尚未到可申领时间',400);
+}
+const cardProjection=`c.*,u.real_name AS teacher_name,
+ DATE_FORMAT(c.valid_from,'%Y-%m-%d %H:%i:%s') AS valid_from_local,
+ DATE_FORMAT(LEAST(c.valid_until,COALESCE(t.review_deadline_at,c.valid_until)),'%Y-%m-%d %H:%i:%s') AS effective_valid_until,
+ DATE_FORMAT(LEAST(COALESCE(c.review_deadline_at,c.valid_until),COALESCE(t.review_deadline_at,c.review_deadline_at,c.valid_until)),'%Y-%m-%d %H:%i:%s') AS effective_review_deadline`;
+async function findCard(conn,hash,lock=false){
+  const [[card]]=await conn.query(`SELECT ${cardProjection} FROM reward_card c JOIN users u ON c.teacher_id=u.id JOIN academic_year t ON c.term_id=t.id WHERE c.token_hash=? ${lock?'FOR UPDATE':''}`,[hash]);
+  return card;
+}
+function previewDTO(card){
+  return {cardId:Number(card.id),monthKey:card.month_key,serialNo:Number(card.serial_no),dimensionCode:card.dimension_code,dimensionName:DIMENSION_NAMES[card.dimension_code],teacherName:card.teacher_name,categoryId:null,categoryCode:null,categoryName:null,points:1,status:card.status,validFrom:card.valid_from_local,validUntil:card.effective_valid_until,reviewDeadline:card.effective_review_deadline};
+}
+async function previewCard(req,res,next){
+  try{
+    const token=req.body?.token;
+    if(typeof token!=='string'||!token.trim()||token.length>256) throw new AppError(422,'请提供卡片扫码凭证',422);
+    const card=await findCard(pool,tokenHash(token.trim()));usable(card,req);canClaim(card);
+    success(res,previewDTO(card));
+  }catch(e){next(e);}
+}
+async function claimCard(req,res,next){
+  let c;
+  try{
+    const token=req.body?.token;
+    if(typeof token!=='string'||!token.trim()||token.length>256) throw new AppError(422,'请提供卡片扫码凭证',422);
+    const key=requestKey(req.body.requestKey);
+    c=await pool.getConnection();await c.beginTransaction();
+    const card=await findCard(c,tokenHash(token.trim()),true);usable(card,req);
+    const [[previous]]=await c.query('SELECT id,card_id,student_id,status FROM card_claim WHERE request_key=?',[key]);
+    if(previous){
+      if(Number(previous.card_id)!==Number(card.id)||Number(previous.student_id)!==Number(req.user.id)) throw new AppError(409,'该请求标识已用于其他申领',409);
+      await c.commit();return success(res,{claimId:Number(previous.id),cardId:Number(card.id),status:previous.status,pointsCredited:0,replayed:true});
     }
-
-    let alloc = {};
-    if (typeof rawAlloc === "string") {
-      try { alloc = JSON.parse(rawAlloc); } catch { alloc = {}; }
-    } else if (typeof rawAlloc === "object" && rawAlloc !== null) {
-      if (Array.isArray(rawAlloc)) {
-        rawAlloc.forEach((a) => {
-          if (a?.code && a?.count) alloc[a.code] = Number(a.count);
-        });
-      } else {
-        alloc = rawAlloc;
+    canClaim(card);
+    const [created]=await c.query("INSERT INTO card_claim(school_id,card_id,student_id,status,request_key) VALUES (?,?,?,'PENDING',?)",[req.user.schoolId,card.id,req.user.id,key]);
+    await c.query("UPDATE reward_card SET status='PENDING' WHERE id=?",[card.id]);
+    await c.commit();success(res,{claimId:created.insertId,cardId:Number(card.id),status:'PENDING',cardStatus:'PENDING',dimensionCode:card.dimension_code,categoryId:null,pointsPending:1,pointsCredited:0},'申领已提交，等待教师选择奖励分类并审核');
+  }catch(e){if(c) await c.rollback();if(e.code==='ER_DUP_ENTRY') return fail(res,ErrorCodes.DUPLICATE_REQUEST,'该卡已进入申领流程，请刷新查看',409);next(e);}
+  finally{if(c)c.release();}
+}
+async function getCards(req,res,next){
+  try{
+    const {monthKey,status}=req.query||{};
+    if(monthKey)validateMonth(monthKey);
+    const params=[req.user.schoolId];let where='c.school_id=? AND c.is_legacy_test=0 AND c.allocation_id IS NOT NULL';
+    const teacherId=req.user.role==='teacher'?req.user.id:req.query.teacherId;
+    if(teacherId){where+=' AND c.teacher_id=?';params.push(teacherId);}
+    if(monthKey){where+=' AND c.month_key=?';params.push(monthKey);}
+    if(status){where+=' AND c.status=?';params.push(status);}
+    const [rows]=await pool.query(`SELECT c.id,c.teacher_id,c.month_key,c.serial_no,c.status,c.created_at,c.dimension_code,u.real_name teacher_name,s.real_name used_student_name FROM reward_card c JOIN users u ON c.teacher_id=u.id LEFT JOIN users s ON s.id=c.used_student_id WHERE ${where} ORDER BY c.id DESC LIMIT 500`,params);
+    success(res,rows.map(r=>({...r,dimension_name:DIMENSION_NAMES[r.dimension_code]})));
+  }catch(e){next(e);}
+}
+async function getTeacherClaims(req,res,next){
+  try{
+    const {status='PENDING'}=req.query||{};
+    const params=[req.user.schoolId];let where='c.school_id=? AND cl.school_id=c.school_id AND c.is_legacy_test=0';
+    if(req.user.role==='teacher'){where+=' AND c.teacher_id=?';params.push(req.user.id);}
+    if(status){where+=' AND cl.status=?';params.push(status);}
+    const [rows]=await pool.query(`SELECT cl.id claim_id,cl.status claim_status,cl.claimed_at,cl.claimed_at claim_time,cl.category_id,cl.category_path_json,cl.review_remark,c.id card_id,c.teacher_id,c.month_key,c.serial_no,c.dimension_code,a.category_version,cat.category_name,cat.category_code,u.id student_id,u.real_name student_name,u.grade,u.class_no FROM card_claim cl JOIN reward_card c ON cl.card_id=c.id JOIN card_allocation a ON c.allocation_id=a.id LEFT JOIN edu_evaluation_category cat ON cl.category_id=cat.id JOIN users u ON cl.student_id=u.id WHERE ${where} ORDER BY cl.id DESC LIMIT 500`,params);
+    success(res,rows.map(r=>({...r,dimension_name:DIMENSION_NAMES[r.dimension_code],categoryPath:json(r.category_path_json,null)})));
+  }catch(e){next(e);}
+}
+async function validatedCategory(c,categoryId,dimension,version){
+  if(!Number.isSafeInteger(Number(categoryId))||Number(categoryId)<=0) throw new AppError(422,'审核通过前请选择完整的一级子类和二级子类',422);
+  const [[row]]=await c.query(`SELECT leaf.id,leaf.category_code,leaf.category_name,leaf.category_level,leaf.score,leaf.status,leaf.version,
+    p.id parent_id,p.category_code parent_code,p.category_name parent_name,p.category_level parent_level,p.status parent_status,p.version parent_version,
+    root.id root_id,root.category_code root_code,root.category_name root_name,root.category_level root_level,root.status root_status,root.version root_version
+    FROM edu_evaluation_category leaf JOIN edu_evaluation_category p ON leaf.parent_id=p.id JOIN edu_evaluation_category root ON p.parent_id=root.id WHERE leaf.id=?`,[Number(categoryId)]);
+  if(!row||Number(row.category_level)!==3||Number(row.parent_level)!==2||Number(row.root_level)!==1||Number(row.score)!==1||Number(row.status)!==1||Number(row.parent_status)!==1||Number(row.root_status)!==1||row.root_code!==dimension||row.version!==version||row.parent_version!==version||row.root_version!==version) throw new AppError(422,'所选分类已失效、层级不完整或不属于本卡方向与版本，请重新选择',422);
+  return [{id:Number(row.root_id),code:row.root_code,name:row.root_name},{id:Number(row.parent_id),code:row.parent_code,name:row.parent_name},{id:Number(row.id),code:row.category_code,name:row.category_name}];
+}
+async function decideClaim(req,res,next){
+  let c;
+  try{
+    let decision=String(req.body?.decision||'').toUpperCase();
+    if(['APPROVED','PASS','通过'].includes(decision))decision='APPROVE';
+    if(['REJECTED','REFUSE','驳回'].includes(decision))decision='REJECT';
+    if(!['APPROVE','REJECT'].includes(decision))throw new AppError(422,'请选择通过或驳回',422);
+    const key=requestKey(req.body.requestKey);
+    c=await pool.getConnection();await c.beginTransaction();
+    const [[claim]]=await c.query(`SELECT cl.*,c.status card_status,c.teacher_id,c.term_id,c.dimension_code,c.school_id card_school_id,c.is_legacy_test,c.allocation_id,
+      a.category_version allocation_category_version,u.grade,u.class_no,
+      DATE_FORMAT(LEAST(COALESCE(c.review_deadline_at,c.valid_until),COALESCE(t.review_deadline_at,c.review_deadline_at,c.valid_until)),'%Y-%m-%d %H:%i:%s') effective_review_deadline
+      FROM card_claim cl JOIN reward_card c ON cl.card_id=c.id JOIN card_allocation a ON c.allocation_id=a.id JOIN academic_year t ON c.term_id=t.id JOIN users u ON cl.student_id=u.id
+      WHERE cl.id=? FOR UPDATE`,[req.params.id]);
+    if(!claim)throw new AppError(404,'未找到待审核申请',404);
+    if(Number(claim.card_school_id)!==Number(req.user.schoolId)||Number(claim.school_id)!==Number(req.user.schoolId)||(req.user.role!=='manager'&&Number(claim.teacher_id)!==Number(req.user.id))) throw new AppError(403,'只能审核本校本人名下卡片，或由本校管理员接管',403);
+    if(Number(claim.is_legacy_test)!==0)throw new AppError(410,'旧测试申请不进入正式审核',410);
+    if(claim.status!=='PENDING'){
+      const [[score]]=await c.query('SELECT id,request_key,category_id FROM score_record WHERE card_claim_id=?',[claim.id]);
+      if(claim.status==='APPROVED'&&decision==='APPROVE'&&score?.request_key===key&&Number(score.category_id)===Number(req.body.categoryId)){
+        await c.commit();return success(res,{claimId:Number(claim.id),decision,claimStatus:'APPROVED',status:'APPROVED',cardStatus:'USED',scoreRecordId:Number(score.id),delta:1,replayed:true});
       }
+      throw new AppError(ErrorCodes.CLAIM_NOT_PENDING,'该申请已处理，请刷新查看结果',400);
     }
-
-    const totalAlloc = Object.values(alloc).reduce((sum, val) => sum + Number(val || 0), 0);
-    if (Object.keys(alloc).length > 0 && totalAlloc !== Number(quotaN)) {
-      return fail(res, ErrorCodes.VALIDATION_ERROR, `指标分配卡片总数(${totalAlloc})必须等于配额N(${quotaN})`, 422);
+    if(claim.card_status!=='PENDING')throw new AppError(409,'卡片当前状态不允许审核',409);
+    const now=schoolTimestamp();
+    if(now>claim.effective_review_deadline)throw new AppError(ErrorCodes.REVIEW_TIMEOUT,'已超过该申请的最终审核截止时间',400);
+    let scoreRecordId=null,path=null;
+    if(decision==='APPROVE'){
+      path=await validatedCategory(c,req.body.categoryId,claim.dimension_code,claim.allocation_category_version);
+      await c.query("UPDATE card_claim SET status='APPROVED',reviewer_id=?,reviewed_at=?,category_id=?,category_version=?,category_path_json=?,review_remark=? WHERE id=?",[req.user.id,now,Number(req.body.categoryId),claim.allocation_category_version,JSON.stringify(path),String(req.body.remark||'').slice(0,500)||null,claim.id]);
+      await c.query("UPDATE reward_card SET status='USED',used_student_id=?,used_at=? WHERE id=?",[claim.student_id,now,claim.card_id]);
+      const [score]=await c.query("INSERT INTO score_record(school_id,term_id,student_id,class_snapshot,dimension_code,category_id,source,delta,card_claim_id,operator_id,request_key) VALUES (?,?,?,?,?,?,'B_CARD',1,?,?,?)",[req.user.schoolId,claim.term_id,claim.student_id,JSON.stringify({grade:claim.grade,class_no:claim.class_no}),claim.dimension_code,Number(req.body.categoryId),claim.id,req.user.id,key]);scoreRecordId=score.insertId;
+    }else{
+      await c.query("UPDATE card_claim SET status='REJECTED',reviewer_id=?,reviewed_at=?,reject_reason=? WHERE id=?",[req.user.id,now,String(req.body.rejectReason||'未通过教师审核').slice(0,500),claim.id]);
+      await c.query("UPDATE reward_card SET status='VOID' WHERE id=?",[claim.card_id]);
     }
-
-    await conn.query(
-      `INSERT INTO card_quota_rule (
-        school_id, term_id, month_key, teacher_id, quota_n, allocation_json, config_version, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, 'V1', ?)
-      ON DUPLICATE KEY UPDATE quota_n = VALUES(quota_n), allocation_json = VALUES(allocation_json)`,
-      [schoolId, termId, monthKey, teacherId, quotaN, JSON.stringify(alloc), adminId]
-    );
-
-    success(res, { teacherId, monthKey, quotaN, allocation: alloc }, "配额配置成功");
-  } catch (err) {
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
+    await c.query('INSERT INTO operation_audit(school_id,actor_user_id,actor_role,target_type,target_id,action,request_id,new_summary) VALUES (?,?,?,?,?,?,?,?)',[req.user.schoolId,req.user.id,req.user.role,'CARD_CLAIM',claim.id,decision==='APPROVE'?'CLAIM_APPROVE':'CLAIM_REJECT',key,JSON.stringify({scoreRecordId,delta:decision==='APPROVE'?1:0,categoryPath:path,remark:String(req.body.remark||'').slice(0,500)})]);
+    await c.commit();success(res,{claimId:Number(claim.id),decision,claimStatus:decision==='APPROVE'?'APPROVED':'REJECTED',status:decision==='APPROVE'?'APPROVED':'REJECTED',cardStatus:decision==='APPROVE'?'USED':'VOID',scoreRecordId,delta:decision==='APPROVE'?1:0,creditedAt:now},decision==='APPROVE'?'审核通过，已按所选分类加1分':'申请已驳回，卡片已作废');
+  }catch(e){if(c)await c.rollback();if(e.code==='ER_DUP_ENTRY')return fail(res,409,'该审核请求已处理，请刷新结果',409);next(e);}
+  finally{if(c)c.release();}
 }
-
-/**
- * POST /api/v1/admin/cards/generate-month
- * 批量生成月度实体卡印刷条目及安全令牌
- */
-async function generateMonthCards(req, res, next) {
-  const targetCatInput = req.body.categoryId || req.body.category_id || req.body.categoryCode || req.body.category_code;
-  const targetTeacherInput = req.body.teacherId || req.body.teacher_id;
-  const count = req.body.count || 10;
-  let termId = req.body.termId || req.body.term_id;
-  const mKey = req.body.monthKey || req.body.month_key || getMonthKey(new Date());
-
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-
-    const schoolId = req.user?.schoolId || 1;
-
-    // 自动查询当前生效学期
-    if (!termId) {
-      const [termRows] = await conn.query(
-        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
-        [schoolId]
-      );
-      termId = termRows.length > 0 ? termRows[0].id : 1;
-    }
-
-    // 解析目标加分指标（支持 ID 或 code / name）
-    let targetCatId = null;
-    if (targetCatInput) {
-      if (isNaN(Number(targetCatInput))) {
-        const [catRows] = await conn.query(
-          "SELECT id FROM edu_evaluation_category WHERE (category_code = ? OR category_name = ?) AND status = 1 LIMIT 1",
-          [targetCatInput, targetCatInput]
-        );
-        if (catRows.length > 0) targetCatId = catRows[0].id;
-      } else {
-        targetCatId = Number(targetCatInput);
-      }
-    }
-
-    // 默认获取三级加分指标
-    if (!targetCatId) {
-      const [catRows] = await conn.query(
-        "SELECT id FROM edu_evaluation_category WHERE category_level = 3 AND status = 1 LIMIT 1"
-      );
-      if (catRows.length === 0) throw new Error("无有效的三级加分指标");
-      targetCatId = catRows[0].id;
-    }
-
-    // 默认分配给指定教师或首个教师
-    let targetTeacherId = targetTeacherInput;
-    if (!targetTeacherId) {
-      const [tRows] = await conn.query("SELECT id FROM users WHERE role = 'teacher' AND school_id = ? LIMIT 1", [
-        schoolId
-      ]);
-      targetTeacherId = tRows.length > 0 ? tRows[0].id : 2;
-    }
-
-    // 查当前教师当月最大序号
-    const [[maxRow]] = await conn.query(
-      "SELECT COALESCE(MAX(serial_no), 0) AS max_s FROM reward_card WHERE school_id = ? AND teacher_id = ? AND month_key = ?",
-      [schoolId, targetTeacherId, mKey]
-    );
-    let startSerial = Number(maxRow.max_s);
-
-    const validFrom = `${mKey}-01 00:00:00`;
-    // 计算月末
-    const [y, m] = mKey.split("-").map(Number);
-    const lastDay = new Date(y, m, 0).getDate();
-    const validUntil = `${mKey}-${lastDay} 23:59:59`;
-
-    const createdCards = [];
-    for (let i = 1; i <= Number(count); i++) {
-      startSerial++;
-      const rawToken = crypto.randomBytes(32).toString("hex");
-      const tokenHash = sha256(rawToken);
-
-      const [resInsert] = await conn.query(
-        `INSERT INTO reward_card (
-          school_id, term_id, teacher_id, month_key, serial_no, category_id,
-          token_hash, valid_from, valid_until, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'UNUSED')`,
-        [schoolId, termId, targetTeacherId, mKey, startSerial, targetCatId, tokenHash, validFrom, validUntil]
-      );
-
-      createdCards.push({
-        id: resInsert.insertId,
-        card_id: resInsert.insertId,
-        serialNo: startSerial,
-        serial_no: startSerial,
-        token: rawToken, // 供打印二维码 / 扫码调用
-        monthKey: mKey,
-        month_key: mKey,
-        status: "UNUSED"
-      });
-    }
-
-    await conn.commit();
-    success(res, { count: createdCards.length, cards: createdCards }, "月度实体卡批量生成成功");
-  } catch (err) {
-    if (conn) await conn.rollback();
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-/**
- * GET /api/v1/cards
- * 卡片查询（管理员/教师）
- */
-async function getCards(req, res, next) {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const schoolId = req.user?.schoolId || 1;
-    const { monthKey, status } = req.query;
-    const teacherId = req.user?.role === "teacher" ? req.user.id || req.user.userId : req.query.teacherId;
-
-    let sql = `
-      SELECT c.id, c.teacher_id, c.month_key, c.serial_no, c.token_hash, c.status, c.created_at,
-             cat.category_name, cat.category_code,
-             u.real_name AS teacher_name,
-             stu.real_name AS used_student_name
-      FROM reward_card c
-      LEFT JOIN edu_evaluation_category cat ON c.category_id = cat.id
-      LEFT JOIN users u ON c.teacher_id = u.id
-      LEFT JOIN users stu ON c.used_student_id = stu.id
-      WHERE c.school_id = ?
-    `;
-    const params = [schoolId];
-
-    if (monthKey) {
-      sql += " AND c.month_key = ?";
-      params.push(monthKey);
-    }
-    if (status) {
-      sql += " AND c.status = ?";
-      params.push(status);
-    }
-    if (teacherId) {
-      sql += " AND c.teacher_id = ?";
-      params.push(teacherId);
-    }
-
-    sql += " ORDER BY c.id DESC LIMIT 100";
-
-    const [rows] = await conn.query(sql, params);
-    success(res, rows);
-  } catch (err) {
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-/**
- * GET /api/v1/student/cards/preview
- * 移动端扫描实体卡，展示卡片预览信息（只读，不加分）
- */
-async function previewCard(req, res, next) {
-  const { token } = req.query;
-  if (!token) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "请提供卡片安全凭证 token", 422);
-  }
-
-  const tokenHash = sha256(token);
-  let conn;
-  try {
-    conn = await pool.getConnection();
-
-    const [rows] = await conn.query(
-      `SELECT c.id, c.month_key, c.serial_no, c.status,
-              cat.category_name, cat.category_code, cat.score,
-              u.real_name AS teacher_name
-       FROM reward_card c
-       LEFT JOIN edu_evaluation_category cat ON c.category_id = cat.id
-       LEFT JOIN users u ON c.teacher_id = u.id
-       WHERE c.token_hash = ?
-       LIMIT 1`,
-      [tokenHash]
-    );
-
-    if (rows.length === 0) {
-      return fail(res, ErrorCodes.NOT_FOUND, "未查询到该实体卡信息", 404);
-    }
-
-    const card = rows[0];
-    if (card.status === "USED") {
-      return fail(res, ErrorCodes.CARD_USED, "该实体卡已审核通过并入账，属于永久失效卡", 409);
-    }
-    if (card.status === "PENDING") {
-      return fail(res, ErrorCodes.CARD_PENDING, "该实体卡已被扫码申领，正在教师审核中", 409);
-    }
-    if (card.status === "EXPIRED") {
-      return fail(res, ErrorCodes.CARD_EXPIRED, "实体卡跨月未扫码已超期，禁止发起新申领", 400);
-    }
-    if (card.status === "VOID") {
-      return fail(res, ErrorCodes.CARD_VOID, "该实体卡已被作废，不可继续使用", 409);
-    }
-
-    success(res, {
-      cardId: card.id,
-      monthKey: card.month_key,
-      serialNo: card.serial_no,
-      categoryName: card.category_name,
-      categoryCode: card.category_code,
-      teacherName: card.teacher_name,
-      points: 1,
-      status: card.status
-    });
-  } catch (err) {
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-/**
- * POST /api/v1/student/card-claims
- * B模式学生确认申领实体卡，悲观行锁防并发抢卡，生成待审单据
- */
-async function claimCard(req, res, next) {
-  const { token, requestKey } = req.body;
-  if (!token) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "缺少卡片安全凭证 token", 422);
-  }
-
-  const tokenHash = sha256(token);
-  const studentId = req.user?.id || req.user?.userId;
-  const schoolId = req.user?.schoolId || 1;
-
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-
-    // 1. 悲观行锁锁定卡片
-    const [cardRows] = await conn.query(
-      `SELECT c.id, c.school_id, c.term_id, c.month_key, c.status, c.category_id,
-              cat.category_name, cat.category_code
-       FROM reward_card c
-       LEFT JOIN edu_evaluation_category cat ON c.category_id = cat.id
-       WHERE c.token_hash = ?
-       FOR UPDATE`,
-      [tokenHash]
-    );
-
-    if (cardRows.length === 0) {
-      await conn.rollback();
-      return fail(res, ErrorCodes.NOT_FOUND, "该实体卡不存在", 404);
-    }
-
-    const card = cardRows[0];
-
-    // 状态判定
-    if (card.status === "PENDING") {
-      await conn.rollback();
-      return fail(res, ErrorCodes.CARD_PENDING, "该实体卡已被其他同学扫码申领，正在审核中", 409);
-    }
-    if (card.status === "USED") {
-      await conn.rollback();
-      return fail(res, ErrorCodes.CARD_USED, "该实体卡已审核通过并入账，属于永久失效卡", 409);
-    }
-    if (card.status === "EXPIRED") {
-      await conn.rollback();
-      return fail(res, ErrorCodes.CARD_EXPIRED, "实体卡跨月未扫码已超期，禁止发起新申领", 400);
-    }
-    if (card.status === "VOID") {
-      await conn.rollback();
-      return fail(res, ErrorCodes.CARD_VOID, "该实体卡已被作废，不可继续使用", 409);
-    }
-    if (card.status !== "UNUSED") {
-      await conn.rollback();
-      return fail(res, ErrorCodes.BAD_REQUEST, `卡片当前状态不可申领(${card.status})`, 400);
-    }
-
-    // 2. 写入 card_claim 记录
-    const reqKey = requestKey || `CLAIM_${card.id}_${studentId}_${Date.now()}`;
-    const [claimInsert] = await conn.query(
-      `INSERT INTO card_claim (
-        school_id, card_id, student_id, status, request_key
-      ) VALUES (?, ?, ?, 'PENDING', ?)`,
-      [schoolId, card.id, studentId, reqKey]
-    );
-
-    // 3. 将 reward_card 状态变更为 PENDING
-    await conn.query("UPDATE reward_card SET status = 'PENDING' WHERE id = ?", [card.id]);
-
-    await conn.commit();
-
-    success(
-      res,
-      {
-        claimId: claimInsert.insertId,
-        cardId: card.id,
-        status: "PENDING",
-        cardStatus: "PENDING",
-        category: card.category_name,
-        pointsPending: 1,
-        pointsCredited: 0
-      },
-      "申领已提交，等待教师审核"
-    );
-  } catch (err) {
-    if (conn) await conn.rollback();
-    if (String(err.code) === "ER_DUP_ENTRY") {
-      return fail(res, ErrorCodes.DUPLICATE_REQUEST, "该实体卡已在申领流程中，请勿重复提交", 409);
-    }
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-/**
- * GET /api/v1/teacher/card-claims
- * 教师查询待审扫卡清单
- */
-async function getTeacherClaims(req, res, next) {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const teacherId = req.user?.id || req.user?.userId;
-    const { status = "PENDING" } = req.query;
-
-    let sql = `
-      SELECT cl.id AS claim_id, cl.status AS claim_status, cl.claimed_at, cl.created_at AS claim_time,
-             c.id AS card_id, c.month_key, c.serial_no,
-             cat.category_name, cat.category_code,
-             u.id AS student_id, u.real_name AS student_name, u.grade, u.class_no
-      FROM card_claim cl
-      JOIN reward_card c ON cl.card_id = c.id
-      JOIN edu_evaluation_category cat ON c.category_id = cat.id
-      JOIN users u ON cl.student_id = u.id
-      WHERE (c.teacher_id = ? OR ? IN (SELECT id FROM users WHERE role = 'manager'))
-    `;
-    const params = [teacherId, teacherId];
-
-    if (status) {
-      sql += " AND cl.status = ?";
-      params.push(status);
-    }
-
-    sql += " ORDER BY cl.id DESC";
-
-    const [rows] = await conn.query(sql, params);
-    success(res, rows);
-  } catch (err) {
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-/**
- * POST /api/v1/teacher/card-claims/:id/decision
- * 教师审核决定（APPROVE 加1分并USED / REJECT 驳回并VOID）
- */
-async function decideClaim(req, res, next) {
-  const claimId = req.params.id;
-  let { decision, rejectReason, requestKey } = req.body;
-  if (!decision) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "请提供审核决定", 422);
-  }
-  decision = String(decision).toUpperCase();
-  if (decision === "APPROVED" || decision === "PASS" || decision === "通过") decision = "APPROVE";
-  if (decision === "REJECTED" || decision === "REFUSE" || decision === "驳回") decision = "REJECT";
-  if (!["APPROVE", "REJECT"].includes(decision)) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "审核决定只能是 APPROVE 或 REJECT", 422);
-  }
-
-  const teacherId = req.user?.id || req.user?.userId;
-  const schoolId = req.user?.schoolId || 1;
-
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-
-    // 1. 悲观锁锁定申领单
-    const [claimRows] = await conn.query(
-      `SELECT cl.id, cl.school_id, cl.card_id, cl.student_id, cl.status,
-              c.term_id, c.category_id, c.teacher_id,
-              cat.category_code,
-              u.grade, u.class_no
-       FROM card_claim cl
-       JOIN reward_card c ON cl.card_id = c.id
-       JOIN edu_evaluation_category cat ON c.category_id = cat.id
-       JOIN users u ON cl.student_id = u.id
-       WHERE cl.id = ?
-       FOR UPDATE`,
-      [claimId]
-    );
-
-    if (claimRows.length === 0) {
-      await conn.rollback();
-      return fail(res, ErrorCodes.NOT_FOUND, "未找到该扫码申领记录", 404);
-    }
-
-    const claim = claimRows[0];
-    if (claim.status !== "PENDING") {
-      await conn.rollback();
-      return fail(res, ErrorCodes.CLAIM_NOT_PENDING, "该扫卡单据已被处理过（已通过或已驳回），不可重复审核", 400);
-    }
-
-    let scoreRecordId = null;
-    const now = new Date();
-    const dimCode = (claim.category_code || "D").charAt(0);
-    const classSnapshot = JSON.stringify({ grade: claim.grade, class_no: claim.class_no });
-
-    if (decision === "APPROVE") {
-      // 通过申领
-      await conn.query("UPDATE card_claim SET status = 'APPROVED', reviewer_id = ?, reviewed_at = ? WHERE id = ?", [
-        teacherId,
-        now,
-        claimId
-      ]);
-      // 卡片置为终态 USED，绑定 used_student_id
-      await conn.query("UPDATE reward_card SET status = 'USED', used_student_id = ?, used_at = ? WHERE id = ?", [
-        claim.student_id,
-        now,
-        claim.card_id
-      ]);
-
-      // 原子写入不可篡改积分流水 score_record (+1)
-      const reqKey = requestKey || `DECISION_SCORE_${claimId}_${Date.now()}`;
-      const [scoreRes] = await conn.query(
-        `INSERT INTO score_record (
-          school_id, term_id, student_id, class_snapshot, dimension_code, category_id,
-          source, delta, card_claim_id, operator_id, request_key
-        ) VALUES (?, ?, ?, ?, ?, ?, 'B_CARD', 1, ?, ?, ?)`,
-        [
-          schoolId,
-          claim.term_id,
-          claim.student_id,
-          classSnapshot,
-          dimCode,
-          claim.category_id,
-          claim.id,
-          teacherId,
-          reqKey
-        ]
-      );
-      scoreRecordId = scoreRes.insertId;
-
-      // 写入审计日志 operation_audit
-      await conn.query(
-        `INSERT INTO operation_audit (
-          school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
-        ) VALUES (?, ?, ?, 'CARD_CLAIM', ?, 'CLAIM_APPROVE', ?, ?)`,
-        [
-          schoolId,
-          teacherId,
-          req.user?.role || "teacher",
-          claimId,
-          reqKey || `REQ_CLAIM_${claimId}_${Date.now()}`,
-          JSON.stringify({ scoreRecordId, delta: 1 })
-        ]
-      );
-    } else {
-      // 驳回申领
-      await conn.query(
-        "UPDATE card_claim SET status = 'REJECTED', reviewer_id = ?, reviewed_at = ?, reject_reason = ? WHERE id = ?",
-        [teacherId, now, rejectReason || null, claimId]
-      );
-      // 卡片置为作废 VOID
-      await conn.query("UPDATE reward_card SET status = 'VOID' WHERE id = ?", [claim.card_id]);
-
-      // 写入审计日志 operation_audit
-      await conn.query(
-        `INSERT INTO operation_audit (
-          school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
-        ) VALUES (?, ?, ?, 'CARD_CLAIM', ?, 'CLAIM_REJECT', ?, ?)`,
-        [
-          schoolId,
-          teacherId,
-          req.user?.role || "teacher",
-          claimId,
-          `REQ_REJECT_${claimId}_${Date.now()}`,
-          JSON.stringify({ status: "REJECTED", reason: rejectReason })
-        ]
-      );
-    }
-
-    await conn.commit();
-
-    success(
-      res,
-      {
-        claimId: Number(claimId),
-        decision,
-        claimStatus: decision === "APPROVE" ? "APPROVED" : "REJECTED",
-        status: decision === "APPROVE" ? "APPROVED" : "REJECTED",
-        cardStatus: decision === "APPROVE" ? "USED" : "VOID",
-        scoreRecordId,
-        delta: decision === "APPROVE" ? 1 : 0,
-        creditedAt: now.toISOString()
-      },
-      decision === "APPROVE" ? "审核通过，积分已正式入账，实体卡已置为失效终态" : "申领已驳回作废"
-    );
-  } catch (err) {
-    if (conn) await conn.rollback();
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-module.exports = {
-  setCardQuota,
-  generateMonthCards,
-  getCards,
-  previewCard,
-  claimCard,
-  getTeacherClaims,
-  decideClaim
-};
+function retiredPreview(req,res){return fail(res,410,'扫码预览已改为POST，请重新打开最新版领取页面',410);}
+module.exports={setCardQuota:retiredCardEndpoint,getCardQuotas:retiredCardEndpoint,generateMonthCards:retiredCardEndpoint,getCards,previewCard,claimCard,getTeacherClaims,decideClaim,retiredPreview};

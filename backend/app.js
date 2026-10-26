@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { errorHandler } = require("./middleware/errorHandler");
 const { requestIdMiddleware, logger } = require("./utils/logger");
+const {redactCardUrl}=require('./utils/redactUrl');
 
 // 导入路由
 const authRoutes = require("./routes/auth");
@@ -43,13 +44,14 @@ app.use(
     message: { code: 429, message: "请求过于频繁，请稍后重试" }
   })
 );
-app.use(morgan("dev"));
+morgan.token('safe-url',req=>redactCardUrl(req.originalUrl||req.url));
+app.use(morgan(':method :safe-url :status :response-time ms - :res[content-length]'));
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // 请求级日志（带 requestId）
 app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.originalUrl}`, { ip: req.ip }, req.requestId);
+    logger.info(`${req.method} ${redactCardUrl(req.originalUrl)}`, { ip: req.ip }, req.requestId);
   next();
 });
 

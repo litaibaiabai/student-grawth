@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import token from "@/util/token";
-import { post } from "@/util/request";
+import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
 import { getFlattenMenusByRole } from "@/constant/menu";
 import { Modal, Button, Tooltip } from "antd";
@@ -11,11 +11,33 @@ const Topbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [termLabel, setTermLabel] = useState("2026—2027 学年　第一学期");
 
   const user = token.loadUser();
   const role = user?.role || "student";
   const allItems = getFlattenMenusByRole(role);
   const currentItem = allItems.find((i) => i.path === location.pathname);
+
+  const fetchTerm = async () => {
+    try {
+      const res = await get(urls.API_CURRENT_TERM);
+      if (res.code === 200 && res.data) {
+        const t = res.data;
+        const year = t.academicYear || t.academic_year || "2026-2027";
+        const sem = (t.semester === 1 || t.semester === "1") ? "第一学期" : (t.semester === 2 || t.semester === "2") ? "第二学期" : "";
+        setTermLabel(`${year} 学年　${sem}`);
+      }
+    } catch {
+      // 容错保持默认
+    }
+  };
+
+  useEffect(() => {
+    fetchTerm();
+    const handleTermChange = () => fetchTerm();
+    window.addEventListener("term-change", handleTermChange);
+    return () => window.removeEventListener("term-change", handleTermChange);
+  }, []);
 
   const roleNameMap = {
     student: "在读学生",
@@ -53,7 +75,7 @@ const Topbar = () => {
 
       {/* 右侧信息 */}
       <div className="topbar-right-pane">
-        <span className="term-tag-label">2026—2027 学年　第一学期</span>
+        <span className="term-tag-label">{termLabel}</span>
 
         <Tooltip title="系统通知">
           <Button type="text" shape="circle" icon={<BellOutlined style={{ fontSize: 16, color: "#6e8074" }} />} />

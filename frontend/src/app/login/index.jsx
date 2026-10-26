@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined, BankOutlined, ArrowRightOutlined } from "@a
 import { useNavigate } from "react-router-dom";
 import { post } from "@/util/request";
 import token from "@/util/token.js";
+import {claimReturnPath} from "@/util/claimIntent";
 import * as urls from "@/constant/urls";
 import s from "./index.module.less";
 
@@ -72,7 +73,7 @@ const Login = () => {
         );
 
         message.success(`欢迎回来，${res.data.user.real_name || res.data.user.username}！`);
-        navigate("/dashboard", { replace: true });
+        navigate(claimReturnPath(), { replace: true });
       } else {
         message.error(res.message || "用户名或密码错误");
       }

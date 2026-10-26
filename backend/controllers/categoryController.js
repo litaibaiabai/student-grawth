@@ -15,11 +15,13 @@ async function getCategories(req, res, next) {
   try {
     conn = await pool.getConnection();
 
+    const conditions=['status = 1'],params=[];
+    if(req.query?.version){conditions.push('version = ?');params.push(String(req.query.version));}
     const [rows] = await conn.query(
       `SELECT id, parent_id, category_level, category_code, category_name, score, description, sort_order, status, version
        FROM edu_evaluation_category
-       WHERE status = 1
-       ORDER BY category_level ASC, sort_order ASC, id ASC`
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY category_level ASC, sort_order ASC, id ASC`,params
     );
 
     // 组装成三级树状结构
@@ -59,7 +61,7 @@ async function getCategories(req, res, next) {
       }
     }
 
-    success(res, rootNodes);
+    success(res,req.query?.dimensionCode?rootNodes.filter(n=>n.code===req.query.dimensionCode):rootNodes);
   } catch (err) {
     next(err);
   } finally {

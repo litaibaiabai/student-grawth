@@ -22,10 +22,11 @@ CREATE TABLE IF NOT EXISTS `academic_year` (
   `is_current` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否为当前默认展示学期 (1是0否，不代表可操作状态)',
   `active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '是否启用 (1启用0停用)',
   `effective_at` DATETIME NULL COMMENT '业务生效时间',
+  `review_deadline_at` DATETIME NULL COMMENT '学期卡片审核截止，默认学期结束日末',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_school_year_semester` (`academic_year`, `semester`),
+  UNIQUE KEY `uk_school_year_semester` (`school_id`, `academic_year`, `semester`),
   KEY `idx_school_current` (`school_id`, `is_current`, `active`),
   CONSTRAINT `chk_semester_valid` CHECK (`semester` IN (1, 2)),
   CONSTRAINT `chk_term_dates` CHECK (`end_date` >= `start_date`)
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `grade` INT NULL COMMENT '学生当前就读年级 (1~12，教师/管理员为NULL)',
   `class_no` INT NULL COMMENT '学生当前就读班级号 (教师/管理员为NULL)',
   `classes` JSON NULL COMMENT '教师任教班级授权JSON，格式：[{"grade":4,"class_no":1}]',
+  `primary_subject_id` BIGINT UNSIGNED NULL COMMENT '教师主教学科，月分配保留历史快照',
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '账号状态：0正常, 1休学/停用, 2离校/离职',
   `external_id` VARCHAR(128) NULL COMMENT '外部同步标识 (如钉钉unionId/userId)',
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -117,7 +119,12 @@ CREATE TABLE IF NOT EXISTS `reward_card` (
   `teacher_id` BIGINT UNSIGNED NOT NULL COMMENT '发卡责任教师ID (users.id)',
   `month_key` VARCHAR(7) NOT NULL COMMENT '所属月份 (YYYY-MM)',
   `serial_no` INT UNSIGNED NOT NULL COMMENT '当月当教师序号 (1..N)',
-  `category_id` BIGINT UNSIGNED NOT NULL COMMENT '绑定的固定三级评价指标ID (edu_evaluation_category.id)',
+  `category_id` BIGINT UNSIGNED NULL COMMENT '旧测试卡历史指标；新卡审核分类存入申领与积分',
+  `allocation_id` BIGINT UNSIGNED NULL COMMENT '自动月分配批次',
+  `dimension_code` CHAR(1) NULL COMMENT '新卡固定六育方向 D/Z/T/M/L/G',
+  `token_ciphertext` TEXT NULL COMMENT '受控加密印刷凭证',
+  `review_deadline_at` DATETIME NULL COMMENT '审核截止快照',
+  `is_legacy_test` TINYINT NOT NULL DEFAULT 1 COMMENT '历史测试卡标识；自动生成正式卡明确写0',
   `token_hash` CHAR(64) NOT NULL COMMENT '不可逆、高熵二维码随机令牌SHA256哈希 (防暴力猜测)',
   `valid_from` DATETIME NOT NULL COMMENT '卡片生效时间 (月初 00:00:00)',
   `valid_until` DATETIME NOT NULL COMMENT '卡片扫码申领截止时间 (月末 23:59:59)',
@@ -128,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `reward_card` (
   `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '制卡时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_card_token_hash` (`token_hash`),
-  UNIQUE KEY `uk_card_month_serial` (`school_id`, `term_id`, `teacher_id`, `month_key`, `serial_no`),
+  UNIQUE KEY `uk_card_allocation_serial` (`allocation_id`, `serial_no`),
   KEY `idx_card_teacher_month_status` (`teacher_id`, `month_key`, `status`),
   KEY `idx_card_student_used` (`used_student_id`, `status`),
   CONSTRAINT `fk_card_term` FOREIGN KEY (`term_id`) REFERENCES `academic_year` (`id`) ON DELETE RESTRICT,
@@ -154,6 +161,10 @@ CREATE TABLE IF NOT EXISTS `card_claim` (
   `claimed_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '学生扫码确认时间',
   `reviewer_id` BIGINT UNSIGNED NULL COMMENT '实际审核教师ID (users.id)',
   `reviewed_at` DATETIME(6) NULL COMMENT '审核处理时间',
+  `category_id` BIGINT UNSIGNED NULL COMMENT '审核时选定的二级子类叶子指标',
+  `category_version` VARCHAR(30) NULL,
+  `category_path_json` JSON NULL COMMENT '本次奖励分类完整快照',
+  `review_remark` VARCHAR(500) NULL,
   `reject_reason` VARCHAR(255) NULL COMMENT '驳回原因说明',
   `request_key` VARCHAR(64) NOT NULL COMMENT '防重复扫码提交幂等键 (UUID/请求唯一标识)',
   `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '记录创建时间',
@@ -503,3 +514,100 @@ CREATE TABLE IF NOT EXISTS `token_blacklist` (
   `expires_at` DATETIME(3) NOT NULL COMMENT 'Token 过期时间',
   `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '加入黑名单时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Token注销黑名单表';
+
+
+-- 2026-10-26 学科自动发卡新增表
+-- 按主教学科自动月配卡。增量字段由 backend/migrations/20261026_subject_cards.js 检查后添加。
+CREATE TABLE IF NOT EXISTS card_subject (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  school_id BIGINT UNSIGNED NOT NULL,
+  subject_code VARCHAR(30) NOT NULL,
+  subject_name VARCHAR(60) NOT NULL,
+  status TINYINT NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_card_subject_code (school_id, subject_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS teacher_subject (
+  school_id BIGINT UNSIGNED NOT NULL,
+  teacher_id BIGINT UNSIGNED NOT NULL,
+  subject_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (school_id, teacher_id, subject_id),
+  FOREIGN KEY (teacher_id) REFERENCES users(id),
+  FOREIGN KEY (subject_id) REFERENCES card_subject(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS subject_card_policy (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  school_id BIGINT UNSIGNED NOT NULL,
+  subject_id BIGINT UNSIGNED NOT NULL,
+  version INT UNSIGNED NOT NULL,
+  effective_month VARCHAR(7) NOT NULL,
+  monthly_total INT UNSIGNED NOT NULL,
+  ratios_bps_json JSON NOT NULL,
+  enabled TINYINT NOT NULL DEFAULT 1,
+  created_by BIGINT UNSIGNED NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_subject_policy_version (subject_id, version),
+  KEY idx_subject_policy_effective (school_id, subject_id, effective_month, version),
+  FOREIGN KEY (subject_id) REFERENCES card_subject(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS card_allocation (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  school_id BIGINT UNSIGNED NOT NULL,
+  teacher_id BIGINT UNSIGNED NOT NULL,
+  month_key VARCHAR(7) NOT NULL,
+  term_id BIGINT UNSIGNED NOT NULL,
+  subject_id BIGINT UNSIGNED NOT NULL,
+  policy_version_id BIGINT UNSIGNED NOT NULL,
+  teacher_name VARCHAR(64) NOT NULL,
+  subject_name VARCHAR(60) NOT NULL,
+  monthly_total INT UNSIGNED NOT NULL,
+  counts_json JSON NOT NULL,
+  category_version VARCHAR(30) NOT NULL DEFAULT 'V1',
+  valid_from DATETIME NOT NULL,
+  valid_until DATETIME NOT NULL,
+  review_deadline_at DATETIME NOT NULL,
+  status ENUM('GENERATING','READY','FAILED') NOT NULL DEFAULT 'GENERATING',
+  error_message VARCHAR(500) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_card_allocation_month (school_id,teacher_id,month_key),
+  KEY idx_card_allocation_subject (school_id,subject_id,month_key),
+  FOREIGN KEY (teacher_id) REFERENCES users(id),
+  FOREIGN KEY (term_id) REFERENCES academic_year(id),
+  FOREIGN KEY (subject_id) REFERENCES card_subject(id),
+  FOREIGN KEY (policy_version_id) REFERENCES subject_card_policy(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS card_generation_issue (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  school_id BIGINT UNSIGNED NOT NULL,
+  teacher_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  month_key VARCHAR(7) NOT NULL,
+  reason_code VARCHAR(40) NOT NULL,
+  reason_message VARCHAR(500) NOT NULL,
+  resolved TINYINT NOT NULL DEFAULT 0,
+  last_attempt_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_card_issue (school_id,month_key,teacher_id,reason_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS card_print_pack (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  school_id BIGINT UNSIGNED NOT NULL,
+  month_key VARCHAR(7) NOT NULL,
+  manifest_json JSON NOT NULL,
+  issues_json JSON NOT NULL,
+  manifest_hash CHAR(64) NOT NULL,
+  template_version VARCHAR(20) NOT NULL DEFAULT 'V1',
+  status ENUM('PENDING','READY','FAILED') NOT NULL DEFAULT 'PENDING',
+  file_path VARCHAR(500) NULL,
+  file_sha256 CHAR(64) NULL,
+  error_message VARCHAR(500) NULL,
+  created_by BIGINT UNSIGNED NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_card_print_manifest (school_id,month_key,manifest_hash,template_version)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

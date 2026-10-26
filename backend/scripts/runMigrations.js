@@ -9,6 +9,7 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const mysql = require("mysql2/promise");
+const { migrateSubjectCards } = require('../migrations/20261026_subject_cards');
 
 async function run() {
   const dbName = process.env.DB_NAME || "student_growth";
@@ -46,12 +47,14 @@ async function run() {
     let fullSchemaPath = candidateSqlPaths.find((p) => fs.existsSync(p));
     if (fullSchemaPath) {
       console.log(`📄 正在执行建表脚本: ${fullSchemaPath}`);
-      const sqlContent = fs.readFileSync(fullSchemaPath, "utf-8");
+      const sqlContent = fs.readFileSync(fullSchemaPath, "utf-8").replace(/`student_growth`/g, '`' + dbName.replace(/`/g, '``') + '`');
       await conn.query(sqlContent);
       console.log(`✅ 建表脚本执行完成`);
     } else {
       console.log(`ℹ️ 未找到 00_full_schema.sql 文件，跳过 SQL 脚本执行`);
     }
+
+    await migrateSubjectCards(conn);
 
     // 3. 确保 token_blacklist 表存在
     await conn.query(`

@@ -8,3 +8,5 @@ deploy/backend.env
 backend/uploads/
 .workbuddy/
 scratch/
+
+backend/private/

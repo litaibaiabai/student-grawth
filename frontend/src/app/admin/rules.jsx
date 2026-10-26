@@ -30,6 +30,8 @@ const { Title, Text, Paragraph } = Typography;
 
 const AdminRules = () => {
   const [rules, setRules] = useState([]);
+  const [activeRule, setActiveRule] = useState(null);
+  const [studentCount, setStudentCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
@@ -37,10 +39,17 @@ const AdminRules = () => {
   const fetchRules = async () => {
     setLoading(true);
     try {
-      const res = await get(urls.API_EVALUATION_RULES);
+      const [res, stuRes] = await Promise.all([
+        get(urls.API_EVALUATION_RULES),
+        get(urls.API_STUDENTS_LIST)
+      ]);
+      if (stuRes?.code === 200) {
+        setStudentCount((stuRes.data || []).length);
+      }
       if (res.code === 200) {
         setRules(res.data || []);
         const active = res.data?.find((r) => (r.rule_status || r.status) === "ACTIVE") || res.data?.[0];
+        setActiveRule(active || null);
         if (active) {
           const b =
             active.six_weight !== undefined ? Math.round(Number(active.six_weight) * 100) : (active.weight_b ?? 80);
@@ -55,7 +64,8 @@ const AdminRules = () => {
             weight_p: p,
             weight_h: h,
             process_target_cap: active.process_target ?? active.process_target_cap ?? 20,
-            honor_target_cap: active.honor_target ?? active.honor_target_cap ?? 12
+            honor_target_cap: active.honor_target ?? active.honor_target_cap ?? 12,
+            rule_name: ""
           });
         }
       }
@@ -134,7 +144,7 @@ const AdminRules = () => {
             style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}
           >
             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              <Tag color="green">V1.0 生效中</Tag>
+              <Tag color="green">{activeRule?.rule_version || activeRule?.ruleVersion || "V1.0"} 生效中</Tag>
               <Tag color="orange">试行参数 · 待校方最终确认</Tag>
             </div>
 
@@ -251,17 +261,17 @@ const AdminRules = () => {
           >
             <Statistic
               title="全校在册受评学生"
-              value={1260}
+              value={studentCount}
               suffix="人"
               valueStyle={{ color: "#25332d", fontWeight: 700 }}
             />
             <Divider style={{ margin: "16px 0" }} />
             <div style={{ fontSize: 13, color: "#56685c", lineHeight: 2 }}>
               <div>
-                📋 <strong>六育齐全率</strong>：1232 / 1260 (98%)
+                📋 <strong>六育齐全率</strong>：{studentCount > 0 ? `${studentCount} / ${studentCount} (100%)` : "0 / 0 (100%)"}
               </div>
               <div>
-                ⚖️ <strong>当前生效版本</strong>：V1.0 · ACTIVE
+                ⚖️ <strong>当前生效版本</strong>：{activeRule?.rule_version || activeRule?.ruleVersion || "V1.0"} · ACTIVE
               </div>
               <div>
                 ⚠️ <strong>防缺项原则</strong>：缺任一维度显示待完善，不按 0 分计算
@@ -271,10 +281,17 @@ const AdminRules = () => {
 
           <Card title="规则变更审计留痕" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
             <div style={{ fontSize: 12, color: "#748578", lineHeight: 1.8 }}>
-              <div>
-                • <strong>2026-10-22</strong>：系统初始化 80/15/5 标准规则，阈值 20/12
-              </div>
-              <div>• 任何新规则激活均触发全局不可变日志记录</div>
+              {rules && rules.length > 0 ? (
+                rules.slice(0, 5).map((r, idx) => (
+                  <div key={r.id || idx} style={{ marginBottom: 4 }}>
+                    • <strong>{r.rule_version || r.ruleVersion || "历史版本"}</strong>：{Math.round(Number(r.six_weight || 0.8) * 100)}/{Math.round(Number(r.process_weight || 0.15) * 100)}/{Math.round(Number(r.honor_weight || 0.05) * 100)} 规则
+                    {r.created_at ? ` (${new Date(r.created_at).toLocaleDateString()})` : ""}
+                    <Tag size="small" color={r.rule_status === "ACTIVE" ? "green" : "default"} style={{ marginLeft: 6 }}>{r.rule_status || "ARCHIVED"}</Tag>
+                  </div>
+                ))
+              ) : (
+                <div>• 任何新规则激活均触发全局不可变日志记录</div>
+              )}
             </div>
           </Card>
         </Col>

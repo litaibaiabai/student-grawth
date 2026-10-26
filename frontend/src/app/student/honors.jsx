@@ -264,7 +264,14 @@ const StudentHonors = () => {
         footer={null}
         destroyOnClose
       >
-        <Form form={form} layout="vertical" onFinish={handleCreate}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleCreate}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") e.preventDefault();
+          }}
+        >
           <Form.Item name="title" label="活动 / 赛事项目名称" rules={[{ required: true, message: "请输入赛事名称" }]}>
             <Input placeholder="例如：全国青少年信息素养大赛科技创新赛" />
           </Form.Item>
@@ -320,7 +327,14 @@ const StudentHonors = () => {
         footer={null}
         destroyOnClose
       >
-        <Form form={resubmitForm} layout="vertical" onFinish={handleResubmit}>
+        <Form
+          form={resubmitForm}
+          layout="vertical"
+          onFinish={handleResubmit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") e.preventDefault();
+          }}
+        >
           <Alert
             message={`退回原因：${currentHonor?.reject_reason || "材料需补充"}`}
             type="warning"

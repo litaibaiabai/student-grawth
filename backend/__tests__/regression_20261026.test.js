@@ -53,6 +53,7 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
     const queryHandler = async (sql, params = []) => {
       executedQueries.push({ sql, params });
 
+      if(sql.includes('GET_LOCK'))return [[{acquired:1}]];
       // 模拟当前活跃学期查询
       if (sql.includes("FROM academic_year") && sql.includes("is_current = 1")) {
         return [[{ id: 1, academic_year: "2026-2027", semester: 1, is_current: 1, active: 1, start_date: "2026-09-01", end_date: "2027-01-31" }]];
@@ -64,6 +65,9 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
         ]];
       }
       // 模拟指标查询
+      if(sql.includes('FROM edu_evaluation_category leaf')){
+        return [[{id:7,category_code:'D01-01',category_name:'主动礼貌问候',category_level:3,score:1,status:1,version:'V1',parent_id:6,parent_code:'D01',parent_name:'文明礼貌',parent_level:2,parent_status:1,parent_version:'V1',root_id:1,root_code:'D',root_name:'德育',root_level:1,root_status:1,root_version:'V1'}]];
+      }
       if (sql.includes("FROM edu_evaluation_category")) {
         return [[{ id: 7, category_code: "D01-01", category_name: "主动礼貌问候", score: 1, category_level: 3, status: 1 }]];
       }
@@ -84,7 +88,7 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
       }
       // 模拟申领单锁定查询
       if (sql.includes("FROM card_claim") && sql.includes("FOR UPDATE")) {
-        return [[{ id: 701, school_id: 1, card_id: 110, student_id: 4, status: "PENDING", term_id: 1, category_id: 7, grade: 4, class_no: 1 }]];
+        return [[{ id:701,school_id:1,card_school_id:1,card_id:110,student_id:4,status:'PENDING',card_status:'PENDING',teacher_id:2,term_id:1,dimension_code:'D',is_legacy_test:0,allocation_id:1,allocation_category_version:'V1',effective_review_deadline:'2099-01-03 23:59:59',category_id:null,grade:4,class_no:1 }]];
       }
       // 模拟荣誉查询
       if (sql.includes("FROM honor_record") && sql.includes("FOR UPDATE")) {
@@ -145,6 +149,21 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
             })
           }
         ]];
+      }
+      // 模拟卡片配额规则查询
+      if (sql.includes("FROM card_quota_rule")) {
+        return [[{
+          id: 1,
+          school_id: 1,
+          term_id: 1,
+          month_key: "2026-10",
+          teacher_id: 2,
+          teacher_name: "张老师",
+          quota_n: 50,
+          allocation_json: JSON.stringify({ D: 10, Z: 10, T: 10, M: 10, L: 5, G: 5 }),
+          created_at: "2026-10-22",
+          updated_at: "2026-10-22"
+        }]];
       }
       // 默认插入返回 insertId
       return [{ insertId: 999, affectedRows: 1 }];
@@ -222,10 +241,42 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
     assert.equal(term.isCurrent, true);
   });
 
+  test("1.4 saveTerm 未显式传入起止日期时自动按中国小学校历标准推导默认日期", async () => {
+    // 验证第1学期（秋季学期）自动推导为 9月1日 ~ 次年1月31日
+    const reqTerm1 = {
+      body: {
+        academic_year: "2028-2029",
+        semester: 1
+      },
+      user: { id: 1, schoolId: 1, role: "manager" }
+    };
+    const resTerm1 = createMockRes();
+    await termController.saveTerm(reqTerm1, resTerm1, (err) => { if (err) throw err; });
+
+    assert.equal(resTerm1.statusCode, 200);
+    assert.equal(resTerm1.data.data.startDate, "2028-09-01");
+    assert.equal(resTerm1.data.data.endDate, "2029-01-31");
+
+    // 验证第2学期（春季学期）自动推导为 2月20日 ~ 7月15日
+    const reqTerm2 = {
+      body: {
+        academic_year: "2028-2029",
+        semester: 2
+      },
+      user: { id: 1, schoolId: 1, role: "manager" }
+    };
+    const resTerm2 = createMockRes();
+    await termController.saveTerm(reqTerm2, resTerm2, (err) => { if (err) throw err; });
+
+    assert.equal(resTerm2.statusCode, 200);
+    assert.equal(resTerm2.data.data.startDate, "2029-02-20");
+    assert.equal(resTerm2.data.data.endDate, "2029-07-15");
+  });
+
   // ---------------------------------------------------------
   // 2. 评价卡管理模块 (/admin/cards, /admin/card-quotas)
   // ---------------------------------------------------------
-  test("2.1 setCardQuota 兼容 quota_count 与 allocations，杜绝 422", async () => {
+  test("2.1 旧逐教师配额写入已退役", async () => {
     const req = {
       body: {
         teacher_id: 2,
@@ -239,12 +290,12 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
 
     await cardController.setCardQuota(req, res, (err) => { if (err) throw err; });
 
-    assert.equal(res.statusCode, 200);
-    assert.equal(res.data.code, 200);
-    assert.equal(res.data.data.quotaN, 30);
+    assert.equal(res.statusCode,410);
+    assert.equal(res.data.code,410);
+    assert.equal(res.data.data,null);
   });
 
-  test("2.2 generateMonthCards 兼容 category_id 并返回 serial_no 与 serialNo", async () => {
+  test("2.2 旧手工制卡不再生成令牌", async () => {
     const req = {
       body: {
         category_id: 7,
@@ -258,20 +309,15 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
 
     await cardController.generateMonthCards(req, res, (err) => { if (err) throw err; });
 
-    assert.equal(res.statusCode, 200);
-    assert.equal(res.data.data.cards.length, 2);
-    const firstCard = res.data.data.cards[0];
-    assert.ok(firstCard.serialNo > 0);
-    assert.ok(firstCard.serial_no > 0);
-    assert.equal(firstCard.serialNo, firstCard.serial_no);
-    assert.equal(firstCard.monthKey, "2026-10");
+    assert.equal(res.statusCode,410);
+    assert.equal(res.data.data,null);
   });
 
   test("2.3 decideClaim 兼容 APPROVE/APPROVED/通过 多种决策输入", async () => {
     for (const dec of ["APPROVE", "APPROVED", "通过"]) {
       const req = {
         params: { id: "701" },
-        body: { decision: dec },
+        body: {decision:dec,categoryId:7},
         user: { id: 2, schoolId: 1, role: "teacher" }
       };
       const res = createMockRes();
@@ -446,5 +492,132 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
     assert.equal(res.data.code, 200);
     assert.equal(res.data.data.studentId, 4);
     assert.equal(res.data.data.comprehensiveScore, 92.5);
+  });
+
+  // ---------------------------------------------------------
+  // 8. 20261026 有头模式缺陷针对性回归测试
+  // ---------------------------------------------------------
+  test("8.1 setCurrentTerm 成功将指定学期设为当前学期并清除其他学期当前标记", async () => {
+    const req = {
+      params: { id: "2" },
+      user: { schoolId: 1, id: 1 }
+    };
+    const res = createMockRes();
+
+    await termController.setCurrentTerm(req, res, (err) => { if (err) throw err; });
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.data.code, 200);
+    assert.equal(res.data.data.termId, 2);
+
+    // 验证更新 SQL 执行了两次（一次重置，一次设置）
+    const resetCurrent = executedQueries.find((q) => q.sql.includes("UPDATE academic_year SET is_current = 0"));
+    const setCurrent = executedQueries.find((q) => q.sql.includes("UPDATE academic_year SET is_current = 1, active = 1"));
+    assert.ok(resetCurrent, "必须清除原当前学期标记");
+    assert.ok(setCurrent, "必须设置新当前学期标记");
+  });
+
+  test("8.2 saveTerm 支持通过 req.params.id 更新学期数据", async () => {
+    const req = {
+      params: { id: "3" },
+      body: {
+        academic_year: "2027-2028",
+        semester: 2,
+        start_date: "2028-02-20",
+        end_date: "2028-07-15",
+        is_current: false
+      },
+      user: { schoolId: 1, id: 1 }
+    };
+    const res = createMockRes();
+
+    await termController.saveTerm(req, res, (err) => { if (err) throw err; });
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.data.code, 200);
+    assert.equal(res.data.data.id, 3);
+
+    const updateQuery = executedQueries.find((q) => q.sql.includes("UPDATE academic_year"));
+    assert.ok(updateQuery, "必须执行 UPDATE academic_year 语句");
+  });
+
+  test("8.3 旧配额查询明确提示迁移至只读分配", async () => {
+    const req = {
+      user: { schoolId: 1, id: 1 }
+    };
+    const res = createMockRes();
+
+    await cardController.getCardQuotas(req, res, (err) => { if (err) throw err; });
+
+    assert.equal(res.statusCode,410);
+    assert.equal(res.data.code,410);
+    assert.equal(res.data.data,null);
+  });
+
+  test("8.4 previewImport 教师角色导入 DIMENSION 维度终测分必须被拦截 (403)", async () => {
+    const req = {
+      body: {
+        type: "DIMENSION",
+        items: [{ studentId: 4, dimension: "D", score: 95 }]
+      },
+      user: { schoolId: 1, id: 2, role: "teacher" }
+    };
+    const res = createMockRes();
+
+    await importController.previewImport(req, res, (err) => {
+      assert.ok(err, "教师导入终测分应被阻断");
+      assert.equal(err.status, 403);
+      assert.ok(err.message.includes("管理员"));
+    });
+  });
+
+  test("8.5 previewImport 六育终测分展示清晰的维度标签而非'五育维度分'", async () => {
+    const req = {
+      body: {
+        type: "DIMENSION",
+        items: [
+          { studentId: 4, dimension: "D", score: 95 },
+          { studentId: 4, dimension: "G", score: 96 }
+        ]
+      },
+      user: { schoolId: 1, id: 1, role: "manager" }
+    };
+    const res = createMockRes();
+
+    await importController.previewImport(req, res, (err) => { if (err) throw err; });
+
+    assert.equal(res.statusCode, 200);
+    const diffs = res.data.data.diffs;
+    assert.equal(diffs.length, 2);
+    assert.equal(diffs[0].target, "【D】德育终测分");
+    assert.equal(diffs[1].target, "【G】生活故事终测分");
+  });
+
+  test("8.6 教师也无法访问已退役的旧配额入口", async () => {
+    const req = {
+      user: { schoolId: 1, id: 2, role: "teacher" },
+      query: {}
+    };
+    const res = createMockRes();
+
+    await cardController.getCardQuotas(req, res, (err) => { if (err) throw err; });
+
+    assert.equal(res.statusCode,410);
+    assert.equal(res.data.data,null);
+  });
+
+  test("8.7 setCurrentTerm 成功将操作记录落盘至 operation_audit", async () => {
+    const req = {
+      params: { id: "1" },
+      user: { schoolId: 1, id: 10, role: "manager" }
+    };
+    const res = createMockRes();
+
+    await termController.setCurrentTerm(req, res, (err) => { if (err) throw err; });
+
+    assert.equal(res.statusCode, 200);
+    const auditRecord = executedQueries.find((q) => q.sql.includes("INSERT INTO operation_audit") && q.sql.includes("SET_CURRENT_TERM"));
+    assert.ok(auditRecord, "必须记录 SET_CURRENT_TERM 审计留痕");
+    assert.equal(auditRecord.params[1], 10, "操作人 ID 必须准确记录");
   });
 });

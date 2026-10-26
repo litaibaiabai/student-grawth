@@ -16,7 +16,9 @@ import {
   Alert,
   Row,
   Col,
-  Badge
+  Badge,
+  Popconfirm,
+  Tooltip
 } from "antd";
 import {
   CalendarOutlined,
@@ -24,12 +26,81 @@ import {
   ReloadOutlined,
   CheckCircleOutlined,
   LockOutlined,
-  SafetyCertificateOutlined
+  SafetyCertificateOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
-import { get, post } from "@/util/request";
+import dayjs from "dayjs";
+import { get, post, put } from "@/util/request";
 import * as urls from "@/constant/urls";
 
 const { Text, Title } = Typography;
+
+/**
+ * 根据中国中小学/小学校历规则计算学期起止日期标准范围
+ * - 第一学期（秋季学期）：当年9月1日开学 ~ 翌年1月31日（寒假前）
+ * - 第二学期（春季学期）：翌年2月20日（元宵节前后春季开学）~ 7月15日（暑假前）
+ * @param {string} academicYear 学年格式，如 "2026-2027"
+ * @param {number|string} semester 学期，1为上学期，2为下学期
+ * @returns {[dayjs.Dayjs, dayjs.Dayjs]|null}
+ */
+export const getChinaSchoolTermDates = (academicYear, semester) => {
+  if (!academicYear) return null;
+  const match = String(academicYear).match(/^(\d{4})-(\d{4})$/);
+  if (!match) return null;
+  const startYear = parseInt(match[1], 10);
+  const endYear = parseInt(match[2], 10);
+
+  const sem = Number(semester);
+  if (sem === 1) {
+    return [
+      dayjs(`${startYear}-09-01`),
+      dayjs(`${endYear}-01-31`)
+    ];
+  } else if (sem === 2) {
+    return [
+      dayjs(`${endYear}-02-20`),
+      dayjs(`${endYear}-07-15`)
+    ];
+  }
+  return null;
+};
+
+/**
+ * 根据当前系统日期自动推导中国小学当前的学年、学期及校历起止时间段
+ * - 8月 ~ 12月：新学年秋季学期 (第1学期，如 2026-09-01 ~ 2027-01-31)
+ * - 1月：上一学年秋季学期期末 (第1学期)
+ * - 2月 ~ 7月：春季学期 (第2学期，如 2027-02-20 ~ 2027-07-15)
+ * @param {dayjs.Dayjs} [now=dayjs()]
+ */
+export const getDefaultChinaTermConfig = (now = dayjs()) => {
+  const currentYear = now.year();
+  const currentMonth = now.month() + 1; // 1 ~ 12
+
+  let academicYear = "";
+  let semester = 1;
+
+  if (currentMonth >= 8) {
+    // 8月~12月：秋季学期（第1学期）
+    academicYear = `${currentYear}-${currentYear + 1}`;
+    semester = 1;
+  } else if (currentMonth === 1) {
+    // 1月：仍为当年秋季学期（第1学期）
+    academicYear = `${currentYear - 1}-${currentYear}`;
+    semester = 1;
+  } else {
+    // 2月~7月：春季学期（第2学期）
+    academicYear = `${currentYear - 1}-${currentYear}`;
+    semester = 2;
+  }
+
+  const dateRange = getChinaSchoolTermDates(academicYear, semester);
+  return {
+    academic_year: academicYear,
+    semester,
+    date_range: dateRange,
+    is_current: false
+  };
+};
 
 const AdminTerms = () => {
   const [terms, setTerms] = useState([]);
@@ -37,6 +108,7 @@ const AdminTerms = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
+  const [editing, setEditing] = useState(null);
 
   const fetchTerms = async () => {
     setLoading(true);
@@ -56,6 +128,14 @@ const AdminTerms = () => {
     fetchTerms();
   }, []);
 
+  const handleOpenCreateModal = () => {
+    const defaults = getDefaultChinaTermConfig();
+    setEditing(null);
+    form.resetFields();
+    form.setFieldsValue({...defaults,active:true});
+    setCreateModalOpen(true);
+  };
+
   const handleCreateTerm = async (values) => {
     setSubmitting(true);
     try {
@@ -64,15 +144,18 @@ const AdminTerms = () => {
         semester: values.semester,
         startDate: values.date_range[0].format("YYYY-MM-DD"),
         endDate: values.date_range[1].format("YYYY-MM-DD"),
-        isCurrent: !!values.is_current
+        isCurrent: !!values.is_current,
+        active: values.active,
+        reviewDeadlineAt: values.review_deadline_at ? values.review_deadline_at.second(59).format("YYYY-MM-DD HH:mm:ss") : undefined
       };
 
-      const res = await post(urls.API_ADMIN_TERMS, payload);
+      const res = editing ? await put(`${urls.API_ADMIN_TERMS}/${editing.id}`, payload) : await post(urls.API_ADMIN_TERMS, payload);
       if (res.code === 200) {
-        message.success("新学期创建成功并已配置校历！");
+        message.success(editing ? "学期配置已更新" : "新学期创建成功并已配置校历！");
         setCreateModalOpen(false);
         form.resetFields();
         fetchTerms();
+        window.dispatchEvent(new CustomEvent("term-change"));
       } else {
         message.error(res.message || "创建学期失败");
       }
@@ -81,6 +164,27 @@ const AdminTerms = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSetCurrent = async (id) => {
+    try {
+      const res = await post(`${urls.API_ADMIN_TERMS}/${id}/set-current`);
+      if (res.code === 200) {
+        message.success("已成功切换当前活跃学期！");
+        fetchTerms();
+        window.dispatchEvent(new CustomEvent("term-change"));
+      } else {
+        message.error(res.message || "切换学期失败");
+      }
+    } catch (err) {
+      if (!err.handled) message.error(err.message || "操作失败");
+    }
+  };
+
+  const editTerm = (r) => {
+    setEditing(r);form.resetFields();
+    form.setFieldsValue({academic_year:r.academicYear,semester:Number(r.semester),date_range:[dayjs(r.startDate),dayjs(r.endDate)],review_deadline_at:dayjs(r.reviewDeadlineAt),is_current:r.isCurrent,active:r.isActive});
+    setCreateModalOpen(true);
   };
 
   const columns = [
@@ -115,15 +219,17 @@ const AdminTerms = () => {
       render: (_, r) => {
         const s = r.start_date || r.startDate;
         const e = r.end_date || r.endDate;
+        const formatStr = (d) => (d ? dayjs(d).format("YYYY-MM-DD") : "--");
         return (
           <span>
-            {s ? new Date(s).toLocaleDateString("zh-CN") : "--"}
+            {formatStr(s)}
             {" ~ "}
-            {e ? new Date(e).toLocaleDateString("zh-CN") : "--"}
+            {formatStr(e)}
           </span>
         );
       }
     },
+    {title:"审核截止",dataIndex:"reviewDeadlineAt",render:v=>v||"学期结束日23:59:59"},
     {
       title: "运行状态",
       dataIndex: "active",
@@ -150,6 +256,30 @@ const AdminTerms = () => {
             <Text style={{ color: "#059669" }}>可录入/评价中</Text>
           </Space>
         )
+    },
+    {
+      title: "操作",
+      key: "action",
+      width: 140,
+      render: (_, r) => {
+        const isCur = r.is_current === 1 || r.isCurrent;
+        if (isCur) {
+          return <Space direction="vertical"><Tag color="blue">当前生效中</Tag>{r.school_id&&<Button type="link" onClick={()=>editTerm(r)}>编辑校历与审核截止</Button>}</Space>;
+        }
+        return (
+          <Space direction="vertical">{r.school_id&&<Button type="link" onClick={()=>editTerm(r)}>编辑校历与审核截止</Button>}<Popconfirm
+            title="确认将该学期设为当前活跃学期？"
+            description="切换默认展示学期；评价卡仍按有效校历的月份自动分配。"
+            onConfirm={() => handleSetCurrent(r.id)}
+            okText="确认切换"
+            cancelText="取消"
+          >
+            <Button type="link" size="small">
+              设为当前学期
+            </Button>
+          </Popconfirm></Space>
+        );
+      }
     }
   ];
 
@@ -175,14 +305,14 @@ const AdminTerms = () => {
               学期与校历周期管理
             </Title>
             <Text style={{ color: "#94a3b8", fontSize: 13 }}>
-              定义全校活跃学期，管控评价业务有效时间窗。所有过程卡片、荣誉申报及期末评价均严格依附当前活跃学期。
+              配置校历与审核截止时间。评价卡只在有效学期覆盖的月份发放，不发放寒暑假月份卡片。
             </Text>
           </Col>
           <Col>
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => setCreateModalOpen(true)}
+              onClick={handleOpenCreateModal}
               style={{
                 background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
                 border: "none",
@@ -209,7 +339,7 @@ const AdminTerms = () => {
       >
         <Alert
           message="多学期排他性规则"
-          description="同一时刻全校仅允许一个学期标记为【当前活跃学期】(is_current=1)。激活新学期将自动将旧学期标记为已归档只读。"
+          description="默认展示学期与有效校历分别管理。卡片按本校有效校历分配，校历重叠时会提示异常。审核截止默认在学期结束日23:59，可按学校安排调整。"
           type="info"
           showIcon
           style={{ marginBottom: 16, borderRadius: 8 }}
@@ -223,22 +353,40 @@ const AdminTerms = () => {
         title={
           <Space>
             <CalendarOutlined style={{ color: "#2563eb" }} />
-            <span>配置并启动新学期</span>
+            <span>{editing ? "编辑学期校历" : "配置新学期"}</span>
           </Space>
         }
         open={createModalOpen}
         onOk={() => form.submit()}
         onCancel={() => setCreateModalOpen(false)}
         confirmLoading={submitting}
-        okText="立即创建"
+        okText={editing ? "保存修改" : "立即创建"}
         cancelText="取消"
+        width={560}
       >
+        <Alert
+          type="info"
+          showIcon
+          icon={<InfoCircleOutlined />}
+          message="校历智能推荐机制"
+          description="系统已结合中国小学校历时间自动推导当期学年与起止段（秋季学期9月1日~次年1月31日，春季学期2月20日~7月15日）。您可根据本校校历实际排课直接使用或灵活调整。"
+          style={{ marginTop: 12, marginBottom: 16, borderRadius: 8 }}
+        />
+
         <Form
           form={form}
           layout="vertical"
           onFinish={handleCreateTerm}
-          initialValues={{ is_current: true }}
-          style={{ marginTop: 16 }}
+          initialValues={getDefaultChinaTermConfig()}
+          onValuesChange={(changedValues, allValues) => {
+            // 当学年或学期发生变动时，自动联动匹配中国小学校历标准起止日期
+            if (changedValues.academic_year !== undefined || changedValues.semester !== undefined) {
+              const recommendedDates = getChinaSchoolTermDates(allValues.academic_year, allValues.semester);
+              if (recommendedDates) {
+                form.setFieldsValue({ date_range: recommendedDates });
+              }
+            }
+          }}
         >
           <Form.Item
             name="academic_year"
@@ -255,19 +403,63 @@ const AdminTerms = () => {
             <Select
               placeholder="选择学期"
               options={[
-                { value: 1, label: "第一学期（上学期）" },
-                { value: 2, label: "第二学期（下学期）" }
+                { value: 1, label: "第一学期（秋季学期 / 上学期）" },
+                { value: 2, label: "第二学期（春季学期 / 下学期）" }
               ]}
             />
           </Form.Item>
 
           <Form.Item
             name="date_range"
-            label="学期起止日期 (校历范围)"
+            label={
+              <Space size={8}>
+                <span>学期起止日期 (校历范围)</span>
+                <Tag color="cyan" style={{ fontSize: 11, borderRadius: 4 }}>
+                  已按中国小学校历自动推荐
+                </Tag>
+              </Space>
+            }
+            extra="默认起止段：第1学期(当年09-01 ~ 次年01-31)，第2学期(当年02-20 ~ 当年07-15)。支持点击下方快捷键一键套用。"
             rules={[{ required: true, message: "请选择学期起止日期" }]}
           >
-            <DatePicker.RangePicker placeholder={["开始日期", "结束日期"]} style={{ width: "100%" }} />
+            <DatePicker.RangePicker
+              placeholder={["开始日期", "结束日期"]}
+              style={{ width: "100%" }}
+              format="YYYY-MM-DD"
+            />
           </Form.Item>
+
+          <div style={{ marginTop: -8, marginBottom: 16, display: "flex", gap: 8 }}>
+            <Button
+              size="small"
+              type="dashed"
+              onClick={() => {
+                const ay = form.getFieldValue("academic_year") || getDefaultChinaTermConfig().academic_year;
+                form.setFieldsValue({
+                  semester: 1,
+                  date_range: getChinaSchoolTermDates(ay, 1)
+                });
+              }}
+            >
+              套用第1学期标准校历 (9.1 ~ 1.31)
+            </Button>
+            <Button
+              size="small"
+              type="dashed"
+              onClick={() => {
+                const ay = form.getFieldValue("academic_year") || getDefaultChinaTermConfig().academic_year;
+                form.setFieldsValue({
+                  semester: 2,
+                  date_range: getChinaSchoolTermDates(ay, 2)
+                });
+              }}
+            >
+              套用第2学期标准校历 (2.20 ~ 7.15)
+            </Button>
+          </div>
+
+          <Form.Item name="review_deadline_at" label="学期审核截止（北京时间）" extra="默认在学期结束日23:59。已扫码卡的审核还受次月3日23:59限制。"><DatePicker showTime={{format:"HH:mm"}} format="YYYY-MM-DD HH:mm" style={{width:"100%"}}/></Form.Item>
+          <Form.Item name="active" label="校历有效" valuePropName="checked" initialValue={true}><Switch/></Form.Item>
 
           <Form.Item name="is_current" label="设为当前活跃学期" valuePropName="checked">
             <Switch />

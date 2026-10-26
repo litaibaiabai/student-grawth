@@ -5,6 +5,10 @@ import zhCN from "antd/locale/zh_CN";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
 import token from "@/util/token";
+import {captureClaimLocation,claimReturnPath} from "@/util/claimIntent";
+
+// Capture before the authentication guard redirects an unopened claim page.
+captureClaimLocation();
 import { get } from "@/util/request";
 import { API_AUTH_ME } from "@/constant/urls";
 import Topbar from "@/component/Nav";
@@ -68,6 +72,12 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    const capture=()=>captureClaimLocation();
+    window.addEventListener("hashchange",capture);
+    return ()=>window.removeEventListener("hashchange",capture);
+  },[]);
 
   // 检查登录状态
   const getAuthState = useCallback(() => {
@@ -148,7 +158,7 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             {/* 登录页 */}
-            <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+            <Route path="/login" element={isAuthenticated ? <Navigate to={claimReturnPath()} replace /> : <Login />} />
 
             {/* 首页仪表盘 */}
             <Route

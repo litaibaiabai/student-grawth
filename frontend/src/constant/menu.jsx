@@ -75,6 +75,7 @@ export const menuGroups = {
       group: "评价业务",
       items: [
         { key: "/admin/cards", path: "/admin/cards", label: "评价卡管理", icon: <CreditCardOutlined /> },
+        { key: "/teacher/claims", path: "/teacher/claims", label: "评价卡审核", icon: <CheckCircleOutlined /> },
         { key: "/admin/import", path: "/admin/import", label: "成绩导入", icon: <CloudUploadOutlined /> }
       ]
     },

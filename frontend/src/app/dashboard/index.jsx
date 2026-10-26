@@ -58,6 +58,7 @@ const Dashboard = () => {
   const [storiesCount, setStoriesCount] = useState(0);
   const [studentsCount, setStudentsCount] = useState(0);
   const [activeRuleVersion, setActiveRuleVersion] = useState("V1.0");
+  const [currentTerm, setCurrentTerm] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +68,9 @@ const Dashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        const termRes = await get(urls.API_CURRENT_TERM);
+        if (termRes.code === 200) setCurrentTerm(termRes.data);
+
         if (user.role === "student") {
           const [scoreRes, compRes] = await Promise.all([
             get(urls.API_STUDENT_SCORES),
@@ -358,7 +362,12 @@ const Dashboard = () => {
             </div>
             <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>教师工作台</h1>
             <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>
-              {name}老师，早上好。今天也有值得被看见的小小进步。
+              {(() => {
+                const hour = new Date().getHours();
+                const greeting = hour >= 5 && hour < 11 ? "早上好" : (hour >= 11 && hour < 14 ? "中午好" : (hour >= 14 && hour < 18 ? "下午好" : "晚上好"));
+                const teacherDisplayName = name.endsWith("老师") ? name : `${name}老师`;
+                return `${teacherDisplayName}，${greeting}。今天也有值得被看见的小小进步。`;
+              })()}
             </p>
           </div>
           <Button
@@ -654,10 +663,10 @@ const Dashboard = () => {
           <Card title="当前学期与校历档案" bordered={false} style={{ borderRadius: 12, border: "1px solid #e6ebe7" }}>
             <div style={{ fontSize: 13, color: "#3d4e42", lineHeight: 2 }}>
               <div>
-                <strong>当前学年学期</strong>：2026—2027 · 第一学期
+                <strong>当前学年学期</strong>：{currentTerm ? `${currentTerm.academicYear} · 第${currentTerm.semester === 1 || currentTerm.semester === "1" ? "一" : "二"}学期` : "2026—2027 · 第一学期"}
               </div>
               <div>
-                <strong>校历教学周期</strong>：2026-09-01 ~ 2027-01-31
+                <strong>校历教学周期</strong>：{currentTerm?.startDate ? `${String(currentTerm.startDate).slice(0, 10)} ~ ${String(currentTerm.endDate).slice(0, 10)}` : "2026-09-01 ~ 2027-01-31"}
               </div>
               <div>
                 <strong>业务运行状态</strong>：<Tag color="green">可操作 (ACTIVE)</Tag>
