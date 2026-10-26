@@ -44,6 +44,8 @@ export const API_REVIEW_STORY = (id) => `${BASE}/teacher/stories/${id}/review`;
 // 成绩导入
 export const API_IMPORT_PREVIEW = BASE + "/import/preview";
 export const API_IMPORT_COMMIT = BASE + "/import/commit";
+export const API_IMPORT_BATCH_PREVIEW = BASE + "/import/batch-preview";
+export const API_IMPORT_BATCH_COMMIT = BASE + "/import/batch-commit";
 
 // 综合评分
 export const API_COMPREHENSIVE_SCORE = BASE + "/student/comprehensive-score";
