@@ -62,6 +62,20 @@ const AdminCategories = () => {
     }
   };
 
+  // 统计三级叶子节点数量
+  const countLeaves = (nodes) => {
+    let count = 0;
+    const trav = (arr) => {
+      (arr || []).forEach((n) => {
+        if (!n.children || n.children.length === 0) count++;
+        else trav(n.children);
+      });
+    };
+    trav(nodes);
+    return count;
+  };
+  const totalLeafCount = countLeaves(categories);
+
   return (
     <div>
       {/* 标题 */}
@@ -88,7 +102,7 @@ const AdminCategories = () => {
             title={
               <Space>
                 <BranchesOutlined style={{ color: "#277460" }} />
-                <span>105项三级行为评价指标体系 (标准字典树)</span>
+                <span>{totalLeafCount > 0 ? `${totalLeafCount}项` : ""}三级行为评价指标体系 (标准字典树)</span>
               </Space>
             }
             bordered={false}

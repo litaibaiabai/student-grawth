@@ -58,7 +58,21 @@ async function getRules(req, res, next) {
        ORDER BY r.id DESC`,
       [schoolId]
     );
-    success(res, rows);
+
+    const formatted = rows.map((r) => ({
+      ...r,
+      termId: r.term_id,
+      ruleVersion: r.rule_version,
+      ruleName: r.rule_version,
+      sixWeight: r.six_weight,
+      processWeight: r.process_weight,
+      honorWeight: r.honor_weight,
+      processTarget: r.process_target,
+      honorTarget: r.honor_target,
+      ruleStatus: r.rule_status
+    }));
+
+    success(res, formatted);
   } catch (err) {
     next(err);
   } finally {
@@ -72,7 +86,8 @@ async function getRules(req, res, next) {
  */
 async function saveRule(req, res, next) {
   const {
-    termId = 1,
+    termId,
+    term_id,
     ruleVersion,
     rule_version,
     rule_name,
@@ -119,10 +134,19 @@ async function saveRule(req, res, next) {
     conn = await pool.getConnection();
     await conn.beginTransaction();
 
+    let targetTermId = termId || term_id;
+    if (!targetTermId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      targetTermId = termRows.length > 0 ? termRows[0].id : 1;
+    }
+
     if (ruleStatus === "ACTIVE") {
       await conn.query(
         "UPDATE comprehensive_score_rule SET rule_status = 'SUPERSEDED' WHERE school_id = ? AND term_id = ?",
-        [schoolId, termId]
+        [schoolId, targetTermId]
       );
     }
 
@@ -130,17 +154,23 @@ async function saveRule(req, res, next) {
       `INSERT INTO comprehensive_score_rule (
         school_id, term_id, rule_version, six_weight, process_weight, honor_weight,
         process_target, honor_target, rule_status, approved_by, approved_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [schoolId, termId, version, b, p, h, pt, ht, ruleStatus, adminId]
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ON DUPLICATE KEY UPDATE
+        six_weight = VALUES(six_weight),
+        process_weight = VALUES(process_weight),
+        honor_weight = VALUES(honor_weight),
+        process_target = VALUES(process_target),
+        honor_target = VALUES(honor_target),
+        rule_status = VALUES(rule_status),
+        approved_by = VALUES(approved_by),
+        approved_at = NOW()`,
+      [schoolId, targetTermId, version, b, p, h, pt, ht, ruleStatus, adminId]
     );
 
     await conn.commit();
     success(res, { id: insertRes.insertId, ruleVersion: version, ruleStatus }, "综合评分规则配置成功");
   } catch (err) {
     if (conn) await conn.rollback();
-    if (err.code === "ER_DUP_ENTRY") {
-      return fail(res, ErrorCodes.CONFLICT, `规则版本“${version}”已存在，请换一个版本标识`, 409);
-    }
     next(err);
   } finally {
     if (conn) conn.release();

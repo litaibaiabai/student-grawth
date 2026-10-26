@@ -98,9 +98,10 @@ const AdminTerms = () => {
       render: (_, r) => (
         <Space>
           <span style={{ fontWeight: 600, fontSize: 14 }}>
-            {r.academic_year}学年第{r.semester === 1 ? "一" : "二"}学期
+            {r.term_name ||
+              `${r.academic_year || r.academicYear || ""}学年第${r.semester === 1 || r.semester === "1" ? "一" : "二"}学期`}
           </span>
-          {r.is_current === 1 && (
+          {(r.is_current === 1 || r.isCurrent) && (
             <Tag color="cyan" style={{ fontWeight: 600 }}>
               当前活跃学期
             </Tag>
@@ -111,19 +112,28 @@ const AdminTerms = () => {
     {
       title: "学期周期 (开始 - 结束)",
       key: "dates",
-      render: (_, r) => (
-        <span>
-          {r.start_date ? new Date(r.start_date).toLocaleDateString("zh-CN") : "--"}
-          {" ~ "}
-          {r.end_date ? new Date(r.end_date).toLocaleDateString("zh-CN") : "--"}
-        </span>
-      )
+      render: (_, r) => {
+        const s = r.start_date || r.startDate;
+        const e = r.end_date || r.endDate;
+        return (
+          <span>
+            {s ? new Date(s).toLocaleDateString("zh-CN") : "--"}
+            {" ~ "}
+            {e ? new Date(e).toLocaleDateString("zh-CN") : "--"}
+          </span>
+        );
+      }
     },
     {
       title: "运行状态",
       dataIndex: "active",
       key: "status",
-      render: (active) => (active ? <Tag color="green">运行中</Tag> : <Tag color="default">已停用</Tag>)
+      render: (active, r) =>
+        active || r.status === "ACTIVE" || r.is_current === 1 || r.isCurrent ? (
+          <Tag color="green">运行中</Tag>
+        ) : (
+          <Tag color="default">已停用</Tag>
+        )
     },
     {
       title: "评价数据封存状态",
@@ -256,7 +266,7 @@ const AdminTerms = () => {
             label="学期起止日期 (校历范围)"
             rules={[{ required: true, message: "请选择学期起止日期" }]}
           >
-            <DatePicker.RangePicker style={{ width: "100%" }} />
+            <DatePicker.RangePicker placeholder={["开始日期", "结束日期"]} style={{ width: "100%" }} />
           </Form.Item>
 
           <Form.Item name="is_current" label="设为当前活跃学期" valuePropName="checked">

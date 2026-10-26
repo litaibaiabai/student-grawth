@@ -24,6 +24,8 @@ async function submitHonor(req, res, next) {
     requestKey
   } = req.body;
 
+  const eventTitle = title || awardName || req.body.eventTitle || req.body.event_title || req.body.name;
+
   let cleanCertUrl = certificateUrl;
   if (cleanCertUrl) {
     cleanCertUrl = cleanCertUrl.replace(/^(\/api\/v1)?\/uploads\//, "");
@@ -191,8 +193,12 @@ async function resubmitHonor(req, res, next) {
 async function reviewHonor(req, res, next) {
   const honorId = req.params.id;
   let { decision, rejectReason, comment } = req.body;
-  if (decision === "APPROVE") decision = "APPROVED";
-  if (decision === "REJECT") decision = "REJECTED";
+  if (!decision) {
+    return fail(res, ErrorCodes.VALIDATION_ERROR, "请提供审核决定", 422);
+  }
+  decision = String(decision).toUpperCase();
+  if (decision === "APPROVE" || decision === "PASS" || decision === "通过") decision = "APPROVED";
+  if (decision === "REJECT" || decision === "REFUSE" || decision === "驳回") decision = "REJECTED";
 
   if (!["APPROVED", "REJECTED"].includes(decision)) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "审核决定只能是 APPROVED 或 REJECTED", 422);

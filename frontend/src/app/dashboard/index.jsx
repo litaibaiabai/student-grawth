@@ -55,6 +55,9 @@ const Dashboard = () => {
   const [compData, setCompData] = useState(null);
   const [claimsCount, setClaimsCount] = useState(0);
   const [honorsCount, setHonorsCount] = useState(0);
+  const [storiesCount, setStoriesCount] = useState(0);
+  const [studentsCount, setStudentsCount] = useState(0);
+  const [activeRuleVersion, setActiveRuleVersion] = useState("V1.0");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,12 +75,25 @@ const Dashboard = () => {
           if (scoreRes.code === 200) setScoreData(scoreRes.data);
           if (compRes.code === 200) setCompData(compRes.data);
         } else if (user.role === "teacher") {
-          const [claimsRes, honorsRes] = await Promise.all([
+          const [claimsRes, honorsRes, storiesRes] = await Promise.all([
             get(urls.API_TEACHER_CLAIMS, { status: "PENDING" }),
-            get(urls.API_HONORS, { status: "PENDING" })
+            get(urls.API_HONORS, { status: "PENDING" }),
+            get(urls.API_STORIES, { status: "SUBMITTED" })
           ]);
           if (claimsRes.code === 200) setClaimsCount(claimsRes.data?.length || 0);
           if (honorsRes.code === 200) setHonorsCount(honorsRes.data?.length || 0);
+          if (storiesRes.code === 200) setStoriesCount(storiesRes.data?.length || 0);
+        } else if (user.role === "manager") {
+          const [studentsRes, rulesRes] = await Promise.all([
+            get(urls.API_STUDENTS_LIST),
+            get(urls.API_EVALUATION_RULES)
+          ]);
+          if (studentsRes.code === 200) setStudentsCount(studentsRes.data?.length || 0);
+          if (rulesRes.code === 200 && Array.isArray(rulesRes.data) && rulesRes.data.length > 0) {
+            const active =
+              rulesRes.data.find((r) => r.rule_status === "ACTIVE" || r.ruleStatus === "ACTIVE") || rulesRes.data[0];
+            setActiveRuleVersion(active.rule_version || active.ruleVersion || "V1.0");
+          }
         }
       } catch (err) {
         // 容错
@@ -243,9 +259,24 @@ const Dashboard = () => {
                   },
                   {
                     title: "积分变动",
+                    dataIndex: "delta",
                     key: "delta",
                     width: 90,
-                    render: () => <span style={{ color: "#277460", fontWeight: 700, fontSize: 15 }}>+1.00</span>
+                    render: (delta) => {
+                      const d = Number(delta ?? 1);
+                      const isPos = d > 0;
+                      return (
+                        <span
+                          style={{
+                            color: isPos ? "#277460" : "#dc2626",
+                            fontWeight: 700,
+                            fontSize: 15
+                          }}
+                        >
+                          {isPos ? `+${d.toFixed(2)}` : d.toFixed(2)}
+                        </span>
+                      );
+                    }
                   }
                 ]}
                 locale={{ emptyText: "本学期暂无过程记录，快去向老师领取激励卡吧" }}
@@ -390,7 +421,7 @@ const Dashboard = () => {
             </div>
             <div>
               <div className="stat-value">
-                5 <small style={{ fontSize: 13 }}>篇</small>
+                {storiesCount} <small style={{ fontSize: 13 }}>篇</small>
               </div>
               <div className="stat-label">生活故事待终审</div>
             </div>
@@ -556,7 +587,7 @@ const Dashboard = () => {
             <CompassOutlined />
           </div>
           <div>
-            <div className="stat-value">1,260</div>
+            <div className="stat-value">{studentsCount > 0 ? studentsCount.toLocaleString() : "1,260"}</div>
             <div className="stat-label">全校在读受评学生</div>
           </div>
         </div>
@@ -577,7 +608,7 @@ const Dashboard = () => {
             <CheckCircleOutlined />
           </div>
           <div>
-            <div className="stat-value">V1.0</div>
+            <div className="stat-value">{activeRuleVersion}</div>
             <div className="stat-label">当前生效评分规则 (80/15/5)</div>
           </div>
           <Button type="link" onClick={() => navigate("/admin/rules")}>

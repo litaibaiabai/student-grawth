@@ -37,6 +37,20 @@ import * as urls from "@/constant/urls";
 const { Text, Title, Paragraph } = Typography;
 const { Option } = Select;
 
+const formatTeacher = (t) => {
+  const name = t.real_name || t.username;
+  if (!t.classes) return name;
+  let cls = t.classes;
+  if (typeof cls === "string") {
+    try { cls = JSON.parse(cls); } catch (e) { return `${name} (${cls})`; }
+  }
+  if (Array.isArray(cls) && cls.length > 0) {
+    const classDesc = cls.map((c) => `${c.grade || c.grade_no || ""}年级${c.class_no || ""}班`).join("、");
+    return `${name} (${classDesc})`;
+  }
+  return name;
+};
+
 const AdminCards = () => {
   const isManager = token.loadUser()?.role === "manager";
   const [cards, setCards] = useState([]);
@@ -99,10 +113,13 @@ const AdminCards = () => {
   const handleGenerateCards = async (values) => {
     setSubmitting(true);
     try {
+      const selectedCategory = categories.find(
+        (c) => c.category_code === values.category_code || c.id === values.category_code
+      );
       const res = await post(urls.API_GENERATE_CARDS, {
         termId,
         teacherId: values.teacher_id,
-        categoryId: categories.find((c) => c.category_code === values.category_code)?.id,
+        categoryId: selectedCategory?.id || values.category_code,
         monthKey: values.month_key,
         count: values.count
       });
@@ -340,7 +357,7 @@ const AdminCards = () => {
             <Select placeholder="选择领用卡片的任课教师">
               {teachers.map((t) => (
                 <Option key={t.id} value={t.id}>
-                  {t.real_name || t.username}
+                  {formatTeacher(t)}
                 </Option>
               ))}
             </Select>
@@ -399,7 +416,7 @@ const AdminCards = () => {
             <Select placeholder="选择教师">
               {teachers.map((t) => (
                 <Option key={t.id} value={t.id}>
-                  {t.real_name || t.username}
+                  {formatTeacher(t)}
                 </Option>
               ))}
             </Select>
@@ -436,8 +453,8 @@ const AdminCards = () => {
                     <Form.Item {...rest} name={[name, "code"]} rules={[{ required: true, message: "请选择指标" }]}>
                       <Select placeholder="三级指标" style={{ width: 260 }}>
                         {categories.map((c) => (
-                          <Option key={c.code} value={c.code}>
-                            {c.code} {c.name}
+                          <Option key={c.category_code || c.code} value={c.category_code || c.code}>
+                            [{c.category_code || c.code}] {c.category_name || c.name}
                           </Option>
                         ))}
                       </Select>
@@ -472,6 +489,7 @@ const AdminCards = () => {
         onOk={() => setPrintModalOpen(false)}
         onCancel={() => setPrintModalOpen(false)}
         okText="完成打印并关闭"
+        cancelButtonProps={{ style: { display: "none" } }}
         width={700}
       >
         <Alert
@@ -498,8 +516,8 @@ const AdminCards = () => {
               }}
             >
               <div>
-                <Tag color="green">卡号 {c.serialNo}</Tag>
-                <Text strong>{c.monthKey} 激励卡</Text>
+                <Tag color="green">卡号 {c.serialNo ?? c.serial_no ?? c.id}</Tag>
+                <Text strong>{c.monthKey || c.month_key} 激励卡</Text>
               </div>
               <Space>
                 <Text code copyable>

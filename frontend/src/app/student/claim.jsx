@@ -45,7 +45,8 @@ const StudentClaimCard = () => {
         });
         message.success("卡片信息已读取成功");
       } else {
-        message.error(res.message || "未能识别该卡片信息");
+        setPreviewData(null);
+        message.error(res.message || "未能识别该卡片信息（卡片不存在或无效）");
       }
     } catch (err) {
       setPreviewData(null);

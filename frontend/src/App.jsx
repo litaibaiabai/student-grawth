@@ -1,12 +1,17 @@
 import { Suspense, lazy, useState, useEffect, useCallback } from "react";
 import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Spin, ConfigProvider } from "antd";
+import { Spin, ConfigProvider, message } from "antd";
 import zhCN from "antd/locale/zh_CN";
+import dayjs from "dayjs";
+import "dayjs/locale/zh-cn";
 import token from "@/util/token";
 import { get } from "@/util/request";
 import { API_AUTH_ME } from "@/constant/urls";
 import Topbar from "@/component/Nav";
 import Sidebar from "@/component/Sidebar";
+
+dayjs.locale("zh-cn");
+message.config({ maxCount: 2 });
 
 // 懒加载页面视图
 const Dashboard = lazy(() => import("./app/dashboard"));

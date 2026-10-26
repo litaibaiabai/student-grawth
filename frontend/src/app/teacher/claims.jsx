@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Table, Button, Tag, Space, message, Popconfirm, Input, Radio, Typography, Alert } from "antd";
+import { Card, Table, Button, Tag, Space, message, Popconfirm, Input, Radio, Typography, Alert, Tabs } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -157,17 +157,7 @@ const TeacherClaims = () => {
   return (
     <Card
       title="学生实体卡扫码申领审核工作台 (B模式核心事务审核)"
-      extra={
-        <Space>
-          <Radio.Group value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} buttonStyle="solid">
-            <Radio.Button value="PENDING">待审单据</Radio.Button>
-            <Radio.Button value="APPROVED">已通过</Radio.Button>
-            <Radio.Button value="REJECTED">已驳回</Radio.Button>
-            <Radio.Button value="">全部记录</Radio.Button>
-          </Radio.Group>
-          <Button icon={<ReloadOutlined />} onClick={() => fetchClaims(filterStatus)} />
-        </Space>
-      }
+      extra={<Button icon={<ReloadOutlined />} onClick={() => fetchClaims(filterStatus)}>刷新</Button>}
       style={{ borderRadius: 16 }}
     >
       <Alert
@@ -178,12 +168,24 @@ const TeacherClaims = () => {
         style={{ marginBottom: 16, borderRadius: 8 }}
       />
 
+      <Tabs
+        activeKey={filterStatus}
+        onChange={(k) => setFilterStatus(k)}
+        items={[
+          { key: "PENDING", label: "待审单据" },
+          { key: "APPROVED", label: "已通过入账" },
+          { key: "REJECTED", label: "已驳回作废" },
+          { key: "", label: "全部申领记录" }
+        ]}
+        style={{ marginBottom: 12 }}
+      />
+
       <Table
         dataSource={claims}
         columns={columns}
         rowKey="claim_id"
         loading={loading}
-        locale={{ emptyText: "暂无待审核的扫卡申领记录" }}
+        locale={{ emptyText: "暂无对应的扫卡申领记录" }}
       />
     </Card>
   );

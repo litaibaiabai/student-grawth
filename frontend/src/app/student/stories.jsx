@@ -40,23 +40,38 @@ const StudentStories = () => {
       if (res.code === 200 && res.data) {
         setStories(res.data);
         const thisMonthStory = res.data.find((s) => s.month_key === monthKeyOf(selectedMonth));
-        // 标题与正文同存于 text_content：第一行为标题
-        const text = thisMonthStory?.text_content || "";
-        const nl = text.indexOf("\n");
-        setTitle(nl >= 0 ? text.slice(0, nl) : "");
-        setContent(nl >= 0 ? text.slice(nl + 1) : text);
-        setIsSubmitted(thisMonthStory?.status === "REVIEWED" || thisMonthStory?.status === "SUBMITTED");
-        let ai = null;
-        try {
-          const raw = thisMonthStory?.llm_suggestion;
-          ai = typeof raw === "string" ? JSON.parse(raw) : raw;
-        } catch {
-          ai = null;
+        if (thisMonthStory) {
+          const text = thisMonthStory.text_content || thisMonthStory.content || "";
+          const nl = text.indexOf("\n");
+          if (nl >= 0) {
+            setTitle(text.slice(0, nl));
+            setContent(text.slice(nl + 1));
+          } else {
+            setTitle(thisMonthStory.title || text);
+            setContent(thisMonthStory.content || "");
+          }
+          setIsSubmitted(thisMonthStory.status === "REVIEWED" || thisMonthStory.status === "SUBMITTED");
+          let ai = null;
+          try {
+            const raw = thisMonthStory.llm_suggestion;
+            ai = typeof raw === "string" ? JSON.parse(raw) : raw;
+          } catch {
+            ai = null;
+          }
+          setAiFeedback(ai?.score ? { score: ai.score, suggestion: ai.suggestion } : null);
+        } else {
+          setTitle("");
+          setContent("");
+          setIsSubmitted(false);
+          setAiFeedback(null);
         }
-        setAiFeedback(ai?.score ? { score: ai.score, suggestion: ai.suggestion } : null);
       }
     } catch {
       // 容错
+      setTitle("");
+      setContent("");
+      setIsSubmitted(false);
+      setAiFeedback(null);
     } finally {
       setLoading(false);
     }
@@ -100,6 +115,8 @@ const StudentStories = () => {
       setSubmitting(false);
     }
   };
+
+  const currentStory = stories.find((s) => s.month_key === monthKeyOf(selectedMonth));
 
   return (
     <div>
@@ -154,7 +171,21 @@ const StudentStories = () => {
             title={
               <Space>
                 <Tag color="green">{MONTHS.find((m) => m.key === selectedMonth)?.label}故事</Tag>
-                <Tag color={isSubmitted ? "blue" : "default"}>{isSubmitted ? "已提交" : "草稿状态"}</Tag>
+                <Tag
+                  color={
+                    currentStory?.status === "REVIEWED"
+                      ? "green"
+                      : currentStory?.status === "SUBMITTED"
+                        ? "blue"
+                        : "default"
+                  }
+                >
+                  {currentStory?.status === "REVIEWED"
+                    ? "已评分"
+                    : currentStory?.status === "SUBMITTED"
+                      ? "已提交"
+                      : "写作中"}
+                </Tag>
               </Space>
             }
             bordered={false}
@@ -253,6 +284,29 @@ const StudentStories = () => {
                 <p style={{ margin: "6px 0 0", fontSize: 12, color: "#15803d", lineHeight: 1.8 }}>
                   {aiFeedback.suggestion}
                 </p>
+              </div>
+            )}
+
+            {currentStory?.status === "REVIEWED" && (
+              <div
+                style={{
+                  marginTop: 16,
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  borderRadius: 8,
+                  padding: 16
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#1e40af", fontWeight: 600 }}>
+                  <CheckCircleOutlined style={{ color: "#2563eb" }} />
+                  <span>教师终审确认分：{currentStory.teacher_score} 分</span>
+                  <Tag color="blue">已入账</Tag>
+                </div>
+                {currentStory.teacher_comment && (
+                  <p style={{ margin: "6px 0 0", fontSize: 13, color: "#1e3a8a", lineHeight: 1.8 }}>
+                    评语：{currentStory.teacher_comment}
+                  </p>
+                )}
               </div>
             )}
           </Card>

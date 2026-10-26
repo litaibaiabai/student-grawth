@@ -130,7 +130,7 @@ const StudentReport = () => {
               fontWeight: 600
             }}
           >
-            查看可打印的防伪报告
+            在线防伪打印 / 查看报告
           </Button>
         </Space>
       </div>
@@ -159,7 +159,7 @@ const StudentReport = () => {
         </div>
       ) : (
         <article className="report-paper">
-          <p className="report-kicker">CHONGLI EXPERIMENTAL SCHOOL</p>
+          <p className="report-kicker">HANGZHOU YUNHUI ELEMENTARY SCHOOL</p>
           <h2 className="report-title">学期综合素质发展报告</h2>
           <p className="report-meta">
             {report.academicYear}学年第{report.semester === 1 ? "一" : "二"}学期

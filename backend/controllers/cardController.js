@@ -80,8 +80,11 @@ async function setCardQuota(req, res, next) {
  * 批量生成月度实体卡印刷条目及安全令牌
  */
 async function generateMonthCards(req, res, next) {
-  const { termId = 1, monthKey, teacherId, count = 10, categoryId } = req.body;
-  const mKey = monthKey || getMonthKey(new Date());
+  const targetCatInput = req.body.categoryId || req.body.category_id || req.body.categoryCode || req.body.category_code;
+  const targetTeacherInput = req.body.teacherId || req.body.teacher_id;
+  const count = req.body.count || 10;
+  let termId = req.body.termId || req.body.term_id;
+  const mKey = req.body.monthKey || req.body.month_key || getMonthKey(new Date());
 
   let conn;
   try {
@@ -90,8 +93,30 @@ async function generateMonthCards(req, res, next) {
 
     const schoolId = req.user?.schoolId || 1;
 
+    // 自动查询当前生效学期
+    if (!termId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      termId = termRows.length > 0 ? termRows[0].id : 1;
+    }
+
+    // 解析目标加分指标（支持 ID 或 code / name）
+    let targetCatId = null;
+    if (targetCatInput) {
+      if (isNaN(Number(targetCatInput))) {
+        const [catRows] = await conn.query(
+          "SELECT id FROM edu_evaluation_category WHERE (category_code = ? OR category_name = ?) AND status = 1 LIMIT 1",
+          [targetCatInput, targetCatInput]
+        );
+        if (catRows.length > 0) targetCatId = catRows[0].id;
+      } else {
+        targetCatId = Number(targetCatInput);
+      }
+    }
+
     // 默认获取三级加分指标
-    let targetCatId = categoryId;
     if (!targetCatId) {
       const [catRows] = await conn.query(
         "SELECT id FROM edu_evaluation_category WHERE category_level = 3 AND status = 1 LIMIT 1"
@@ -100,8 +125,8 @@ async function generateMonthCards(req, res, next) {
       targetCatId = catRows[0].id;
     }
 
-    // 默认分配给首个教师
-    let targetTeacherId = teacherId;
+    // 默认分配给指定教师或首个教师
+    let targetTeacherId = targetTeacherInput;
     if (!targetTeacherId) {
       const [tRows] = await conn.query("SELECT id FROM users WHERE role = 'teacher' AND school_id = ? LIMIT 1", [
         schoolId
@@ -138,9 +163,12 @@ async function generateMonthCards(req, res, next) {
 
       createdCards.push({
         id: resInsert.insertId,
+        card_id: resInsert.insertId,
         serialNo: startSerial,
+        serial_no: startSerial,
         token: rawToken, // 供打印二维码 / 扫码调用
         monthKey: mKey,
+        month_key: mKey,
         status: "UNUSED"
       });
     }
@@ -409,7 +437,13 @@ async function getTeacherClaims(req, res, next) {
  */
 async function decideClaim(req, res, next) {
   const claimId = req.params.id;
-  const { decision, rejectReason, requestKey } = req.body;
+  let { decision, rejectReason, requestKey } = req.body;
+  if (!decision) {
+    return fail(res, ErrorCodes.VALIDATION_ERROR, "请提供审核决定", 422);
+  }
+  decision = String(decision).toUpperCase();
+  if (decision === "APPROVED" || decision === "PASS" || decision === "通过") decision = "APPROVE";
+  if (decision === "REJECTED" || decision === "REFUSE" || decision === "驳回") decision = "REJECT";
   if (!["APPROVE", "REJECT"].includes(decision)) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "审核决定只能是 APPROVE 或 REJECT", 422);
   }

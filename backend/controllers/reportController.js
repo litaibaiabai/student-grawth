@@ -15,7 +15,6 @@ const { computeStudentScore } = require("../services/evaluationEngine");
 async function publishBatch(req, res, next) {
   const rawStudentIds = req.body.studentIds || req.body.student_ids;
   const studentIds = Array.isArray(rawStudentIds) ? rawStudentIds : [];
-  const termId = req.body.termId || req.body.term_id || 1;
   if (studentIds.length === 0) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "请指定要发布报告的学生列表", 422);
   }
@@ -26,6 +25,15 @@ async function publishBatch(req, res, next) {
   let conn;
   try {
     conn = await pool.getConnection();
+
+    let termId = req.body.termId || req.body.term_id;
+    if (!termId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      termId = termRows.length > 0 ? termRows[0].id : 1;
+    }
 
     const published = [];
     const blocked = [];
@@ -181,11 +189,19 @@ async function getCurrentReport(req, res, next) {
   }
 
   const schoolId = req.user?.schoolId || 1;
-  const termId = req.query.termId || 1;
+  let termId = req.query.termId || req.query.term_id;
 
   let conn;
   try {
     conn = await pool.getConnection();
+
+    if (!termId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      termId = termRows.length > 0 ? termRows[0].id : 1;
+    }
 
     const [rows] = await conn.query(
       `SELECT r.*, a.academic_year, a.semester
