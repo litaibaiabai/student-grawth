@@ -5,10 +5,11 @@
 const express = require("express");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { login, getMe } = require("../controllers/authController");
-const { getCurrentTerm, getTerms, saveTerm } = require("../controllers/termController");
+const { getCurrentTerm, getTerms, saveTerm, setCurrentTerm } = require("../controllers/termController");
 const { getCategories } = require("../controllers/categoryController");
 const {
   setCardQuota,
+  getCardQuotas,
   generateMonthCards,
   getCards,
   previewCard,
@@ -20,7 +21,7 @@ const { directScoreBatch, reverseScore, getStudentScores } = require("../control
 const { submitHonor, resubmitHonor, reviewHonor, getHonors } = require("../controllers/honorController");
 const { uploadHonorCertificate, uploadLimiter, getHonorCertificate } = require("../controllers/uploadController");
 const { submitStory, reviewStory, getStories } = require("../controllers/storyController");
-const { previewImport, commitImport } = require("../controllers/importController");
+const { previewImport, commitImport, previewBatchImport, commitBatchImport } = require("../controllers/importController");
 const { getComprehensiveScore, getRules, saveRule } = require("../controllers/evaluationController");
 const { publishBatch, getCurrentReport, exportReportHtml } = require("../controllers/reportController");
 const { expireOldCards } = require("../services/scheduler");
@@ -37,6 +38,9 @@ router.get("/me", requireAuth, getMe);
 router.get("/terms/current", getCurrentTerm);
 router.get("/terms", requireAuth, getTerms);
 router.post("/admin/terms", requireAuth, requireRole("manager"), saveTerm);
+router.put("/admin/terms/:id", requireAuth, requireRole("manager"), saveTerm);
+router.post("/admin/terms/:id", requireAuth, requireRole("manager"), saveTerm);
+router.post("/admin/terms/:id/set-current", requireAuth, requireRole("manager"), setCurrentTerm);
 
 // ---------------------- 六育指标字典 ----------------------
 router.get("/evaluation-categories", getCategories);
@@ -47,6 +51,7 @@ router.post("/student/card-claims", requireAuth, requireRole("student"), claimCa
 router.get("/teacher/card-claims", requireAuth, requireRole("teacher", "manager"), getTeacherClaims);
 router.post("/teacher/card-claims/:id/decision", requireAuth, requireRole("teacher", "manager"), decideClaim);
 
+router.get("/admin/card-quotas", requireAuth, requireRole("manager", "teacher"), getCardQuotas);
 router.post("/admin/card-quotas", requireAuth, requireRole("manager"), setCardQuota);
 router.post("/admin/cards/generate-month", requireAuth, requireRole("manager"), generateMonthCards);
 router.get("/cards", requireAuth, getCards);
@@ -72,6 +77,8 @@ router.get("/stories", requireAuth, getStories);
 // ---------------------- 数据导入 ----------------------
 router.post("/import/preview", requireAuth, requireRole("teacher", "manager"), previewImport);
 router.post("/import/commit", requireAuth, requireRole("teacher", "manager"), commitImport);
+router.post("/import/batch-preview", requireAuth, requireRole("teacher", "manager"), previewBatchImport);
+router.post("/import/batch-commit", requireAuth, requireRole("teacher", "manager"), commitBatchImport);
 
 // ---------------------- 综合评分 ----------------------
 router.get("/student/comprehensive-score", requireAuth, getComprehensiveScore);

@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const { pool } = require("../db");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
+const batchImportService = require("../services/batchImportService");
 
 /**
  * POST /api/v1/import/preview
@@ -13,6 +14,9 @@ const { success, fail } = require("../utils/response");
  */
 async function previewImport(req, res, next) {
   const type = (req.body.type || "SUBJECT").toUpperCase();
+  if (type === "DIMENSION" && req.user?.role === "teacher") {
+    return fail(res, ErrorCodes.FORBIDDEN, "教师仅可导入任教学科期末成绩，六育维度终测评分需由教务管理员统一导入", 403);
+  }
   const rawItems = req.body.items || req.body.records;
   const items = Array.isArray(rawItems) ? rawItems : [];
   if (items.length === 0) {
@@ -27,6 +31,16 @@ async function previewImport(req, res, next) {
   let conn;
   try {
     conn = await pool.getConnection();
+
+    // 动态回退当前活跃学期
+    let termId = req.body?.termId || req.body?.term_id;
+    if (!termId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      termId = termRows.length > 0 ? termRows[0].id : 1;
+    }
 
     // 预加载全校学生
     const [students] = await conn.query(
@@ -68,21 +82,32 @@ async function previewImport(req, res, next) {
         continue;
       }
 
-      // 查询旧值
+      // 查询旧值（严格限定当前学校、学生与当前学期）
       let oldScore = null;
       if (type === "SUBJECT") {
         const [exist] = await conn.query(
-          "SELECT raw_score FROM subject_score WHERE student_id = ? AND subject_code = ? LIMIT 1",
-          [student.id, item.subjectCode || "CHINESE"]
+          "SELECT raw_score FROM subject_score WHERE (school_id = ? OR school_id IS NULL) AND student_id = ? AND term_id = ? AND subject_code = ? LIMIT 1",
+          [schoolId, student.id, termId, item.subjectCode || "CHINESE"]
         );
         if (exist.length > 0 && exist[0].raw_score !== null) oldScore = Number(exist[0].raw_score);
       } else {
         const [exist] = await conn.query(
-          "SELECT score_100 FROM student_dimension_score WHERE student_id = ? AND dimension_code = ? LIMIT 1",
-          [student.id, item.dimension || "D"]
+          "SELECT score_100 FROM student_dimension_score WHERE (school_id = ? OR school_id IS NULL) AND student_id = ? AND term_id = ? AND dimension_code = ? LIMIT 1",
+          [schoolId, student.id, termId, item.dimension || "D"]
         );
         if (exist.length > 0) oldScore = Number(exist[0].score_100);
       }
+
+      const dimMap = {
+        D: "德育",
+        Z: "智育",
+        T: "体育",
+        M: "美育",
+        L: "劳育",
+        G: "生活故事"
+      };
+      const dimCode = item.dimension || "D";
+      const dimName = dimMap[dimCode] || "综合维度";
 
       diffs.push({
         row: i + 1,
@@ -91,10 +116,10 @@ async function previewImport(req, res, next) {
         username: student.username,
         grade: student.grade,
         classNo: student.class_no,
-        target: type === "SUBJECT" ? item.subjectName || item.subjectCode : `【${item.dimension}】五育维度分`,
+        target: type === "SUBJECT" ? item.subjectName || item.subjectCode : `【${dimCode}】${dimName}终测分`,
         subjectCode: item.subjectCode || "CHINESE",
         subjectName: item.subjectName || item.subjectCode || "语文",
-        dimension: item.dimension || "D",
+        dimension: dimCode,
         oldScore,
         newScore: scoreNum,
         action: oldScore === null ? "NEW" : oldScore === scoreNum ? "SAME" : "UPDATE",
@@ -122,9 +147,11 @@ async function previewImport(req, res, next) {
  */
 async function commitImport(req, res, next) {
   const type = (req.body.type || "SUBJECT").toUpperCase();
+  if (type === "DIMENSION" && req.user?.role === "teacher") {
+    return fail(res, ErrorCodes.FORBIDDEN, "教师仅可导入任教学科期末成绩，六育维度终测评分需由教务管理员统一导入", 403);
+  }
   const rawItems = req.body.items || req.body.records;
   const items = Array.isArray(rawItems) ? rawItems : [];
-  const termId = req.body.termId || req.body.term_id || 1;
   if (items.length === 0) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "提交导入数据不能为空", 422);
   }
@@ -136,6 +163,17 @@ async function commitImport(req, res, next) {
   let conn;
   try {
     conn = await pool.getConnection();
+
+    // 动态回退当前活跃学期
+    let termId = req.body?.termId || req.body?.term_id;
+    if (!termId) {
+      const [termRows] = await conn.query(
+        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
+        [schoolId]
+      );
+      termId = termRows.length > 0 ? termRows[0].id : 1;
+    }
+
     await conn.beginTransaction();
 
     let committedCount = 0;
@@ -217,7 +255,75 @@ async function commitImport(req, res, next) {
   }
 }
 
+/**
+ * POST /api/v1/import/batch-preview
+ * 全校成绩 Excel 内存批量解析体检（分流正常数据与异常数据）
+ */
+async function previewBatchImport(req, res, next) {
+  try {
+    const type = (req.body.type || "SUBJECT").toUpperCase();
+    if (type === "DIMENSION" && req.user?.role === "teacher") {
+      return fail(res, ErrorCodes.FORBIDDEN, "教师仅可导入任教学科期末成绩，六育维度终测评分需由教务管理员统一导入", 403);
+    }
+    const schoolId = req.user?.schoolId || 1;
+    const operatorId = req.user?.id || req.user?.userId;
+    const rows = req.body.rows || [];
+    const termId = req.body.termId;
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return fail(res, ErrorCodes.VALIDATION_ERROR, "导入数据行不能为空", 422);
+    }
+
+    const result = await batchImportService.previewBatchExcel({
+      schoolId,
+      termId,
+      type,
+      rows,
+      operatorId
+    });
+
+    success(res, result, "数据体检完成");
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/import/batch-commit
+ * 全校成绩 Excel 分块原子批量写入正式表
+ */
+async function commitBatchImport(req, res, next) {
+  try {
+    const type = (req.body.type || "SUBJECT").toUpperCase();
+    if (type === "DIMENSION" && req.user?.role === "teacher") {
+      return fail(res, ErrorCodes.FORBIDDEN, "教师仅可导入任教学科期末成绩，六育维度终测评分需由教务管理员统一导入", 403);
+    }
+    const schoolId = req.user?.schoolId || 1;
+    const operatorId = req.user?.id || req.user?.userId;
+    const validStudents = req.body.validStudents || req.body.students || [];
+    const termId = req.body.termId;
+
+    if (!Array.isArray(validStudents) || validStudents.length === 0) {
+      return fail(res, ErrorCodes.VALIDATION_ERROR, "提交导入数据不能为空", 422);
+    }
+
+    const result = await batchImportService.commitBatchExcel({
+      schoolId,
+      termId,
+      type,
+      validStudents,
+      operatorId
+    });
+
+    success(res, result, "全校成绩批量导入成功");
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   previewImport,
-  commitImport
+  commitImport,
+  previewBatchImport,
+  commitBatchImport
 };
