@@ -39,6 +39,10 @@ registerMigration(storyMigration);
 const indicatorMigration = require('./07_report_indicators');
 registerMigration(indicatorMigration);
 
+// 08 学科成绩导入
+const subjectImportMigration = require('./08_subject_imports');
+registerMigration(subjectImportMigration);
+
 module.exports = {
   initialized: true
 };
