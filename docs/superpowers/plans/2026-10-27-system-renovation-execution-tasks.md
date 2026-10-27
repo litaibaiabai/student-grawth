@@ -391,11 +391,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** 20A、任教/制卡/纠错/扫码；G0/G3旧卡与首批范围，必需设备/账号来源。
 **Interfaces — Produces:** 按学校/学期P0启用状态、盘点/对账、回退演练证据。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R20B，先走真实界面，再对外部结果断言：`assert.equal(checks.usedCardsCreditedAgain,0); assert.equal(checks.rollbackDropsNewRewards,false); assert.equal(checks.newFlowPendingClaimsAdded,0)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R20B --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 启用前盘点并按批准策略处理旧未用/PENDING，分别保留LEGACY与AUTO_V2行为；回退关闭新入口而不覆盖新账，旧期限任务识别版本。 P0不等待AI、家长和最终A4；只为已确认设备/账号前置加实际阻塞。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R20B --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/rolloutService.js backend/controllers/rolloutController.js frontend/src/app/admin/rollout.jsx scripts/full-system-demo/scenarios/R20B.cjs backend/routes/api.js backend/services/scheduler.js scripts/full-system-demo/README.md frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r20b P0试点与回退演练"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R20B，先走真实界面，再对外部结果断言：`assert.equal(checks.usedCardsCreditedAgain,0); assert.equal(checks.rollbackDropsNewRewards,false); assert.equal(checks.newFlowPendingClaimsAdded,0)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R20B --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 启用前盘点并按批准策略处理旧未用/PENDING，分别保留LEGACY与AUTO_V2行为；回退关闭新入口而不覆盖新账，旧期限任务识别版本。 P0不等待AI、家长和最终A4；只为已确认设备/账号前置加实际阻塞。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R20B --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/rolloutService.js backend/controllers/rolloutController.js frontend/src/app/admin/rollout.jsx scripts/full-system-demo/scenarios/R20B.cjs backend/routes/api.js backend/services/scheduler.js scripts/full-system-demo/README.md frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r20b P0试点与回退演练"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -408,11 +408,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** 20B、学科导入、AI、家长、阅读打印、成长首页；按范围补健康/学籍/设备/身份。
 **Interfaces — Produces:** 完整一期放行记录、真实三角色证据、新旧账和报告版本核对及更新手册。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R20C，先走真实界面，再对外部结果断言：`assert.equal(checks.legacyReportsChanged,false); assert.equal(checks.missingRequiredFeatureReportedComplete,false); assert.equal(checks.readOnlyReconciliationMatches,true)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R20C --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 在隔离环境从真实UI完成全部已选功能，只读对账；对实际目标环境/设备/纸样执行对应放行；逐项保留失败或延期，不用固定旧90.50样例替代新规则核算。 容量包、备份恢复和隐私负例通过后再扩范围；本票不替代各开发票自测。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R20C --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- scripts/full-system-demo/scenarios/R20C.cjs backend/services/rolloutService.js frontend/src/app/admin/rollout.jsx scripts/full-system-demo/steps.cjs scripts/full-system-demo/materials.py scripts/full-system-demo/README.md backend/controllers/rolloutController.js`及`git commit -m "feat(renovation): r20c P1全链路试点与历史对账"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R20C，先走真实界面，再对外部结果断言：`assert.equal(checks.legacyReportsChanged,false); assert.equal(checks.missingRequiredFeatureReportedComplete,false); assert.equal(checks.readOnlyReconciliationMatches,true)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R20C --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 在隔离环境从真实UI完成全部已选功能，只读对账；对实际目标环境/设备/纸样执行对应放行；逐项保留失败或延期，不用固定旧90.50样例替代新规则核算。 容量包、备份恢复和隐私负例通过后再扩范围；本票不替代各开发票自测。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R20C --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- scripts/full-system-demo/scenarios/R20C.cjs backend/services/rolloutService.js frontend/src/app/admin/rollout.jsx scripts/full-system-demo/steps.cjs scripts/full-system-demo/materials.py scripts/full-system-demo/README.md backend/controllers/rolloutController.js`及`git commit -m "feat(renovation): r20c P1全链路试点与历史对账"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 ## 自审与执行证据要求
 
