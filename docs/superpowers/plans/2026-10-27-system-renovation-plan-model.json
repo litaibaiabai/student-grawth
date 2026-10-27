@@ -1,0 +1,3416 @@
+{
+  "status": "proposed-audit-model-not-live-ticket-state",
+  "date": "2026-10-27",
+  "unit": "one-fullstack-worker working day; QA support included in nominal task elapsed assumptions",
+  "workers": 2,
+  "assumptions": [
+    "业务输入和隔离环境在对应任务开始前就绪",
+    "个人登录为基线估算场景，不表示校方已选定",
+    "健康不是评分必需来源，家长寄语不阻断发布为基线估算假设",
+    "实际钉钉SSO不在预留估算内，接口等待时间不计入工期",
+    "QA与技术负责人可及时评审，估算不是承诺"
+  ],
+  "scenarios": {
+    "base": {
+      "flags": {},
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B"
+          ],
+          "optional": false
+        }
+      ],
+      "nodeCount": 18,
+      "nominalEffort": 79,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "20B"
+        ],
+        "p0Duration": 18,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 41
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 7,
+          "end": 13
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 1,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 2,
+          "start": 18,
+          "end": 22
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 27,
+          "end": 32
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 27,
+          "end": 33
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 32,
+          "end": 38
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 33,
+          "end": 37
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 2,
+          "start": 37,
+          "end": 41
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 38,
+          "end": 42
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 42,
+          "end": 45
+        }
+      ],
+      "resourceFinish": 45,
+      "p0ResourceFinish": 18,
+      "bufferProposal": 9
+    },
+    "publicDevice": {
+      "flags": {
+        "publicDevice": true
+      },
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04",
+            "18A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04",
+            "18B"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B"
+          ],
+          "optional": false
+        },
+        {
+          "id": "18A",
+          "ticket": "DEV-RENOVATION-18",
+          "title": "公共设备身份与短会话",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": true
+        },
+        {
+          "id": "18B",
+          "ticket": "DEV-RENOVATION-18",
+          "title": "公共设备兑换与清屏",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "18A",
+            "03"
+          ],
+          "optional": true
+        }
+      ],
+      "nodeCount": 20,
+      "nominalEffort": 84,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "18B",
+          "20B"
+        ],
+        "p0Duration": 21,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 41
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "18A",
+          "title": "公共设备身份与短会话",
+          "worker": 2,
+          "start": 7,
+          "end": 9
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 9,
+          "end": 15
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 15,
+          "end": 20
+        },
+        {
+          "id": "18B",
+          "title": "公共设备兑换与清屏",
+          "worker": 1,
+          "start": 16,
+          "end": 19
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 19,
+          "end": 21
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 2,
+          "start": 20,
+          "end": 23
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 1,
+          "start": 21,
+          "end": 25
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 2,
+          "start": 23,
+          "end": 29
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 29,
+          "end": 34
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 29,
+          "end": 35
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 34,
+          "end": 40
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 35,
+          "end": 39
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 2,
+          "start": 39,
+          "end": 43
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 40,
+          "end": 44
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 44,
+          "end": 47
+        }
+      ],
+      "resourceFinish": 47,
+      "p0ResourceFinish": 21,
+      "bufferProposal": 10
+    },
+    "familyMandatory": {
+      "flags": {
+        "familyMandatory": true
+      },
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11",
+            "13"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B"
+          ],
+          "optional": false
+        }
+      ],
+      "nodeCount": 18,
+      "nominalEffort": 79,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "20B"
+        ],
+        "p0Duration": 18,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "13",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 45
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 7,
+          "end": 13
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 1,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 2,
+          "start": 18,
+          "end": 22
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 27,
+          "end": 32
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 27,
+          "end": 33
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 1,
+          "start": 32,
+          "end": 36
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 33,
+          "end": 37
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 36,
+          "end": 42
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 42,
+          "end": 46
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 46,
+          "end": 49
+        }
+      ],
+      "resourceFinish": 49,
+      "p0ResourceFinish": 18,
+      "bufferProposal": 10
+    },
+    "healthRequired": {
+      "flags": {
+        "health": true
+      },
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07",
+            "09"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B",
+            "09"
+          ],
+          "optional": false
+        },
+        {
+          "id": "09",
+          "ticket": "DEV-RENOVATION-09",
+          "title": "体测与健康导入",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": true
+        }
+      ],
+      "nodeCount": 19,
+      "nominalEffort": 82,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "20B"
+        ],
+        "p0Duration": 18,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 41
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 7,
+          "end": 13
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 1,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "09",
+          "title": "体测与健康导入",
+          "worker": 2,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 2,
+          "start": 21,
+          "end": 25
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 27,
+          "end": 32
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 27,
+          "end": 33
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 32,
+          "end": 38
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 33,
+          "end": 37
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 2,
+          "start": 37,
+          "end": 41
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 38,
+          "end": 42
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 42,
+          "end": 45
+        }
+      ],
+      "resourceFinish": 45,
+      "p0ResourceFinish": 18,
+      "bufferProposal": 9
+    },
+    "rosterRequired": {
+      "flags": {
+        "roster": true
+      },
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "17",
+          "ticket": "DEV-RENOVATION-17",
+          "title": "学籍表导入",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": true
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04",
+            "17"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B"
+          ],
+          "optional": false
+        }
+      ],
+      "nodeCount": 19,
+      "nominalEffort": 82,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "20B"
+        ],
+        "p0Duration": 18,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 41
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "17",
+          "title": "学籍表导入",
+          "worker": 2,
+          "start": 7,
+          "end": 10
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 10,
+          "end": 16
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 16,
+          "end": 21
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 1,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 2,
+          "start": 21,
+          "end": 25
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 27,
+          "end": 32
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 27,
+          "end": 33
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 32,
+          "end": 38
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 33,
+          "end": 37
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 2,
+          "start": 37,
+          "end": 41
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 38,
+          "end": 42
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 42,
+          "end": 45
+        }
+      ],
+      "resourceFinish": 45,
+      "p0ResourceFinish": 18,
+      "bufferProposal": 9
+    },
+    "identityReservation": {
+      "flags": {
+        "identityReservation": true
+      },
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "19",
+          "ticket": "DEV-RENOVATION-19",
+          "title": "钉钉身份预留",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": true
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B",
+            "19"
+          ],
+          "optional": false
+        }
+      ],
+      "nodeCount": 19,
+      "nominalEffort": 81,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "20B"
+        ],
+        "p0Duration": 18,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 41
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 7,
+          "end": 13
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 1,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 2,
+          "start": 18,
+          "end": 22
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "id": "19",
+          "title": "钉钉身份预留",
+          "worker": 2,
+          "start": 22,
+          "end": 24
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 27,
+          "end": 32
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 27,
+          "end": 33
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 32,
+          "end": 38
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 33,
+          "end": 37
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 2,
+          "start": 37,
+          "end": 41
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 38,
+          "end": 42
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 42,
+          "end": 45
+        }
+      ],
+      "resourceFinish": 45,
+      "p0ResourceFinish": 18,
+      "bufferProposal": 9
+    },
+    "subjectImportRequired": {
+      "flags": {
+        "subjectImportOnly": true
+      },
+      "nodes": [
+        {
+          "id": "10",
+          "ticket": "DEV-RENOVATION-10",
+          "title": "自动六育评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "05",
+            "06",
+            "07",
+            "08"
+          ],
+          "optional": false
+        },
+        {
+          "id": "11",
+          "ticket": "DEV-RENOVATION-11",
+          "title": "报告草稿与教师确认",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "12",
+          "ticket": "DEV-RENOVATION-12",
+          "title": "AI寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "13",
+          "ticket": "DEV-RENOVATION-13",
+          "title": "家长寄语",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "14",
+          "ticket": "DEV-RENOVATION-14",
+          "title": "状态发布与版本冻结",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "11"
+          ],
+          "optional": false
+        },
+        {
+          "id": "15",
+          "ticket": "DEV-RENOVATION-15",
+          "title": "报告阅读与A4打印",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "14"
+          ],
+          "optional": false
+        },
+        {
+          "id": "16",
+          "ticket": "DEV-RENOVATION-16",
+          "title": "学生成长首页与主题",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "03",
+            "10"
+          ],
+          "optional": false
+        },
+        {
+          "id": "01",
+          "ticket": "DEV-RENOVATION-01",
+          "title": "任教授权与受限成绩",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "02",
+          "ticket": "DEV-RENOVATION-02",
+          "title": "预分类制卡与打印",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "20A"
+          ],
+          "optional": false
+        },
+        {
+          "id": "03",
+          "ticket": "DEV-RENOVATION-03",
+          "title": "扫码即时入账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 4,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "02",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "04",
+          "ticket": "DEV-RENOVATION-04",
+          "title": "教师纠错与直评",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "05",
+          "ticket": "DEV-RENOVATION-05",
+          "title": "荣誉认定与奖励",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 5,
+            "pessimistic": 8
+          },
+          "dependencies": [
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "06",
+          "ticket": "DEV-RENOVATION-06",
+          "title": "故事建议与终审",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 5
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "07",
+          "ticket": "DEV-RENOVATION-07",
+          "title": "年级指标与教师评价",
+          "estimate": {
+            "optimistic": 4,
+            "nominal": 6,
+            "pessimistic": 10
+          },
+          "dependencies": [
+            "01"
+          ],
+          "optional": false
+        },
+        {
+          "id": "08",
+          "ticket": "DEV-RENOVATION-08",
+          "title": "学科成绩导入",
+          "estimate": {
+            "optimistic": 3,
+            "nominal": 4,
+            "pessimistic": 7
+          },
+          "dependencies": [
+            "07"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20A",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "兼容迁移与隔离验收入口",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [],
+          "optional": false
+        },
+        {
+          "id": "20B",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P0试点与回退演练",
+          "estimate": {
+            "optimistic": 1,
+            "nominal": 2,
+            "pessimistic": 4
+          },
+          "dependencies": [
+            "03",
+            "04"
+          ],
+          "optional": false
+        },
+        {
+          "id": "20C",
+          "ticket": "DEV-RENOVATION-20",
+          "title": "P1全链路试点与历史对账",
+          "estimate": {
+            "optimistic": 2,
+            "nominal": 3,
+            "pessimistic": 6
+          },
+          "dependencies": [
+            "08",
+            "12",
+            "13",
+            "15",
+            "16",
+            "20B"
+          ],
+          "optional": false
+        }
+      ],
+      "nodeCount": 18,
+      "nominalEffort": 79,
+      "criticalPath": {
+        "p0": [
+          "20A",
+          "01",
+          "04",
+          "03",
+          "20B"
+        ],
+        "p0Duration": 18,
+        "full": [
+          "20A",
+          "01",
+          "04",
+          "05",
+          "10",
+          "11",
+          "14",
+          "15",
+          "20C"
+        ],
+        "duration": 41
+      },
+      "resourceSchedule": [
+        {
+          "id": "20A",
+          "title": "兼容迁移与隔离验收入口",
+          "worker": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "id": "01",
+          "title": "任教授权与受限成绩",
+          "worker": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "02",
+          "title": "预分类制卡与打印",
+          "worker": 2,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "id": "04",
+          "title": "教师纠错与直评",
+          "worker": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "id": "07",
+          "title": "年级指标与教师评价",
+          "worker": 2,
+          "start": 7,
+          "end": 13
+        },
+        {
+          "id": "03",
+          "title": "扫码即时入账",
+          "worker": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
+          "id": "05",
+          "title": "荣誉认定与奖励",
+          "worker": 2,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "id": "20B",
+          "title": "P0试点与回退演练",
+          "worker": 1,
+          "start": 16,
+          "end": 18
+        },
+        {
+          "id": "08",
+          "title": "学科成绩导入",
+          "worker": 1,
+          "start": 18,
+          "end": 22
+        },
+        {
+          "id": "06",
+          "title": "故事建议与终审",
+          "worker": 2,
+          "start": 18,
+          "end": 21
+        },
+        {
+          "id": "10",
+          "title": "自动六育评价",
+          "worker": 1,
+          "start": 22,
+          "end": 28
+        },
+        {
+          "id": "11",
+          "title": "报告草稿与教师确认",
+          "worker": 1,
+          "start": 28,
+          "end": 33
+        },
+        {
+          "id": "16",
+          "title": "学生成长首页与主题",
+          "worker": 2,
+          "start": 28,
+          "end": 34
+        },
+        {
+          "id": "14",
+          "title": "状态发布与版本冻结",
+          "worker": 1,
+          "start": 33,
+          "end": 39
+        },
+        {
+          "id": "12",
+          "title": "AI寄语",
+          "worker": 2,
+          "start": 34,
+          "end": 38
+        },
+        {
+          "id": "13",
+          "title": "家长寄语",
+          "worker": 2,
+          "start": 38,
+          "end": 42
+        },
+        {
+          "id": "15",
+          "title": "报告阅读与A4打印",
+          "worker": 1,
+          "start": 39,
+          "end": 43
+        },
+        {
+          "id": "20C",
+          "title": "P1全链路试点与历史对账",
+          "worker": 1,
+          "start": 43,
+          "end": 46
+        }
+      ],
+      "resourceFinish": 46,
+      "p0ResourceFinish": 18,
+      "bufferProposal": 10
+    }
+  },
+  "workPackages": [
+    {
+      "id": "10",
+      "ticket": "DEV-RENOVATION-10",
+      "title": "自动六育评价",
+      "estimate": {
+        "optimistic": 4,
+        "nominal": 6,
+        "pessimistic": 10
+      },
+      "dependencies": [
+        "05",
+        "06",
+        "07"
+      ],
+      "optional": false
+    },
+    {
+      "id": "11",
+      "ticket": "DEV-RENOVATION-11",
+      "title": "报告草稿与教师确认",
+      "estimate": {
+        "optimistic": 3,
+        "nominal": 5,
+        "pessimistic": 8
+      },
+      "dependencies": [
+        "10"
+      ],
+      "optional": false
+    },
+    {
+      "id": "12",
+      "ticket": "DEV-RENOVATION-12",
+      "title": "AI寄语",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 4,
+        "pessimistic": 7
+      },
+      "dependencies": [
+        "11"
+      ],
+      "optional": false
+    },
+    {
+      "id": "13",
+      "ticket": "DEV-RENOVATION-13",
+      "title": "家长寄语",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 4,
+        "pessimistic": 7
+      },
+      "dependencies": [
+        "11"
+      ],
+      "optional": false
+    },
+    {
+      "id": "14",
+      "ticket": "DEV-RENOVATION-14",
+      "title": "状态发布与版本冻结",
+      "estimate": {
+        "optimistic": 4,
+        "nominal": 6,
+        "pessimistic": 10
+      },
+      "dependencies": [
+        "11"
+      ],
+      "optional": false
+    },
+    {
+      "id": "15",
+      "ticket": "DEV-RENOVATION-15",
+      "title": "报告阅读与A4打印",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 4,
+        "pessimistic": 6
+      },
+      "dependencies": [
+        "14"
+      ],
+      "optional": false
+    },
+    {
+      "id": "16",
+      "ticket": "DEV-RENOVATION-16",
+      "title": "学生成长首页与主题",
+      "estimate": {
+        "optimistic": 4,
+        "nominal": 6,
+        "pessimistic": 10
+      },
+      "dependencies": [
+        "03",
+        "10"
+      ],
+      "optional": false
+    },
+    {
+      "id": "17",
+      "ticket": "DEV-RENOVATION-17",
+      "title": "学籍表导入",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 3,
+        "pessimistic": 5
+      },
+      "dependencies": [
+        "01"
+      ],
+      "optional": true
+    },
+    {
+      "id": "19",
+      "ticket": "DEV-RENOVATION-19",
+      "title": "钉钉身份预留",
+      "estimate": {
+        "optimistic": 1,
+        "nominal": 2,
+        "pessimistic": 4
+      },
+      "dependencies": [
+        "01"
+      ],
+      "optional": true
+    },
+    {
+      "id": "01",
+      "ticket": "DEV-RENOVATION-01",
+      "title": "任教授权与受限成绩",
+      "estimate": {
+        "optimistic": 3,
+        "nominal": 5,
+        "pessimistic": 8
+      },
+      "dependencies": [
+        "20A"
+      ],
+      "optional": false
+    },
+    {
+      "id": "02",
+      "ticket": "DEV-RENOVATION-02",
+      "title": "预分类制卡与打印",
+      "estimate": {
+        "optimistic": 3,
+        "nominal": 5,
+        "pessimistic": 8
+      },
+      "dependencies": [
+        "20A"
+      ],
+      "optional": false
+    },
+    {
+      "id": "03",
+      "ticket": "DEV-RENOVATION-03",
+      "title": "扫码即时入账",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 4,
+        "pessimistic": 6
+      },
+      "dependencies": [
+        "02",
+        "04"
+      ],
+      "optional": false
+    },
+    {
+      "id": "04",
+      "ticket": "DEV-RENOVATION-04",
+      "title": "教师纠错与直评",
+      "estimate": {
+        "optimistic": 3,
+        "nominal": 5,
+        "pessimistic": 8
+      },
+      "dependencies": [
+        "01"
+      ],
+      "optional": false
+    },
+    {
+      "id": "05",
+      "ticket": "DEV-RENOVATION-05",
+      "title": "荣誉认定与奖励",
+      "estimate": {
+        "optimistic": 3,
+        "nominal": 5,
+        "pessimistic": 8
+      },
+      "dependencies": [
+        "04"
+      ],
+      "optional": false
+    },
+    {
+      "id": "06",
+      "ticket": "DEV-RENOVATION-06",
+      "title": "故事建议与终审",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 3,
+        "pessimistic": 5
+      },
+      "dependencies": [
+        "01"
+      ],
+      "optional": false
+    },
+    {
+      "id": "07",
+      "ticket": "DEV-RENOVATION-07",
+      "title": "年级指标与教师评价",
+      "estimate": {
+        "optimistic": 4,
+        "nominal": 6,
+        "pessimistic": 10
+      },
+      "dependencies": [
+        "01"
+      ],
+      "optional": false
+    },
+    {
+      "id": "08",
+      "ticket": "DEV-RENOVATION-08",
+      "title": "学科成绩导入",
+      "estimate": {
+        "optimistic": 3,
+        "nominal": 4,
+        "pessimistic": 7
+      },
+      "dependencies": [
+        "07"
+      ],
+      "optional": false
+    },
+    {
+      "id": "20A",
+      "ticket": "DEV-RENOVATION-20",
+      "title": "兼容迁移与隔离验收入口",
+      "estimate": {
+        "optimistic": 1,
+        "nominal": 2,
+        "pessimistic": 4
+      },
+      "dependencies": [],
+      "optional": false
+    },
+    {
+      "id": "20B",
+      "ticket": "DEV-RENOVATION-20",
+      "title": "P0试点与回退演练",
+      "estimate": {
+        "optimistic": 1,
+        "nominal": 2,
+        "pessimistic": 4
+      },
+      "dependencies": [
+        "03",
+        "04"
+      ],
+      "optional": false
+    },
+    {
+      "id": "20C",
+      "ticket": "DEV-RENOVATION-20",
+      "title": "P1全链路试点与历史对账",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 3,
+        "pessimistic": 6
+      },
+      "dependencies": [
+        "08",
+        "12",
+        "13",
+        "15",
+        "16",
+        "20B"
+      ],
+      "optional": false
+    },
+    {
+      "id": "18A",
+      "ticket": "DEV-RENOVATION-18",
+      "title": "公共设备身份与短会话",
+      "estimate": {
+        "optimistic": 1,
+        "nominal": 2,
+        "pessimistic": 4
+      },
+      "dependencies": [
+        "01"
+      ],
+      "optional": true
+    },
+    {
+      "id": "18B",
+      "ticket": "DEV-RENOVATION-18",
+      "title": "公共设备兑换与清屏",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 3,
+        "pessimistic": 5
+      },
+      "dependencies": [
+        "18A",
+        "03"
+      ],
+      "optional": true
+    },
+    {
+      "id": "09",
+      "ticket": "DEV-RENOVATION-09",
+      "title": "体测与健康导入",
+      "estimate": {
+        "optimistic": 2,
+        "nominal": 3,
+        "pessimistic": 5
+      },
+      "dependencies": [
+        "07"
+      ],
+      "optional": true
+    }
+  ]
+}

@@ -68,6 +68,7 @@ export const menuGroups = {
       items: [
         { key: "/dashboard", path: "/dashboard", label: "管理概览", icon: <CompassOutlined /> },
         { key: "/admin/terms", path: "/admin/terms", label: "学期与校历", icon: <CalendarOutlined /> },
+        { key: "/admin/teaching-assignments", path: "/admin/teaching-assignments", label: "任教授权管理", icon: <TeamOutlined /> },
         { key: "/admin/categories", path: "/admin/categories", label: "六育指标树", icon: <AppstoreOutlined /> }
       ]
     },

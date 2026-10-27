@@ -32,6 +32,7 @@ const cardPrint = require('../controllers/cardPrintController');
 const { requireCardAccount } = require('../middleware/cardAccount');
 const { success } = require("../utils/response");
 const {queueReconcile}=require('../services/cardAllocationService');
+const teachingAssignments = require("../controllers/teachingAssignmentController");
 const reconcileCalendar=(req,res,next)=>{res.once('finish',()=>{if(res.statusCode<300)queueReconcile(req.user.schoolId);});next();};
 
 const router = express.Router();
@@ -47,6 +48,12 @@ router.post('/admin/terms',requireAuth,requireRole('manager'),requireCardAccount
 router.put('/admin/terms/:id',requireAuth,requireRole('manager'),requireCardAccount,reconcileCalendar,saveTerm);
 router.post('/admin/terms/:id',requireAuth,requireRole('manager'),requireCardAccount,reconcileCalendar,saveTerm);
 router.post("/admin/terms/:id/set-current", requireAuth, requireRole("manager"), setCurrentTerm);
+
+// ---------------------- 任教授权与班主任职责 ----------------------
+router.get("/admin/teaching-assignments", requireAuth, requireRole("manager", "teacher"), teachingAssignments.getTeachingAssignments);
+router.post("/admin/teaching-assignments", requireAuth, requireRole("manager"), teachingAssignments.saveTeachingAssignment);
+router.delete("/admin/teaching-assignments/:id", requireAuth, requireRole("manager"), teachingAssignments.deleteTeachingAssignment);
+router.post("/admin/import/subject-scores", requireAuth, requireRole("teacher", "manager"), teachingAssignments.submitSubjectScores);
 
 // ---------------------- 六育指标字典 ----------------------
 router.get("/evaluation-categories", getCategories);

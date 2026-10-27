@@ -1,0 +1,465 @@
+[
+  {
+    "id": "20A",
+    "create": [
+      "backend/services/migrationRunner.js",
+      "backend/migrations/renovation/index.js",
+      "scripts/full-system-demo/scenarios/R20A.cjs"
+    ],
+    "modify": [
+      "scripts/full-system-demo/environment.test.cjs",
+      "backend/scripts/runMigrations.js",
+      "scripts/full-system-demo/run.cjs",
+      "scripts/full-system-demo/initialize.cjs"
+    ],
+    "consumes": "旧库基线、现有自动演示manifest；不读取或写入业务结果作为演示操作。",
+    "produces": "C0 runRenovationScenario及applyRegisteredMigrations；带校验和/可重入步骤的登记；只在本次受控前缀库运行场景。",
+    "assertions": "assert.equal(checks.businessDatabaseRejected,true); assert.equal(checks.migrationReplayPreservesLedger,true); assert.equal(checks.baselineReportUnchanged,true)"
+  },
+  {
+    "id": "01",
+    "create": [
+      "backend/services/authorizationService.js",
+      "backend/services/studentTermStateService.js",
+      "backend/controllers/teachingAssignmentController.js",
+      "backend/migrations/renovation/01_authorization.js",
+      "frontend/src/app/admin/teachingAssignments.jsx",
+      "scripts/full-system-demo/scenarios/R01.cjs",
+      "backend/__tests__/renovation_auth.integration.test.js"
+    ],
+    "modify": [
+      "backend/middleware/auth.js",
+      "backend/middleware/studentScope.js",
+      "backend/routes/api.js",
+      "backend/controllers/importController.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/urls.js",
+      "frontend/src/constant/menu.jsx",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "20A迁移/验收入口；G0职责与成绩访问政策。",
+    "produces": "C1 resolveActorContext/assertScope；C2 withStudentTermMutation/withStudentTermsMutation；新增职责界面与受限成绩适配。",
+    "assertions": "assert.equal(checks.crossSubjectStatus,403); assert.equal(checks.sameTokenAfterRevocationStatus,403); assert.equal(checks.permissionDependencyFailureStatus,503)"
+  },
+  {
+    "id": "02",
+    "create": [
+      "backend/services/rewardCategoryService.js",
+      "backend/migrations/renovation/02_classified_cards.js",
+      "scripts/full-system-demo/scenarios/R02.cjs"
+    ],
+    "modify": [
+      "backend/controllers/categoryController.js",
+      "backend/controllers/cardPolicyController.js",
+      "backend/services/cardAllocationService.js",
+      "backend/services/cardPrintService.js",
+      "frontend/src/app/admin/cards.jsx",
+      "frontend/src/app/admin/categories.jsx",
+      "backend/routes/api.js",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "20A；G0学校奖励树/子类份额及未用旧卡政策。",
+    "produces": "分类冻结的AUTO_V2卡及受控打印；rewardCategoryService.resolvePath({schoolId,categoryId,version},connection) -> CategoryPath。",
+    "assertions": "assert.equal(checks.generatedCards,10); assert.equal(checks.dCards,6); assert.equal(checks.zCards,4); assert.equal(checks.reprintAddsCards,0)"
+  },
+  {
+    "id": "04",
+    "create": [
+      "backend/services/scoreLedgerService.js",
+      "backend/migrations/renovation/04_reward_ledger.js",
+      "frontend/src/app/teacher/scoreLedger.jsx",
+      "scripts/full-system-demo/scenarios/R04.cjs",
+      "backend/__tests__/renovation_rewards.integration.test.js"
+    ],
+    "modify": [
+      "backend/controllers/scoreController.js",
+      "backend/routes/api.js",
+      "frontend/src/app/teacher/directScore.jsx",
+      "frontend/src/app/admin/audits.jsx",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2；已确认纠错/直评范围；旧正向流水映射。",
+    "produces": "C3 appendReward/correctReward，同连接接入C2；score_event根、追加流水和请求载荷幂等。",
+    "assertions": "assert.equal(checks.correctedNetPoints,'2.00'); assert.equal(checks.repeatCorrectionAddsEntries,0); assert.equal(checks.cardReusableAfterCorrection,false)"
+  },
+  {
+    "id": "03",
+    "create": [
+      "backend/services/cardRedemptionService.js",
+      "backend/migrations/renovation/03_instant_redemption.js",
+      "scripts/full-system-demo/scenarios/R03.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_rewards.integration.test.js",
+      "backend/controllers/cardController.js",
+      "backend/services/scheduler.js",
+      "backend/routes/api.js",
+      "frontend/src/app/student/claim.jsx",
+      "frontend/src/util/cardClaimSession.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "预分类卡、C1/C2/C3；个人身份方案，公共设备必需时另消费18A会话。",
+    "produces": "redeemCard({actor,token,requestKey,payloadHash}) -> RewardReceipt+CardRedemption；旧领取地址的兼容分流。",
+    "assertions": "assert.equal(checks.originalRewardsForCard,1); assert.equal(checks.netOriginalPoints,'1.00'); assert.equal(checks.teacherPendingAdded,0); assert.equal(checks.replayShowsNewRewardAnimation,false)"
+  },
+  {
+    "id": "05",
+    "create": [
+      "backend/services/honorAwardService.js",
+      "backend/migrations/renovation/05_honor_awards.js",
+      "scripts/full-system-demo/scenarios/R05.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_rewards.integration.test.js",
+      "backend/controllers/honorController.js",
+      "frontend/src/app/student/honors.jsx",
+      "frontend/src/app/teacher/honors.jsx",
+      "frontend/src/app/admin/rules.jsx",
+      "backend/routes/api.js",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2/C3；G1荣誉归属/赛事届次/计分/封顶规则。",
+    "produces": "approveHonor({actor,honorId,expectedRevision,dimension,ruleVersion,requestKey}) -> HonorRevision+RewardReceipt。",
+    "assertions": "assert.equal(checks.approvedHonorPoints,'4.00'); assert.equal(checks.replayedHonorRewards,1); assert.equal(checks.revokedHonorNetPoints,'0.00')"
+  },
+  {
+    "id": "06",
+    "create": [
+      "backend/services/storyReviewService.js",
+      "backend/migrations/renovation/06_story_versions.js",
+      "scripts/full-system-demo/scenarios/R06.cjs"
+    ],
+    "modify": [
+      "backend/controllers/storyController.js",
+      "frontend/src/app/student/stories.jsx",
+      "frontend/src/app/teacher/stories.jsx",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2；G1月份/建议规则/退回与终审政策。",
+    "produces": "reviewStory({actor,storyId,expectedRevision,finalScore,comment}) -> StoryRevision；列出有效月作品的数据合同。",
+    "assertions": "assert.equal(checks.suggestionKind,'RULE'); assert.equal(checks.finalScore,'88.00'); assert.equal(checks.reviewedTextOverwritten,false)"
+  },
+  {
+    "id": "07",
+    "create": [
+      "backend/services/reportIndicatorService.js",
+      "backend/controllers/reportIndicatorController.js",
+      "backend/migrations/renovation/07_report_indicators.js",
+      "frontend/src/app/admin/reportIndicators.jsx",
+      "frontend/src/app/teacher/indicatorEvaluation.jsx",
+      "scripts/full-system-demo/scenarios/R07.cjs"
+    ],
+    "modify": [
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2；G1年级课程、值类型、必评和数据状态；不等待最终纸样。",
+    "produces": "C4 IndicatorValue；saveIndicatorValues({actor,studentKey,expectedRevision,values}) -> ValueRevisions。",
+    "assertions": "assert.equal(checks.rawStars,'★★★'); assert.equal(checks.gradeRawNumericValue,null); assert.equal(checks.recordedZeroIsMissing,false); assert.equal(checks.nonApplicableBlocks,false)"
+  },
+  {
+    "id": "08",
+    "create": [
+      "backend/services/subjectImportService.js",
+      "backend/migrations/renovation/08_subject_imports.js",
+      "scripts/full-system-demo/scenarios/R08.cjs",
+      "backend/__tests__/renovation_import_auth.integration.test.js"
+    ],
+    "modify": [
+      "backend/controllers/importController.js",
+      "backend/services/batchImportService.js",
+      "frontend/src/app/admin/import.jsx",
+      "frontend/src/util/excelScoreParser.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2/C4，G1样例/导入原子策略；服务器预览批次。",
+    "produces": "previewSubjectImport({actor,termId,subjectCode,mapping,rows}) -> PreviewBatch；commitSubjectImport({actor,batchId,expectedRevision,requestKey}) -> ImportResult。",
+    "assertions": "assert.equal(checks.forgedSubjectStatus,403); assert.equal(checks.stalePreviewStatus,409); assert.equal(checks.effectiveVersionCount,1); assert.equal(checks.zeroLost,false)"
+  },
+  {
+    "id": "09",
+    "create": [
+      "backend/services/healthImportService.js",
+      "backend/controllers/healthController.js",
+      "backend/migrations/renovation/09_health_values.js",
+      "frontend/src/app/teacher/healthImport.jsx",
+      "scripts/full-system-demo/scenarios/R09.cjs",
+      "backend/__tests__/renovation_health_auth.integration.test.js"
+    ],
+    "modify": [
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2/C4；G1健康专用授权/单位/样例，按范围启用。",
+    "produces": "previewHealthImport/commitHealthImport使用服务器批次；只读授权HealthValues。",
+    "assertions": "assert.equal(checks.heightUnit,'cm'); assert.equal(checks.managerCanReadHealth,false); assert.equal(checks.healthConvertedToReward,false)"
+  },
+  {
+    "id": "10",
+    "create": [
+      "backend/services/evaluationSnapshotService.js",
+      "backend/migrations/renovation/10_evaluation_versions.js",
+      "scripts/full-system-demo/scenarios/R10.cjs"
+    ],
+    "modify": [
+      "backend/services/evaluationEngine.js",
+      "backend/controllers/evaluationController.js",
+      "frontend/src/app/admin/rules.jsx",
+      "frontend/src/app/student/evaluation.jsx",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C2/C3/C4，G1批准规则；荣誉、正式故事和适用指标，按规则补导入/体测。",
+    "produces": "C5 buildEvaluationSnapshot，指定连接及版本，不在内部另开pool。",
+    "assertions": "assert.equal(checks.testPolicyStoryAggregate,'85.00'); assert.equal(checks.honorCountedTimes,1); assert.equal(checks.noHonorAutomaticallyMissing,false); assert.equal(checks.unconfiguredGrade,null)"
+  },
+  {
+    "id": "11",
+    "create": [
+      "backend/services/reportDraftService.js",
+      "backend/controllers/reportDraftController.js",
+      "backend/migrations/renovation/11_report_drafts.js",
+      "frontend/src/app/teacher/reportDrafts.jsx",
+      "scripts/full-system-demo/scenarios/R11.cjs",
+      "backend/__tests__/renovation_reports.integration.test.js"
+    ],
+    "modify": [
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2/C5；G2最小内容与门槛。",
+    "produces": "C6 buildDraft/confirmDraft；包含空可选AI/家长扩展位的稳定草稿及approvalFingerprint。",
+    "assertions": "assert.equal(checks.manualCommentConfirmed,true); assert.equal(checks.sourceChangeInvalidatesApproval,true); assert.equal(checks.confirmStaleFingerprintStatus,409)"
+  },
+  {
+    "id": "12",
+    "create": [
+      "backend/services/commentGenerationService.js",
+      "backend/services/commentProvider.js",
+      "backend/migrations/renovation/12_comment_jobs.js",
+      "scripts/full-system-demo/scenarios/R12.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_reports.integration.test.js",
+      "backend/controllers/reportDraftController.js",
+      "frontend/src/app/teacher/reportDrafts.jsx",
+      "backend/routes/api.js",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C6/C7；学校批准模型/数据授权、供应条件和预算配置。",
+    "produces": "requestComment({actor,draftId,expectedFingerprint}) -> Job；applyCommentResult({jobId,expectedFingerprint,result}) -> SuggestionRevision。",
+    "assertions": "assert.equal(checks.acceptedGenerationSource,'MODEL'); assert.equal(checks.lateResponseOverwritesTeacher,false); assert.equal(checks.failureLosesDraft,false)"
+  },
+  {
+    "id": "13",
+    "create": [
+      "backend/services/familyFeedbackService.js",
+      "backend/controllers/familyFeedbackController.js",
+      "backend/migrations/renovation/13_family_feedback.js",
+      "frontend/src/app/family/feedback.jsx",
+      "scripts/full-system-demo/scenarios/R13.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_reports.integration.test.js",
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/app/teacher/reportDrafts.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2/C6；G2家长身份、是否必填、来源与可见范围。",
+    "produces": "C7 submitFamilyFeedback；草稿征集及发布后独立FeedbackRevision。",
+    "assertions": "assert.equal(checks.wrongStudentFeedbackStatus,403); assert.equal(checks.revokedCredentialRejected,true); assert.equal(checks.postPublishChangesOldBody,false)"
+  },
+  {
+    "id": "14",
+    "create": [
+      "backend/services/reportPublishService.js",
+      "backend/migrations/renovation/14_report_publish_jobs.js",
+      "scripts/full-system-demo/scenarios/R14.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_reports.integration.test.js",
+      "backend/controllers/reportController.js",
+      "backend/routes/api.js",
+      "frontend/src/app/admin/reports.jsx",
+      "frontend/src/app/admin/audits.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2/C6；家长必填时消费C7已完成反馈。",
+    "produces": "C8 publishOne及持久批量作业；readiness白名单；当前发布版指针。",
+    "assertions": "assert.equal(checks.currentPublishedVersionCount,1); assert.equal(checks.failedRepublishKeepsOldReadable,true); assert.equal(checks.managerResponseContainsPersonalContent,false)"
+  },
+  {
+    "id": "15",
+    "create": [
+      "backend/services/reportRenderService.js",
+      "frontend/src/app/student/reportPrint.less",
+      "scripts/full-system-demo/scenarios/R15.cjs"
+    ],
+    "modify": [
+      "backend/controllers/reportController.js",
+      "frontend/src/app/student/report.jsx",
+      "frontend/src/constant/urls.js"
+    ],
+    "consumes": "C1/C8及G3批准纸样、模板/字体版本。",
+    "produces": "C9 readPublishedReport/renderReport；旧打印地址的受限兼容别名。",
+    "assertions": "assert.equal(checks.printedNameEqualsSnapshot,true); assert.equal(checks.liveProfileChangesOldPrint,false); assert.equal(checks.printOverflow,false)"
+  },
+  {
+    "id": "16",
+    "create": [
+      "backend/controllers/growthController.js",
+      "frontend/src/component/StudentLayout/index.jsx",
+      "frontend/src/component/StudentLayout/index.less",
+      "frontend/src/app/student/growth.jsx",
+      "scripts/full-system-demo/scenarios/R16.cjs"
+    ],
+    "modify": [
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/app/dashboard/index.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js"
+    ],
+    "consumes": "C1/C5及扫码结果，G2学生主题、成长等级与主题操作者规则。",
+    "produces": "getMyGrowth({actor,termId}) -> {evaluation,timeline,theme}; StudentLayout只消费这些DTO。",
+    "assertions": "assert.equal(checks.timelineUsesMyRecords,true); assert.equal(checks.themeChangesLedger,false); assert.equal(checks.gameLevelEqualsOfficialGrade,false)"
+  },
+  {
+    "id": "17",
+    "create": [
+      "backend/services/rosterImportService.js",
+      "backend/controllers/rosterImportController.js",
+      "backend/migrations/renovation/17_roster_imports.js",
+      "frontend/src/app/admin/rosterImport.jsx",
+      "scripts/full-system-demo/scenarios/R17.cjs",
+      "backend/__tests__/renovation_roster_auth.integration.test.js"
+    ],
+    "modify": [
+      "backend/routes/api.js",
+      "backend/services/studentTermStateService.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1/C2，由任教授权票提供；G0试点账号来源、样例与获准基础字段，不等P1最终切换。",
+    "produces": "previewRosterImport/commitRosterImport -> 服务器批次/逐项结果，scope=ROSTER_WRITE。",
+    "assertions": "assert.equal(checks.roleOverwritten,false); assert.equal(checks.sameNameWrongIdOverwritten,false); assert.equal(checks.profileRevisionAdvanced,true)"
+  },
+  {
+    "id": "18A",
+    "create": [
+      "backend/services/deviceSessionService.js",
+      "backend/controllers/deviceController.js",
+      "backend/migrations/renovation/18_device_sessions.js",
+      "frontend/src/app/admin/devices.jsx",
+      "frontend/src/app/kiosk/identify.jsx",
+      "scripts/full-system-demo/scenarios/R18A.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_auth.integration.test.js",
+      "backend/services/authorizationService.js",
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1；G0实际设备、学校绑定与学生身份凭证。",
+    "produces": "C10 issueDeviceSession，带CARD_REDEEM限定能力；撤销/过期检查。",
+    "assertions": "assert.equal(checks.identifiedStudentMatchesCredential,true); assert.equal(checks.kioskReportAccessStatus,403); assert.equal(checks.expiredSessionRejected,true)"
+  },
+  {
+    "id": "18B",
+    "create": [
+      "frontend/src/app/kiosk/redeem.jsx",
+      "scripts/full-system-demo/scenarios/R18B.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_auth.integration.test.js",
+      "backend/services/deviceSessionService.js",
+      "backend/controllers/deviceController.js",
+      "frontend/src/App.jsx",
+      "backend/routes/api.js",
+      "frontend/src/constant/urls.js"
+    ],
+    "consumes": "C10受限会话、扫码即时入账结果。",
+    "produces": "设备身份→兑换→清屏→下一位的完整场景与会话结束状态。",
+    "assertions": "assert.equal(checks.nextStudentUsesPreviousIdentity,false); assert.equal(checks.timeoutClearsSession,true); assert.equal(checks.sharedDeviceDuplicateRewardCount,0)"
+  },
+  {
+    "id": "19",
+    "create": [
+      "backend/services/externalIdentityService.js",
+      "backend/controllers/externalIdentityController.js",
+      "backend/migrations/renovation/19_identity_links.js",
+      "frontend/src/app/admin/identityLinks.jsx",
+      "scripts/full-system-demo/scenarios/R19.cjs"
+    ],
+    "modify": [
+      "backend/__tests__/renovation_auth.integration.test.js",
+      "backend/routes/api.js",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js",
+      "backend/migrations/renovation/index.js"
+    ],
+    "consumes": "C1当前授权，由任教授权票提供；G0预留范围及账号映射政策，不等P1最终切换。",
+    "produces": "bindExternalIdentity/unbindExternalIdentity/listLinks；学校+provider+tenant+externalSubject唯一映射。",
+    "assertions": "assert.equal(checks.mappingCrossSchoolStatus,403); assert.equal(checks.debugCallbackCanIssueLoginToken,false); assert.equal(checks.unlinkAudited,true)"
+  },
+  {
+    "id": "20B",
+    "create": [
+      "backend/services/rolloutService.js",
+      "backend/controllers/rolloutController.js",
+      "frontend/src/app/admin/rollout.jsx",
+      "scripts/full-system-demo/scenarios/R20B.cjs"
+    ],
+    "modify": [
+      "backend/routes/api.js",
+      "backend/services/scheduler.js",
+      "scripts/full-system-demo/README.md",
+      "frontend/src/App.jsx",
+      "frontend/src/constant/menu.jsx",
+      "frontend/src/constant/urls.js"
+    ],
+    "consumes": "20A、任教/制卡/纠错/扫码；G0/G3旧卡与首批范围，必需设备/账号来源。",
+    "produces": "按学校/学期P0启用状态、盘点/对账、回退演练证据。",
+    "assertions": "assert.equal(checks.usedCardsCreditedAgain,0); assert.equal(checks.rollbackDropsNewRewards,false); assert.equal(checks.newFlowPendingClaimsAdded,0)"
+  },
+  {
+    "id": "20C",
+    "create": [
+      "scripts/full-system-demo/scenarios/R20C.cjs"
+    ],
+    "modify": [
+      "backend/services/rolloutService.js",
+      "frontend/src/app/admin/rollout.jsx",
+      "scripts/full-system-demo/steps.cjs",
+      "scripts/full-system-demo/materials.py",
+      "scripts/full-system-demo/README.md",
+      "backend/controllers/rolloutController.js"
+    ],
+    "consumes": "20B、学科导入、AI、家长、阅读打印、成长首页；按范围补健康/学籍/设备/身份。",
+    "produces": "完整一期放行记录、真实三角色证据、新旧账和报告版本核对及更新手册。",
+    "assertions": "assert.equal(checks.legacyReportsChanged,false); assert.equal(checks.missingRequiredFeatureReportedComplete,false); assert.equal(checks.readOnlyReconciliationMatches,true)"
+  }
+]

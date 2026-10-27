@@ -25,23 +25,55 @@ async function requireAuth(req, res, next) {
 
     // 计算 token 的 sha256 哈希值，检查是否在黑名单中
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    let blacklisted = false;
     try {
       const [rows] = await pool.query(
         "SELECT 1 FROM token_blacklist WHERE token_hash = ? AND expires_at > NOW() LIMIT 1",
         [tokenHash]
       );
       if (rows.length > 0) {
-        return res.status(401).json({
-          code: 401,
-          message: "token 已失效，请重新登录"
-        });
+        blacklisted = true;
       }
     } catch (dbErr) {
-      // 数据库不可用时降级处理，允许认证通过
-      console.warn("⚠️ token_blacklist 查询失败，降级模式：", dbErr.message);
+      if (dbErr.code !== 'ER_NO_SUCH_TABLE') {
+        return res.status(503).json({
+          code: 503,
+          message: "权限敏感依赖不可用，请稍后重试"
+        });
+      }
     }
 
-    req.user = decoded; // 将用户信息挂载到 req 对象
+    if (blacklisted) {
+      return res.status(401).json({
+        code: 401,
+        message: "token 已失效，请重新登录"
+      });
+    }
+
+    // 实时构建 ActorContext，禁止盲信旧 JWT 快照
+    const { resolveActorContext } = require('../services/authorizationService');
+    let actor;
+    try {
+      actor = await resolveActorContext({
+        userId: decoded.id,
+        tokenHash,
+        issuedRole: decoded.role,
+        termId: req.query.termId || req.body?.termId || null
+      }, pool);
+    } catch (actorErr) {
+      const status = actorErr.statusCode || 500;
+      return res.status(status).json({
+        code: status,
+        message: actorErr.message
+      });
+    }
+
+    req.actor = actor;
+    req.user = {
+      ...decoded,
+      ...actor,
+      classes: (actor.assignments || []).map(a => ({ grade: a.grade, class_no: a.classNo, subject_code: a.subjectCode }))
+    };
     next();
   } catch (err) {
     return res.status(401).json({

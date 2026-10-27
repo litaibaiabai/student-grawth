@@ -1,18 +1,18 @@
 # 本地 Markdown 问题跟踪器
 
-本仓库未提供问题跟踪器约定。本目录采用 wayfinder 的本地 Markdown 默认方案；不向远程 GitHub 创建问题。
+本目录采用本地 Markdown 问题跟踪方案，承接 wayfinder 决策地图与 to-spec 功能规格；不向远程 GitHub 创建问题。
 
 ## Wayfinding operations
 
-每份地图与每张决策票都是一个 Markdown issue。文件顶部的元数据是状态的唯一来源：
+每份地图、每张决策票与功能规格都是一个 Markdown issue。文件顶部的元数据是状态的唯一来源：
 
 | 字段 | 含义 |
 | --- | --- |
 | `id` | 稳定的问题身份，移动文件时仍保留 |
 | `title` | 面向读者的名称，引用时用名称包裹链接 |
 | `status` | `open` 或 `closed` |
-| `labels` | 地图为 `wayfinder:map`；决策票为 `wayfinder:grilling` 等类型 |
-| `parent` | 父地图的 `id`，地图本身留空 |
+| `labels` | 地图为 `wayfinder:map`；决策票为 `wayfinder:grilling` 等类型；to-spec 规格标注 `ready-for-agent` |
+| `parent` | 决策票填写父地图的 `id`；地图与独立功能规格留空 |
 | `assignee` | 空值表示未领取；领取时先写入实际负责人的标识 |
 | `blocked_by` | 依赖的决策票 `id` 列表；本地跟踪器不具备原生阻塞关系，采用这一文件约定 |
 
@@ -60,4 +60,20 @@ PY
 
 ## 地图入口
 
+- [六育系统减负与成长报告改造地图](system-renovation/map.md) — 本轮改造评审草案及开放决策；未开始实施。
 - [按学科自动配卡与审核归类改造地图](subject-card-issuance/map.md) — 已完成规划，含开发交接规格。
+
+## 功能规格发布
+
+- to-spec 复用同一问题跟踪器，在对应工作目录的 `spec.md` 发布独立规格，不另建远程 issue 或第二套目录。
+- 规格使用现有元数据格式，`status: open`，`labels` 包含 `ready-for-agent`；`parent` 留空，避免混入地图的待解决决策票查询。
+- 标签和依赖分别表达分流与前置关系。若业务选择仍开放，以 `blocked_by` 关联决策票，并在规格中明示；不因标签而视作校规已批准或解除依赖。
+- 当前规格：[六育学生评价系统减负与成长报告改造规格](system-renovation/spec.md)。
+
+## 开发票发布
+
+- to-tickets 采用本地模板，在 `.scratch/<feature>/issues/` 按依赖顺序一票一文件发布，保留 ready-for-agent 分流标签。
+- 开发票与本目录的决策票分开，parent 关联父规格；blocked_by 可同时引用开发票和业务决策，正文用名称链接展示。
+- 条件依赖使用 conditional_blocked_by 与 conditional_state 保留未决范围；未决条件不能因普通阻塞关闭而被跳过，选择确定后将生效票加入 blocked_by。
+- 领取查询同时读取本目录和对应开发票目录；开放、未领取、阻塞全部关闭且条件已解决才可领取。
+- 当前开发票：[六育系统改造开发票索引](../../.scratch/system-renovation/README.md)，共20票；索引提供实时前沿查询。

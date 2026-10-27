@@ -64,3 +64,7 @@ export const API_REPORT_PDF = (id) => `${BASE}/student/reports/${id}/export-pdf`
 export const API_STUDENTS_LIST = BASE + "/users/students";
 export const API_TEACHERS_LIST = BASE + "/users/teachers";
 export const API_AUDITS = BASE + "/admin/audits";
+
+// 任教授权
+export const API_ADMIN_TEACHING_ASSIGNMENTS = BASE + "/admin/teaching-assignments";
+export const API_ADMIN_TEACHING_ASSIGNMENT_DELETE = (id) => `${BASE}/admin/teaching-assignments/${id}`;

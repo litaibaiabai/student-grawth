@@ -11,11 +11,15 @@ registerMigration({
   id: '20A_migration_registry_baseline',
   checksum: '20a_baseline_v1',
   up: async (connection) => {
-    // 20A 仅保证基础兼容，不提前创建后续业务表
     await connection.query('SELECT 1');
   }
 });
 
+// 01 任教授权与学期状态迁移
+const authMigration = require('./01_authorization');
+registerMigration(authMigration);
+
 module.exports = {
   initialized: true
 };
+

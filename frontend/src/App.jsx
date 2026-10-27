@@ -37,6 +37,7 @@ const TeacherStories = lazy(() => import("./app/teacher/stories"));
 
 // 管理员端视图
 const AdminTerms = lazy(() => import("./app/admin/terms"));
+const AdminTeachingAssignments = lazy(() => import("./app/admin/teachingAssignments"));
 const AdminCards = lazy(() => import("./app/admin/cards"));
 const AdminCategories = lazy(() => import("./app/admin/categories"));
 const AdminImport = lazy(() => import("./app/admin/import"));
@@ -260,6 +261,14 @@ function App() {
               element={
                 <RequireAuth>
                   <AdminTerms />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/teaching-assignments"
+              element={
+                <RequireAuth>
+                  <AdminTeachingAssignments />
                 </RequireAuth>
               }
             />
