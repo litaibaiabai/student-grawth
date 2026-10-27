@@ -1,0 +1,81 @@
+.student-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+
+  &.theme-default {
+    background: linear-gradient(135deg, #eef2f7 0%, #f9fbfd 100%);
+    --primary-color: #3b82f6;
+    --accent-color: #60a5fa;
+    --card-bg: rgba(255, 255, 255, 0.9);
+  }
+
+  &.theme-ocean {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+    --primary-color: #0284c7;
+    --accent-color: #38bdf8;
+    --card-bg: rgba(255, 255, 255, 0.95);
+  }
+
+  &.theme-forest {
+    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+    --primary-color: #059669;
+    --accent-color: #34d399;
+    --card-bg: rgba(255, 255, 255, 0.95);
+  }
+
+  &.theme-sunset {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    --primary-color: #ea580c;
+    --accent-color: #fb923c;
+    --card-bg: rgba(255, 255, 255, 0.95);
+  }
+
+  &.theme-cartoon {
+    background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%);
+    --primary-color: #9333ea;
+    --accent-color: #c084fc;
+    --card-bg: rgba(255, 255, 255, 0.95);
+  }
+
+  .student-header {
+    background: var(--card-bg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.03);
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+  }
+
+  .student-content {
+    flex: 1;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .student-footer {
+    text-align: center;
+    padding: 16px;
+    color: #64748b;
+    font-size: 13px;
+  }
+}

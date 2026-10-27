@@ -67,6 +67,10 @@ registerMigration(familyFeedbackMigration);
 const reportPublishMigration = require('./14_report_publish_jobs');
 registerMigration(reportPublishMigration);
 
+// 16 学生主题偏好与成长首页
+const growthThemeMigration = require('./16_growth_theme');
+registerMigration(growthThemeMigration);
+
 module.exports = {
   initialized: true
 };

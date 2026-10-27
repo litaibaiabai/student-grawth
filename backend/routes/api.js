@@ -224,4 +224,9 @@ router.get("/admin/audits", requireAuth, requireRole("manager"), async (req, res
   }
 });
 
+// ---------------------- 学生成长首页与主题 (Task 16) ----------------------
+const growthController = require("../controllers/growthController");
+router.get("/growth/my", requireAuth, growthController.handleGetMyGrowth);
+router.post("/growth/theme", requireAuth, growthController.handleSetTheme);
+
 module.exports = router;

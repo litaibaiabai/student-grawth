@@ -77,3 +77,7 @@ export const API_AUDITS = BASE + "/admin/audits";
 // 任教授权
 export const API_ADMIN_TEACHING_ASSIGNMENTS = BASE + "/admin/teaching-assignments";
 export const API_ADMIN_TEACHING_ASSIGNMENT_DELETE = (id) => `${BASE}/admin/teaching-assignments/${id}`;
+
+// 成长首页与主题 (Task 16)
+export const API_GROWTH_MY = BASE + "/growth/my";
+export const API_GROWTH_THEME = BASE + "/growth/theme";
