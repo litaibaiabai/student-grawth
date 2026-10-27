@@ -1,7 +1,7 @@
 ---
 id: DEV-RENOVATION-05
 title: 荣誉认定与奖励
-status: open
+status: closed
 labels: ["ready-for-agent"]
 parent: SPEC-20261027-RENOVATION
 assignee:
