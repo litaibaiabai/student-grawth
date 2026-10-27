@@ -19,6 +19,10 @@ registerMigration({
 const authMigration = require('./01_authorization');
 registerMigration(authMigration);
 
+// 02 预分类制卡与固定分值
+const cardMigration = require('./02_classified_cards');
+registerMigration(cardMigration);
+
 module.exports = {
   initialized: true
 };
