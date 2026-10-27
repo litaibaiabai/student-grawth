@@ -398,4 +398,52 @@ describe('Task 11: 报告草稿与教师确认集成测试', () => {
     );
     assert.equal(rows.length, 1);
   });
+
+  test('15. 学生本人成功读取已发布报告快照与评语', async () => {
+    const { getPublishedReport } = require('../services/reportRenderService');
+    const report = await getPublishedReport({
+      actor: { id: 201, role: 'student' },
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      connection
+    });
+
+    assert.ok(report);
+    assert.equal(report.studentId, 201);
+    assert.equal(report.status, 'PUBLISHED');
+    assert.ok(report.snapshotJson);
+  });
+
+  test('16. 渲染 A4 打印版 HTML，附带防伪哈希与打印样式', async () => {
+    const { getPublishedReport, renderPrintableA4 } = require('../services/reportRenderService');
+    const report = await getPublishedReport({
+      actor: { id: 201, role: 'student' },
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      connection
+    });
+
+    const a4Html = renderPrintableA4({ reportData: report });
+    assert.ok(a4Html);
+    assert.ok(a4Html.includes('@media print'));
+    assert.ok(a4Html.includes(report.approvalFingerprint));
+  });
+
+  test('17. 管理员直接访问学生个人报告正文被拒绝 (403)', async () => {
+    const { getPublishedReport } = require('../services/reportRenderService');
+    await assert.rejects(
+      async () => {
+        await getPublishedReport({
+          actor: { id: 999, role: 'manager' },
+          schoolId: 1,
+          termId: 1,
+          studentId: 201,
+          connection
+        });
+      },
+      (err) => err.status === 403 || err.statusCode === 403
+    );
+  });
 });

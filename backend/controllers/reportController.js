@@ -185,6 +185,10 @@ async function publishBatch(req, res, next) {
  * 查看本人或指定学生已发布的期末报告
  */
 async function getCurrentReport(req, res, next) {
+  if (req.user?.role === "manager" || req.user?.role === "admin") {
+    return fail(res, "AUTH_FORBIDDEN", "管理员无权查阅学生个人报告正文与详情", 403);
+  }
+
   let studentId = req.query.studentId;
   if (req.user?.role === "student" || !studentId) {
     studentId = req.user?.id || req.user?.userId;
@@ -284,9 +288,12 @@ async function exportReportHtml(req, res, next) {
 
     const rep = rows[0];
 
-    // 学生仅能查看本人报告，教师仅能查看任教班级，管理员不限
+    // 学生仅能查看本人报告，教师仅能查看任教班级，管理员禁止借打印访问正文
     const role = req.user?.role;
     const uid = req.user?.id || req.user?.userId;
+    if (role === "manager" || role === "admin") {
+      return res.status(403).send("管理员无权查阅学生个人报告正文与详情");
+    }
     if (role === "student" && (Number(rep.student_id) !== Number(uid) || rep.status !== "PUBLISHED")) {
       return res.status(403).send("无权查看该报告");
     }

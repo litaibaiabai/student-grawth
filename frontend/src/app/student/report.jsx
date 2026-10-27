@@ -3,6 +3,7 @@ import { Button, Tag, Table, Spin, Space, Result } from "antd";
 import { DownloadOutlined, ReloadOutlined, FileProtectOutlined } from "@ant-design/icons";
 import { get, openReportHtml } from "@/util/request";
 import * as urls from "@/constant/urls";
+import "./reportPrint.css";
 
 const RadarSvg = ({ scores = {} }) => {
   const keys = ["D", "Z", "T", "M", "L", "G"];

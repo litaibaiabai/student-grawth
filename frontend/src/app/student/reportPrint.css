@@ -1,0 +1,40 @@
+/**
+ * reportPrint.css — 期末报告 A4 打印与排版样式
+ */
+@page {
+  size: A4 portrait;
+  margin: 15mm 15mm 15mm 15mm;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 隐藏所有界面导航、侧边栏和操作按钮 */
+  .ant-layout-header,
+  .ant-layout-sider,
+  .no-print,
+  .print-hide-button,
+  button,
+  .ant-btn {
+    display: none !important;
+  }
+
+  .report-print-container {
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* 避免内部块跨页断裂 */
+  .print-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
