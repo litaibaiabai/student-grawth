@@ -86,3 +86,9 @@ export const API_GROWTH_THEME = BASE + "/growth/theme";
 export const API_ROSTER_PREVIEW = BASE + "/admin/roster/preview";
 export const API_ROSTER_COMMIT = BASE + "/admin/roster/commit";
 
+// 公共设备与终端会话 (Task 18A / 18B)
+export const API_DEVICE_REGISTER = BASE + "/admin/devices/register";
+export const API_KIOSK_SESSION_ISSUE = BASE + "/kiosk/session/issue";
+export const API_KIOSK_SESSION_REVOKE = BASE + "/kiosk/session/revoke";
+
+

@@ -75,6 +75,10 @@ registerMigration(growthThemeMigration);
 const rosterImportMigration = require('./17_roster_imports');
 registerMigration(rosterImportMigration);
 
+// 18A 公共设备与受限短会话
+const deviceSessionMigration = require('./18_device_sessions');
+registerMigration(deviceSessionMigration);
+
 module.exports = {
   initialized: true
 };

@@ -169,4 +169,56 @@ describe('Task 01: 任教授权与受限成绩 (C1/C2 合同)', () => {
     assert.equal(res2.sourceRevision, 2, '回放不应再递增 sourceRevision');
     assert.equal(res2.result.scoreAdded, 5);
   });
+
+  describe('Task 18A: 公共设备身份与受限短会话 (C10 合同)', () => {
+    const deviceSessionService = require('../services/deviceSessionService');
+
+    test('管理员成功注册受控设备白名单', async () => {
+      const reg = await deviceSessionService.registerDevice({
+        actor: { id: 999, role: 'manager', schoolId: 1 },
+        schoolId: 1,
+        deviceCode: 'KIOSK_TEST_01',
+        deviceSecret: 'secret_123',
+        locationName: '测试终端',
+        connection
+      });
+      assert.equal(reg.deviceCode, 'KIOSK_TEST_01');
+    });
+
+    test('设备验证学生凭据后签发短会话，仅限 CARD_REDEEM 权限', async () => {
+      const session = await deviceSessionService.issueDeviceSession({
+        deviceCode: 'KIOSK_TEST_01',
+        deviceSecret: 'secret_123',
+        studentId: 201,
+        connection
+      });
+
+      assert.ok(session.sessionToken);
+      assert.equal(session.student.id, 201);
+      assert.equal(session.scope, 'CARD_REDEEM');
+
+      // 验证会话有效
+      const valid = await deviceSessionService.validateDeviceSession({
+        sessionToken: session.sessionToken,
+        connection
+      });
+      assert.equal(valid.student_id, 201);
+
+      // 主动撤销后失效
+      await deviceSessionService.revokeDeviceSession({
+        sessionToken: session.sessionToken,
+        connection
+      });
+
+      await assert.rejects(async () => {
+        await deviceSessionService.validateDeviceSession({
+          sessionToken: session.sessionToken,
+          connection
+        });
+      }, (err) => {
+        assert.equal(err.status, 401);
+        return true;
+      });
+    });
+  });
 });

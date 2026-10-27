@@ -29,6 +29,11 @@ async function assertReportReadAuth({ actor, studentId, schoolId, termId, conn }
     throw new HttpError('管理员无权查阅学生个人报告正文与评语', 403);
   }
 
+  // 公共终端受限会话禁止读取个人报告正文 (Task 18A)
+  if (actor.scope === 'CARD_REDEEM' || actor.sessionType === 'DEVICE_SESSION') {
+    throw new HttpError('公共终端受限短会话禁止访问学期报告隐私正文', 403);
+  }
+
   const targetStudentId = Number(studentId);
 
   // 学生本人可看

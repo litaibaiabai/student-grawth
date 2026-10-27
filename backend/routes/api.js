@@ -234,4 +234,10 @@ const rosterImportController = require("../controllers/rosterImportController");
 router.post("/admin/roster/preview", requireAuth, requireRole("manager"), rosterImportController.handlePreviewRoster);
 router.post("/admin/roster/commit", requireAuth, requireRole("manager"), rosterImportController.handleCommitRoster);
 
+// ---------------------- 公共设备与终端会话 (Task 18A / 18B) ----------------------
+const deviceController = require("../controllers/deviceController");
+router.post("/admin/devices/register", requireAuth, requireRole("manager"), deviceController.handleRegisterDevice);
+router.post("/kiosk/session/issue", deviceController.handleIssueSession);
+router.post("/kiosk/session/revoke", deviceController.handleRevokeSession);
+
 module.exports = router;

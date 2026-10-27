@@ -46,6 +46,8 @@ const AdminRules = lazy(() => import("./app/admin/rules"));
 const AdminReports = lazy(() => import("./app/admin/reports"));
 const AdminAudits = lazy(() => import("./app/admin/audits"));
 const AdminRoster = lazy(() => import("./app/admin/rosterImport"));
+const AdminDevices = lazy(() => import("./app/admin/devices"));
+const KioskIdentify = lazy(() => import("./app/kiosk/identify"));
 
 const NotFound = lazy(() => import("./app/not-found"));
 const Forbidden = lazy(() => import("./app/forbidden"));
@@ -161,9 +163,10 @@ function App() {
       <Router>
         <Suspense fallback={<Loading />}>
           <Routes>
-            {/* 登录页与外部家长免登录填写页 */}
+            {/* 登录页与外部家长免登录填写页、公共终端免登录识别页 */}
             <Route path="/login" element={isAuthenticated ? <Navigate to={claimReturnPath()} replace /> : <Login />} />
             <Route path="/family/feedback" element={<FamilyFeedback />} />
+            <Route path="/kiosk/identify" element={<KioskIdentify />} />
 
             {/* 首页仪表盘 */}
             <Route
@@ -281,6 +284,14 @@ function App() {
               element={
                 <RequireAuth>
                   <AdminTeachingAssignments />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/devices"
+              element={
+                <RequireAuth>
+                  <AdminDevices />
                 </RequireAuth>
               }
             />
