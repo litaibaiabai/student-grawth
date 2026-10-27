@@ -306,11 +306,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C5及扫码结果，G2学生主题、成长等级与主题操作者规则。
 **Interfaces — Produces:** getMyGrowth({actor,termId}) -> {evaluation,timeline,theme}; StudentLayout只消费这些DTO。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R16，先走真实界面，再对外部结果断言：`assert.equal(checks.timelineUsesMyRecords,true); assert.equal(checks.themeChangesLedger,false); assert.equal(checks.gameLevelEqualsOfficialGrade,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R16 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 单独学生布局和统一足迹，使用真实核算状态，不重做计分；主题按允许操作者范围配置，不默认给学生全校主题管理权。 无已发布报告时能正确显示未发布，不以尚未完成的最终纸样阻塞成长首页自身验收。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R16 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/controllers/growthController.js frontend/src/component/StudentLayout/index.jsx frontend/src/component/StudentLayout/index.less frontend/src/app/student/growth.jsx scripts/full-system-demo/scenarios/R16.cjs backend/routes/api.js frontend/src/App.jsx frontend/src/app/dashboard/index.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r16 学生成长首页与主题"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R16，先走真实界面，再对外部结果断言：`assert.equal(checks.timelineUsesMyRecords,true); assert.equal(checks.themeChangesLedger,false); assert.equal(checks.gameLevelEqualsOfficialGrade,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R16 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 单独学生布局和统一足迹，使用真实核算状态，不重做计分；主题按允许操作者范围配置，不默认给学生全校主题管理权。 无已发布报告时能正确显示未发布，不以尚未完成的最终纸样阻塞成长首页自身验收。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R16 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/controllers/growthController.js frontend/src/component/StudentLayout/index.jsx frontend/src/component/StudentLayout/index.less frontend/src/app/student/growth.jsx scripts/full-system-demo/scenarios/R16.cjs backend/routes/api.js frontend/src/App.jsx frontend/src/app/dashboard/index.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r16 学生成长首页与主题"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
