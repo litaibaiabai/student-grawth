@@ -289,11 +289,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C8及G3批准纸样、模板/字体版本。
 **Interfaces — Produces:** C9 readPublishedReport/renderReport；旧打印地址的受限兼容别名。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R15，先走真实界面，再对外部结果断言：`assert.equal(checks.printedNameEqualsSnapshot,true); assert.equal(checks.liveProfileChangesOldPrint,false); assert.equal(checks.printOverflow,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R15 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 完全从发布快照渲染电子与A4；固化模板/字体版本并另标打印时间；按允许范围展示当前/替代版。 不得预设双面/两页；按批准样张和最长真实结构夹具核验，截图与PDF正文对账。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R15 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportRenderService.js frontend/src/app/student/reportPrint.less scripts/full-system-demo/scenarios/R15.cjs backend/controllers/reportController.js frontend/src/app/student/report.jsx frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r15 报告阅读与A4打印"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R15，先走真实界面，再对外部结果断言：`assert.equal(checks.printedNameEqualsSnapshot,true); assert.equal(checks.liveProfileChangesOldPrint,false); assert.equal(checks.printOverflow,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R15 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 完全从发布快照渲染电子与A4；固化模板/字体版本并另标打印时间；按允许范围展示当前/替代版。 不得预设双面/两页；按批准样张和最长真实结构夹具核验，截图与PDF正文对账。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R15 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportRenderService.js frontend/src/app/student/reportPrint.less scripts/full-system-demo/scenarios/R15.cjs backend/controllers/reportController.js frontend/src/app/student/report.jsx frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r15 报告阅读与A4打印"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
