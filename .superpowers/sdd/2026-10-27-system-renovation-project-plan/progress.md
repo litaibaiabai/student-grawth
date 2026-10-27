@@ -24,6 +24,7 @@ All P0 tasks (20A, 01, 02, 04, 03, 20B) are successfully completed, verified, an
 ## P1 Phase Execution
 Task 05: complete (commits c34c491..61c272d, tests: node scripts/full-system-demo/run.cjs --scenario R05 --speed 6 --exit → PASS 4/4 chapters, checks.honorSubmissionMultiVersion=true, checks.teacherReviewAwardsC3Points=true, checks.duplicateReviewIdempotent=true, checks.honorRevokeSyncsLedger=true; renovation_honors.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 107/107)
 Task 06: complete (commits 61c272d..969d0e3, tests: node scripts/full-system-demo/run.cjs --scenario R06 --speed 6 --exit → PASS 4/4 chapters, checks.draftAndFinalSubmitWithAISuggestion=true, checks.teacherReviewAuthoritativeScore=true, checks.unauthorizedTeacherRejected403=true, checks.finalizedStoryImmutable409=true; renovation_stories.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 110/110)
+Task 07: complete (commits 969d0e3..3b4e981, tests: node scripts/full-system-demo/run.cjs --scenario R07 --speed 6 --exit → PASS 4/4 chapters, checks.rawStars='★★★', checks.gradeRawNumericValue=null, checks.recordedZeroIsMissing=false, checks.nonApplicableBlocks=false; renovation_indicators.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 113/113)
 
 
 
