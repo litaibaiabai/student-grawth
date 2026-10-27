@@ -3,15 +3,20 @@ const fs=require('fs'),path=require('path'),crypto=require('crypto'),vm=require(
 const root=path.resolve(__dirname,'../..'),backend=path.join(root,'backend');
 require(path.join(backend,'node_modules/dotenv')).config({path:path.join(backend,'.env')});
 const mysql=require(path.join(backend,'node_modules/mysql2/promise')),bcrypt=require(path.join(backend,'node_modules/bcrypt'));
+const {assertIsolatedDatabase}=require('./environment.cjs');
+require(path.join(backend,'migrations/renovation'));
+const {applyRegisteredMigrations}=require(path.join(backend,'services/migrationRunner'));
 async function initialize(runtime){
  const date=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const runId=date.replaceAll('-','')+'_'+crypto.randomBytes(3).toString('hex'),dbName='liuyu_demo_'+runId;
+ assertIsolatedDatabase(dbName);
  const out=path.join(root,'output/full-system-demo',runId),privateDir=path.join(out,'.private');
  const c=await mysql.createConnection({host:process.env.DB_HOST||'localhost',port:Number(process.env.DB_PORT||3306),user:process.env.DB_USER||'root',password:process.env.DB_PASSWORD,multipleStatements:true});
  try{
   await c.query('CREATE DATABASE `'+dbName+'` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci');
   await c.query(fs.readFileSync(path.join(root,'sql/00_full_schema.sql'),'utf8').replaceAll('`student_growth`','`'+dbName+'`'));
   await require(path.join(backend,'migrations/20261026_subject_cards')).migrateSubjectCards(c);
+  await applyRegisteredMigrations({connection:c, databaseName:dbName});
   const users=[{id:1,username:'demo_admin',realName:'演示管理员',role:'manager',schoolId:1},{id:2,username:'demo_teacher_a',realName:'林老师',role:'teacher',schoolId:1,classes:[{grade:4,class_no:1},{grade:4,class_no:2}]},{id:3,username:'demo_teacher_b',realName:'陈老师',role:'teacher',schoolId:1,classes:[{grade:4,class_no:2}]}];
   ['周知行','许星禾','沈乐知','陆安然','程子墨','唐可欣','顾明远','叶小满'].forEach((name,i)=>users.push({id:11+i,username:'demo_s'+String(i+1).padStart(2,'0'),realName:name,role:'student',schoolId:1,grade:4,classNo:i<4?1:2}));
   users.push({id:91,username:'other_manager',realName:'异校管理员',role:'manager',schoolId:2},{id:92,username:'other_teacher',realName:'异校教师',role:'teacher',schoolId:2,classes:[{grade:4,class_no:1}]},{id:93,username:'other_student',realName:'异校学生',role:'student',schoolId:2,grade:4,classNo:1});

@@ -45,12 +45,44 @@ async function main(){
   r.context=await r.browser.newContext({baseURL:m.baseUrl,viewport:{width:1440,height:1000},acceptDownloads:true,recordVideo:{dir:path.join(m.out,'video'),size:{width:1440,height:1000}},locale:'zh-CN',timezoneId:'Asia/Shanghai'});
   await r.context.tracing.start({screenshots:true,snapshots:true,sources:false});
   const page=pace(await r.context.newPage(),o.speed);page.on('pageerror',e=>console.error('页面异常：'+e.message));page.setDefaultTimeout(20000);await page.goto(m.baseUrl);
-  r.steps=createSteps(page,m.out,o.speed);await require('./browser-demo.cjs').browserDemo({page,context:pace(r.context,o.speed),m,rt,s:r.steps});
+  r.steps=createSteps(page,m.out,o.speed);
+  if(o.scenario){
+    const sc=require('./scenarios/'+o.scenario+'.cjs');
+    console.log(`执行改造场景 [${sc.id}] ${sc.title}...`);
+    const mysql=require(path.join(root,'backend/node_modules/mysql2/promise'));
+    const {inspect}=require('./environment.cjs');
+    await sc.run({page,s:r.steps,m,rt,mysql,inspect});
+  }else{
+    await require('./browser-demo.cjs').browserDemo({page,context:pace(r.context,o.speed),m,rt,s:r.steps});
+  }
  }catch(e){error=e;console.error('演示未完成：'+e.message);}
  finally{await life.finish(error);}
  if(o.exit){process.exitCode=await life.stop(false);process.removeListener('SIGINT',stop);process.removeListener('SIGTERM',stop);}
  else if(error&&!r.browser){process.exitCode=await life.stop(false);process.removeListener('SIGINT',stop);process.removeListener('SIGTERM',stop);}
  else{console.log('浏览器和本次服务保留。结束请回到本终端按Ctrl+C；不会关闭其他服务。');if(error)process.exitCode=1;}
 }
+async function runRenovationScenario(scenarioId, options={}){
+  const o={speed:options.speed||6,headless:options.headless!==false,exit:true,scenario:scenarioId};
+  const rt=await preflight();const m=await initialize(rt);
+  const life=createLifecycle(m),r=life.resources;let checks={},error=null;
+  try{
+    fs.mkdirSync(path.join(m.out,'downloads'),{recursive:true});fs.mkdirSync(path.join(m.out,'video'),{recursive:true});fs.chmodSync(m.out,0o700);
+    execFileSync(rt.python,[path.join(__dirname,'materials.py'),m.out],{stdio:'pipe'});
+    const logs=fs.openSync(path.join(m.out,'service.log'),'a');
+    try{r.service=spawn(process.execPath,[path.join(__dirname,'service.cjs'),path.join(m.out,'manifest.json')],{cwd:root,stdio:['ignore',logs,logs]});}finally{fs.closeSync(logs);}
+    await waitReady(m.baseUrl,r.service);
+    r.browser=await playwright().chromium.launch({...rt.browserOptions,headless:o.headless,slowMo:0,args:['--no-first-run']});
+    r.context=await r.browser.newContext({baseURL:m.baseUrl,viewport:{width:1440,height:1000},locale:'zh-CN',timezoneId:'Asia/Shanghai'});
+    const page=pace(await r.context.newPage(),o.speed);page.setDefaultTimeout(20000);await page.goto(m.baseUrl);
+    r.steps=createSteps(page,m.out,o.speed);
+    const sc=require('./scenarios/'+scenarioId+'.cjs');
+    const mysql=require(path.join(root,'backend/node_modules/mysql2/promise'));
+    const {inspect}=require('./environment.cjs');
+    const res=await sc.run({page,s:r.steps,m,rt,mysql,inspect});
+    if(res&&res.checks)checks=res.checks;
+  }catch(e){error=e;}finally{await life.finish(error);await life.stop(false);}
+  return {uiPassed:!error,checks,artifacts:{out:m.out,dbName:m.dbName},failures:error?[error.message]:[]};
+}
 if(require.main===module)main().catch(e=>{console.error(e.message);process.exitCode=1});
-module.exports={saveReport,waitReady,createLifecycle};
+module.exports={saveReport,waitReady,createLifecycle,runRenovationScenario};
+

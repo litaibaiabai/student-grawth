@@ -10,6 +10,8 @@ require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const fs = require("fs");
 const mysql = require("mysql2/promise");
 const { migrateSubjectCards } = require('../migrations/20261026_subject_cards');
+const { applyRegisteredMigrations } = require('../services/migrationRunner');
+require('../migrations/renovation');
 
 async function run() {
   const dbName = process.env.DB_NAME || "student_growth";
@@ -55,6 +57,8 @@ async function run() {
     }
 
     await migrateSubjectCards(conn);
+    await applyRegisteredMigrations({ connection: conn, databaseName: dbName });
+    console.log(`✅ 增量注册迁移已应用`);
 
     // 3. 确保 token_blacklist 表存在
     await conn.query(`
