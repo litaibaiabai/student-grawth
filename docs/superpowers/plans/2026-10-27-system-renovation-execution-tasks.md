@@ -221,11 +221,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2/C5；G2最小内容与门槛。
 **Interfaces — Produces:** C6 buildDraft/confirmDraft；包含空可选AI/家长扩展位的稳定草稿及approvalFingerprint。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R11，先走真实界面，再对外部结果断言：`assert.equal(checks.manualCommentConfirmed,true); assert.equal(checks.sourceChangeInvalidatesApproval,true); assert.equal(checks.confirmStaleFingerprintStatus,409)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R11 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 以同版本来源构建并保存草稿快照，唯一寄语保存修订；确认指纹覆盖来源/资料、规则、指标、模板、寄语及纳入的反馈版本。 不依赖AI/家长实现来证明人工确认路径；后续模块不得改变指纹字段含义。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R11 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportDraftService.js backend/controllers/reportDraftController.js backend/migrations/renovation/11_report_drafts.js frontend/src/app/teacher/reportDrafts.jsx scripts/full-system-demo/scenarios/R11.cjs backend/__tests__/renovation_reports.integration.test.js backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r11 报告草稿与教师确认"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R11，先走真实界面，再对外部结果断言：`assert.equal(checks.manualCommentConfirmed,true); assert.equal(checks.sourceChangeInvalidatesApproval,true); assert.equal(checks.confirmStaleFingerprintStatus,409)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R11 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 以同版本来源构建并保存草稿快照，唯一寄语保存修订；确认指纹覆盖来源/资料、规则、指标、模板、寄语及纳入的反馈版本。 不依赖AI/家长实现来证明人工确认路径；后续模块不得改变指纹字段含义。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R11 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportDraftService.js backend/controllers/reportDraftController.js backend/migrations/renovation/11_report_drafts.js frontend/src/app/teacher/reportDrafts.jsx scripts/full-system-demo/scenarios/R11.cjs backend/__tests__/renovation_reports.integration.test.js backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r11 报告草稿与教师确认"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
