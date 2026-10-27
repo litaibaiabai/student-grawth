@@ -188,9 +188,44 @@ async function revokeDeviceSession({ sessionToken, connection = null }) {
   return { success: true, sessionToken };
 }
 
+async function redeemKioskCard({ sessionToken, cardToken, requestKey, connection = null }) {
+  const conn = connection || db;
+  const session = await validateDeviceSession({ sessionToken, connection: conn });
+
+  if (session.scope !== 'CARD_REDEEM') {
+    const err = new Error('此会话无扫码兑换权限');
+    err.status = 403;
+    throw err;
+  }
+
+  const cardRedemptionService = require('./cardRedemptionService');
+  const result = await cardRedemptionService.redeemCardInstant({
+    schoolId: session.school_id,
+    studentId: session.student_id,
+    token: cardToken,
+    requestKey
+  }, conn);
+
+  return {
+    success: true,
+    claimId: result.claimId,
+    pointsCredited: result.pointsCredited,
+    dimensionCode: result.dimensionCode || 'D',
+    categoryName: result.categoryName,
+    replayed: !!result.replayed
+  };
+}
+
+async function clearKioskSession({ sessionToken, connection = null }) {
+  return await revokeDeviceSession({ sessionToken, connection });
+}
+
 module.exports = {
   registerDevice,
   issueDeviceSession,
   validateDeviceSession,
-  revokeDeviceSession
+  revokeDeviceSession,
+  redeemKioskCard,
+  clearKioskSession
 };
+

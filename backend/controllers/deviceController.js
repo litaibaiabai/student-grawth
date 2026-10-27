@@ -51,8 +51,41 @@ async function handleRevokeSession(req, res) {
   }
 }
 
+async function handleKioskRedeem(req, res) {
+  try {
+    const { sessionToken, cardToken, requestKey } = req.body;
+    if (!sessionToken || !cardToken) {
+      return res.status(400).json({ code: 400, message: '会话凭证与卡片Token不可为空' });
+    }
+
+    const data = await deviceSessionService.redeemKioskCard({
+      sessionToken,
+      cardToken,
+      requestKey
+    });
+
+    return res.json({ code: 200, message: '即时兑换入账成功', data });
+  } catch (err) {
+    const status = err.statusCode || err.status || 500;
+    return res.status(status).json({ code: status, message: err.message });
+  }
+}
+
+async function handleClearKioskSession(req, res) {
+  try {
+    const { sessionToken } = req.body;
+    const data = await deviceSessionService.clearKioskSession({ sessionToken });
+    return res.json({ code: 200, message: '终端会话已清理清屏', data });
+  } catch (err) {
+    return res.status(err.status || 500).json({ code: err.status || 500, message: err.message });
+  }
+}
+
 module.exports = {
   handleRegisterDevice,
   handleIssueSession,
-  handleRevokeSession
+  handleRevokeSession,
+  handleKioskRedeem,
+  handleClearKioskSession
 };
+

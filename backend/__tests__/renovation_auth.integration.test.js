@@ -51,6 +51,14 @@ describe('Task 01: 任教授权与受限成绩 (C1/C2 合同)', () => {
       VALUES (101, 1, 'teacher_math', 'hash123', '数学张老师', 'teacher', 0);
       INSERT INTO users (id, school_id, username, password, real_name, role, grade, class_no, status)
       VALUES (201, 1, 'student_alice', 'hash123', '学生小爱', 'student', 4, 1, 0);
+      INSERT INTO edu_evaluation_category (id, parent_id, category_level, category_code, category_name, score, status, version)
+      VALUES 
+        (1, 0, 1, 'D', '德育', 0, 1, 'V2'),
+        (2, 1, 2, 'D01', '日常品德', 0, 1, 'V2'),
+        (3, 2, 3, 'D01-01', '爱护公物', 1, 1, 'V2'),
+        (4, 0, 1, 'Z', '智育', 0, 1, 'V2'),
+        (5, 4, 2, 'Z01', '学习探究', 0, 1, 'V2'),
+        (6, 5, 3, 'Z01-01', '钻研求知', 1, 1, 'V2');
     `);
   });
 
@@ -221,4 +229,70 @@ describe('Task 01: 任教授权与受限成绩 (C1/C2 合同)', () => {
       });
     });
   });
+
+  describe('Task 18B: 公共设备兑换与切人清屏', () => {
+    const deviceSessionService = require('../services/deviceSessionService');
+    const { generatePreclassifiedCards } = require('../services/rewardCategoryService');
+    const { decryptToken, credentialContext } = require('../services/cardCredentials');
+
+    test('终端会话扫码即时兑换入账，展示维度不泄露历史账本，并支持幂等重放', async () => {
+      // 准备可用卡片
+      await generatePreclassifiedCards({ schoolId: 1, monthKey: '2026-10', conn: connection });
+      const [cards] = await connection.query(
+        "SELECT id, token_ciphertext FROM reward_card WHERE school_id = 1 AND batch_code = 'AUTO_V2' AND status = 'UNUSED' LIMIT 1"
+      );
+      assert.ok(cards.length >= 1);
+      const token = decryptToken(cards[0].token_ciphertext, credentialContext({ school_id: 1, serial_no: 1, batch_code: 'AUTO_V2' }));
+
+      // 签发会话
+      const session = await deviceSessionService.issueDeviceSession({
+        deviceCode: 'KIOSK_TEST_01',
+        deviceSecret: 'secret_123',
+        studentId: 201,
+        connection
+      });
+
+      const requestKey = 'TEST_CLAIM_' + Date.now();
+      const res = await deviceSessionService.redeemKioskCard({
+        sessionToken: session.sessionToken,
+        cardToken: token,
+        requestKey,
+        connection
+      });
+
+      assert.equal(res.success, true);
+      assert.ok(res.pointsCredited >= 1);
+      assert.ok(res.dimensionCode);
+      assert.equal(res.historicalLedger, undefined, '不可泄露历史账本明细');
+
+      // 幂等重试
+      const retryRes = await deviceSessionService.redeemKioskCard({
+        sessionToken: session.sessionToken,
+        cardToken: token,
+        requestKey,
+        connection
+      });
+      assert.equal(retryRes.replayed, true);
+
+      // 清屏注销
+      await deviceSessionService.clearKioskSession({
+        sessionToken: session.sessionToken,
+        connection
+      });
+
+      // 验证注销后无法再兑换
+      await assert.rejects(async () => {
+        await deviceSessionService.redeemKioskCard({
+          sessionToken: session.sessionToken,
+          cardToken: token,
+          requestKey: 'NEW_REQ',
+          connection
+        });
+      }, (err) => {
+        assert.equal(err.status, 401);
+        return true;
+      });
+    });
+  });
 });
+

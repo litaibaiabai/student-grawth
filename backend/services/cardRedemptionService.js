@@ -67,6 +67,7 @@ async function redeemCardInstant({ schoolId = 1, studentId, token, requestKey },
             pointsCredited: card.points || 1,
             categoryId: card.category_id,
             categoryName: card.category_name,
+            dimensionCode: card.dimension_code,
             replayed: true
           };
         }

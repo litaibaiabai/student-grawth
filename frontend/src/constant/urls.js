@@ -90,5 +90,8 @@ export const API_ROSTER_COMMIT = BASE + "/admin/roster/commit";
 export const API_DEVICE_REGISTER = BASE + "/admin/devices/register";
 export const API_KIOSK_SESSION_ISSUE = BASE + "/kiosk/session/issue";
 export const API_KIOSK_SESSION_REVOKE = BASE + "/kiosk/session/revoke";
+export const API_KIOSK_REDEEM = BASE + "/kiosk/redeem";
+export const API_KIOSK_CLEAR_SESSION = BASE + "/kiosk/clear-session";
+
 
 

@@ -48,6 +48,7 @@ const AdminAudits = lazy(() => import("./app/admin/audits"));
 const AdminRoster = lazy(() => import("./app/admin/rosterImport"));
 const AdminDevices = lazy(() => import("./app/admin/devices"));
 const KioskIdentify = lazy(() => import("./app/kiosk/identify"));
+const KioskRedeem = lazy(() => import("./app/kiosk/redeem"));
 
 const NotFound = lazy(() => import("./app/not-found"));
 const Forbidden = lazy(() => import("./app/forbidden"));
@@ -167,6 +168,7 @@ function App() {
             <Route path="/login" element={isAuthenticated ? <Navigate to={claimReturnPath()} replace /> : <Login />} />
             <Route path="/family/feedback" element={<FamilyFeedback />} />
             <Route path="/kiosk/identify" element={<KioskIdentify />} />
+            <Route path="/kiosk/redeem" element={<KioskRedeem />} />
 
             {/* 首页仪表盘 */}
             <Route

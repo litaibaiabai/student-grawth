@@ -239,5 +239,7 @@ const deviceController = require("../controllers/deviceController");
 router.post("/admin/devices/register", requireAuth, requireRole("manager"), deviceController.handleRegisterDevice);
 router.post("/kiosk/session/issue", deviceController.handleIssueSession);
 router.post("/kiosk/session/revoke", deviceController.handleRevokeSession);
+router.post("/kiosk/redeem", deviceController.handleKioskRedeem);
+router.post("/kiosk/clear-session", deviceController.handleClearKioskSession);
 
 module.exports = router;
