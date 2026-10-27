@@ -18,7 +18,7 @@ function requestKey(value){
 function usable(card,req){
   if(!card) throw new AppError(404,'未找到该实体卡',404);
   if(Number(card.school_id)!==Number(req.user.schoolId)) throw new AppError(403,'该卡片不属于本校',403);
-  if(Number(card.is_legacy_test)!==0&&!card.batch_code) throw new AppError(410,'该卡片为旧测试卡，不能用于正式申领',410);
+  if(Number(card.is_legacy_test)!==0||(!card.allocation_id&&!card.batch_code)) throw new AppError(410,'该卡片为旧测试卡，不能用于正式申领',410);
 }
 function canClaim(card){
   if(card.status==='USED') throw new AppError(ErrorCodes.CARD_USED,'该卡已审核入账，不能再次申领',409);
@@ -57,7 +57,7 @@ async function claimCard(req,res,next){
     const card=await findCard(c,tokenHash(token.trim()),true);usable(card,req);
 
     // 预分类卡直接即时入账
-    if(card.category_id || card.batch_code === 'AUTO_V2'){
+    if (card.category_id) {
       await c.rollback();
       c.release();
       c = null;
