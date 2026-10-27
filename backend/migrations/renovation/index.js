@@ -47,6 +47,10 @@ registerMigration(subjectImportMigration);
 const healthMigration = require('./09_health_values');
 registerMigration(healthMigration);
 
+// 10 自动六育评价快照
+const evaluationMigration = require('./10_evaluation_versions');
+registerMigration(evaluationMigration);
+
 module.exports = {
   initialized: true
 };
