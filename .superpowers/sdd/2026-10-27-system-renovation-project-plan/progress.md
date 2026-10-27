@@ -26,6 +26,7 @@ Task 05: complete (commits c34c491..61c272d, tests: node scripts/full-system-dem
 Task 06: complete (commits 61c272d..969d0e3, tests: node scripts/full-system-demo/run.cjs --scenario R06 --speed 6 --exit → PASS 4/4 chapters, checks.draftAndFinalSubmitWithAISuggestion=true, checks.teacherReviewAuthoritativeScore=true, checks.unauthorizedTeacherRejected403=true, checks.finalizedStoryImmutable409=true; renovation_stories.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 110/110)
 Task 07: complete (commits 969d0e3..3b4e981, tests: node scripts/full-system-demo/run.cjs --scenario R07 --speed 6 --exit → PASS 4/4 chapters, checks.rawStars='★★★', checks.gradeRawNumericValue=null, checks.recordedZeroIsMissing=false, checks.nonApplicableBlocks=false; renovation_indicators.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 113/113)
 Task 08: complete (commits 3b4e981..cf5e18c, tests: node scripts/full-system-demo/run.cjs --scenario R08 --speed 6 --exit → PASS 4/4 chapters, checks.forgedSubjectStatus=403, checks.stalePreviewStatus=409, checks.effectiveVersionCount=1, checks.zeroLost=false; renovation_import_auth.integration.test.js → PASS 4/4; npm test --prefix backend → PASS 117/117)
+Task 09: complete (commits cf5e18c..0f9657e, tests: node scripts/full-system-demo/run.cjs --scenario R09 --speed 6 --exit → PASS 4/4 chapters, checks.heightUnit='cm', checks.managerCanReadHealth=false, checks.healthConvertedToReward=false; renovation_health_auth.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 120/120)
 
 
 
