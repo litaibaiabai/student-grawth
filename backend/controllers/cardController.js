@@ -8,6 +8,7 @@ const {DIMENSION_NAMES,schoolTimestamp,validateMonth}=require('../services/cardR
 const {tokenHash}=require('../services/cardCredentials');
 const {json}=require('../services/cardAllocationService');
 const {retiredCardEndpoint}=require('./cardPolicyController');
+const {redeemCardInstant}=require('../services/cardRedemptionService');
 
 function requestKey(value){
   if(value===undefined||value===null||value==='') return crypto.randomUUID();
@@ -17,7 +18,7 @@ function requestKey(value){
 function usable(card,req){
   if(!card) throw new AppError(404,'未找到该实体卡',404);
   if(Number(card.school_id)!==Number(req.user.schoolId)) throw new AppError(403,'该卡片不属于本校',403);
-  if(Number(card.is_legacy_test)!==0||!card.allocation_id) throw new AppError(410,'该卡片为旧测试卡，不能用于正式申领',410);
+  if(Number(card.is_legacy_test)!==0&&!card.batch_code) throw new AppError(410,'该卡片为旧测试卡，不能用于正式申领',410);
 }
 function canClaim(card){
   if(card.status==='USED') throw new AppError(ErrorCodes.CARD_USED,'该卡已审核入账，不能再次申领',409);
@@ -36,7 +37,7 @@ async function findCard(conn,hash,lock=false){
   return card;
 }
 function previewDTO(card){
-  return {cardId:Number(card.id),monthKey:card.month_key,serialNo:Number(card.serial_no),dimensionCode:card.dimension_code,dimensionName:DIMENSION_NAMES[card.dimension_code],teacherName:card.teacher_name,categoryId:null,categoryCode:null,categoryName:null,points:1,status:card.status,validFrom:card.valid_from_local,validUntil:card.effective_valid_until,reviewDeadline:card.effective_review_deadline};
+  return {cardId:Number(card.id),monthKey:card.month_key,serialNo:Number(card.serial_no),dimensionCode:card.dimension_code,dimensionName:DIMENSION_NAMES[card.dimension_code],teacherName:card.teacher_name,categoryId:card.category_id||null,categoryCode:null,categoryName:card.category_name||null,points:card.points||1,status:card.status,validFrom:card.valid_from_local,validUntil:card.effective_valid_until,reviewDeadline:card.effective_review_deadline};
 }
 async function previewCard(req,res,next){
   try{
@@ -54,6 +55,36 @@ async function claimCard(req,res,next){
     const key=requestKey(req.body.requestKey);
     c=await pool.getConnection();await c.beginTransaction();
     const card=await findCard(c,tokenHash(token.trim()),true);usable(card,req);
+
+    // 预分类卡直接即时入账
+    if(card.category_id || card.batch_code === 'AUTO_V2'){
+      await c.rollback();
+      c.release();
+      c = null;
+      const conn = await pool.getConnection();
+      try{
+        const redeemRes = await redeemCardInstant({
+          schoolId: req.user.schoolId,
+          studentId: req.user.id,
+          token: token.trim(),
+          requestKey: key
+        }, conn);
+        return success(res,{
+          claimId: redeemRes.claimId,
+          cardId: Number(card.id),
+          status: 'APPROVED',
+          cardStatus: 'USED',
+          dimensionCode: redeemRes.dimensionCode || card.dimension_code,
+          categoryId: redeemRes.categoryId,
+          pointsPending: 0,
+          pointsCredited: redeemRes.pointsCredited || 1,
+          replayed: !!redeemRes.replayed
+        }, '扫码即时入账成功，已获得1分奖励');
+      }finally{
+        conn.release();
+      }
+    }
+
     const [[previous]]=await c.query('SELECT id,card_id,student_id,status FROM card_claim WHERE request_key=?',[key]);
     if(previous){
       if(Number(previous.card_id)!==Number(card.id)||Number(previous.student_id)!==Number(req.user.id)) throw new AppError(409,'该请求标识已用于其他申领',409);
