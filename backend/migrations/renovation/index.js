@@ -31,6 +31,10 @@ registerMigration(ledgerMigration);
 const honorMigration = require('./05_honor_awards');
 registerMigration(honorMigration);
 
+// 06 故事建议与终审
+const storyMigration = require('./06_story_review');
+registerMigration(storyMigration);
+
 module.exports = {
   initialized: true
 };

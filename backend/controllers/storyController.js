@@ -48,10 +48,14 @@ async function submitStory(req, res, next) {
   const draftFlag = isDraft !== undefined ? isDraft : is_draft;
   const status = draftFlag ? "DRAFT" : "SUBMITTED";
 
-  let conn;
+  let conn = req.conn;
+  let ownConn = false;
   try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
+    if (!conn) {
+      conn = await pool.getConnection();
+      ownConn = true;
+      await conn.beginTransaction();
+    }
 
     // 1. 获取当前学期
     const [termRows] = await conn.query(
@@ -98,8 +102,7 @@ async function submitStory(req, res, next) {
       [schoolId, storyId, nextVer, content, contentHash, JSON.stringify(aiResult), studentId]
     );
 
-    await conn.commit();
-
+    if (ownConn) await conn.commit();
     success(res, {
       id: storyId,
       monthKey: mKey,
@@ -109,10 +112,10 @@ async function submitStory(req, res, next) {
       aiSuggestion: aiResult.suggestion
     }, isDraft ? "故事草稿已保存" : "故事已成功提交，AI初评建议已生成");
   } catch (err) {
-    if (conn) await conn.rollback();
+    if (ownConn && conn) await conn.rollback();
     next(err);
   } finally {
-    if (conn) conn.release();
+    if (ownConn && conn) conn.release();
   }
 }
 
@@ -132,20 +135,23 @@ async function reviewStory(req, res, next) {
 
   const teacherId = req.user?.id || req.user?.userId;
 
-  let conn;
+  let conn = req.conn;
+  let ownConn = false;
   try {
-    conn = await pool.getConnection();
-
-    await conn.beginTransaction();
+    if (!conn) {
+      conn = await pool.getConnection();
+      ownConn = true;
+      await conn.beginTransaction();
+    }
     const [rows] = await conn.query("SELECT * FROM story_submission WHERE id = ? FOR UPDATE", [storyId]);
     if (rows.length === 0) {
-      await conn.rollback();
+      if (ownConn) await conn.rollback();
       return fail(res, ErrorCodes.NOT_FOUND, "故事记录不存在", 404);
     }
 
-    if(Number(rows[0].school_id)!==Number(req.user.schoolId))throw new AppError(403,'禁止跨校审核',403);
-    await requireStudentScope(req.user,rows[0].student_id,conn);
-    if(rows[0].status!=='SUBMITTED')throw new AppError(409,'仅已提交故事可终审，请刷新列表',409);
+    if (Number(rows[0].school_id) !== Number(req.user.schoolId)) throw new AppError(403, '禁止跨校审核', 403);
+    await requireStudentScope(req.user, rows[0].student_id, conn);
+    if (rows[0].status !== 'SUBMITTED') throw new AppError(409, '仅已提交故事可终审，请刷新列表', 409);
     await conn.query(
       `UPDATE story_submission
        SET status = 'REVIEWED', teacher_score = ?, teacher_comment = ?, reviewer_id = ?, reviewed_at = NOW()
@@ -153,18 +159,18 @@ async function reviewStory(req, res, next) {
       [Number(scoreVal), commentVal, teacherId, storyId]
     );
 
-    await conn.query("INSERT INTO operation_audit(school_id,actor_user_id,actor_role,target_type,target_id,action,request_id,new_summary) VALUES(?,?,?,'STORY_SUBMISSION',?,'REVIEW_STORY',?,?)",[req.user.schoolId,teacherId,req.user.role,storyId,req.requestId||crypto.randomUUID(),JSON.stringify({teacherScore:Number(scoreVal),version:rows[0].current_version})]);
-    await conn.commit();
+    await conn.query("INSERT INTO operation_audit(school_id,actor_user_id,actor_role,target_type,target_id,action,request_id,new_summary) VALUES(?,?,?,'STORY_SUBMISSION',?,'REVIEW_STORY',?,?)", [req.user.schoolId, teacherId, req.user.role, storyId, req.requestId || crypto.randomUUID(), JSON.stringify({ teacherScore: Number(scoreVal), version: rows[0].current_version })]);
+    if (ownConn) await conn.commit();
     success(res, {
       id: Number(storyId),
       teacherScore: Number(scoreVal),
       status: "REVIEWED"
     }, "故事终审分已正式确认入账");
   } catch (err) {
-    if(conn)await conn.rollback();
+    if (ownConn && conn) await conn.rollback();
     next(err);
   } finally {
-    if (conn) conn.release();
+    if (ownConn && conn) conn.release();
   }
 }
 
