@@ -272,11 +272,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2/C6；家长必填时消费C7已完成反馈。
 **Interfaces — Produces:** C8 publishOne及持久批量作业；readiness白名单；当前发布版指针。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R14，先走真实界面，再对外部结果断言：`assert.equal(checks.currentPublishedVersionCount,1); assert.equal(checks.failedRepublishKeepsOldReadable,true); assert.equal(checks.managerResponseContainsPersonalContent,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R14 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 逐份锁定学期状态、核对指纹、冻结批准草稿；新版和指针/替代状态同事务。服务内部可为发布读取内容，但管理员响应/审计仅返回获准状态。 加入并发发布、确认后源写竞争、单份失败与批次部分成功屏障测试；不能调用另一个pool临时重算。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R14 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportPublishService.js backend/migrations/renovation/14_report_publish_jobs.js scripts/full-system-demo/scenarios/R14.cjs backend/__tests__/renovation_reports.integration.test.js backend/controllers/reportController.js backend/routes/api.js frontend/src/app/admin/reports.jsx frontend/src/app/admin/audits.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r14 状态发布与版本冻结"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R14，先走真实界面，再对外部结果断言：`assert.equal(checks.currentPublishedVersionCount,1); assert.equal(checks.failedRepublishKeepsOldReadable,true); assert.equal(checks.managerResponseContainsPersonalContent,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R14 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 逐份锁定学期状态、核对指纹、冻结批准草稿；新版和指针/替代状态同事务。服务内部可为发布读取内容，但管理员响应/审计仅返回获准状态。 加入并发发布、确认后源写竞争、单份失败与批次部分成功屏障测试；不能调用另一个pool临时重算。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R14 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportPublishService.js backend/migrations/renovation/14_report_publish_jobs.js scripts/full-system-demo/scenarios/R14.cjs backend/__tests__/renovation_reports.integration.test.js backend/controllers/reportController.js backend/routes/api.js frontend/src/app/admin/reports.jsx frontend/src/app/admin/audits.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r14 状态发布与版本冻结"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
