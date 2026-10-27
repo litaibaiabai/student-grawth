@@ -4,6 +4,8 @@
 
 const crypto = require("crypto");
 const { pool } = require("../db");
+const {requireStudentScope,classFilter}=require("../middleware/studentScope");
+const {AppError}=require("../middleware/errorHandler");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const { getMonthKey } = require("../utils/monthKey");
@@ -60,13 +62,14 @@ async function submitStory(req, res, next) {
 
     // 2. 检查当月是否已有记录
     const [existRows] = await conn.query(
-      "SELECT id, current_version, status FROM story_submission WHERE school_id = ? AND student_id = ? AND term_id = ? AND month_key = ?",
+      "SELECT id, current_version, status FROM story_submission WHERE school_id = ? AND student_id = ? AND term_id = ? AND month_key = ? FOR UPDATE",
       [schoolId, studentId, termId, mKey]
     );
 
     let storyId;
     let nextVer = 1;
     if (existRows.length > 0) {
+      if(existRows[0].status!=='DRAFT')throw new AppError(409,'已提交或终审故事不可覆盖，请联系教师处理',409);
       storyId = existRows[0].id;
       nextVer = Number(existRows[0].current_version) + 1;
       await conn.query(
@@ -123,7 +126,7 @@ async function reviewStory(req, res, next) {
   const scoreVal = teacherScore !== undefined ? teacherScore : (teacher_score !== undefined ? teacher_score : finalScore);
   const commentVal = teacherComment !== undefined ? teacherComment : (teacher_comment !== undefined ? teacher_comment : null);
 
-  if (scoreVal === undefined || Number(scoreVal) < 0 || Number(scoreVal) > 100) {
+  if (scoreVal === undefined || !Number.isFinite(Number(scoreVal)) || Number(scoreVal) < 0 || Number(scoreVal) > 100) {
     return fail(res, ErrorCodes.VALIDATION_ERROR, "正式得分必须在 0 ~ 100 之间", 422);
   }
 
@@ -133,11 +136,16 @@ async function reviewStory(req, res, next) {
   try {
     conn = await pool.getConnection();
 
-    const [rows] = await conn.query("SELECT * FROM story_submission WHERE id = ?", [storyId]);
+    await conn.beginTransaction();
+    const [rows] = await conn.query("SELECT * FROM story_submission WHERE id = ? FOR UPDATE", [storyId]);
     if (rows.length === 0) {
+      await conn.rollback();
       return fail(res, ErrorCodes.NOT_FOUND, "故事记录不存在", 404);
     }
 
+    if(Number(rows[0].school_id)!==Number(req.user.schoolId))throw new AppError(403,'禁止跨校审核',403);
+    await requireStudentScope(req.user,rows[0].student_id,conn);
+    if(rows[0].status!=='SUBMITTED')throw new AppError(409,'仅已提交故事可终审，请刷新列表',409);
     await conn.query(
       `UPDATE story_submission
        SET status = 'REVIEWED', teacher_score = ?, teacher_comment = ?, reviewer_id = ?, reviewed_at = NOW()
@@ -145,12 +153,15 @@ async function reviewStory(req, res, next) {
       [Number(scoreVal), commentVal, teacherId, storyId]
     );
 
+    await conn.query("INSERT INTO operation_audit(school_id,actor_user_id,actor_role,target_type,target_id,action,request_id,new_summary) VALUES(?,?,?,'STORY_SUBMISSION',?,'REVIEW_STORY',?,?)",[req.user.schoolId,teacherId,req.user.role,storyId,req.requestId||crypto.randomUUID(),JSON.stringify({teacherScore:Number(scoreVal),version:rows[0].current_version})]);
+    await conn.commit();
     success(res, {
       id: Number(storyId),
       teacherScore: Number(scoreVal),
       status: "REVIEWED"
     }, "故事终审分已正式确认入账");
   } catch (err) {
+    if(conn)await conn.rollback();
     next(err);
   } finally {
     if (conn) conn.release();
@@ -181,6 +192,7 @@ async function getStories(req, res, next) {
       WHERE s.school_id = ?
     `;
     const params = [schoolId];
+    sql += classFilter(req.user,"u",params);
 
     if (req.user?.role === "student") {
       sql += " AND s.student_id = ?";

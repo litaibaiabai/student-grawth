@@ -2,7 +2,8 @@
  * init_db_data.js — 初始化 student_growth 基础数据
  * 包括：学期、三角色测试账号、六育三级评价指标树
  */
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const bcrypt = require("bcrypt");
 const { pool } = require("../db");
 

@@ -105,10 +105,11 @@ async function computeStudentScore(studentId, termId = 1, schoolId = 1) {
   return {
     studentId,
     termId,
+    ruleVersion:rule.rule_version||"DEFAULT_80_15_5",
     isComplete,
     missingDimensions: missingDims,
     dimensions: dimDetails,
-    sixAverage: sixAverage ? Number(sixAverage.toFixed(2)) : null,
+    sixAverage: sixAverage !== null ? Number(sixAverage.toFixed(2)) : null,
     process: {
       netPoints: netProcessPoints,
       targetPoints: processTarget,

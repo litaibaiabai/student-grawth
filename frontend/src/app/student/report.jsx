@@ -193,7 +193,7 @@ const StudentReport = () => {
             </div>
             <p style={{ fontSize: 11, color: "#8b9c8e", marginTop: 12, textAlign: "center" }}>
               期末综合素质总评：<strong>{Number(report.comprehensiveScore).toFixed(2)} 分</strong>（
-              {report.comprehensiveGrade}）· 规则 V1.0 (80/15/5)
+              {report.comprehensiveGrade}）· 规则 {report.snapshot?.evaluation?.ruleVersion || "历史版本"}
             </p>
           </section>
 

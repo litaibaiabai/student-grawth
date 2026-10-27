@@ -10,3 +10,6 @@ backend/uploads/
 scratch/
 
 backend/private/
+
+# Local automatic demo credentials, browser traces and fictional run evidence
+output/full-system-demo/

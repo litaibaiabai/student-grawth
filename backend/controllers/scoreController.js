@@ -3,6 +3,8 @@
  */
 
 const { pool } = require("../db");
+const {requireStudentScope}=require("../middleware/studentScope");
+const {AppError}=require("../middleware/errorHandler");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const { assertStudentInScope } = require("../middleware/security");
@@ -66,8 +68,7 @@ async function directScoreBatch(req, res, next) {
       if (req.user?.role !== "manager") {
         student = await assertStudentInScope(req.user?.classes, sid, schoolId);
       } else {
-        const [stuRows] = await conn.query("SELECT grade, class_no FROM users WHERE id = ?", [sid]);
-        student = stuRows[0] || { grade: 1, class_no: 1 };
+        student = await requireStudentScope(req.user,sid,conn);
       }
 
       const classSnapshot = JSON.stringify({ grade: student.grade || 1, class_no: student.class_no || 1 });
@@ -142,6 +143,7 @@ async function reverseScore(req, res, next) {
     }
 
     const orig = origRows[0];
+    if(Number(orig.school_id)!==Number(schoolId))throw new AppError(403,"禁止冲销异校流水",403);
     if (orig.delta <= 0) {
       await conn.rollback();
       return fail(res, ErrorCodes.BAD_REQUEST, "仅正向奖励流水(+1)可被冲销", 400);
@@ -233,6 +235,8 @@ async function getStudentScores(req, res, next) {
     }
 
     const schoolId = req.user?.schoolId || 1;
+
+    await requireStudentScope(req.user,studentId,conn);
 
     // 1. 各维度积分统计
     const [dimRows] = await conn.query(

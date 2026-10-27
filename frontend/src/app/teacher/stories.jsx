@@ -78,7 +78,7 @@ const TeacherStories = () => {
       });
 
       if (res.code === 200) {
-        message.success("月度故事评阅已完成并锁定归档！已纳入学期综合素质5%权重计算");
+        message.success("月度故事评阅已完成并锁定归档！已作为六育G维度正式分来源");
         setSelectedStory(null);
         fetchStories();
       } else {
@@ -123,7 +123,7 @@ const TeacherStories = () => {
       )
     },
     {
-      title: "AI 智能助评参考",
+      title: "规则模拟建议",
       key: "ai",
       width: 160,
       render: (_, r) => (
@@ -179,8 +179,8 @@ const TeacherStories = () => {
       key: "action",
       width: 120,
       render: (_, r) => (
-        <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => handleOpenReview(r)}>
-          {r.teacher_score !== null ? "复核修订" : "批阅评分"}
+        <Button type="primary" size="small" disabled={r.status !== "SUBMITTED"} icon={<EditOutlined />} onClick={() => handleOpenReview(r)}>
+          {r.status === "REVIEWED" ? "已终审" : r.status === "DRAFT" ? "草稿待提交" : "批阅评分"}
         </Button>
       )
     }
@@ -208,8 +208,7 @@ const TeacherStories = () => {
               学生月度生活故事与自我反思评阅台
             </Title>
             <Text style={{ color: "#cbd5e1", fontSize: 13 }}>
-              支持结合自然语言大模型（AI
-              Pre-scoring）语义预评分建议，给出具有人文关怀的教师期终评语并核定终审分数（占综合评分5%权重）。
+              辅助建议由当前规则模拟生成；教师阅读正文并独立核定正式分，作为六育G维度来源。
             </Text>
           </Col>
           <Col>
@@ -224,8 +223,8 @@ const TeacherStories = () => {
               }}
             >
               <ReadOutlined style={{ fontSize: 24, color: "#38bdf8" }} />
-              <div style={{ fontSize: 12, color: "#cbd5e1", marginTop: 4 }}>综合评分权重</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>5 % 标准权</div>
+              <div style={{ fontSize: 12, color: "#cbd5e1", marginTop: 4 }}>正式评分用途</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>G 维度来源</div>
             </div>
           </Col>
         </Row>
@@ -310,7 +309,7 @@ const TeacherStories = () => {
                   <Space>
                     <RobotOutlined style={{ color: "#16a34a", fontSize: 16 }} />
                     <Text strong style={{ color: "#166534" }}>
-                      AI 智能语言模型预评分建议：
+                      规则模拟建议（仅供参考）：
                     </Text>
                     <Tag color="green" style={{ fontSize: 13, fontWeight: 700 }}>
                       {selectedStory.ai_score ?? 85} 分
@@ -319,12 +318,12 @@ const TeacherStories = () => {
                 </Col>
                 <Col>
                   <Button size="small" onClick={() => setTeacherScore(selectedStory.ai_score ?? 85)}>
-                    采纳 AI 建议分
+                    采用模拟建议分
                   </Button>
                 </Col>
               </Row>
               <div style={{ fontSize: 12, color: "#15803d", marginTop: 6 }}>
-                模型评语：逻辑条理清晰，心理活动描写饱满，具备较强的自我察觉与积极行动意愿。
+                模拟建议：{selectedStory.ai_suggestion || "暂无建议"}
               </div>
             </div>
 

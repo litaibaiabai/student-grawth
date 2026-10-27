@@ -157,7 +157,7 @@ function queueReconcile(schoolId){
   if(draining) return;
   draining=true;
   setImmediate(async()=>{
-    try{while(queued.size){const id=queued.values().next().value;queued.delete(id);await reconcileMonth({schoolId:id}).catch(e=>console.error('自动配卡检查失败:',e.code||e.name));}}
+    try{while(queued.size){const id=queued.values().next().value;queued.delete(id);await reconcileMonth({schoolId:id}).catch(e=>console.error('自动配卡检查失败:', e.message || e.code || e.name));}}
     finally{draining=false;}
   });
 }

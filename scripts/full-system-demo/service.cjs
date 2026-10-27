@@ -1,0 +1,6 @@
+const fs=require('fs'),path=require('path');const {root}=require('./environment.cjs');
+const manifestFile=process.argv[2],m=JSON.parse(fs.readFileSync(manifestFile));
+const secrets=JSON.parse(fs.readFileSync(path.join(path.dirname(manifestFile),'.private/secrets.json')));
+require(path.join(root,'backend/node_modules/dotenv')).config({path:path.join(root,'backend/.env')});
+Object.assign(process.env,secrets,{DB_NAME:m.dbName,NODE_ENV:'test',TZ:'Asia/Shanghai',FRONTEND_PUBLIC_URL:m.baseUrl,CORS_ORIGIN:m.baseUrl,TRUST_PROXY:'0',CARD_PRINT_DIR:path.join(path.dirname(manifestFile),'.private/prints'),UPLOAD_DIR:path.join(path.dirname(manifestFile),'.private/uploads')});
+(async()=>{const {createServer}=await import(path.join(root,'frontend/node_modules/vite/dist/node/index.js'));const vite=await createServer({root:path.join(root,'frontend'),configFile:path.join(root,'frontend/vite.config.js'),server:{host:'127.0.0.1',port:m.frontendPort,strictPort:true,proxy:{'/api':{target:'http://127.0.0.1:'+m.backendPort,changeOrigin:true}}}});await vite.listen();require(path.join(root,'backend/app.js')).listen(m.backendPort,'127.0.0.1');require(path.join(root,'backend/services/scheduler')).startSchedulers();console.log('DEMO_READY');})().catch(e=>{console.error(e.message);process.exit(1)});

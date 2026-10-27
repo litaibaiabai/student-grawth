@@ -159,7 +159,7 @@ const AdminReports = () => {
             TERM REPORT PUBLISHING GATEWAY
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1e382b", margin: "6px 0 4px" }}>期末报告发布中心</h1>
-          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>六项条件全部通过，才能把报告交到学生手里。</p>
+          <p style={{ color: "#748578", fontSize: 13, margin: 0 }}>先检查六育成绩完整性，再发布本学期报告快照。</p>
         </div>
         <Space size="middle">
           <Space>
@@ -194,8 +194,8 @@ const AdminReports = () => {
       </div>
 
       <Alert
-        message="六项刚性门禁检查机制 (Precondition Checklist)"
-        description="系统在正式发布前将严格校验：①六育成绩无缺失 ②计算规则生效 ③班主任评语确认 ④综合分计算成功 ⑤防伪快照校验码生成 ⑥学期处于运行可操作状态。任何一项不符即标记受阻，杜绝残缺数据下发学生。"
+        message="发布前完整性检查"
+        description="系统逐学生核对六育成绩是否齐全；缺项时阻断该学生，其他完整记录可发布。报告保留发布时的数据快照与版本。"
         type="info"
         showIcon
         style={{ marginBottom: 20, borderRadius: 8 }}
@@ -207,7 +207,7 @@ const AdminReports = () => {
           description={
             publishResult.blockedCount > 0
               ? publishResult.blocked.map((b) => `${b.studentName || `学生ID ${b.studentId}`}：${b.reason}`).join("；")
-              : "学生端现已可查阅本人本学期报告。系统已自动生成防伪哈希与核验码。"
+              : "学生端现已可查阅本人本学期报告及带报告编号的打印视图。"
           }
           type={publishResult.publishedCount > 0 ? (publishResult.blockedCount > 0 ? "warning" : "success") : "error"}
           showIcon

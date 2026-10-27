@@ -35,7 +35,7 @@ const DIMENSION_MAP = {
 /**
  * 预览并校验全校成绩行数据（只读比对，内存分流）
  */
-async function previewBatchExcel({ schoolId = 1, termId, type = "SUBJECT", rows = [], operatorId }) {
+async function previewBatchExcel({ schoolId = 1, termId, type = "SUBJECT", rows = [], operatorId, user }) {
   const normType = (type || "SUBJECT").toUpperCase();
   const inputRows = Array.isArray(rows) ? rows : [];
 
@@ -108,6 +108,13 @@ async function previewBatchExcel({ schoolId = 1, termId, type = "SUBJECT", rows 
         continue;
       }
 
+      if(user?.role==='teacher'){
+        let classes=user.classes;
+        if(typeof classes==='string'){try{classes=JSON.parse(classes)}catch{classes=[]}}
+        if(!Array.isArray(classes)||!classes.some(c=>Number(c.grade)===Number(student.grade)&&Number(c.class_no)===Number(student.class_no))){
+          errors.push({rowNum,username:rawUsername,realName,reason:'学生不在当前教师任教班级范围内'});continue;
+        }
+      }
       // 解析科目/维度分值
       const rawScores = row.scores || {};
       const scoreEntries = Array.isArray(rawScores)

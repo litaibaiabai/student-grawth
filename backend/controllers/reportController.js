@@ -4,6 +4,7 @@
 
 const crypto = require("crypto");
 const { pool } = require("../db");
+const {requireStudentScope}=require("../middleware/studentScope");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const { computeStudentScore } = require("../services/evaluationEngine");
@@ -120,12 +121,13 @@ async function publishBatch(req, res, next) {
           school_id, student_id, term_id, version, rule_version, snapshot_json,
           comprehensive_score, comprehensive_grade, teacher_comment, teacher_comment_draft,
           student_statement, family_message, family_source, status, published_at
-        ) VALUES (?, ?, ?, ?, 'V1', ?, ?, ?, ?, ?, ?, ?, 'STUDENT_TRANSCRIBED', 'PUBLISHED', NOW())`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'STUDENT_TRANSCRIBED', 'PUBLISHED', NOW())`,
         [
           schoolId,
           sid,
           termId,
           version,
+          evalResult.ruleVersion,
           JSON.stringify(snapshot),
           score,
           grade,
@@ -203,6 +205,7 @@ async function getCurrentReport(req, res, next) {
       termId = termRows.length > 0 ? termRows[0].id : 1;
     }
 
+    await requireStudentScope(req.user,studentId,conn);
     const [rows] = await conn.query(
       `SELECT r.*, a.academic_year, a.semester
        FROM term_report r

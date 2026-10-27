@@ -1,0 +1,10 @@
+export function currentSchoolMonth(date=new Date()){
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit'}).formatToParts(date);
+ return parts.find(p=>p.type==='year').value+'-'+parts.find(p=>p.type==='month').value;
+}
+export function storyMonths(term){
+ const start=String(term?.startDate||'').slice(0,7),end=String(term?.endDate||'').slice(0,7);if(!/^\d{4}-\d{2}$/.test(start)||!/^\d{4}-\d{2}$/.test(end)||start>end)return [];
+ let [y,m]=start.split('-').map(Number);const result=[];
+ while(result.length<24){const key=`${y}-${String(m).padStart(2,'0')}`;if(key>end)break;result.push({key,label:`${m} 月`});if(++m===13){m=1;y++;}}
+ return result;
+}

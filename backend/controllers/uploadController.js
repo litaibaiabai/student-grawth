@@ -110,7 +110,7 @@ async function getHonorCertificate(req, res, next) {
     if (!allowed) return res.status(403).end();
 
     res.set({ "X-Content-Type-Options": "nosniff", "Cache-Control": "private, max-age=3600" });
-    res.sendFile(path.join(UPLOAD_ROOT, fileRef), (err) => {
+    res.sendFile(path.join(UPLOAD_ROOT, fileRef), {dotfiles:"allow"}, (err) => {
       if (err && !res.headersSent) res.status(404).end();
     });
   } catch (err) {

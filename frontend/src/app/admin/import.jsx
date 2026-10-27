@@ -330,7 +330,7 @@ const AdminImport = () => {
               items={[
                 {
                   key: "subject",
-                  label: isTeacher ? "任教学科期末成绩 (占总评15%)" : "1. 文化课与学科期末成绩 (全科大总表)"
+                  label: isTeacher ? "任教学科期末成绩（独立记录）" : "1. 文化课与学科期末成绩 (全科大总表)"
                 },
                 ...(!isTeacher
                   ? [

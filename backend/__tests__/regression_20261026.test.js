@@ -92,7 +92,7 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
       }
       // 模拟荣誉查询
       if (sql.includes("FROM honor_record") && sql.includes("FOR UPDATE")) {
-        return [[{ id: 1, status: "PENDING", honor_points: 3 }]];
+        return [[{ id: 1, school_id:1,student_id:4,status: "PENDING", honor_points: 3 }]];
       }
       if (sql.includes("SELECT honor_points FROM honor_record")) {
         return [[{ honor_points: 3 }]];
@@ -385,7 +385,7 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
       const req = {
         params: { id: "1" },
         body: { decision: dec },
-        user: { id: 2, schoolId: 1, role: "teacher" }
+        user: { id: 2, schoolId: 1, role: "teacher",classes:[{grade:4,class_no:1}] }
       };
       const res = createMockRes();
       await honorController.reviewHonor(req, res, (err) => { if (err) throw err; });
@@ -397,7 +397,7 @@ describe("20261026 回归测试缺陷专项契约测试", () => {
       const req = {
         params: { id: "1" },
         body: { decision: dec, rejectReason: "材料模糊" },
-        user: { id: 2, schoolId: 1, role: "teacher" }
+        user: { id: 2, schoolId: 1, role: "teacher",classes:[{grade:4,class_no:1}] }
       };
       const res = createMockRes();
       await honorController.reviewHonor(req, res, (err) => { if (err) throw err; });

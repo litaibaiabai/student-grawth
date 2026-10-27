@@ -30,7 +30,7 @@ async function expireOldCards(now=new Date()) {
     return cards.length;
   } catch (err) {
     if(conn)await conn.rollback();
-    console.error("❌ 卡片过期定时任务执行失败:", err.code||err.name);
+    console.error("❌ 卡片过期定时任务执行失败:", err.message || err.code || err.name);
     return 0;
   } finally {
     if (conn) conn.release();
@@ -81,10 +81,10 @@ function startSchedulers() {
   console.log("⏱️ 后台调度器与 Outbox 投递守护服务已启动");
   // 启动即执行一次卡片检查
   expireOldCards();
-  const reconcile=()=>reconcileMonth().catch(e=>console.error('自动发卡任务失败:',e.code||e.name));
+  const reconcile=()=>reconcileMonth().catch(e=>console.error('自动发卡任务失败:', e.message || e.code || e.name));
   reconcile();
   setInterval(reconcile,60*1000);
-  const prints=()=>processPrintJobs().catch(e=>console.error('打印任务重试失败:',e.code||e.name));
+  const prints=()=>processPrintJobs().catch(e=>console.error('打印任务重试失败:', e.message || e.code || e.name));
   prints();
   setInterval(prints,60*1000);
 

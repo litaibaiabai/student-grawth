@@ -3,19 +3,12 @@ import { Card, Form, Input, Button, Tag, message, Space, Row, Col, Typography, A
 import { BookOutlined, SendOutlined, SaveOutlined, RobotOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
+import {storyMonths,currentSchoolMonth} from "@/util/storyMonths";
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-const MONTHS = [
-  { key: "09", label: "9 月" },
-  { key: "10", label: "10 月" },
-  { key: "11", label: "11 月" },
-  { key: "12", label: "12 月" },
-  { key: "01", label: "1 月" }
-];
-
-const monthKeyOf = (m) => (m === "01" ? "2027-01" : `2026-${m}`);
+const monthKeyOf = m => m;
 
 const STATUS_TAG = {
   REVIEWED: { text: "已评分", color: "green" },
@@ -24,8 +17,10 @@ const STATUS_TAG = {
 };
 
 const StudentStories = () => {
-  const [selectedMonth, setSelectedMonth] = useState("10");
+  const [selectedMonth, setSelectedMonth] = useState(currentSchoolMonth);
   const [stories, setStories] = useState([]);
+  const [months,setMonths]=useState([]);
+  useEffect(()=>{get(urls.API_CURRENT_TERM).then(res=>{if(res.code!==200)return;const values=storyMonths(res.data);setMonths(values);setSelectedMonth(current=>values.some(m=>m.key===current)?current:(values[0]?.key||current));});},[]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState("");
@@ -133,7 +128,7 @@ const StudentStories = () => {
 
       {/* 月份横向时间条 */}
       <div style={{ display: "flex", gap: 12, overflowX: "auto", marginBottom: 24 }}>
-        {MONTHS.map((m) => {
+        {months.map((m) => {
           const isActive = selectedMonth === m.key;
           return (
             <button
@@ -170,7 +165,7 @@ const StudentStories = () => {
           <Card
             title={
               <Space>
-                <Tag color="green">{MONTHS.find((m) => m.key === selectedMonth)?.label}故事</Tag>
+                <Tag color="green">{months.find((m) => m.key === selectedMonth)?.label}故事</Tag>
                 <Tag
                   color={
                     currentStory?.status === "REVIEWED"
@@ -235,14 +230,14 @@ const StudentStories = () => {
                 color: "#9ca89f"
               }}
             >
-              <span>{isSubmitted ? "已提交，等待教师人工终审打分" : "草稿保存在系统云端"}</span>
+              <span>{currentStory?.status === "REVIEWED" ? "教师已终审，正式分和评语见下方" : isSubmitted ? "已提交，等待教师人工终审打分" : "草稿保存在系统云端"}</span>
               <span>{content.length} 字</span>
             </div>
 
             <div style={{ marginTop: 20, textAlign: "right" }}>
               {isSubmitted ? (
                 <Tag color="cyan" style={{ fontSize: 13, padding: "4px 12px" }}>
-                  已正式提交 · 占期末综合分 5%
+                  已正式提交 · 教师终审分作为G维度来源
                 </Tag>
               ) : (
                 <Space>
@@ -278,7 +273,7 @@ const StudentStories = () => {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#166534", fontWeight: 600 }}>
                   <RobotOutlined style={{ color: "#16a34a" }} />
-                  <span>AI 智能语义预评参考 (建议分: {aiFeedback.score} 分)</span>
+                  <span>规则模拟建议 (建议分: {aiFeedback.score} 分)</span>
                   <Tag color="green">仅供参考</Tag>
                 </div>
                 <p style={{ margin: "6px 0 0", fontSize: 12, color: "#15803d", lineHeight: 1.8 }}>

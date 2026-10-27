@@ -3,6 +3,7 @@
  */
 
 const { pool } = require("../db");
+const {requireStudentScope}=require("../middleware/studentScope");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const { computeStudentScore } = require("../services/evaluationEngine");
@@ -21,6 +22,7 @@ async function getComprehensiveScore(req, res, next) {
   const termId = req.query.termId || 1;
 
   try {
+    await requireStudentScope(req.user,studentId);
     const result = await computeStudentScore(studentId, termId, schoolId);
     success(res, {
       ...result,

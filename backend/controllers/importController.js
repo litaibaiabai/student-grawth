@@ -7,6 +7,7 @@ const { pool } = require("../db");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const batchImportService = require("../services/batchImportService");
+const {requireStudentScope}=require("../middleware/studentScope");
 
 /**
  * POST /api/v1/import/preview
@@ -180,6 +181,7 @@ async function commitImport(req, res, next) {
 
     for (const item of items) {
       if (!item.valid && item.valid !== undefined) continue;
+      await requireStudentScope(req.user,item.studentId,conn);
 
       if (type === "SUBJECT") {
         await conn.query(
@@ -279,7 +281,8 @@ async function previewBatchImport(req, res, next) {
       termId,
       type,
       rows,
-      operatorId
+      operatorId,
+      user:req.user
     });
 
     success(res, result, "数据体检完成");
@@ -307,12 +310,14 @@ async function commitBatchImport(req, res, next) {
       return fail(res, ErrorCodes.VALIDATION_ERROR, "提交导入数据不能为空", 422);
     }
 
+    for(const student of validStudents)await requireStudentScope(req.user,student.studentId);
     const result = await batchImportService.commitBatchExcel({
       schoolId,
       termId,
       type,
       validStudents,
-      operatorId
+      operatorId,
+      user:req.user
     });
 
     success(res, result, "全校成绩批量导入成功");

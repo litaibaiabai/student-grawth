@@ -499,7 +499,7 @@ const Dashboard = () => {
                   <div>
                     <div style={{ fontWeight: 600, color: "#25332d", fontSize: 13 }}>月度成长故事终审</div>
                     <div style={{ color: "#8a9990", fontSize: 11, marginTop: 2 }}>
-                      结合 AI 语义预评分给出人文寄语与终审锁定分 (0-100)
+                      结合规则模拟建议给出反馈与终审分 (0-100)
                     </div>
                   </div>
                   <Button type="default" size="small" onClick={() => navigate("/teacher/stories")}>
@@ -607,7 +607,7 @@ const Dashboard = () => {
             <UploadOutlined />
           </div>
           <div>
-            <div className="stat-value">6 / 6</div>
+            <div className="stat-value">待核验</div>
             <div className="stat-label">六育维度底表状态</div>
           </div>
           <Button type="link" onClick={() => navigate("/admin/import")}>
@@ -650,7 +650,7 @@ const Dashboard = () => {
 
               <div style={{ padding: 16, background: "#f8faf9", borderRadius: 8, border: "1px solid #e8eee9" }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#277460" }}>03 报告发布</div>
-                <div style={{ fontSize: 12, color: "#6e7e73", margin: "8px 0" }}>6项门禁检查 · 不可变快照 · 导出</div>
+                <div style={{ fontSize: 12, color: "#6e7e73", margin: "8px 0" }}>六育完整性检查 · 版本快照 · 打印视图</div>
                 <Button type="link" size="small" onClick={() => navigate("/admin/reports")} style={{ padding: 0 }}>
                   发布中心
                 </Button>

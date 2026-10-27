@@ -7,5 +7,5 @@ exports.create=async(req,res,next)=>{try{
 exports.get=async(req,res,next)=>{try{success(res,await service.getPrintPack({schoolId:req.user.schoolId,id:req.params.id}));}catch(e){next(e);}};
 exports.download=async(req,res,next)=>{try{
   const file=await service.downloadFile({schoolId:req.user.schoolId,id:req.params.id});
-  res.set('Cache-Control','no-store');res.download(file.path,file.name,error=>{if(error&&!res.headersSent)next(error);});
+  res.set('Cache-Control','no-store');res.download(file.path,file.name,{dotfiles:"allow"},error=>{if(error&&!res.headersSent)next(error);});
 }catch(e){next(e);}};

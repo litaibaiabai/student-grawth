@@ -361,7 +361,7 @@ const TeacherDirectScore = () => {
                           {stu.real_name || stu.username}
                         </div>
                         <div style={{ fontSize: 11, color: "#8d9c90" }}>
-                          {stu.grade}年级（{stu.class_no}）班 · 学号 2026040{stu.id}
+                          {stu.grade}年级（{stu.class_no}）班 · 学号 {stu.username}
                         </div>
                       </div>
                       <Input

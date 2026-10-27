@@ -4,6 +4,8 @@
 
 const crypto = require("crypto");
 const { pool } = require("../db");
+const {requireStudentScope,classFilter}=require("../middleware/studentScope");
+const {AppError}=require("../middleware/errorHandler");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const { FILE_REF_RE } = require("./uploadController");
@@ -219,6 +221,9 @@ async function reviewHonor(req, res, next) {
     }
 
     const prev = rows[0];
+    if(Number(prev.school_id)!==Number(schoolId))throw new AppError(403,'禁止跨校审核',403);
+    await requireStudentScope(req.user,prev.student_id,conn);
+    if(prev.status!=='PENDING')throw new AppError(409,'仅待审核荣誉可审核，请刷新列表',409);
     await conn.query(
       `UPDATE honor_record
        SET status = ?, reviewer_id = ?, reviewed_at = NOW(), reject_reason = ?
@@ -274,6 +279,7 @@ async function getHonors(req, res, next) {
       WHERE h.school_id = ?
     `;
     const params = [schoolId];
+    sql += classFilter(req.user,"u",params);
 
     if (req.user?.role === "student") {
       sql += " AND h.student_id = ?";

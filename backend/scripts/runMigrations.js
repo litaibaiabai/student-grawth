@@ -5,9 +5,9 @@
  * 2. 依次加载并执行 SQL 建表脚本 (00_full_schema.sql 等)
  * 3. 运行基础数据初始化 (init_db_data.js)
  */
-require("dotenv").config();
-const fs = require("fs");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
+const fs = require("fs");
 const mysql = require("mysql2/promise");
 const { migrateSubjectCards } = require('../migrations/20261026_subject_cards');
 

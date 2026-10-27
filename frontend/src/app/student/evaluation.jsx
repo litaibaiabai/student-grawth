@@ -15,7 +15,7 @@ const RadarChartSvg = ({ scores = {} }) => {
   // 六育：德、智、体、美、劳、故事
   const keys = ["D", "Z", "T", "M", "L", "G"];
   const labels = ["德育", "智育", "体育", "美育", "劳育", "故事"];
-  const vals = keys.map((k) => scores[k] ?? 85);
+  const vals = keys.map((k) => scores[k] ?? 0);
 
   // 六边形顶点计算
   const center = { x: 150, y: 130 };
@@ -34,7 +34,7 @@ const RadarChartSvg = ({ scores = {} }) => {
 
   const dataPoints = angles
     .map((ang, idx) => {
-      const val = vals[idx] || 50;
+      const val = vals[idx] ?? 0;
       const r = (val / 100) * maxR;
       const x = center.x + Math.cos(ang) * r;
       const y = center.y + Math.sin(ang) * r;
@@ -67,7 +67,7 @@ const RadarChartSvg = ({ scores = {} }) => {
 
       {/* 数据点 */}
       {angles.map((ang, idx) => {
-        const val = vals[idx] || 50;
+        const val = vals[idx] ?? 0;
         const r = (val / 100) * maxR;
         const x = center.x + Math.cos(ang) * r;
         const y = center.y + Math.sin(ang) * r;
@@ -151,7 +151,7 @@ const StudentEvaluation = () => {
         }}
       >
         <div>
-          <div style={{ fontSize: 12, color: "#6b866e", fontWeight: 600 }}>本学期综合评价 · 规则 V1.0 (试行)</div>
+          <div style={{ fontSize: 12, color: "#6b866e", fontWeight: 600 }}>本学期综合评价 · 规则 {evalData?.ruleVersion || "默认规则"}</div>
           <div style={{ fontSize: 44, fontWeight: 700, color: "#1e382b", margin: "8px 0 4px" }}>
             {isComplete ? calc.comprehensive_score : "待完善"}
             {isComplete && <small style={{ fontSize: 16, color: "#6b866e", marginLeft: 8 }}>/ 100 分</small>}
@@ -162,9 +162,9 @@ const StudentEvaluation = () => {
         </div>
 
         <div style={{ textAlign: "right", fontSize: 12, color: "#56695b", lineHeight: 1.8 }}>
-          <div>六育底表均分 ({comps.B?.raw_value ?? "待录入"}) × 80%</div>
-          <div>过程激励标准分 ({comps.P?.standard_score ?? "待计算"}) × 15%</div>
-          <div>荣誉成果标准分 ({comps.H?.standard_score ?? "待计算"}) × 5%</div>
+          <div>六育底表均分 ({comps.B?.raw_value ?? "待录入"}) × {Number(evalData?.weights?.six ?? .8) * 100}%</div>
+          <div>过程激励标准分 ({comps.P?.standard_score ?? "待计算"}) × {Number(evalData?.weights?.process ?? .15) * 100}%</div>
+          <div>荣誉成果标准分 ({comps.H?.standard_score ?? "待计算"}) × {Number(evalData?.weights?.honor ?? .05) * 100}%</div>
         </div>
       </div>
 
@@ -247,7 +247,7 @@ const StudentEvaluation = () => {
                 </div>
               </div>
               <div style={{ fontSize: 11, color: "#9aa59d", marginTop: 10, textAlign: "center" }}>
-                试行阈值 20 次封顶，按线性换算折入 15% 综合权重
+                阈值 {evalData?.process?.targetPoints ?? 20} 次封顶，按当前过程权重折算
               </div>
             </div>
 
@@ -272,13 +272,13 @@ const StudentEvaluation = () => {
                 </div>
               </div>
               <div style={{ fontSize: 11, color: "#9aa59d", marginTop: 10, textAlign: "center" }}>
-                试行阈值 12 分封顶，白名单赛事官方认定纳入学期期终
+                阈值 {evalData?.honor?.targetPoints ?? 12} 分封顶，经审核认定后折算
               </div>
             </div>
 
             <Alert
               message="规则版本说明"
-              description="本学期核算严格依据校风控委员会审核通过的 Rule V1.0 规则。所有计算公式与参数透明可追溯。"
+              description={`本学期按 ${evalData?.ruleVersion || "默认规则"} 核算，权重和目标值以当前返回规则为准。`}
               type="info"
               showIcon
               style={{ borderRadius: 8 }}

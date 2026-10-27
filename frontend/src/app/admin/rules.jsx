@@ -227,7 +227,7 @@ const AdminRules = () => {
 
               <Alert
                 message="不可逆生效机制"
-                description="修改此处参数将生成新的 ACTIVE 规则版本，旧规则将转为 DEPRECATED 历史版本保留备查。期末报告发布时将快照记录所引用的规则版本。"
+                description="修改此处参数将生成新的 ACTIVE 规则版本，旧规则将转为 SUPERSEDED 历史版本保留备查。期末报告发布时将快照记录所引用的规则版本。"
                 type="info"
                 showIcon
                 style={{ marginBottom: 20, borderRadius: 8 }}
@@ -268,7 +268,7 @@ const AdminRules = () => {
             <Divider style={{ margin: "16px 0" }} />
             <div style={{ fontSize: 13, color: "#56685c", lineHeight: 2 }}>
               <div>
-                📋 <strong>六育齐全率</strong>：{studentCount > 0 ? `${studentCount} / ${studentCount} (100%)` : "0 / 0 (100%)"}
+                📋 <strong>六育齐全率</strong>：待逐学生核验，请在报告发布中心检查
               </div>
               <div>
                 ⚖️ <strong>当前生效版本</strong>：{activeRule?.rule_version || activeRule?.ruleVersion || "V1.0"} · ACTIVE
