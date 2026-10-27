@@ -145,11 +145,12 @@ async function correctReward({
   const crypto = require('crypto');
   const payloadHash = crypto.createHash('sha256').update(JSON.stringify({ originalScoreId, action, newCategoryId, newPoints })).digest('hex');
 
+  const reqKey = requestKey || `CORRECT_${originalScoreId}_${Date.now()}`;
   const { sourceRevision, result } = await withStudentTermMutation({
     connection: conn,
     actor: { id: operatorId, role: 'teacher' },
     studentKey: { schoolId, termId: orig.term_id, studentId: orig.student_id },
-    requestKey: requestKey || `CORRECT_${originalScoreId}_${Date.now()}`,
+    requestKey: reqKey,
     payloadHash
   }, async (mutationConn, state) => {
     const classSnapshotStr = typeof orig.class_snapshot === 'object' && orig.class_snapshot !== null
@@ -172,7 +173,7 @@ async function correctReward({
         -orig.delta,
         orig.id,
         operatorId,
-        requestKey,
+        reqKey,
         reason ? `【冲销原记录#${originalScoreId}】${reason}` : `【冲销原记录#${originalScoreId}】`,
         action === 'CORRECT' ? 'CORRECT' : 'REVOKE'
       ]
