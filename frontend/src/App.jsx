@@ -231,6 +231,7 @@ function App() {
                 </RequireAuth>
               }
             />
+            <Route path="/student/growth" element={<Navigate to="/dashboard" replace />} />
 
             {/* 教师端路由 */}
             <Route

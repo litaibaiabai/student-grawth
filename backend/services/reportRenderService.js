@@ -130,8 +130,19 @@ async function getPublishedReport({ actor, schoolId = 1, termId = 1, studentId, 
   }
 }
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
 /**
- * 渲染适合 A4 打印的纯静态 HTML (移除一切交互与脚本，附带防伪指纹)
+ * 渲染适合 A4 打印的纯静态 HTML (移除一切交互与脚本，附带防伪指纹与实体转义)
  */
 function renderPrintableA4({ reportData }) {
   const {
@@ -154,21 +165,22 @@ function renderPrintableA4({ reportData }) {
 
   const dimsHtml = Object.entries(sixDims).map(([code, val]) => {
     const dimNames = { D: '德育', Z: '智育', T: '体育', M: '美育', L: '劳育', G: '生活故事' };
+    const scoreVal = val.score !== undefined ? val.score : val.value;
     return `
       <div class="dim-card">
-        <div class="dim-name">${dimNames[code] || code}</div>
-        <div class="dim-score">${val.score !== undefined ? val.score : val.value} 分</div>
-        <div class="dim-status">${val.status === 'NORMAL' ? '正常就绪' : val.status}</div>
+        <div class="dim-name">${escapeHtml(dimNames[code] || code)}</div>
+        <div class="dim-score">${escapeHtml(scoreVal)} 分</div>
+        <div class="dim-status">${escapeHtml(val.status === 'NORMAL' ? '正常就绪' : val.status)}</div>
       </div>
     `;
   }).join('');
 
   const honorsHtml = honors.length > 0
-    ? honors.map(h => `<li class="honor-item"><strong>${h.title}</strong> — ${h.award_level || ''} (${h.prize_level || ''})</li>`).join('')
+    ? honors.map(h => `<li class="honor-item"><strong>${escapeHtml(h.title)}</strong> — ${escapeHtml(h.award_level || '')} (${escapeHtml(h.prize_level || '')})</li>`).join('')
     : '<div class="empty-tip">本学期暂无申报荣誉记录</div>';
 
   const subjectsHtml = subjects.length > 0
-    ? subjects.map(s => `<tr><td>${s.subject_name || s.subject_code}</td><td>${s.score !== null ? s.score : s.raw_score}</td></tr>`).join('')
+    ? subjects.map(s => `<tr><td>${escapeHtml(s.subject_name || s.subject_code)}</td><td>${escapeHtml(s.score !== null ? s.score : s.raw_score)}</td></tr>`).join('')
     : '<tr><td colspan="2" class="empty-tip">暂无学科成绩</td></tr>';
 
   const printTimestamp = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
@@ -178,7 +190,7 @@ function renderPrintableA4({ reportData }) {
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>小学生综合素质发展报告单 - ${studentName}</title>
+  <title>小学生综合素质发展报告单 - ${escapeHtml(studentName)}</title>
   <style>
     @page {
       size: A4 portrait;
@@ -310,9 +322,9 @@ function renderPrintableA4({ reportData }) {
     </div>
 
     <div class="meta-bar">
-      <span><strong>姓名：</strong>${studentName}</span>
-      <span><strong>班级：</strong>${grade}年级 ${classNo}班</span>
-      <span><strong>综合折算分：</strong>${comprehensiveScore || '待核算'} 分</span>
+      <span><strong>姓名：</strong>${escapeHtml(studentName)}</span>
+      <span><strong>班级：</strong>${escapeHtml(grade)}年级 ${escapeHtml(classNo)}班</span>
+      <span><strong>综合折算分：</strong>${escapeHtml(comprehensiveScore || '待核算')} 分</span>
       <span><strong>发布时间：</strong>${publishedAt ? new Date(publishedAt).toLocaleDateString('zh-CN') : '已归档'}</span>
     </div>
 
@@ -338,16 +350,16 @@ function renderPrintableA4({ reportData }) {
 
     <div class="section-title">班主任寄语</div>
     <div class="comment-block">
-      ${teacherComment || '班主任暂未填写正式评语'}
+      ${escapeHtml(teacherComment) || '班主任暂未填写正式评语'}
     </div>
 
     <div class="section-title">家长寄语与心愿</div>
     <div class="comment-block">
-      ${familyMessage || '暂无家长留言反馈'}
+      ${escapeHtml(familyMessage) || '暂无家长留言反馈'}
     </div>
 
     <div class="footer">
-      <div>防伪安全指纹: <span class="security-hash">${approvalFingerprint || 'N/A'}</span></div>
+      <div>防伪安全指纹: <span class="security-hash">${escapeHtml(approvalFingerprint || 'N/A')}</span></div>
       <div>打印时间: ${printTimestamp}</div>
     </div>
   </div>

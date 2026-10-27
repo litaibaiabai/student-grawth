@@ -77,6 +77,12 @@ async function getMyGrowthData({ actor, studentId, termId = 1, connection = null
     throw err;
   }
 
+  // 教师访问需受限于任教班级范围
+  if (actor.role === 'teacher') {
+    const { requireStudentScope } = require('../middleware/studentScope');
+    await requireStudentScope(actor, targetStudentId, conn);
+  }
+
   // 2. 查询学生基础资料
   const [students] = await conn.query(
     "SELECT id, username, real_name, grade, class_no FROM users WHERE id = ?",
@@ -296,15 +302,6 @@ async function setStudentTheme({ actor, themeId, connection = null }) {
     err.status = 400;
     throw err;
   }
-
-  // 保证 student_theme_preference 表存在并写入
-  await conn.query(`
-    CREATE TABLE IF NOT EXISTS student_theme_preference (
-      student_id INT PRIMARY KEY,
-      theme_id VARCHAR(32) NOT NULL DEFAULT 'default',
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-  `);
 
   await conn.query(`
     INSERT INTO student_theme_preference (student_id, theme_id, updated_at)

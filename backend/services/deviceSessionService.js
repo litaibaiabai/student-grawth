@@ -28,20 +28,6 @@ async function registerDevice({ actor, schoolId = 1, deviceCode, deviceSecret, l
     throw err;
   }
 
-  // 保证表存在
-  await conn.query(`
-    CREATE TABLE IF NOT EXISTS kiosk_device (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      device_code VARCHAR(64) NOT NULL UNIQUE,
-      device_secret VARCHAR(64) NOT NULL,
-      school_id INT NOT NULL,
-      location_name VARCHAR(128) NOT NULL,
-      status TINYINT NOT NULL DEFAULT 1,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      KEY idx_school_device (school_id, status)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-  `);
-
   await conn.query(`
     INSERT INTO kiosk_device (device_code, device_secret, school_id, location_name, status)
     VALUES (?, ?, ?, ?, 1)
@@ -99,22 +85,6 @@ async function issueDeviceSession({ deviceCode, deviceSecret, studentId, student
   const sessionToken = 'KIOSK_SES_' + crypto.randomBytes(16).toString('hex');
   const durationSec = 120;
   const expiresAt = new Date(Date.now() + durationSec * 1000);
-
-  await conn.query(`
-    CREATE TABLE IF NOT EXISTS kiosk_session (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      session_token VARCHAR(64) NOT NULL UNIQUE,
-      device_code VARCHAR(64) NOT NULL,
-      school_id INT NOT NULL,
-      student_id INT NOT NULL,
-      scope VARCHAR(64) NOT NULL DEFAULT 'CARD_REDEEM',
-      expires_at DATETIME NOT NULL,
-      revoked_at DATETIME NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      KEY idx_token_exp (session_token, expires_at),
-      KEY idx_student_session (school_id, student_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-  `);
 
   await conn.query(`
     INSERT INTO kiosk_session (session_token, device_code, school_id, student_id, scope, expires_at)

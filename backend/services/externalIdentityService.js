@@ -56,25 +56,6 @@ async function bindExternalIdentity({
   }
   const user = users[0];
 
-  // 保证表存在
-  await conn.query(`
-    CREATE TABLE IF NOT EXISTS external_identity_link (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      school_id INT NOT NULL,
-      user_id INT NOT NULL,
-      provider VARCHAR(32) NOT NULL DEFAULT 'DINGTALK',
-      tenant_id VARCHAR(128) NOT NULL,
-      external_subject VARCHAR(128) NOT NULL,
-      external_name VARCHAR(128) NULL,
-      status TINYINT NOT NULL DEFAULT 1,
-      bound_by INT NOT NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      UNIQUE KEY uk_school_prov_sub (school_id, provider, external_subject),
-      KEY idx_school_user (school_id, user_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-  `);
-
   // 写入或更新关联
   await conn.query(`
     INSERT INTO external_identity_link (school_id, user_id, provider, tenant_id, external_subject, external_name, status, bound_by)
@@ -177,25 +158,6 @@ async function listIdentityLinks({ actor, schoolId = 1, connection = null }) {
   }
 
   const effectiveSchoolId = Number(schoolId || actor.schoolId || 1);
-
-  // 保证表存在
-  await conn.query(`
-    CREATE TABLE IF NOT EXISTS external_identity_link (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      school_id INT NOT NULL,
-      user_id INT NOT NULL,
-      provider VARCHAR(32) NOT NULL DEFAULT 'DINGTALK',
-      tenant_id VARCHAR(128) NOT NULL,
-      external_subject VARCHAR(128) NOT NULL,
-      external_name VARCHAR(128) NULL,
-      status TINYINT NOT NULL DEFAULT 1,
-      bound_by INT NOT NULL,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      UNIQUE KEY uk_school_prov_sub (school_id, provider, external_subject),
-      KEY idx_school_user (school_id, user_id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-  `);
 
   const [rows] = await conn.query(`
     SELECT l.id, l.school_id, l.user_id, l.provider, l.tenant_id, l.external_subject, l.external_name, l.status, l.created_at,
