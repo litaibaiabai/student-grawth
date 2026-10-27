@@ -34,11 +34,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** 旧库基线、现有自动演示manifest；不读取或写入业务结果作为演示操作。
 **Interfaces — Produces:** C0 runRenovationScenario及applyRegisteredMigrations；带校验和/可重入步骤的登记；只在本次受控前缀库运行场景。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R20A，先走真实界面，再对外部结果断言：`assert.equal(checks.businessDatabaseRejected,true); assert.equal(checks.migrationReplayPreservesLedger,true); assert.equal(checks.baselineReportUnchanged,true)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 先运行`node --test scripts/full-system-demo/environment.test.cjs`验证新增环境防护负例为FAIL；不允许靠不存在的命令当业务失败。
-- [ ] **Step 3 — 最小实现。** 先建立迁移登记和隔离场景筛选，用最小兼容演练验证检查点，不提前创建各票业务表；流程版本字段由制卡迁移拥有。 此节点只做兼容扩展及既有验收入口防护，不提前实现全部功能。为所有后续写入准备同一登记方式；G0未定时只在隔离环境演练。 场景夹具只准备身份、学期、测试策略及明确声明的历史样本，不预造本次新奖励或新审批结果。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R20A --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。同时重跑既有工具防护测试。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/migrationRunner.js backend/migrations/renovation/index.js scripts/full-system-demo/scenarios/R20A.cjs scripts/full-system-demo/environment.test.cjs backend/scripts/runMigrations.js scripts/full-system-demo/run.cjs scripts/full-system-demo/initialize.cjs`及`git commit -m "feat(renovation): r20a 兼容迁移与隔离验收入口"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R20A，先走真实界面，再对外部结果断言：`assert.equal(checks.businessDatabaseRejected,true); assert.equal(checks.migrationReplayPreservesLedger,true); assert.equal(checks.baselineReportUnchanged,true)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 先运行`node --test scripts/full-system-demo/environment.test.cjs`验证新增环境防护负例为FAIL；不允许靠不存在的命令当业务失败。
+- [x] **Step 3 — 最小实现。** 先建立迁移登记和隔离场景筛选，用最小兼容演练验证检查点，不提前创建各票业务表；流程版本字段由制卡迁移拥有。 此节点只做兼容扩展及既有验收入口防护，不提前实现全部功能。为所有后续写入准备同一登记方式；G0未定时只在隔离环境演练。 场景夹具只准备身份、学期、测试策略及明确声明的历史样本，不预造本次新奖励或新审批结果。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R20A --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。同时重跑既有工具防护测试。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/migrationRunner.js backend/migrations/renovation/index.js scripts/full-system-demo/scenarios/R20A.cjs scripts/full-system-demo/environment.test.cjs backend/scripts/runMigrations.js scripts/full-system-demo/run.cjs scripts/full-system-demo/initialize.cjs`及`git commit -m "feat(renovation): r20a 兼容迁移与隔离验收入口"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -51,11 +51,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** 20A迁移/验收入口；G0职责与成绩访问政策。
 **Interfaces — Produces:** C1 resolveActorContext/assertScope；C2 withStudentTermMutation/withStudentTermsMutation；新增职责界面与受限成绩适配。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R01，先走真实界面，再对外部结果断言：`assert.equal(checks.crossSubjectStatus,403); assert.equal(checks.sameTokenAfterRevocationStatus,403); assert.equal(checks.permissionDependencyFailureStatus,503)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R01 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 以当前数据库账号和学期职责构造上下文，JWT仅证明登录身份；敏感依赖失败拒绝访问。为来源变更实现唯一学期状态事务入口，并先让现有成绩提交接入。 授权前后变更与同Token测试是本票完成条件，不靠要求所有老师重登录掩盖旧权限问题。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R01 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/authorizationService.js backend/services/studentTermStateService.js backend/controllers/teachingAssignmentController.js backend/migrations/renovation/01_authorization.js frontend/src/app/admin/teachingAssignments.jsx scripts/full-system-demo/scenarios/R01.cjs backend/__tests__/renovation_auth.integration.test.js backend/middleware/auth.js backend/middleware/studentScope.js backend/routes/api.js backend/controllers/importController.js frontend/src/App.jsx frontend/src/constant/urls.js frontend/src/constant/menu.jsx backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r01 任教授权与受限成绩"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R01，先走真实界面，再对外部结果断言：`assert.equal(checks.crossSubjectStatus,403); assert.equal(checks.sameTokenAfterRevocationStatus,403); assert.equal(checks.permissionDependencyFailureStatus,503)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R01 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 以当前数据库账号和学期职责构造上下文，JWT仅证明登录身份；敏感依赖失败拒绝访问。为来源变更实现唯一学期状态事务入口，并先让现有成绩提交接入。 授权前后变更与同Token测试是本票完成条件，不靠要求所有老师重登录掩盖旧权限问题。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R01 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/authorizationService.js backend/services/studentTermStateService.js backend/controllers/teachingAssignmentController.js backend/migrations/renovation/01_authorization.js frontend/src/app/admin/teachingAssignments.jsx scripts/full-system-demo/scenarios/R01.cjs backend/__tests__/renovation_auth.integration.test.js backend/middleware/auth.js backend/middleware/studentScope.js backend/routes/api.js backend/controllers/importController.js frontend/src/App.jsx frontend/src/constant/urls.js frontend/src/constant/menu.jsx backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r01 任教授权与受限成绩"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -68,11 +68,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** 20A；G0学校奖励树/子类份额及未用旧卡政策。
 **Interfaces — Produces:** 分类冻结的AUTO_V2卡及受控打印；rewardCategoryService.resolvePath({schoolId,categoryId,version},connection) -> CategoryPath。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R02，先走真实界面，再对外部结果断言：`assert.equal(checks.generatedCards,10); assert.equal(checks.dCards,6); assert.equal(checks.zCards,4); assert.equal(checks.reprintAddsCards,0)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R02 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 学校奖励树与全局只读模板分开，版本化叶子份额；复用整数分配/生成锁，生成时冻结完整路径及流程版本，打印同卡不重发。 10张、D6/Z4仅是隔离夹具TEST_ONLY_V2，不是学校默认配额。报告指标字典由年级指标票拥有。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R02 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/rewardCategoryService.js backend/migrations/renovation/02_classified_cards.js scripts/full-system-demo/scenarios/R02.cjs backend/controllers/categoryController.js backend/controllers/cardPolicyController.js backend/services/cardAllocationService.js backend/services/cardPrintService.js frontend/src/app/admin/cards.jsx frontend/src/app/admin/categories.jsx backend/routes/api.js frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r02 预分类制卡与打印"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R02，先走真实界面，再对外部结果断言：`assert.equal(checks.generatedCards,10); assert.equal(checks.dCards,6); assert.equal(checks.zCards,4); assert.equal(checks.reprintAddsCards,0)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R02 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 学校奖励树与全局只读模板分开，版本化叶子份额；复用整数分配/生成锁，生成时冻结完整路径及流程版本，打印同卡不重发。 10张、D6/Z4仅是隔离夹具TEST_ONLY_V2，不是学校默认配额。报告指标字典由年级指标票拥有。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R02 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/rewardCategoryService.js backend/migrations/renovation/02_classified_cards.js scripts/full-system-demo/scenarios/R02.cjs backend/controllers/categoryController.js backend/controllers/cardPolicyController.js backend/services/cardAllocationService.js backend/services/cardPrintService.js frontend/src/app/admin/cards.jsx frontend/src/app/admin/categories.jsx backend/routes/api.js frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r02 预分类制卡与打印"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -85,11 +85,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2；已确认纠错/直评范围；旧正向流水映射。
 **Interfaces — Produces:** C3 appendReward/correctReward，同连接接入C2；score_event根、追加流水和请求载荷幂等。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R04，先走真实界面，再对外部结果断言：`assert.equal(checks.correctedNetPoints,'2.00'); assert.equal(checks.repeatCorrectionAddsEntries,0); assert.equal(checks.cardReusableAfterCorrection,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R04 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 先扩精确分值/来源/分类可空条件及奖励根，再迁移历史根映射；锁当前有效根后冲销/替代。直评复用稳定批次键，不再拼接时间随机数。 测试允许+1改+2由TEST_ONLY_V2授权，不授予生产任意改分。该合同完成后扫码/荣誉才消费，避免各自实现一套账本。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R04 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/scoreLedgerService.js backend/migrations/renovation/04_reward_ledger.js frontend/src/app/teacher/scoreLedger.jsx scripts/full-system-demo/scenarios/R04.cjs backend/__tests__/renovation_rewards.integration.test.js backend/controllers/scoreController.js backend/routes/api.js frontend/src/app/teacher/directScore.jsx frontend/src/app/admin/audits.jsx frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r04 教师纠错与直评"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R04，先走真实界面，再对外部结果断言：`assert.equal(checks.correctedNetPoints,'2.00'); assert.equal(checks.repeatCorrectionAddsEntries,0); assert.equal(checks.cardReusableAfterCorrection,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R04 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 先扩精确分值/来源/分类可空条件及奖励根，再迁移历史根映射；锁当前有效根后冲销/替代。直评复用稳定批次键，不再拼接时间随机数。 测试允许+1改+2由TEST_ONLY_V2授权，不授予生产任意改分。该合同完成后扫码/荣誉才消费，避免各自实现一套账本。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R04 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/scoreLedgerService.js backend/migrations/renovation/04_reward_ledger.js frontend/src/app/teacher/scoreLedger.jsx scripts/full-system-demo/scenarios/R04.cjs backend/__tests__/renovation_rewards.integration.test.js backend/controllers/scoreController.js backend/routes/api.js frontend/src/app/teacher/directScore.jsx frontend/src/app/admin/audits.jsx frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r04 教师纠错与直评"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -102,11 +102,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** 预分类卡、C1/C2/C3；个人身份方案，公共设备必需时另消费18A会话。
 **Interfaces — Produces:** redeemCard({actor,token,requestKey,payloadHash}) -> RewardReceipt+CardRedemption；旧领取地址的兼容分流。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R03，先走真实界面，再对外部结果断言：`assert.equal(checks.originalRewardsForCard,1); assert.equal(checks.netOriginalPoints,'1.00'); assert.equal(checks.teacherPendingAdded,0); assert.equal(checks.replayShowsNewRewardAnimation,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R03 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 按student_term_state→卡→奖励根顺序完成一次兑换，学生为发起者、卡教师为奖励责任人，审计体现实际身份且不伪造reviewer；期限/旧PENDING由流程版本分支处理。 增加同卡100请求竞争、提交后响应丢失重试、更正后重复扫及月底边界；新扫码不需要旧人工审核分支。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R03 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/cardRedemptionService.js backend/migrations/renovation/03_instant_redemption.js scripts/full-system-demo/scenarios/R03.cjs backend/__tests__/renovation_rewards.integration.test.js backend/controllers/cardController.js backend/services/scheduler.js backend/routes/api.js frontend/src/app/student/claim.jsx frontend/src/util/cardClaimSession.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r03 扫码即时入账"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R03，先走真实界面，再对外部结果断言：`assert.equal(checks.originalRewardsForCard,1); assert.equal(checks.netOriginalPoints,'1.00'); assert.equal(checks.teacherPendingAdded,0); assert.equal(checks.replayShowsNewRewardAnimation,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R03 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 按student_term_state→卡→奖励根顺序完成一次兑换，学生为发起者、卡教师为奖励责任人，审计体现实际身份且不伪造reviewer；期限/旧PENDING由流程版本分支处理。 增加同卡100请求竞争、提交后响应丢失重试、更正后重复扫及月底边界；新扫码不需要旧人工审核分支。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R03 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/cardRedemptionService.js backend/migrations/renovation/03_instant_redemption.js scripts/full-system-demo/scenarios/R03.cjs backend/__tests__/renovation_rewards.integration.test.js backend/controllers/cardController.js backend/services/scheduler.js backend/routes/api.js frontend/src/app/student/claim.jsx frontend/src/util/cardClaimSession.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r03 扫码即时入账"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -119,11 +119,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2/C3；G1荣誉归属/赛事届次/计分/封顶规则。
 **Interfaces — Produces:** approveHonor({actor,honorId,expectedRevision,dimension,ruleVersion,requestKey}) -> HonorRevision+RewardReceipt。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R05，先走真实界面，再对外部结果断言：`assert.equal(checks.approvedHonorPoints,'4.00'); assert.equal(checks.replayedHonorRewards,1); assert.equal(checks.revokedHonorNetPoints,'0.00')`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R05 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 保留旧生成列，新增认定分/规则版/来源；T/M/L荣誉允许无日常奖励叶子。认定与记账同C2事务，材料重提和认定更正留历史。 测试规则4.00只属于TEST_ONLY_V2，用于证明未硬编码旧市一等奖6分。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R05 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/honorAwardService.js backend/migrations/renovation/05_honor_awards.js scripts/full-system-demo/scenarios/R05.cjs backend/__tests__/renovation_rewards.integration.test.js backend/controllers/honorController.js frontend/src/app/student/honors.jsx frontend/src/app/teacher/honors.jsx frontend/src/app/admin/rules.jsx backend/routes/api.js frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r05 荣誉认定与奖励"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R05，先走真实界面，再对外部结果断言：`assert.equal(checks.approvedHonorPoints,'4.00'); assert.equal(checks.replayedHonorRewards,1); assert.equal(checks.revokedHonorNetPoints,'0.00')`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R05 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 保留旧生成列，新增认定分/规则版/来源；T/M/L荣誉允许无日常奖励叶子。认定与记账同C2事务，材料重提和认定更正留历史。 测试规则4.00只属于TEST_ONLY_V2，用于证明未硬编码旧市一等奖6分。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R05 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/honorAwardService.js backend/migrations/renovation/05_honor_awards.js scripts/full-system-demo/scenarios/R05.cjs backend/__tests__/renovation_rewards.integration.test.js backend/controllers/honorController.js frontend/src/app/student/honors.jsx frontend/src/app/teacher/honors.jsx frontend/src/app/admin/rules.jsx backend/routes/api.js frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r05 荣誉认定与奖励"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -136,11 +136,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2；G1月份/建议规则/退回与终审政策。
 **Interfaces — Produces:** reviewStory({actor,storyId,expectedRevision,finalScore,comment}) -> StoryRevision；列出有效月作品的数据合同。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R06，先走真实界面，再对外部结果断言：`assert.equal(checks.suggestionKind,'RULE'); assert.equal(checks.finalScore,'88.00'); assert.equal(checks.reviewedTextOverwritten,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R06 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 建议与正式评价分开；正式提交/终审写入有效版本并推进学期sourceRevision，保留草稿及批准的退回路径。G聚合留给自动六育。 88.00是教师测试输入；篇幅只能作为规则特征，不证明真实性。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R06 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/storyReviewService.js backend/migrations/renovation/06_story_versions.js scripts/full-system-demo/scenarios/R06.cjs backend/controllers/storyController.js frontend/src/app/student/stories.jsx frontend/src/app/teacher/stories.jsx backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r06 故事建议与终审"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R06，先走真实界面，再对外部结果断言：`assert.equal(checks.suggestionKind,'RULE'); assert.equal(checks.finalScore,'88.00'); assert.equal(checks.reviewedTextOverwritten,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R06 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 建议与正式评价分开；正式提交/终审写入有效版本并推进学期sourceRevision，保留草稿及批准的退回路径。G聚合留给自动六育。 88.00是教师测试输入；篇幅只能作为规则特征，不证明真实性。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R06 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/storyReviewService.js backend/migrations/renovation/06_story_versions.js scripts/full-system-demo/scenarios/R06.cjs backend/controllers/storyController.js frontend/src/app/student/stories.jsx frontend/src/app/teacher/stories.jsx backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r06 故事建议与终审"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -153,11 +153,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2；G1年级课程、值类型、必评和数据状态；不等待最终纸样。
 **Interfaces — Produces:** C4 IndicatorValue；saveIndicatorValues({actor,studentKey,expectedRevision,values}) -> ValueRevisions。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R07，先走真实界面，再对外部结果断言：`assert.equal(checks.rawStars,'★★★'); assert.equal(checks.gradeRawNumericValue,null); assert.equal(checks.recordedZeroIsMissing,false); assert.equal(checks.nonApplicableBlocks,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R07 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 字典和结果按学校/版本/年级范围持久化，记录原值/单位/来源与有效版本；写入走C2，配置权限不开放个人结果读取。 明确RECORDED/MISSING/EXEMPT/NOT_APPLICABLE等批准状态，不把全部74项设为全员必填。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R07 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportIndicatorService.js backend/controllers/reportIndicatorController.js backend/migrations/renovation/07_report_indicators.js frontend/src/app/admin/reportIndicators.jsx frontend/src/app/teacher/indicatorEvaluation.jsx scripts/full-system-demo/scenarios/R07.cjs backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r07 年级指标与教师评价"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R07，先走真实界面，再对外部结果断言：`assert.equal(checks.rawStars,'★★★'); assert.equal(checks.gradeRawNumericValue,null); assert.equal(checks.recordedZeroIsMissing,false); assert.equal(checks.nonApplicableBlocks,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R07 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 字典和结果按学校/版本/年级范围持久化，记录原值/单位/来源与有效版本；写入走C2，配置权限不开放个人结果读取。 明确RECORDED/MISSING/EXEMPT/NOT_APPLICABLE等批准状态，不把全部74项设为全员必填。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R07 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/reportIndicatorService.js backend/controllers/reportIndicatorController.js backend/migrations/renovation/07_report_indicators.js frontend/src/app/admin/reportIndicators.jsx frontend/src/app/teacher/indicatorEvaluation.jsx scripts/full-system-demo/scenarios/R07.cjs backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r07 年级指标与教师评价"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -170,11 +170,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2/C4，G1样例/导入原子策略；服务器预览批次。
 **Interfaces — Produces:** previewSubjectImport({actor,termId,subjectCode,mapping,rows}) -> PreviewBatch；commitSubjectImport({actor,batchId,expectedRevision,requestKey}) -> ImportResult。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R08，先走真实界面，再对外部结果断言：`assert.equal(checks.forgedSubjectStatus,403); assert.equal(checks.stalePreviewStatus,409); assert.equal(checks.effectiveVersionCount,1); assert.equal(checks.zeroLost,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R08 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 服务器保留标准输入/摘要，提交不接受客户端有效成绩作为权威；再次校验权限及当前版本，按批准的整批或有效行策略原子提交并推进来源版本。 不要通过“每行COMMIT”隐式选择部分成功；旧单项/批量入口统一适配。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R08 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/subjectImportService.js backend/migrations/renovation/08_subject_imports.js scripts/full-system-demo/scenarios/R08.cjs backend/__tests__/renovation_import_auth.integration.test.js backend/controllers/importController.js backend/services/batchImportService.js frontend/src/app/admin/import.jsx frontend/src/util/excelScoreParser.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r08 学科成绩导入"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R08，先走真实界面，再对外部结果断言：`assert.equal(checks.forgedSubjectStatus,403); assert.equal(checks.stalePreviewStatus,409); assert.equal(checks.effectiveVersionCount,1); assert.equal(checks.zeroLost,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R08 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 服务器保留标准输入/摘要，提交不接受客户端有效成绩作为权威；再次校验权限及当前版本，按批准的整批或有效行策略原子提交并推进来源版本。 不要通过“每行COMMIT”隐式选择部分成功；旧单项/批量入口统一适配。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R08 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/subjectImportService.js backend/migrations/renovation/08_subject_imports.js scripts/full-system-demo/scenarios/R08.cjs backend/__tests__/renovation_import_auth.integration.test.js backend/controllers/importController.js backend/services/batchImportService.js frontend/src/app/admin/import.jsx frontend/src/util/excelScoreParser.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r08 学科成绩导入"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -187,11 +187,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2/C4；G1健康专用授权/单位/样例，按范围启用。
 **Interfaces — Produces:** previewHealthImport/commitHealthImport使用服务器批次；只读授权HealthValues。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R09，先走真实界面，再对外部结果断言：`assert.equal(checks.heightUnit,'cm'); assert.equal(checks.managerCanReadHealth,false); assert.equal(checks.healthConvertedToReward,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R09 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 适配受控样例，保留测量时间、原值、单位、缺测/免测与有效版本；数据仅进入获准报告区域。 体测若是必评来源则先于自动六育；仅展示来源时可后置到相应报告验收。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R09 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/healthImportService.js backend/controllers/healthController.js backend/migrations/renovation/09_health_values.js frontend/src/app/teacher/healthImport.jsx scripts/full-system-demo/scenarios/R09.cjs backend/__tests__/renovation_health_auth.integration.test.js backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r09 体测与健康导入"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R09，先走真实界面，再对外部结果断言：`assert.equal(checks.heightUnit,'cm'); assert.equal(checks.managerCanReadHealth,false); assert.equal(checks.healthConvertedToReward,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R09 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 适配受控样例，保留测量时间、原值、单位、缺测/免测与有效版本；数据仅进入获准报告区域。 体测若是必评来源则先于自动六育；仅展示来源时可后置到相应报告验收。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R09 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/healthImportService.js backend/controllers/healthController.js backend/migrations/renovation/09_health_values.js frontend/src/app/teacher/healthImport.jsx scripts/full-system-demo/scenarios/R09.cjs backend/__tests__/renovation_health_auth.integration.test.js backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r09 体测与健康导入"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
@@ -204,11 +204,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C2/C3/C4，G1批准规则；荣誉、正式故事和适用指标，按规则补导入/体测。
 **Interfaces — Produces:** C5 buildEvaluationSnapshot，指定连接及版本，不在内部另开pool。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R10，先走真实界面，再对外部结果断言：`assert.equal(checks.testPolicyStoryAggregate,'85.00'); assert.equal(checks.honorCountedTimes,1); assert.equal(checks.noHonorAutomaticallyMissing,false); assert.equal(checks.unconfiguredGrade,null)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R10 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 按有效来源/版本生成六维、状态与证据；新规则无隐式80/15/5回退，旧结果按LEGACY策略读取，计算只输出派生结果。 测试G按TEST_ONLY_V2的80/90均值为85，仅用于验证版本与聚合，不代表学校口径。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R10 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/evaluationSnapshotService.js backend/migrations/renovation/10_evaluation_versions.js scripts/full-system-demo/scenarios/R10.cjs backend/services/evaluationEngine.js backend/controllers/evaluationController.js frontend/src/app/admin/rules.jsx frontend/src/app/student/evaluation.jsx backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r10 自动六育评价"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R10，先走真实界面，再对外部结果断言：`assert.equal(checks.testPolicyStoryAggregate,'85.00'); assert.equal(checks.honorCountedTimes,1); assert.equal(checks.noHonorAutomaticallyMissing,false); assert.equal(checks.unconfiguredGrade,null)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R10 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 按有效来源/版本生成六维、状态与证据；新规则无隐式80/15/5回退，旧结果按LEGACY策略读取，计算只输出派生结果。 测试G按TEST_ONLY_V2的80/90均值为85，仅用于验证版本与聚合，不代表学校口径。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R10 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/evaluationSnapshotService.js backend/migrations/renovation/10_evaluation_versions.js scripts/full-system-demo/scenarios/R10.cjs backend/services/evaluationEngine.js backend/controllers/evaluationController.js frontend/src/app/admin/rules.jsx frontend/src/app/student/evaluation.jsx backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r10 自动六育评价"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
