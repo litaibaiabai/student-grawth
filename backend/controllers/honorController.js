@@ -9,6 +9,7 @@ const {AppError}=require("../middleware/errorHandler");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
 const { FILE_REF_RE } = require("./uploadController");
+const { appendReward, correctReward } = require("../services/scoreLedgerService");
 
 /**
  * POST /api/v1/student/honors
@@ -188,71 +189,76 @@ async function resubmitHonor(req, res, next) {
   }
 }
 
+const { reviewHonorWithLedger, revokeHonorWithLedger } = require("../services/honorAwardService");
+
 /**
  * POST /api/v1/teacher/honors/:id/review
  * 教师审核荣誉申报 (APPROVED | REJECTED)
  */
 async function reviewHonor(req, res, next) {
-  const honorId = req.params.id;
-  let { decision, rejectReason, comment } = req.body;
-  if (!decision) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "请提供审核决定", 422);
-  }
-  decision = String(decision).toUpperCase();
-  if (decision === "APPROVE" || decision === "PASS" || decision === "通过") decision = "APPROVED";
-  if (decision === "REJECT" || decision === "REFUSE" || decision === "驳回") decision = "REJECTED";
-
-  if (!["APPROVED", "REJECTED"].includes(decision)) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "审核决定只能是 APPROVED 或 REJECTED", 422);
-  }
-
-  const teacherId = req.user?.id || req.user?.userId;
-  const schoolId = req.user?.schoolId || 1;
-
-  let conn;
+  let conn = req.conn;
+  let ownConn = false;
   try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-
-    const [rows] = await conn.query("SELECT * FROM honor_record WHERE id = ? FOR UPDATE", [honorId]);
-    if (rows.length === 0) {
-      await conn.rollback();
-      return fail(res, ErrorCodes.NOT_FOUND, "荣誉记录不存在", 404);
+    if (!conn) {
+      conn = await pool.getConnection();
+      ownConn = true;
+      await conn.beginTransaction();
     }
+    const result = await reviewHonorWithLedger({
+      schoolId: req.user?.schoolId || 1,
+      honorId: req.params.id,
+      decision: req.body?.decision,
+      rejectReason: req.body?.rejectReason,
+      comment: req.body?.comment,
+      dimensionCode: req.body?.dimensionCode,
+      categoryId: req.body?.categoryId,
+      awardPoints: req.body?.awardPoints,
+      teacherId: req.user?.id || req.user?.userId,
+      actorRole: req.user?.role || 'teacher',
+      actorUser: req.user,
+      requestKey: req.body?.requestKey
+    }, conn);
 
-    const prev = rows[0];
-    if(Number(prev.school_id)!==Number(schoolId))throw new AppError(403,'禁止跨校审核',403);
-    await requireStudentScope(req.user,prev.student_id,conn);
-    if(prev.status!=='PENDING')throw new AppError(409,'仅待审核荣誉可审核，请刷新列表',409);
-    await conn.query(
-      `UPDATE honor_record
-       SET status = ?, reviewer_id = ?, reviewed_at = NOW(), reject_reason = ?
-       WHERE id = ?`,
-      [decision, teacherId, decision === "REJECTED" ? rejectReason || comment || "材料不符要求" : null, honorId]
-    );
-
-    // 写入审计
-    await conn.query(
-      `INSERT INTO operation_audit (
-        school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
-      ) VALUES (?, ?, ?, 'HONOR_RECORD', ?, 'REVIEW_HONOR', ?, ?)`,
-      [
-        schoolId,
-        teacherId,
-        req.user?.role || "teacher",
-        honorId,
-        `REQ_HONOR_REV_${honorId}_${Date.now()}`,
-        JSON.stringify({ decision, honorPoints: prev.honor_points })
-      ]
-    );
-
-    await conn.commit();
-    success(res, { id: Number(honorId), status: decision, honorPoints: Number(prev.honor_points) }, "荣誉审核操作成功");
+    if (ownConn) await conn.commit();
+    success(res, result, result.replayed ? "该荣誉已审核通过" : "荣誉审核操作成功");
   } catch (err) {
-    if (conn) await conn.rollback();
+    if (ownConn && conn) await conn.rollback();
     next(err);
   } finally {
-    if (conn) conn.release();
+    if (ownConn && conn) conn.release();
+  }
+}
+
+/**
+ * POST /api/v1/teacher/honors/:id/revoke
+ * 撤销已认定的荣誉并负向冲销账本
+ */
+async function revokeHonor(req, res, next) {
+  let conn = req.conn;
+  let ownConn = false;
+  try {
+    if (!conn) {
+      conn = await pool.getConnection();
+      ownConn = true;
+      await conn.beginTransaction();
+    }
+    const result = await revokeHonorWithLedger({
+      schoolId: req.user?.schoolId || 1,
+      honorId: req.params.id,
+      teacherId: req.user?.id || req.user?.userId,
+      actorRole: req.user?.role || 'teacher',
+      actorUser: req.user,
+      reason: req.body?.reason,
+      requestKey: req.body?.requestKey
+    }, conn);
+
+    if (ownConn) await conn.commit();
+    success(res, result, "荣誉认定已撤销并同步冲销积分");
+  } catch (err) {
+    if (ownConn && conn) await conn.rollback();
+    next(err);
+  } finally {
+    if (ownConn && conn) conn.release();
   }
 }
 
@@ -309,5 +315,6 @@ module.exports = {
   submitHonor,
   resubmitHonor,
   reviewHonor,
+  revokeHonor,
   getHonors
 };

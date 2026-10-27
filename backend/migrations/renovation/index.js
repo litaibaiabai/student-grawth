@@ -27,6 +27,10 @@ registerMigration(cardMigration);
 const ledgerMigration = require('./04_reward_ledger');
 registerMigration(ledgerMigration);
 
+// 05 荣誉认定与奖励
+const honorMigration = require('./05_honor_awards');
+registerMigration(honorMigration);
+
 module.exports = {
   initialized: true
 };

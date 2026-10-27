@@ -19,7 +19,7 @@ const {
 } = require("../controllers/cardController");
 const {retiredPreview}=require('../controllers/cardController');
 const { directScoreBatch, reverseScore, teacherCorrectScore, getStudentScores } = require("../controllers/scoreController");
-const { submitHonor, resubmitHonor, reviewHonor, getHonors } = require("../controllers/honorController");
+const { submitHonor, resubmitHonor, reviewHonor, revokeHonor, getHonors } = require("../controllers/honorController");
 const { uploadHonorCertificate, uploadLimiter, getHonorCertificate } = require("../controllers/uploadController");
 const { submitStory, reviewStory, getStories } = require("../controllers/storyController");
 const { previewImport, commitImport, previewBatchImport, commitBatchImport } = require("../controllers/importController");
@@ -92,6 +92,7 @@ router.get("/student/scores", requireAuth, getStudentScores);
 router.post("/student/honors", requireAuth, requireRole("student"), submitHonor);
 router.post("/student/honors/:id/resubmit", requireAuth, requireRole("student"), resubmitHonor);
 router.post("/teacher/honors/:id/review", requireAuth, requireRole("teacher", "manager"), reviewHonor);
+router.post("/teacher/honors/:id/revoke", requireAuth, requireRole("teacher", "manager"), revokeHonor);
 router.get("/honors", requireAuth, getHonors);
 router.post("/uploads/honor-certificate", requireAuth, requireRole("student"), uploadLimiter, uploadHonorCertificate);
 router.get("/uploads/honor/:name", requireAuth, getHonorCertificate);

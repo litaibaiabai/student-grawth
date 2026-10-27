@@ -52,7 +52,7 @@ async function withStudentTermMutation({ connection, actor, studentKey, requestK
       [studentKey.schoolId, studentKey.termId, studentKey.studentId]
     );
 
-    const currentRevision = stateRows[0].source_revision;
+    const currentRevision = stateRows[0]?.source_revision ?? 1;
 
     // 3. 执行业务变更
     const result = await mutate(conn);
