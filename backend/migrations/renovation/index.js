@@ -43,6 +43,10 @@ registerMigration(indicatorMigration);
 const subjectImportMigration = require('./08_subject_imports');
 registerMigration(subjectImportMigration);
 
+// 09 体测与健康导入
+const healthMigration = require('./09_health_values');
+registerMigration(healthMigration);
+
 module.exports = {
   initialized: true
 };
