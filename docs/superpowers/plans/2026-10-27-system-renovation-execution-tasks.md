@@ -238,11 +238,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C6/C7；学校批准模型/数据授权、供应条件和预算配置。
 **Interfaces — Produces:** requestComment({actor,draftId,expectedFingerprint}) -> Job；applyCommentResult({jobId,expectedFingerprint,result}) -> SuggestionRevision。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R12，先走真实界面，再对外部结果断言：`assert.equal(checks.acceptedGenerationSource,'MODEL'); assert.equal(checks.lateResponseOverwritesTeacher,false); assert.equal(checks.failureLosesDraft,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R12 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 持久异步任务、证据筛选和脱敏；网络调用在锁外，重试有界，结果CAS匹配旧指纹后仅写建议。人工稿及审批不被覆盖。 真实模型尚不可用时R12必须记录未完成/失败，不能靠Mock通过AI验收；模拟失败只证明兜底行为。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R12 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/commentGenerationService.js backend/services/commentProvider.js backend/migrations/renovation/12_comment_jobs.js scripts/full-system-demo/scenarios/R12.cjs backend/__tests__/renovation_reports.integration.test.js backend/controllers/reportDraftController.js frontend/src/app/teacher/reportDrafts.jsx backend/routes/api.js frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r12 AI寄语"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R12，先走真实界面，再对外部结果断言：`assert.equal(checks.acceptedGenerationSource,'MODEL'); assert.equal(checks.lateResponseOverwritesTeacher,false); assert.equal(checks.failureLosesDraft,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R12 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 持久异步任务、证据筛选和脱敏；网络调用在锁外，重试有界，结果CAS匹配旧指纹后仅写建议。人工稿及审批不被覆盖。 真实模型尚不可用时R12必须记录未完成/失败，不能靠Mock通过AI验收；模拟失败只证明兜底行为。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R12 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/commentGenerationService.js backend/services/commentProvider.js backend/migrations/renovation/12_comment_jobs.js scripts/full-system-demo/scenarios/R12.cjs backend/__tests__/renovation_reports.integration.test.js backend/controllers/reportDraftController.js frontend/src/app/teacher/reportDrafts.jsx backend/routes/api.js frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r12 AI寄语"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
