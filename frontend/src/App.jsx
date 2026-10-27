@@ -34,6 +34,7 @@ const TeacherClaims = lazy(() => import("./app/teacher/claims"));
 const TeacherDirectScore = lazy(() => import("./app/teacher/directScore"));
 const TeacherHonors = lazy(() => import("./app/teacher/honors"));
 const TeacherStories = lazy(() => import("./app/teacher/stories"));
+const TeacherReportDrafts = lazy(() => import("./app/teacher/reportDrafts"));
 
 // 管理员端视图
 const AdminTerms = lazy(() => import("./app/admin/terms"));
@@ -251,6 +252,14 @@ function App() {
               element={
                 <RequireAuth>
                   <TeacherStories />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/teacher/report-drafts"
+              element={
+                <RequireAuth>
+                  <TeacherReportDrafts />
                 </RequireAuth>
               }
             />

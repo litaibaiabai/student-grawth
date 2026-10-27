@@ -58,7 +58,8 @@ export const menuGroups = {
       group: "班级与学期",
       items: [
         { key: "/admin/import", path: "/admin/import", label: "学科成绩导入", icon: <CloudUploadOutlined /> },
-        { key: "/admin/cards", path: "/admin/cards", label: "我的评价卡", icon: <CreditCardOutlined /> }
+        { key: "/admin/cards", path: "/admin/cards", label: "我的评价卡", icon: <CreditCardOutlined /> },
+        { key: "/teacher/report-drafts", path: "/teacher/report-drafts", label: "报告草稿确认", icon: <FileProtectOutlined /> }
       ]
     }
   ],

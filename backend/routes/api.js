@@ -108,6 +108,12 @@ router.get("/uploads/honor/:name", requireAuth, getHonorCertificate);
 // ---------------------- 月度故事 & AI 预评 ----------------------
 router.post("/student/stories", requireAuth, requireRole("student"), submitStory);
 router.post("/teacher/stories/:id/review", requireAuth, requireRole("teacher", "manager"), reviewStory);
+
+// 改造报告草稿与教师确认
+const reportDrafts = require("../controllers/reportDraftController");
+router.post("/teacher/reports/draft", requireAuth, requireRole("teacher"), reportDrafts.buildDraft);
+router.get("/teacher/reports/draft/:draftId", requireAuth, requireRole("teacher"), reportDrafts.getDraft);
+router.post("/teacher/reports/confirm", requireAuth, requireRole("teacher"), reportDrafts.confirmDraft);
 router.get("/stories", requireAuth, getStories);
 
 // ---------------------- 数据导入 ----------------------

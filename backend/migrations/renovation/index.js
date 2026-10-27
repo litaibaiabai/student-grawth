@@ -51,6 +51,10 @@ registerMigration(healthMigration);
 const evaluationMigration = require('./10_evaluation_versions');
 registerMigration(evaluationMigration);
 
+// 11 报告草稿与教师确认
+const reportDraftMigration = require('./11_report_drafts');
+registerMigration(reportDraftMigration);
+
 module.exports = {
   initialized: true
 };
