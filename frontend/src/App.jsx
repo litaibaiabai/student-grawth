@@ -48,6 +48,7 @@ const AdminAudits = lazy(() => import("./app/admin/audits"));
 const AdminRoster = lazy(() => import("./app/admin/rosterImport"));
 const AdminDevices = lazy(() => import("./app/admin/devices"));
 const AdminIdentityLinks = lazy(() => import("./app/admin/identityLinks"));
+const AdminRollout = lazy(() => import("./app/admin/rollout"));
 const KioskIdentify = lazy(() => import("./app/kiosk/identify"));
 const KioskRedeem = lazy(() => import("./app/kiosk/redeem"));
 
@@ -303,6 +304,14 @@ function App() {
               element={
                 <RequireAuth>
                   <AdminIdentityLinks />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/rollout"
+              element={
+                <RequireAuth>
+                  <AdminRollout />
                 </RequireAuth>
               }
             />

@@ -98,6 +98,12 @@ export const API_IDENTITY_LINKS = BASE + "/admin/identity-links";
 export const API_IDENTITY_LINK_BIND = BASE + "/admin/identity-links/bind";
 export const API_IDENTITY_LINK_UNBIND = BASE + "/admin/identity-links/unbind";
 
+// 试点上线与历史对账 (Task 20C)
+export const API_ROLLOUT_STATUS = BASE + "/admin/rollout/status";
+export const API_ROLLOUT_RECONCILIATION = BASE + "/admin/rollout/reconciliation";
+export const API_ROLLOUT_CHECKLIST = BASE + "/admin/rollout/checklist";
+
+
 
 
 

@@ -20,7 +20,8 @@ import {
   ExperimentOutlined,
   SendOutlined,
   SafetyCertificateOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
+  DashboardOutlined
 } from "@ant-design/icons";
 
 export const menuGroups = {
@@ -89,7 +90,8 @@ export const menuGroups = {
       items: [
         { key: "/admin/rules", path: "/admin/rules", label: "综合评分规则", icon: <ExperimentOutlined /> },
         { key: "/admin/reports", path: "/admin/reports", label: "报告批量发布", icon: <SendOutlined /> },
-        { key: "/admin/audits", path: "/admin/audits", label: "审计与冲销", icon: <SafetyCertificateOutlined /> }
+        { key: "/admin/audits", path: "/admin/audits", label: "审计与冲销", icon: <SafetyCertificateOutlined /> },
+        { key: "/admin/rollout", path: "/admin/rollout", label: "试点上线", icon: <DashboardOutlined /> }
       ]
     }
   ]

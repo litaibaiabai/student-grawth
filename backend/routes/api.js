@@ -249,4 +249,10 @@ router.post("/admin/identity-links/bind", requireAuth, requireRole("manager"), e
 router.post("/admin/identity-links/unbind", requireAuth, requireRole("manager"), externalIdentityController.handleUnbindLink);
 router.post("/auth/external-callback", externalIdentityController.handleCallback);
 
+// ---------------------- 试点上线与历史对账 (Task 20C) ----------------------
+const rolloutController = require("../controllers/rolloutController");
+router.get("/admin/rollout/status", requireAuth, requireRole("manager"), rolloutController.handleGetStatus);
+router.get("/admin/rollout/reconciliation", requireAuth, requireRole("manager"), rolloutController.handleReconciliation);
+router.get("/admin/rollout/checklist", requireAuth, requireRole("manager"), rolloutController.handleGetChecklist);
+
 module.exports = router;
