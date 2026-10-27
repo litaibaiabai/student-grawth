@@ -99,8 +99,74 @@ async function confirmDraft(req, res, next) {
   }
 }
 
+/**
+ * POST /api/v1/teacher/reports/draft/:draftId/ai-comment
+ * 请求生成 AI 寄语建议
+ */
+async function requestAiComment(req, res, next) {
+  try {
+    const actor = {
+      id: req.user?.id || req.user?.userId,
+      role: req.user?.role
+    };
+    const { draftId } = req.params;
+    const { expectedFingerprint } = req.body;
+
+    const commentGenerationService = require('../services/commentGenerationService');
+    const job = await commentGenerationService.requestComment({
+      actor,
+      draftId: Number(draftId),
+      expectedFingerprint
+    });
+
+    const result = await commentGenerationService.processCommentJob({
+      jobId: job.jobId
+    });
+
+    return success(res, result, 'AI 寄语生成成功');
+  } catch (err) {
+    if (err.status) {
+      return fail(res, 'AI_COMMENT_ERROR', err.message, err.status);
+    }
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/teacher/reports/draft/:draftId/ai-comment/apply
+ * 采纳或保存 AI 寄语建议（带 CAS 防覆盖）
+ */
+async function applyAiComment(req, res, next) {
+  try {
+    const actor = {
+      id: req.user?.id || req.user?.userId,
+      role: req.user?.role
+    };
+    const { draftId } = req.params;
+    const { jobId, expectedFingerprint, result } = req.body;
+
+    const commentGenerationService = require('../services/commentGenerationService');
+    const applyResult = await commentGenerationService.applyCommentResult({
+      actor,
+      jobId,
+      draftId: Number(draftId),
+      expectedFingerprint,
+      result
+    });
+
+    return success(res, applyResult, '建议应用成功');
+  } catch (err) {
+    if (err.status) {
+      return fail(res, 'APPLY_ERROR', err.message, err.status);
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   buildDraft,
   getDraft,
-  confirmDraft
+  confirmDraft,
+  requestAiComment,
+  applyAiComment
 };

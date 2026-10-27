@@ -114,6 +114,8 @@ const reportDrafts = require("../controllers/reportDraftController");
 router.post("/teacher/reports/draft", requireAuth, requireRole("teacher"), reportDrafts.buildDraft);
 router.get("/teacher/reports/draft/:draftId", requireAuth, requireRole("teacher"), reportDrafts.getDraft);
 router.post("/teacher/reports/confirm", requireAuth, requireRole("teacher"), reportDrafts.confirmDraft);
+router.post("/teacher/reports/draft/:draftId/ai-comment", requireAuth, requireRole("teacher"), reportDrafts.requestAiComment);
+router.post("/teacher/reports/draft/:draftId/ai-comment/apply", requireAuth, requireRole("teacher"), reportDrafts.applyAiComment);
 router.get("/stories", requireAuth, getStories);
 
 // ---------------------- 数据导入 ----------------------

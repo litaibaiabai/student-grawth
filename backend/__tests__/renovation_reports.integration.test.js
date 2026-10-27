@@ -164,4 +164,62 @@ describe('Task 11: 报告草稿与教师确认集成测试', () => {
       (err) => err.status === 409 || err.statusCode === 409
     );
   });
+
+  test('6. 发起 AI 寄语生成任务并生成 MODEL 建议，附带引用证据', async () => {
+    const { requestComment, processCommentJob } = require('../services/commentGenerationService');
+    const job = await requestComment({
+      actor: { id: 101, role: 'teacher' },
+      draftId,
+      expectedFingerprint: fingerprint,
+      connection
+    });
+
+    assert.ok(job.jobId);
+
+    const result = await processCommentJob({
+      jobId: job.jobId,
+      connection
+    });
+
+    assert.equal(result.source, 'MODEL');
+    assert.ok(result.suggestionText);
+    assert.ok(result.citedEvidence);
+  });
+
+  test('7. 晚到模型响应绝不覆盖教师已确认寄语 (CAS)', async () => {
+    const { applyCommentResult } = require('../services/commentGenerationService');
+    const applyRes = await applyCommentResult({
+      actor: { id: 101, role: 'teacher' },
+      jobId: 'LATE_JOB_TEST',
+      draftId,
+      expectedFingerprint: 'STALE_OLD_FINGERPRINT',
+      result: {
+        suggestionText: '晚到的AI响应尝试覆盖',
+        source: 'MODEL'
+      },
+      connection
+    });
+
+    assert.equal(applyRes.overwrittenTeacher, false);
+
+    // 重新获取草稿确认教师寄语依然保留
+    const draftAfter = await getDraft({
+      actor: { id: 101, role: 'teacher' },
+      draftId,
+      connection
+    });
+    assert.equal(draftAfter.teacherComment, '期末寄语：在各方面表现优异，有责任心。');
+  });
+
+  test('8. 模型生成失败不丢失草稿，允许转人工', async () => {
+    const { handleGenerationFailure } = require('../services/commentGenerationService');
+    const failRes = await handleGenerationFailure({
+      draftId,
+      errorMessage: '模型服务模拟超时',
+      connection
+    });
+
+    assert.equal(failRes.status, 'FAILED');
+    assert.equal(failRes.canFallbackToManual, true);
+  });
 });

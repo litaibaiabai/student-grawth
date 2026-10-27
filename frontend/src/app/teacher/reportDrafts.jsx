@@ -19,7 +19,8 @@ import {
   FileTextOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
-  SyncOutlined
+  SyncOutlined,
+  ThunderboltOutlined
 } from "@ant-design/icons";
 import { get, post } from "@/util/request";
 import * as urls from "@/constant/urls";
@@ -35,6 +36,9 @@ const TeacherReportDrafts = () => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState("");
+  const [citedEvidence, setCitedEvidence] = useState([]);
 
   // 加载学生列表
   useEffect(() => {
@@ -69,6 +73,28 @@ const TeacherReportDrafts = () => {
       message.error(err?.message || "请求草稿失败");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 生成 AI 寄语建议
+  const handleGenerateAiComment = async () => {
+    if (!draft) return;
+    setAiGenerating(true);
+    try {
+      const res = await post(urls.API_TEACHER_REPORT_AI_COMMENT(draft.draftId), {
+        expectedFingerprint: draft.approvalFingerprint
+      });
+      if (res && res.code === 200 && res.data) {
+        setAiSuggestion(res.data.suggestionText || "");
+        setCitedEvidence(res.data.citedEvidence || []);
+        message.success("AI 寄语建议生成完成，请班主任核对！");
+      } else {
+        message.error(res?.message || "生成寄语建议失败，请重试或直接手写");
+      }
+    } catch (err) {
+      message.error(err?.message || "模型服务调用异常，可重试或直接手写寄语");
+    } finally {
+      setAiGenerating(false);
     }
   };
 
@@ -213,10 +239,50 @@ const TeacherReportDrafts = () => {
             </div>
           </Card>
 
-          <Card title="班主任学期寄语 (手写/修订)" style={{ marginBottom: 20 }}>
+          <Card
+            title="班主任学期寄语 (手写/修订/AI辅助)"
+            style={{ marginBottom: 20 }}
+            extra={
+              <Button
+                icon={<ThunderboltOutlined />}
+                onClick={handleGenerateAiComment}
+                loading={aiGenerating}
+              >
+                生成 AI 寄语建议 (脱敏证据)
+              </Button>
+            }
+          >
+            {aiSuggestion && (
+              <Alert
+                type="info"
+                style={{ marginBottom: 16 }}
+                message={
+                  <Space direction="vertical" style={{ width: "100%" }}>
+                    <div>
+                      <Text strong>🤖 AI 建议参考 (来源: MODEL):</Text>
+                      <Paragraph style={{ margin: "8px 0" }}>{aiSuggestion}</Paragraph>
+                    </div>
+                    {citedEvidence.length > 0 && (
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          引用证据项: {citedEvidence.join(", ")}
+                        </Text>
+                      </div>
+                    )}
+                    <Button
+                      size="small"
+                      type="link"
+                      onClick={() => setComment(aiSuggestion)}
+                    >
+                      填入编辑框进行核对与修改
+                    </Button>
+                  </Space>
+                }
+              />
+            )}
             <TextArea
               rows={4}
-              placeholder="请输入对该学生的唯一学期寄语（可独立保存并确认，不强制等待AI或家长评语）..."
+              placeholder="请输入对该学生的唯一学期寄语（可人工手写，亦可核对并采纳AI建议，不强制等待家长评语）..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               style={{ marginBottom: 16 }}

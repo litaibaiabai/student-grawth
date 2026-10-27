@@ -55,6 +55,10 @@ registerMigration(evaluationMigration);
 const reportDraftMigration = require('./11_report_drafts');
 registerMigration(reportDraftMigration);
 
+// 12 AI 寄语任务与扩展位
+const commentJobMigration = require('./12_comment_jobs');
+registerMigration(commentJobMigration);
+
 module.exports = {
   initialized: true
 };
