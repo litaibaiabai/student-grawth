@@ -1,7 +1,7 @@
 ---
 id: DEV-RENOVATION-03
 title: 扫码即时入账
-status: open
+status: closed
 labels: ["ready-for-agent"]
 parent: SPEC-20261027-RENOVATION
 assignee:

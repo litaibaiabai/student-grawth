@@ -15,6 +15,11 @@ Task 20A: complete (commits c239a4d..c9335c1, tests: node scripts/full-system-de
 Task 01: complete (commits c9335c1..a9906b1, tests: node scripts/full-system-demo/run.cjs --scenario R01 --speed 6 --exit → PASS 4/4 chapters, checks.crossSubjectStatus=403, checks.sameTokenAfterRevocationStatus=403, checks.permissionDependencyFailureStatus=503; renovation_auth.integration.test.js → PASS 4/4; npm test --prefix backend → PASS 94/94)
 Task 02: complete (commits 515ac8d..5d9c50b, tests: node scripts/full-system-demo/run.cjs --scenario R02 --speed 6 --exit → PASS 4/4 chapters, checks.dailyCardDimensionsValid=true, checks.preboundLeafCategoriesValid=true, checks.idempotentReissue=true, checks.printPreviewDisplaysReason=true; renovation_cards.integration.test.js → PASS 2/2; npm test --prefix backend → PASS 96/96)
 Task 04: complete (commits 5d9c50b..8bb997f, tests: node scripts/full-system-demo/run.cjs --scenario R04 --speed 6 --exit → PASS 5/5 chapters, checks.appendOnlyEnforced=true, checks.reversalProducesNegativeDelta=true, checks.duplicateReversalRejected409=true, checks.correctionCreatesChain=true, checks.sourceRevisionIncremented=true; renovation_ledger.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 99/99)
+Task 03: complete (commits 8bb997f..e65f86b, tests: node scripts/full-system-demo/run.cjs --scenario R03 --speed 6 --exit → PASS 3/3 chapters, checks.instantPointsCredited=true, checks.teacherPendingQueueClean=true, checks.concurrencyWinnerOnlyOne=true, checks.idempotentReplaySuccess=true; renovation_redemption.integration.test.js → PASS 3/3; npm test --prefix backend → PASS 102/102)
+Task 20B: complete (commits e65f86b..c34c491, tests: node scripts/full-system-demo/run.cjs --scenario R20B --speed 6 --exit → PASS 4/4 chapters, checks.p0ClosedLoopVerified=true, checks.legacyInventoryPreserved=true, checks.concurrencyConservationMaintained=true, checks.rollbackPreservesImmutableAudit=true; renovation_p0_pilot.integration.test.js → PASS 2/2; npm test --prefix backend → PASS 104/104)
+
+## P0 Milestone Summary
+All P0 tasks (20A, 01, 02, 04, 03, 20B) are successfully completed, verified, and committed with 100% test pass rate.
 
 
 

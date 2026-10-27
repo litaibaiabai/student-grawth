@@ -1,7 +1,7 @@
 ---
 id: DEV-RENOVATION-20B
 title: P0试点与回退演练
-status: open
+status: closed
 labels: ["ready-for-agent"]
 parent: SPEC-20261027-RENOVATION
 assignee:
