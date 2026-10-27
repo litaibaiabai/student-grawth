@@ -357,11 +357,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C10受限会话、扫码即时入账结果。
 **Interfaces — Produces:** 设备身份→兑换→清屏→下一位的完整场景与会话结束状态。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R18B，先走真实界面，再对外部结果断言：`assert.equal(checks.nextStudentUsesPreviousIdentity,false); assert.equal(checks.timeoutClearsSession,true); assert.equal(checks.sharedDeviceDuplicateRewardCount,0)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R18B --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 只通过既有兑换合同入账，完成/退出/超时同时清界面与服务端会话；断网重试仍复用原请求，不变成多领。 真实目标设备需演示学生甲/乙切换；桌面浏览器模拟不足以宣称硬件验收完成。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R18B --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- frontend/src/app/kiosk/redeem.jsx scripts/full-system-demo/scenarios/R18B.cjs backend/__tests__/renovation_auth.integration.test.js backend/services/deviceSessionService.js backend/controllers/deviceController.js frontend/src/App.jsx backend/routes/api.js frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r18b 公共设备兑换与清屏"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R18B，先走真实界面，再对外部结果断言：`assert.equal(checks.nextStudentUsesPreviousIdentity,false); assert.equal(checks.timeoutClearsSession,true); assert.equal(checks.sharedDeviceDuplicateRewardCount,0)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R18B --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 只通过既有兑换合同入账，完成/退出/超时同时清界面与服务端会话；断网重试仍复用原请求，不变成多领。 真实目标设备需演示学生甲/乙切换；桌面浏览器模拟不足以宣称硬件验收完成。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R18B --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- frontend/src/app/kiosk/redeem.jsx scripts/full-system-demo/scenarios/R18B.cjs backend/__tests__/renovation_auth.integration.test.js backend/services/deviceSessionService.js backend/controllers/deviceController.js frontend/src/App.jsx backend/routes/api.js frontend/src/constant/urls.js`及`git commit -m "feat(renovation): r18b 公共设备兑换与清屏"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
