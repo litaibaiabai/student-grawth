@@ -306,4 +306,96 @@ describe('Task 11: 报告草稿与教师确认集成测试', () => {
 
     assert.ok(feedbacks.length >= 2);
   });
+
+  test('12. 管理员查询宏观发布准备状态，绝不泄露学生个人分数或寄语快照', async () => {
+    const { getPublishReadinessStatus } = require('../services/reportPublishService');
+    const status = await getPublishReadinessStatus({
+      actor: { id: 999, role: 'manager' },
+      schoolId: 1,
+      termId: 1,
+      grade: 4,
+      connection
+    });
+
+    assert.ok(status);
+    assert.equal(typeof status.totalCount, 'number');
+    assert.equal(typeof status.confirmedCount, 'number');
+    assert.equal(typeof status.pendingCount, 'number');
+
+    const jsonStr = JSON.stringify(status);
+    assert.equal(jsonStr.includes('期末寄语'), false);
+    assert.equal(jsonStr.includes('draftSnapshot'), false);
+  });
+
+  test('13. 批量发布已确认草稿，未确认或陈旧者被阻断并返回原因', async () => {
+    const { publishBatchReports, getPublishedReportSummary } = require('../services/reportPublishService');
+    // 此时学生201草稿处于陈旧状态，发布应受阻
+    const blockedRes = await publishBatchReports({
+      actor: { id: 999, role: 'manager' },
+      schoolId: 1,
+      termId: 1,
+      studentIds: [201],
+      connection
+    });
+    assert.equal(blockedRes.blockedCount, 1);
+    assert.ok(blockedRes.blockedList[0].reason.includes('失效') || blockedRes.blockedList[0].reason.includes('变更'));
+
+    // 班主任刷新草稿并重新确认
+    const refreshed = await buildDraft({
+      actor: { id: 101, role: 'teacher' },
+      studentKey: { schoolId: 1, termId: 1, studentId: 201, grade: 4, classNo: 1 },
+      connection
+    });
+    await confirmDraft({
+      actor: { id: 101, role: 'teacher' },
+      draftId: refreshed.draftId,
+      expectedFingerprint: refreshed.approvalFingerprint,
+      comment: '期末寄语：已核对最新变动，确认无误。',
+      connection
+    });
+
+    // 重新发布，应该成功
+    const batchRes = await publishBatchReports({
+      actor: { id: 999, role: 'manager' },
+      schoolId: 1,
+      termId: 1,
+      studentIds: [201],
+      connection
+    });
+
+    assert.equal(batchRes.totalTarget, 1);
+    assert.equal(batchRes.successCount, 1);
+    assert.equal(batchRes.blockedCount, 0);
+
+    const published = await getPublishedReportSummary({
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      connection
+    });
+
+    assert.ok(published);
+    assert.equal(published.status, 'PUBLISHED');
+    assert.equal(published.versionNo, 1);
+    assert.ok(published.approvalFingerprint);
+  });
+
+  test('14. 重复发布幂等保护，版本不重复创建', async () => {
+    const { publishBatchReports } = require('../services/reportPublishService');
+    const repeatRes = await publishBatchReports({
+      actor: { id: 999, role: 'manager' },
+      schoolId: 1,
+      termId: 1,
+      studentIds: [201],
+      connection
+    });
+
+    assert.equal(repeatRes.successCount, 1);
+
+    // 检查 term_report 仍只有 1 条 PUBLISHED
+    const [rows] = await connection.query(
+      "SELECT id FROM term_report WHERE school_id = 1 AND term_id = 1 AND student_id = 201 AND status = 'PUBLISHED'"
+    );
+    assert.equal(rows.length, 1);
+  });
 });

@@ -24,7 +24,7 @@ const { uploadHonorCertificate, uploadLimiter, getHonorCertificate } = require("
 const { submitStory, reviewStory, getStories } = require("../controllers/storyController");
 const { previewImport, commitImport, previewBatchImport, commitBatchImport } = require("../controllers/importController");
 const { getComprehensiveScore, getRules, saveRule } = require("../controllers/evaluationController");
-const { publishBatch, getCurrentReport, exportReportHtml } = require("../controllers/reportController");
+const { publishBatch, getCurrentReport, exportReportHtml, getPublishStatus } = require("../controllers/reportController");
 const { expireOldCards } = require("../services/scheduler");
 const { pool } = require("../db");
 const cardPolicies = require('../controllers/cardPolicyController');
@@ -136,6 +136,7 @@ router.get("/admin/evaluation-rules", requireAuth, requireRole("manager"), getRu
 router.post("/admin/evaluation-rules", requireAuth, requireRole("manager"), saveRule);
 
 // ---------------------- 期末报告 & 导出 ----------------------
+router.get("/admin/reports/publish-status", requireAuth, requireRole("manager"), getPublishStatus);
 router.post("/admin/reports/publish-batch", requireAuth, requireRole("manager"), publishBatch);
 router.get("/student/reports/current", requireAuth, getCurrentReport);
 router.get("/student/reports/:id/export-pdf", requireAuth, exportReportHtml);

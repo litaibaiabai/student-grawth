@@ -63,6 +63,10 @@ registerMigration(commentJobMigration);
 const familyFeedbackMigration = require('./13_family_feedback');
 registerMigration(familyFeedbackMigration);
 
+// 14 状态发布批次与版本冻结
+const reportPublishMigration = require('./14_report_publish_jobs');
+registerMigration(reportPublishMigration);
+
 module.exports = {
   initialized: true
 };

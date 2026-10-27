@@ -549,8 +549,40 @@ async function exportReportHtml(req, res, next) {
   }
 }
 
+/**
+ * GET /api/v1/admin/reports/publish-status
+ * 获取全校/年级发布准备宏观状态（无学生敏感正文）
+ */
+async function getPublishStatus(req, res, next) {
+  try {
+    const actor = {
+      id: req.user?.id || req.user?.userId,
+      role: req.user?.role
+    };
+    const schoolId = req.user?.schoolId || 1;
+    const termId = req.query.termId || req.query.term_id || 1;
+    const grade = req.query.grade;
+
+    const reportPublishService = require("../services/reportPublishService");
+    const status = await reportPublishService.getPublishReadinessStatus({
+      actor,
+      schoolId: Number(schoolId),
+      termId: Number(termId),
+      grade: grade !== undefined && grade !== null ? Number(grade) : null
+    });
+
+    return success(res, status);
+  } catch (err) {
+    if (err.status) {
+      return fail(res, "AUTH_ERROR", err.message, err.status);
+    }
+    next(err);
+  }
+}
+
 module.exports = {
   publishBatch,
   getCurrentReport,
-  exportReportHtml
+  exportReportHtml,
+  getPublishStatus
 };

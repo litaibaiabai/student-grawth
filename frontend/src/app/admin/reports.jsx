@@ -35,9 +35,20 @@ const AdminReports = () => {
   const [publishing, setPublishing] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
   const [publishResult, setPublishResult] = useState(null);
-  const [selectedIds, setSelectedIds] = useState([]);
   const [terms, setTerms] = useState([]);
   const [selectedTermId, setSelectedTermId] = useState(null);
+  const [readiness, setReadiness] = useState(null);
+
+  const fetchReadiness = async (termId) => {
+    try {
+      const res = await get(`${urls.API_ADMIN_REPORT_PUBLISH_STATUS}?termId=${termId || 1}`);
+      if (res.code === 200) {
+        setReadiness(res.data);
+      }
+    } catch (err) {
+      console.error("获取准备状态失败", err);
+    }
+  };
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -54,11 +65,14 @@ const AdminReports = () => {
       if (termsListRes.code === 200) {
         setTerms(termsListRes.data || []);
       }
+      let activeTid = 1;
       if (termRes.code === 200 && termRes.data) {
-        setSelectedTermId(termRes.data.termId || termRes.data.id);
+        activeTid = termRes.data.termId || termRes.data.id;
       } else if (termsListRes.code === 200 && termsListRes.data?.length > 0) {
-        setSelectedTermId(termsListRes.data[0].id);
+        activeTid = termsListRes.data[0].id;
       }
+      setSelectedTermId(activeTid);
+      fetchReadiness(activeTid);
     } catch (err) {
       message.error("获取基础数据失败");
     } finally {
@@ -193,9 +207,39 @@ const AdminReports = () => {
         </Space>
       </div>
 
+      {readiness && (
+        <Row gutter={16} style={{ marginBottom: 20 }}>
+          <Col span={8}>
+            <Card size="small" style={{ borderRadius: 8, background: "#f8faf9" }}>
+              <Statistic title="全校应评学生数" value={readiness.totalCount} suffix="人" />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card size="small" style={{ borderRadius: 8, background: "#f0fdf4" }}>
+              <Statistic
+                title="班主任已确认（具备发布条件）"
+                value={readiness.confirmedCount}
+                valueStyle={{ color: "#277460" }}
+                suffix="人"
+              />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card size="small" style={{ borderRadius: 8, background: "#fffbeb" }}>
+              <Statistic
+                title="待确认 / 来源变动失效"
+                value={readiness.pendingCount}
+                valueStyle={{ color: "#b77a27" }}
+                suffix="人"
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
+
       <Alert
-        message="发布前完整性检查"
-        description="系统逐学生核对六育成绩是否齐全；缺项时阻断该学生，其他完整记录可发布。报告保留发布时的数据快照与版本。"
+        message="发布前准备状态与隐私红线"
+        description="校级管理员仅查看发布准备进度、缺项受阻统计与发布批次结果，系统严格隔离学生个人分数、寄语正文与健康详情。"
         type="info"
         showIcon
         style={{ marginBottom: 20, borderRadius: 8 }}

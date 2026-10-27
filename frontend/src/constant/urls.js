@@ -58,6 +58,7 @@ export const API_EVALUATION_RULES = BASE + "/admin/evaluation-rules";
 // 期末报告
 export const API_CURRENT_REPORT = BASE + "/student/reports/current";
 export const API_PUBLISH_REPORTS = BASE + "/admin/reports/publish-batch";
+export const API_ADMIN_REPORT_PUBLISH_STATUS = BASE + "/admin/reports/publish-status";
 export const API_REPORT_PDF = (id) => `${BASE}/student/reports/${id}/export-pdf`;
 export const API_TEACHER_REPORT_DRAFT = BASE + "/teacher/reports/draft";
 export const API_TEACHER_REPORT_DRAFT_DETAIL = (id) => `${BASE}/teacher/reports/draft/${id}`;
