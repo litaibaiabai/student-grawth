@@ -255,11 +255,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1/C2/C6；G2家长身份、是否必填、来源与可见范围。
 **Interfaces — Produces:** C7 submitFamilyFeedback；草稿征集及发布后独立FeedbackRevision。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R13，先走真实界面，再对外部结果断言：`assert.equal(checks.wrongStudentFeedbackStatus,403); assert.equal(checks.revokedCredentialRejected,true); assert.equal(checks.postPublishChangesOldBody,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R13 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 凭证只存哈希、限定学生/学期/动作；记录真实来源及修订，不默认赋予整份报告读取权，纳入新草稿时推进C2。 发布前征集必须可从草稿操作，不反过来依赖报告先发布，避免必填模式的功能互等。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R13 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/familyFeedbackService.js backend/controllers/familyFeedbackController.js backend/migrations/renovation/13_family_feedback.js frontend/src/app/family/feedback.jsx scripts/full-system-demo/scenarios/R13.cjs backend/__tests__/renovation_reports.integration.test.js backend/routes/api.js frontend/src/App.jsx frontend/src/app/teacher/reportDrafts.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r13 家长寄语"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R13，先走真实界面，再对外部结果断言：`assert.equal(checks.wrongStudentFeedbackStatus,403); assert.equal(checks.revokedCredentialRejected,true); assert.equal(checks.postPublishChangesOldBody,false)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R13 --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 凭证只存哈希、限定学生/学期/动作；记录真实来源及修订，不默认赋予整份报告读取权，纳入新草稿时推进C2。 发布前征集必须可从草稿操作，不反过来依赖报告先发布，避免必填模式的功能互等。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R13 --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/familyFeedbackService.js backend/controllers/familyFeedbackController.js backend/migrations/renovation/13_family_feedback.js frontend/src/app/family/feedback.jsx scripts/full-system-demo/scenarios/R13.cjs backend/__tests__/renovation_reports.integration.test.js backend/routes/api.js frontend/src/App.jsx frontend/src/app/teacher/reportDrafts.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r13 家长寄语"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
