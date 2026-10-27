@@ -222,4 +222,88 @@ describe('Task 11: 报告草稿与教师确认集成测试', () => {
     assert.equal(failRes.status, 'FAILED');
     assert.equal(failRes.canFallbackToManual, true);
   });
+
+  test('9. 家长凭有效 Token 提交寄语，成功绑定学生与草稿', async () => {
+    const { issueFamilyToken, submitFamilyComment, getStudentFamilyFeedbacks } = require('../services/familyFeedbackService');
+    const tokenInfo = await issueFamilyToken({
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      parentName: '李妈妈',
+      connection
+    });
+
+    assert.ok(tokenInfo.token);
+
+    const feedback = await submitFamilyComment({
+      token: tokenInfo.token,
+      studentKey: { schoolId: 1, termId: 1, studentId: 201 },
+      commentText: '孩子在学校表现积极，感谢老师悉心教导！',
+      proxyByStudent: false,
+      connection
+    });
+
+    assert.equal(feedback.studentId, 201);
+    assert.equal(feedback.parentName, '李妈妈');
+
+    // 检查草稿中的 parent_comment 扩展位
+    const draftCheck = await getDraft({
+      actor: { id: 101, role: 'teacher' },
+      draftId,
+      connection
+    });
+    const [draftRow] = await connection.query("SELECT parent_comment FROM student_report_draft WHERE id = ?", [draftId]);
+    assert.equal(draftRow[0].parent_comment, '孩子在学校表现积极，感谢老师悉心教导！');
+  });
+
+  test('10. 跨学生凭证提交家长寄语被拒绝 (403)', async () => {
+    const { issueFamilyToken, submitFamilyComment } = require('../services/familyFeedbackService');
+    const tokenInfo = await issueFamilyToken({
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      connection
+    });
+
+    await assert.rejects(
+      async () => {
+        await submitFamilyComment({
+          token: tokenInfo.token,
+          studentKey: { schoolId: 1, termId: 1, studentId: 999 }, // 错误学生
+          commentText: '尝试越权写入',
+          connection
+        });
+      },
+      (err) => err.status === 403 || err.statusCode === 403
+    );
+  });
+
+  test('11. 报告发布后补填家长寄语，只追加保留且支持学生代录标注', async () => {
+    const { issueFamilyToken, submitFamilyComment, getStudentFamilyFeedbacks } = require('../services/familyFeedbackService');
+    const tokenInfo = await issueFamilyToken({
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      connection
+    });
+
+    const postFeedback = await submitFamilyComment({
+      token: tokenInfo.token,
+      studentKey: { schoolId: 1, termId: 1, studentId: 201 },
+      commentText: '发布后补填：下学期会继续配合家校共育。',
+      proxyByStudent: true,
+      connection
+    });
+
+    assert.equal(postFeedback.proxyByStudent, true);
+
+    const feedbacks = await getStudentFamilyFeedbacks({
+      schoolId: 1,
+      termId: 1,
+      studentId: 201,
+      connection
+    });
+
+    assert.ok(feedbacks.length >= 2);
+  });
 });

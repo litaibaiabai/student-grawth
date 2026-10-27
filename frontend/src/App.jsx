@@ -49,6 +49,7 @@ const AdminAudits = lazy(() => import("./app/admin/audits"));
 const NotFound = lazy(() => import("./app/not-found"));
 const Forbidden = lazy(() => import("./app/forbidden"));
 const ServerError = lazy(() => import("./app/server-error"));
+const FamilyFeedback = lazy(() => import("./app/family/feedback"));
 
 const Loading = () => (
   <div
@@ -159,8 +160,9 @@ function App() {
       <Router>
         <Suspense fallback={<Loading />}>
           <Routes>
-            {/* 登录页 */}
+            {/* 登录页与外部家长免登录填写页 */}
             <Route path="/login" element={isAuthenticated ? <Navigate to={claimReturnPath()} replace /> : <Login />} />
+            <Route path="/family/feedback" element={<FamilyFeedback />} />
 
             {/* 首页仪表盘 */}
             <Route

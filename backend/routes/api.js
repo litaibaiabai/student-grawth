@@ -118,6 +118,12 @@ router.post("/teacher/reports/draft/:draftId/ai-comment", requireAuth, requireRo
 router.post("/teacher/reports/draft/:draftId/ai-comment/apply", requireAuth, requireRole("teacher"), reportDrafts.applyAiComment);
 router.get("/stories", requireAuth, getStories);
 
+// 改造家长寄语与反馈记录
+const familyFeedbacks = require("../controllers/familyFeedbackController");
+router.post("/family/token", requireAuth, requireRole("teacher", "manager"), familyFeedbacks.issueToken);
+router.post("/family/comment", familyFeedbacks.submitComment);
+router.get("/family/feedbacks/:studentId", requireAuth, familyFeedbacks.getFeedbacks);
+
 // ---------------------- 数据导入 ----------------------
 router.post("/import/preview", requireAuth, requireRole("teacher", "manager"), previewImport);
 router.post("/import/commit", requireAuth, requireRole("teacher", "manager"), commitImport);

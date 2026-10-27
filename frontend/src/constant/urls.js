@@ -64,6 +64,9 @@ export const API_TEACHER_REPORT_DRAFT_DETAIL = (id) => `${BASE}/teacher/reports/
 export const API_TEACHER_REPORT_CONFIRM = BASE + "/teacher/reports/confirm";
 export const API_TEACHER_REPORT_AI_COMMENT = (id) => `${BASE}/teacher/reports/draft/${id}/ai-comment`;
 export const API_TEACHER_REPORT_AI_COMMENT_APPLY = (id) => `${BASE}/teacher/reports/draft/${id}/ai-comment/apply`;
+export const API_FAMILY_TOKEN = BASE + "/family/token";
+export const API_FAMILY_COMMENT = BASE + "/family/comment";
+export const API_FAMILY_FEEDBACKS = (studentId) => `${BASE}/family/feedbacks/${studentId}`;
 
 // 辅助查询
 export const API_STUDENTS_LIST = BASE + "/users/students";

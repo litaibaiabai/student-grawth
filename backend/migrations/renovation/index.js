@@ -59,6 +59,10 @@ registerMigration(reportDraftMigration);
 const commentJobMigration = require('./12_comment_jobs');
 registerMigration(commentJobMigration);
 
+// 13 家长寄语与反馈记录
+const familyFeedbackMigration = require('./13_family_feedback');
+registerMigration(familyFeedbackMigration);
+
 module.exports = {
   initialized: true
 };
