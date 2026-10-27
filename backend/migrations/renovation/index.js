@@ -71,6 +71,10 @@ registerMigration(reportPublishMigration);
 const growthThemeMigration = require('./16_growth_theme');
 registerMigration(growthThemeMigration);
 
+// 17 学籍表导入与批次记录
+const rosterImportMigration = require('./17_roster_imports');
+registerMigration(rosterImportMigration);
+
 module.exports = {
   initialized: true
 };

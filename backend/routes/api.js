@@ -229,4 +229,9 @@ const growthController = require("../controllers/growthController");
 router.get("/growth/my", requireAuth, growthController.handleGetMyGrowth);
 router.post("/growth/theme", requireAuth, growthController.handleSetTheme);
 
+// ---------------------- 学籍表导入 (Task 17) ----------------------
+const rosterImportController = require("../controllers/rosterImportController");
+router.post("/admin/roster/preview", requireAuth, requireRole("manager"), rosterImportController.handlePreviewRoster);
+router.post("/admin/roster/commit", requireAuth, requireRole("manager"), rosterImportController.handleCommitRoster);
+
 module.exports = router;

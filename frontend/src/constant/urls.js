@@ -81,3 +81,8 @@ export const API_ADMIN_TEACHING_ASSIGNMENT_DELETE = (id) => `${BASE}/admin/teach
 // 成长首页与主题 (Task 16)
 export const API_GROWTH_MY = BASE + "/growth/my";
 export const API_GROWTH_THEME = BASE + "/growth/theme";
+
+// 学籍表导入 (Task 17)
+export const API_ROSTER_PREVIEW = BASE + "/admin/roster/preview";
+export const API_ROSTER_COMMIT = BASE + "/admin/roster/commit";
+

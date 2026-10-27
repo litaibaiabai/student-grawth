@@ -45,6 +45,7 @@ const AdminImport = lazy(() => import("./app/admin/import"));
 const AdminRules = lazy(() => import("./app/admin/rules"));
 const AdminReports = lazy(() => import("./app/admin/reports"));
 const AdminAudits = lazy(() => import("./app/admin/audits"));
+const AdminRoster = lazy(() => import("./app/admin/rosterImport"));
 
 const NotFound = lazy(() => import("./app/not-found"));
 const Forbidden = lazy(() => import("./app/forbidden"));
@@ -280,6 +281,14 @@ function App() {
               element={
                 <RequireAuth>
                   <AdminTeachingAssignments />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/roster"
+              element={
+                <RequireAuth>
+                  <AdminRoster />
                 </RequireAuth>
               }
             />
