@@ -33,6 +33,7 @@ const { requireCardAccount } = require('../middleware/cardAccount');
 const { success } = require("../utils/response");
 const {queueReconcile}=require('../services/cardAllocationService');
 const teachingAssignments = require("../controllers/teachingAssignmentController");
+const reportIndicators = require("../controllers/reportIndicatorController");
 const reconcileCalendar=(req,res,next)=>{res.once('finish',()=>{if(res.statusCode<300)queueReconcile(req.user.schoolId);});next();};
 
 const router = express.Router();
@@ -57,6 +58,13 @@ router.post("/admin/import/subject-scores", requireAuth, requireRole("teacher", 
 
 // ---------------------- 六育指标字典 ----------------------
 router.get("/evaluation-categories", getCategories);
+
+// ---------------------- 年级指标与过程评价 ----------------------
+router.post("/admin/grade-indicators/configure", requireAuth, requireRole("manager"), reportIndicators.configureGradeIndicators);
+router.get("/admin/grade-indicators/progress", requireAuth, requireRole("manager"), reportIndicators.getGradeIndicatorProgress);
+router.post("/teacher/students/:studentId/indicator-values", requireAuth, requireRole("teacher"), reportIndicators.saveStudentIndicatorValues);
+router.get("/grade-indicators", requireAuth, reportIndicators.getGradeIndicators);
+router.get("/students/:studentId/indicator-values", requireAuth, reportIndicators.getStudentIndicatorValues);
 
 // ---------------------- 实体卡管理 & 扫码申领 ----------------------
 router.get('/student/cards/preview',requireAuth,retiredPreview);

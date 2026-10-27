@@ -35,6 +35,10 @@ registerMigration(honorMigration);
 const storyMigration = require('./06_story_review');
 registerMigration(storyMigration);
 
+// 07 年级指标与教师评价
+const indicatorMigration = require('./07_report_indicators');
+registerMigration(indicatorMigration);
+
 module.exports = {
   initialized: true
 };
