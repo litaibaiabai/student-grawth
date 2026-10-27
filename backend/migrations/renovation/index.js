@@ -23,6 +23,10 @@ registerMigration(authMigration);
 const cardMigration = require('./02_classified_cards');
 registerMigration(cardMigration);
 
+// 04 账本追加合同与纠错
+const ledgerMigration = require('./04_reward_ledger');
+registerMigration(ledgerMigration);
+
 module.exports = {
   initialized: true
 };

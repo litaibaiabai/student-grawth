@@ -300,8 +300,57 @@ async function getStudentScores(req, res, next) {
   }
 }
 
+/**
+ * POST /api/v1/teacher/scores/correction
+ * 教师对本班级学生流水发起撤销或更正 (C3 correctReward)
+ */
+async function teacherCorrectScore(req, res, next) {
+  const { originalScoreId, action, newDimensionCode, newCategoryId, newPoints, reason, requestKey } = req.body;
+  if (!originalScoreId) {
+    return fail(res, ErrorCodes.VALIDATION_ERROR, "缺少 originalScoreId", 422);
+  }
+
+  const teacherId = req.user?.id || req.user?.userId;
+  const schoolId = req.user?.schoolId || 1;
+
+  let conn;
+  try {
+    conn = await pool.getConnection();
+
+    // 校验原流水学生是否在该教师管辖范围内
+    const [origRows] = await conn.query("SELECT student_id FROM score_record WHERE id = ?", [originalScoreId]);
+    if (origRows.length === 0) {
+      return fail(res, ErrorCodes.NOT_FOUND, "原积分流水记录不存在", 404);
+    }
+    await requireStudentScope(req.user, origRows[0].student_id, conn);
+
+    const { correctReward } = require("../services/scoreLedgerService");
+    const result = await correctReward({
+      schoolId,
+      originalScoreId,
+      action: action || "REVOKE",
+      newDimensionCode,
+      newCategoryId,
+      newPoints: newPoints || 1,
+      reason,
+      operatorId: teacherId,
+      requestKey
+    }, conn);
+
+    success(res, result, action === "CORRECT" ? "流水更正成功" : "流水撤销成功");
+  } catch (err) {
+    if (err.statusCode === 409 || String(err.code) === "ER_DUP_ENTRY") {
+      return fail(res, ErrorCodes.REVERSAL_ALREADY_EXISTS, err.message || "该笔原始流水已被冲销过，严禁重复扣减", 409);
+    }
+    next(err);
+  } finally {
+    if (conn) conn.release();
+  }
+}
+
 module.exports = {
   directScoreBatch,
   reverseScore,
+  teacherCorrectScore,
   getStudentScores
 };

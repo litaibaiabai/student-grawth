@@ -18,7 +18,7 @@ const {
   decideClaim
 } = require("../controllers/cardController");
 const {retiredPreview}=require('../controllers/cardController');
-const { directScoreBatch, reverseScore, getStudentScores } = require("../controllers/scoreController");
+const { directScoreBatch, reverseScore, teacherCorrectScore, getStudentScores } = require("../controllers/scoreController");
 const { submitHonor, resubmitHonor, reviewHonor, getHonors } = require("../controllers/honorController");
 const { uploadHonorCertificate, uploadLimiter, getHonorCertificate } = require("../controllers/uploadController");
 const { submitStory, reviewStory, getStories } = require("../controllers/storyController");
@@ -84,6 +84,7 @@ router.get('/cards',requireAuth,requireRole('manager','teacher'),requireCardAcco
 
 // ---------------------- 过程积分 & 冲销 ----------------------
 router.post("/teacher/scores/direct-batch", requireAuth, requireRole("teacher", "manager"), directScoreBatch);
+router.post("/teacher/scores/correction", requireAuth, requireRole("teacher", "manager"), teacherCorrectScore);
 router.post("/admin/scores/reversal", requireAuth, requireRole("manager"), reverseScore);
 router.get("/student/scores", requireAuth, getStudentScores);
 
