@@ -340,11 +340,11 @@ R01覆盖撤权旧Token；R03/R04覆盖竞争与回放；R08/R17覆盖预览后�
 **Interfaces — Consumes:** C1；G0实际设备、学校绑定与学生身份凭证。
 **Interfaces — Produces:** C10 issueDeviceSession，带CARD_REDEEM限定能力；撤销/过期检查。
 
-- [ ] **Step 1 — 写失败场景。** 在本票场景文件写R18A，先走真实界面，再对外部结果断言：`assert.equal(checks.identifiedStudentMatchesCredential,true); assert.equal(checks.kioskReportAccessStatus,403); assert.equal(checks.expiredSessionRejected,true)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
-- [ ] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R18A --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
-- [ ] **Step 3 — 最小实现。** 管理员注册受控设备，验证学生凭证后颁发最小能力会话；正常学生角色不自动扩展设备会话权限。 这是公共设备必需场景的前置，不等待真正兑换；测试使用已确认的本机设备/身份方式。
-- [ ] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R18A --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
-- [ ] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/deviceSessionService.js backend/controllers/deviceController.js backend/migrations/renovation/18_device_sessions.js frontend/src/app/admin/devices.jsx frontend/src/app/kiosk/identify.jsx scripts/full-system-demo/scenarios/R18A.cjs backend/__tests__/renovation_auth.integration.test.js backend/services/authorizationService.js backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r18a 公共设备身份与短会话"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
+- [x] **Step 1 — 写失败场景。** 在本票场景文件写R18A，先走真实界面，再对外部结果断言：`assert.equal(checks.identifiedStudentMatchesCredential,true); assert.equal(checks.kioskReportAccessStatus,403); assert.equal(checks.expiredSessionRejected,true)`；同时覆盖原票验收清单，不能只做这三个摘要断言。
+- [x] **Step 2 — 运行并确认失败。** 运行`node scripts/full-system-demo/run.cjs --scenario R18A --speed 6 --exit`；现有行为应在上述新要求处FAIL，并保存非成功证据。
+- [x] **Step 3 — 最小实现。** 管理员注册受控设备，验证学生凭证后颁发最小能力会话；正常学生角色不自动扩展设备会话权限。 这是公共设备必需场景的前置，不等待真正兑换；测试使用已确认的本机设备/身份方式。
+- [x] **Step 4 — 验证通过。** 运行`node scripts/full-system-demo/run.cjs --scenario R18A --speed 6 --exit`，期望UI步骤、指定API补充、只读对账全部PASS且退出0；记录实际库名、用例、工件与未完成外部项。
+- [x] **Step 5 — 评审并提交。** 复核职责、来源版本和兼容性，执行本票文件范围的`git add -- backend/services/deviceSessionService.js backend/controllers/deviceController.js backend/migrations/renovation/18_device_sessions.js frontend/src/app/admin/devices.jsx frontend/src/app/kiosk/identify.jsx scripts/full-system-demo/scenarios/R18A.cjs backend/__tests__/renovation_auth.integration.test.js backend/services/authorizationService.js backend/routes/api.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js backend/migrations/renovation/index.js`及`git commit -m "feat(renovation): r18a 公共设备身份与短会话"`；如尚有未经批准业务选择或失败验收，不进入关闭状态。
 
 
 
