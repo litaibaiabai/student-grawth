@@ -242,4 +242,11 @@ router.post("/kiosk/session/revoke", deviceController.handleRevokeSession);
 router.post("/kiosk/redeem", deviceController.handleKioskRedeem);
 router.post("/kiosk/clear-session", deviceController.handleClearKioskSession);
 
+// ---------------------- 钉钉身份预留 (Task 19) ----------------------
+const externalIdentityController = require("../controllers/externalIdentityController");
+router.get("/admin/identity-links", requireAuth, requireRole("manager"), externalIdentityController.handleListLinks);
+router.post("/admin/identity-links/bind", requireAuth, requireRole("manager"), externalIdentityController.handleBindLink);
+router.post("/admin/identity-links/unbind", requireAuth, requireRole("manager"), externalIdentityController.handleUnbindLink);
+router.post("/auth/external-callback", externalIdentityController.handleCallback);
+
 module.exports = router;

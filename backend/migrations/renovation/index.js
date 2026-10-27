@@ -79,6 +79,10 @@ registerMigration(rosterImportMigration);
 const deviceSessionMigration = require('./18_device_sessions');
 registerMigration(deviceSessionMigration);
 
+// 19 钉钉身份预留
+const identityLinksMigration = require('./19_identity_links');
+registerMigration(identityLinksMigration);
+
 module.exports = {
   initialized: true
 };

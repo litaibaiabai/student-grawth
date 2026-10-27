@@ -48,6 +48,8 @@ describe('Task 01: 任教授权与受限成绩 (C1/C2 合同)', () => {
       INSERT INTO academic_year (id, school_id, academic_year, semester, start_date, end_date, is_current, active)
       VALUES (1, 1, '2026-2027', 1, '2026-09-01', '2027-01-31', 1, 1);
       INSERT INTO users (id, school_id, username, password, real_name, role, status)
+      VALUES (1, 1, 'admin_demo', 'hash123', '学校管理员', 'manager', 0);
+      INSERT INTO users (id, school_id, username, password, real_name, role, status)
       VALUES (101, 1, 'teacher_math', 'hash123', '数学张老师', 'teacher', 0);
       INSERT INTO users (id, school_id, username, password, real_name, role, grade, class_no, status)
       VALUES (201, 1, 'student_alice', 'hash123', '学生小爱', 'student', 4, 1, 0);
@@ -294,5 +296,70 @@ describe('Task 01: 任教授权与受限成绩 (C1/C2 合同)', () => {
       });
     });
   });
+
+  describe('Task 19: 钉钉身份预留与外部映射', () => {
+    const externalIdentityService = require('../services/externalIdentityService');
+
+    test('管理员受控绑定校内教师钉钉身份，阻断跨校关联(403)，解绑留存审计', async () => {
+      // 1. 同校绑定
+      const link = await externalIdentityService.bindExternalIdentity({
+        actor: { id: 1, role: 'manager', schoolId: 1 },
+        schoolId: 1,
+        userId: 101,
+        provider: 'DINGTALK',
+        tenantId: 'ding_test_tenant',
+        externalSubject: 'ding_t101',
+        externalName: '张老师',
+        connection
+      });
+      assert.equal(link.userId, 101);
+      assert.equal(link.provider, 'DINGTALK');
+
+      // 2. 跨校阻断 403
+      await assert.rejects(async () => {
+        await externalIdentityService.bindExternalIdentity({
+          actor: { id: 1, role: 'manager', schoolId: 1 },
+          schoolId: 2,
+          userId: 101,
+          provider: 'DINGTALK',
+          tenantId: 'ding_test_tenant2',
+          externalSubject: 'ding_t101_cross',
+          connection
+        });
+      }, (err) => {
+        assert.equal(err.status, 403);
+        return true;
+      });
+
+      // 3. 调试回调安全阻断 403
+      await assert.rejects(async () => {
+        await externalIdentityService.handleExternalCallback({
+          provider: 'DINGTALK',
+          authCode: 'unverified_code',
+          connection
+        });
+      }, (err) => {
+        assert.equal(err.status, 403);
+        return true;
+      });
+
+      // 4. 解绑留存审计
+      await externalIdentityService.unbindExternalIdentity({
+        actor: { id: 1, role: 'manager', schoolId: 1 },
+        schoolId: 1,
+        userId: 101,
+        provider: 'DINGTALK',
+        externalSubject: 'ding_t101',
+        connection
+      });
+
+      const [audits] = await connection.query(
+        "SELECT id, action, target_type, target_id FROM operation_audit WHERE school_id = 1 AND action = 'UNBIND_EXTERNAL_IDENTITY' LIMIT 1"
+      );
+      assert.ok(audits.length > 0);
+      assert.equal(audits[0].target_id, 101);
+    });
+  });
 });
+
 

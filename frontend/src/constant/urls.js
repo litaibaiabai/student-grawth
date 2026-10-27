@@ -93,5 +93,11 @@ export const API_KIOSK_SESSION_REVOKE = BASE + "/kiosk/session/revoke";
 export const API_KIOSK_REDEEM = BASE + "/kiosk/redeem";
 export const API_KIOSK_CLEAR_SESSION = BASE + "/kiosk/clear-session";
 
+// 钉钉身份预留 (Task 19)
+export const API_IDENTITY_LINKS = BASE + "/admin/identity-links";
+export const API_IDENTITY_LINK_BIND = BASE + "/admin/identity-links/bind";
+export const API_IDENTITY_LINK_UNBIND = BASE + "/admin/identity-links/unbind";
+
+
 
 
