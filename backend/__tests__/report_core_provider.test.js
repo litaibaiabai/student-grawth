@@ -1,1 +1,54 @@
-const {test}=require('node:test');const assert=require('node:assert/strict');const http=require('node:http');test('LLM adapter sends actual supplied text and rejects malformed scores rather than fabricating success',async t=>{const {createProvider}=require('../services/reportCoreProvider');let invalid=false;const s=http.createServer(async(req,res)=>{let body='';for await(const b of req)body+=b;assert.match(JSON.parse(body).messages[1].content,/虚构故事/);res.setHeader('Content-Type','application/json');res.end(JSON.stringify({choices:[{message:{content:JSON.stringify(invalid?{total:100}:{dimensions:[20,21,22,23],total:86,evidence:['虚构故事'],feedback:'表达清楚'})}}]}))}).listen(0);t.after(()=>s.close());const provider=createProvider({baseUrl:`http://127.0.0.1:${s.address().port}`,apiKey:'fixture',model:'fixture',allowLocal:true});const input={text:'虚构故事',category:'READ',grade:4,ruleVersion:'1'};assert.equal((await provider.scoreStory(input)).total,86);invalid=true;await assert.rejects(provider.scoreStory(input),{statusCode:502});await assert.rejects(createProvider({}).scoreStory(input),{statusCode:503});});
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const http = require("node:http");
+test("LLM adapter sends actual supplied text and rejects malformed scores rather than fabricating success", async (t) => {
+  const { createProvider } = require("../services/reportCoreProvider");
+  let invalid = false;
+  const s = http
+    .createServer(async (req, res) => {
+      let body = "";
+      for await (const b of req) body += b;
+      assert.match(JSON.parse(body).messages[1].content, /虚构故事/);
+      res.setHeader("Content-Type", "application/json");
+      res.end(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify(
+                  invalid
+                    ? { total: 100 }
+                    : {
+                        dimensions: [20, 21, 22, 23],
+                        total: 86,
+                        evidence: ["虚构故事"],
+                        feedback: "表达清楚",
+                      },
+                ),
+              },
+            },
+          ],
+        }),
+      );
+    })
+    .listen(0);
+  t.after(() => s.close());
+  const provider = createProvider({
+    baseUrl: `http://127.0.0.1:${s.address().port}`,
+    apiKey: "fixture",
+    model: "fixture",
+    allowLocal: true,
+  });
+  const input = {
+    text: "虚构故事",
+    category: "READ",
+    grade: 4,
+    ruleVersion: "1",
+  };
+  assert.equal((await provider.scoreStory(input)).total, 86);
+  invalid = true;
+  await assert.rejects(provider.scoreStory(input), { statusCode: 502 });
+  await assert.rejects(createProvider({}).scoreStory(input), {
+    statusCode: 503,
+  });
+});

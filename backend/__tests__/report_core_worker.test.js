@@ -1,1 +1,48 @@
-const {test}=require('node:test');const assert=require('node:assert/strict');const {createCoreTestDb}=require('./helpers/reportCoreDb');test('only one worker leases a queued certificate and expired processing can be recovered',async t=>{const db=await createCoreTestDb(t);await db.seedBase();const {addSource}=require('../services/reportCoreStore');await addSource(db.pool,{schoolId:'1',termId:'1',studentId:'3',sourceType:'CERTIFICATE',kind:'ITEM',status:'QUEUED',payload:{fileRef:'fixture'},key:['worker',1]});const {claimAssessmentJobs}=require('../services/reportCoreWorker');const jobs=await Promise.all([claimAssessmentJobs({pool:db.pool,now:new Date(),limit:2,leaseSeconds:90}),claimAssessmentJobs({pool:db.pool,now:new Date(),limit:2,leaseSeconds:90})]);assert.equal(jobs.flat().length,1);await db.pool.query('UPDATE evaluation_source_record SET locked_until=DATE_SUB(UTC_TIMESTAMP(6),INTERVAL 1 SECOND) WHERE record_kind=\'ITEM\'');assert.equal((await claimAssessmentJobs({pool:db.pool,now:new Date(),limit:2,leaseSeconds:90})).length,1);});
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { createCoreTestDb } = require("./helpers/reportCoreDb");
+test("only one worker leases a queued certificate and expired processing can be recovered", async (t) => {
+  const db = await createCoreTestDb(t);
+  await db.seedBase();
+  const { addSource } = require("../services/reportCoreStore");
+  await addSource(db.pool, {
+    schoolId: "1",
+    termId: "1",
+    studentId: "3",
+    sourceType: "CERTIFICATE",
+    kind: "ITEM",
+    status: "QUEUED",
+    payload: { fileRef: "fixture" },
+    key: ["worker", 1],
+  });
+  const { claimAssessmentJobs } = require("../services/reportCoreWorker");
+  const jobs = await Promise.all([
+    claimAssessmentJobs({
+      pool: db.pool,
+      now: new Date(),
+      limit: 2,
+      leaseSeconds: 90,
+    }),
+    claimAssessmentJobs({
+      pool: db.pool,
+      now: new Date(),
+      limit: 2,
+      leaseSeconds: 90,
+    }),
+  ]);
+  assert.equal(jobs.flat().length, 1);
+  await db.pool.query(
+    "UPDATE evaluation_source_record SET locked_until=DATE_SUB(UTC_TIMESTAMP(6),INTERVAL 1 SECOND) WHERE record_kind='ITEM'",
+  );
+  assert.equal(
+    (
+      await claimAssessmentJobs({
+        pool: db.pool,
+        now: new Date(),
+        limit: 2,
+        leaseSeconds: 90,
+      })
+    ).length,
+    1,
+  );
+});

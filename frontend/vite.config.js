@@ -10,11 +10,11 @@ export default defineConfig({
     sourcemap: true, // 确保此项为 true（Vite 4.0+，这也是默认值）
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: process.env.VITE_API_TARGET || "http://localhost:3000",
         changeOrigin: true
       },
       "/dev-api": {
-        target: "http://localhost:3000",
+        target: process.env.VITE_API_TARGET || "http://localhost:3000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/dev-api/, "")
       }

@@ -13,3 +13,4 @@ backend/private/
 
 # Local automatic demo credentials, browser traces and fictional run evidence
 output/full-system-demo/
+output/report-core/

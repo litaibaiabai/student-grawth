@@ -1,6 +1,122 @@
-const crypto=require('node:crypto');const {parse}=require('./reportCoreStore');const {readPrivateFile}=require('../utils/privateFiles');
-async function claimAssessmentJobs({pool,now=new Date(),limit=2,leaseSeconds=90}){const c=await pool.getConnection();try{await c.beginTransaction();const [rows]=await c.query("SELECT s.* FROM evaluation_source_record s JOIN academic_year t ON t.id=s.term_id AND t.school_id=s.school_id WHERE t.release_status='IDLE' AND s.source_type IN ('CERTIFICATE','STORY') AND s.record_kind='ITEM' AND s.attempts<3 AND ((s.status='QUEUED' AND (s.next_attempt_at IS NULL OR s.next_attempt_at<=?)) OR (s.status='PROCESSING' AND s.locked_until<=?)) ORDER BY s.id LIMIT ? FOR UPDATE SKIP LOCKED",[now,now,Math.max(0,Math.min(2,limit))]);for(const r of rows){r.lease_token=crypto.randomUUID();await c.query("UPDATE evaluation_source_record SET status='PROCESSING',attempts=attempts+1,lease_token=?,locked_until=? WHERE id=?",[r.lease_token,new Date(+now+leaseSeconds*1000),r.id]);r.payload=parse(r.payload_json);r.attempts++}await c.commit();return rows}catch(e){await c.rollback();throw e}finally{c.release()}}
-function startCoreWorker({pool,provider,clock=()=>new Date(),intervalMs=2000}){let running=0,stopped=false;const active=new Set();async function work(job){try{if(job.source_type==='CERTIFICATE'){const bytes=await readPrivateFile(job.payload.fileRef);const result=await provider.extractCertificate({fileBytes:bytes,mime:job.payload.mime});await require('./reportCoreMaterials').applyCertificateFacts({pool,job,leaseToken:job.lease_token,result});}else{const result=await provider.scoreStory({text:job.payload.text,category:job.payload.category,grade:job.payload.grade,ruleVersion:job.payload.scoringRuleVersion});await require('./reportCoreStories').applyStoryResult({pool,job,leaseToken:job.lease_token,contentHash:job.payload.contentHash,ruleVersion:job.payload.scoringRuleVersion,result});}}catch(e){const delay=job.attempts===1?30000:120000;await pool.query("UPDATE evaluation_source_record SET status=?,next_attempt_at=?,lease_token=NULL,locked_until=NULL,payload_json=JSON_SET(payload_json,'$.lastError',?) WHERE id=? AND lease_token=?",[job.attempts>=3?'FAILED':'QUEUED',new Date(+clock()+delay),e.statusCode===423?'发布冻结，稍后重试':'评分/识别失败，可重试或教师复核',job.id,job.lease_token]);}finally{running--;}}
- async function tick(){if(stopped||running>=2)return;const capacity=2-running;running+=capacity;let jobs;try{jobs=await claimAssessmentJobs({pool,now:clock(),limit:capacity});}catch{running-=capacity;return;}running-=capacity-jobs.length;for(const job of jobs){const p=work(job);active.add(p);p.finally(()=>active.delete(p));}await Promise.all([...active]);}
- const timer=setInterval(()=>tick().catch(()=>{}),intervalMs);timer.unref();return {tick,stop:async()=>{stopped=true;clearInterval(timer);await Promise.allSettled([...active])}};}
-module.exports={claimAssessmentJobs,startCoreWorker};
+const crypto = require("node:crypto");
+const { parse } = require("./reportCoreStore");
+const { readPrivateFile } = require("../utils/privateFiles");
+async function claimAssessmentJobs({
+  pool,
+  now = new Date(),
+  limit = 2,
+  leaseSeconds = 90,
+}) {
+  const c = await pool.getConnection();
+  try {
+    await c.beginTransaction();
+    const [rows] = await c.query(
+      "SELECT s.* FROM evaluation_source_record s JOIN academic_year t ON t.id=s.term_id AND t.school_id=s.school_id WHERE t.release_status='IDLE' AND s.source_type IN ('CERTIFICATE','STORY') AND s.record_kind='ITEM' AND s.attempts<3 AND ((s.status='QUEUED' AND (s.next_attempt_at IS NULL OR s.next_attempt_at<=?)) OR (s.status='PROCESSING' AND s.locked_until<=?)) ORDER BY s.id LIMIT ? FOR UPDATE SKIP LOCKED",
+      [now, now, Math.max(0, Math.min(2, limit))],
+    );
+    for (const r of rows) {
+      r.lease_token = crypto.randomUUID();
+      await c.query(
+        "UPDATE evaluation_source_record SET status='PROCESSING',attempts=attempts+1,lease_token=?,locked_until=? WHERE id=?",
+        [r.lease_token, new Date(+now + leaseSeconds * 1000), r.id],
+      );
+      r.payload = parse(r.payload_json);
+      r.attempts++;
+    }
+    await c.commit();
+    return rows;
+  } catch (e) {
+    await c.rollback();
+    throw e;
+  } finally {
+    c.release();
+  }
+}
+function startCoreWorker({
+  pool,
+  provider,
+  clock = () => new Date(),
+  intervalMs = 2000,
+}) {
+  let running = 0,
+    stopped = false;
+  const active = new Set();
+  async function work(job) {
+    try {
+      if (job.source_type === "CERTIFICATE") {
+        const bytes = await readPrivateFile(job.payload.fileRef);
+        const result = await provider.extractCertificate({
+          fileBytes: bytes,
+          mime: job.payload.mime,
+        });
+        await require("./reportCoreMaterials").applyCertificateFacts({
+          pool,
+          job,
+          leaseToken: job.lease_token,
+          result,
+        });
+      } else {
+        const result = await provider.scoreStory({
+          text: job.payload.text,
+          category: job.payload.category,
+          grade: job.payload.grade,
+          ruleVersion: job.payload.scoringRuleVersion,
+        });
+        await require("./reportCoreStories").applyStoryResult({
+          pool,
+          job,
+          leaseToken: job.lease_token,
+          contentHash: job.payload.contentHash,
+          ruleVersion: job.payload.scoringRuleVersion,
+          result,
+        });
+      }
+    } catch (e) {
+      const delay = job.attempts === 1 ? 30000 : 120000;
+      await pool.query(
+        "UPDATE evaluation_source_record SET status=?,next_attempt_at=?,lease_token=NULL,locked_until=NULL,payload_json=JSON_SET(payload_json,'$.lastError',?) WHERE id=? AND lease_token=?",
+        [
+          job.attempts >= 3 ? "FAILED" : "QUEUED",
+          new Date(+clock() + delay),
+          e.statusCode === 423
+            ? "发布冻结，稍后重试"
+            : "评分/识别失败，可重试或教师复核",
+          job.id,
+          job.lease_token,
+        ],
+      );
+    } finally {
+      running--;
+    }
+  }
+  async function tick() {
+    if (stopped || running >= 2) return;
+    const capacity = 2 - running;
+    running += capacity;
+    let jobs;
+    try {
+      jobs = await claimAssessmentJobs({ pool, now: clock(), limit: capacity });
+    } catch {
+      running -= capacity;
+      return;
+    }
+    running -= capacity - jobs.length;
+    for (const job of jobs) {
+      const p = work(job);
+      active.add(p);
+      p.finally(() => active.delete(p));
+    }
+    await Promise.all([...active]);
+  }
+  const timer = setInterval(() => tick().catch(() => {}), intervalMs);
+  timer.unref();
+  return {
+    tick,
+    stop: async () => {
+      stopped = true;
+      clearInterval(timer);
+      await Promise.allSettled([...active]);
+    },
+  };
+}
+module.exports = { claimAssessmentJobs, startCoreWorker };
