@@ -12,6 +12,8 @@ ZIP仅新增生产依赖`yazl@3.3.1`并提交lock文件，采用`ZipFile.addRead
 
 **Spec:** [学校期末报告核心工作流精简方案](../specs/2026-10-28-term-report-core-workflow-design.md)，配套[109项来源合同](../../data/term-report-core-source-policy.json)、[完整六表SQL](../../database/term-report-core-v1.schema.sql)和[字段字典](../../database/term-report-core-v1.schema.json)。以最新 Spec 和来源合同为准，不执行旧宽表提案或旧全库迁移脚本。
 
+**实施状态（2026-10-28）：** 核心代码和三角色闭环已实现并提交；已验证109位置、A4双面、8学生浏览器闭环及规模预算。真实LLM验收受供应方Arrearage阻挡，正式校样审批与旧素材/卡凭证恢复、生产切换仍为外部门槛。
+
 ## Global Constraints
 
 - “一个学生每月一个有效批次，内含三类，每类 1–3 篇。”
@@ -263,17 +265,17 @@ FrozenReport = {id:string,termId:string,studentId:string,version:number,releaseV
 
 `backend/db.js`导出`createDbPool(config)->Pool`供应用/测试显式创建，无任何DDL。各测试片段中的apiAs、mintPlan、insertStar等是对应测试文件的局部fixture助手，不是遗漏的生产接口；生产边界仅以Interfaces列出者为准。
 
-- [ ] **Step 1：写失败测试**，用独立库断言以下行为。
+- [x] **Step 1：写失败测试**，用独立库断言以下行为。
 ```js
 assert.deepEqual((await listBusinessTables(pool)).sort(), expectedSixTables.sort());
 await assert.rejects(insertStar(pool, 4), /constraint|check/i);
 await assert.rejects(insertSecondReversal(pool, originalId), /duplicate/i);
 assert.equal((await schemaFingerprintAfterPoolInit(pool)), baselineFingerprint);
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_schema.test.js`；预期新helper/脚本未定义而失败，记录原因，不能依靠连接失败冒充RED。
-- [ ] **Step 3：最小实现**：初始化只认空库；已完整同构则不变，部分表则报错。pool配置大整数返回字符串和UTC；移除`db.js`自动CREATE黑名单。SQL必须验证跨校FK、重复学生学期、同父槽位及NULL确认版本约束。
-- [ ] **Step 4：运行GREEN**：同命令全部通过；校验`97`列和映射覆盖`109/109`，pool初始化无额外表；完整应用启动检查在T11完成。不得连接原业务库建表。
-- [ ] **Step 5：提交**：`git add sql/05_term_report_core_schema.sql backend/db.js backend/package.json backend/scripts/runCoreMigrations.js backend/__tests__/helpers/reportCoreDb.js backend/__tests__/report_core_schema.test.js`；`git commit -m "feat: add isolated six-table report schema"`。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_schema.test.js`；预期新helper/脚本未定义而失败，记录原因，不能依靠连接失败冒充RED。
+- [x] **Step 3：最小实现**：初始化只认空库；已完整同构则不变，部分表则报错。pool配置大整数返回字符串和UTC；移除`db.js`自动CREATE黑名单。SQL必须验证跨校FK、重复学生学期、同父槽位及NULL确认版本约束。
+- [x] **Step 4：运行GREEN**：同命令全部通过；校验`97`列和映射覆盖`109/109`，pool初始化无额外表；完整应用启动检查在T11完成。不得连接原业务库建表。
+- [x] **Step 5：提交**：`git add sql/05_term_report_core_schema.sql backend/db.js backend/package.json backend/scripts/runCoreMigrations.js backend/__tests__/helpers/reportCoreDb.js backend/__tests__/report_core_schema.test.js`；`git commit -m "feat: add isolated six-table report schema"`。
 
 ### Task 2:认证、学期、学籍职责与精简应用壳
 
@@ -283,16 +285,16 @@ assert.equal((await schemaFingerprintAfterPoolInit(pool)), baselineFingerprint);
 
 **Interfaces:** Consumes T1 pool。Produces `createApp({pool,provider,clock,schoolId}) -> ExpressApp`（`backend/app.js`导出，直接启动仅在require.main===module）；`resolveActorContext({userId,tokenVersion,termId},connection)->Actor`；`assertScope({actor,studentKey,action,fields},connection)->{allowedFields}`。`requireAuth`从app.locals.pool读取，不再读取黑名单、JWT班级快照或缺用户回退。直接启动从SCHOOL_ID注入，测试显式注入；缺配置拒绝启动。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 assert.equal((await apiAs(deletedUserToken).get('/api/v1/me')).status, 401);
 assert.equal((await teacherApi.patch(otherClassAssignment, {})).status, 403);
 await logout(token); assert.equal((await apiAs(token).get('/api/v1/me')).status, 401);
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_auth.test.js`；必须失败在旧身份降级或未实现工厂，不是数据库不可达。
-- [ ] **Step 3：实现上述函数及基础API**：账号存在/启用、角色和token_version实时验证；数据库异常503。登录按部署学校和username查询，允许两校同名但不能串校；上线强制旧token重新登录。职责按term读取，STORY专任教师或班主任可复核故事；班主任完整报告、普通教师仅学科字段。先提供可用的学期/职责页面与角色导航壳，不请求旧growth接口。
-- [ ] **Step 4：运行GREEN**：同测试全过；另断言无账号跨校、两校同名登录只命中部署学校、manager看报告正文403、已撤任教师不能复用旧token授权。前端`npm test --prefix frontend`执行兼容的工具测试，新增壳测试按T11正式收口。
-- [ ] **Step 5：提交**：`git add backend/app.js backend/middleware/auth.js backend/controllers/authController.js backend/services/authorizationService.js backend/routes/auth.js backend/routes/reportCore.js backend/controllers/termController.js backend/controllers/teachingAssignmentController.js backend/__tests__/report_core_auth.test.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js frontend/src/component/StudentLayout/index.jsx frontend/src/app/admin/terms.jsx frontend/src/app/admin/teachingAssignments.jsx`；`git commit -m "feat: add report-only auth and term scope"`。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_auth.test.js`；必须失败在旧身份降级或未实现工厂，不是数据库不可达。
+- [x] **Step 3：实现上述函数及基础API**：账号存在/启用、角色和token_version实时验证；数据库异常503。登录按部署学校和username查询，允许两校同名但不能串校；上线强制旧token重新登录。职责按term读取，STORY专任教师或班主任可复核故事；班主任完整报告、普通教师仅学科字段。先提供可用的学期/职责页面与角色导航壳，不请求旧growth接口。
+- [x] **Step 4：运行GREEN**：同测试全过；另断言无账号跨校、两校同名登录只命中部署学校、manager看报告正文403、已撤任教师不能复用旧token授权。前端`npm test --prefix frontend`执行兼容的工具测试，新增壳测试按T11正式收口。
+- [x] **Step 5：提交**：`git add backend/app.js backend/middleware/auth.js backend/controllers/authController.js backend/services/authorizationService.js backend/routes/auth.js backend/routes/reportCore.js backend/controllers/termController.js backend/controllers/teachingAssignmentController.js backend/__tests__/report_core_auth.test.js frontend/src/App.jsx frontend/src/constant/menu.jsx frontend/src/constant/urls.js frontend/src/component/StudentLayout/index.jsx frontend/src/app/admin/terms.jsx frontend/src/app/admin/teachingAssignments.jsx`；`git commit -m "feat: add report-only auth and term scope"`。
 
 ### Task 3:固定字段策略、来源事务、幂等与投射
 
@@ -300,7 +302,7 @@ await logout(token); assert.equal((await apiAs(token).get('/api/v1/me')).status,
 
 **Interfaces:** Consumes T2 Actor/assertScope。Produces `validateConfig(config)->ValidatedConfig`；`cardStars({points,target,settled})->1|2|3|null`；`storyStars(score)->1|2|3`；`stableHash(value)->string`；`withMutation({pool,actor,termId,studentIds,command,action},mutate)->MutationResult`；`rebuildEvaluation({connection,studentKey,targets,config})->{values,fieldSources,sectionMeta}`。`mutate(connection)`只处理同一事务内来源，返回`{result,changedTargetsByStudent}`；修订、确认失效和回放统一由withMutation处理。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 assert.deepEqual([0,4,5,9,10].map(points=>cardStars({points,target:10,settled:true})),[1,1,2,2,3]);
 assert.equal(cardStars({points:0,target:10,settled:false}), null);
@@ -308,10 +310,10 @@ assert.equal((await repeatSameCommand()).replayed,true);
 assert.equal(await revisionAfterReplay(), beforeRevision);
 await assert.rejects(sameKeyWithDifferentBody(), {statusCode:409});
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_policy.test.js backend/__tests__/report_core_store.test.js`；预期新策略和事务方法缺失。
-- [ ] **Step 3：实现合同**：严格采用公共锁序；公开source列表不返私有payload。字段SOURCE权限由静态policy和任教职责共同确定。服务端business_key绑定操作者/动作/requestKey；先读已有成功信封再取冻结锁，回放无需再次写入。卡T≥2且积分非负；奖状无映射返回待认定；校验97固定字段全部覆盖，37卡类别与37个CARD目标逐一对应。
-- [ ] **Step 4：运行GREEN**：同命令全过；补并发两个不同字段都保留、同键不同学生或正文不回放、回滚不递增、来源变更清空CONFIRMED、自评不被自动投射改写的断言。
-- [ ] **Step 5：提交**：`git add backend/config/reportCorePolicy.json backend/services/reportCorePolicy.js backend/services/reportCoreStore.js backend/services/reportCoreProjection.js backend/routes/reportCore.js backend/__tests__/report_core_policy.test.js backend/__tests__/report_core_store.test.js`；`git commit -m "feat: unify report sources and revision-safe projection"`。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_policy.test.js backend/__tests__/report_core_store.test.js`；预期新策略和事务方法缺失。
+- [x] **Step 3：实现合同**：严格采用公共锁序；公开source列表不返私有payload。字段SOURCE权限由静态policy和任教职责共同确定。服务端business_key绑定操作者/动作/requestKey；先读已有成功信封再取冻结锁，回放无需再次写入。卡T≥2且积分非负；奖状无映射返回待认定；校验97固定字段全部覆盖，37卡类别与37个CARD目标逐一对应。
+- [x] **Step 4：运行GREEN**：同命令全过；补并发两个不同字段都保留、同键不同学生或正文不回放、回滚不递增、来源变更清空CONFIRMED、自评不被自动投射改写的断言。
+- [x] **Step 5：提交**：`git add backend/config/reportCorePolicy.json backend/services/reportCorePolicy.js backend/services/reportCoreStore.js backend/services/reportCoreProjection.js backend/routes/reportCore.js backend/__tests__/report_core_policy.test.js backend/__tests__/report_core_store.test.js`；`git commit -m "feat: unify report sources and revision-safe projection"`。
 
 ### Task 4:卡额度、分班制卡、扫码、直评与更正
 
@@ -319,7 +321,7 @@ await assert.rejects(sameKeyWithDifferentBody(), {statusCode:409});
 
 **Interfaces:** Consumes T3事务/折星。Produces `saveQuota({pool,actor,termId,teacherId,monthKey,total,command})`；`savePlan({pool,actor,quotaId,expectedRevision,plans,command})`；`generateCards({pool,actor,quotaId,expectedRevision,command})->{cardIds,counts}`；`redeemCard({pool,actor,token,command})->{sourceId,pointsCredited:1}`；`directScore({pool,actor,termId,studentIds,categoryCode,reason,command})`；`reverseSource({pool,actor,sourceId,reason,command})`；`buildClassPrintZip({pool,actor,quotaId})->Readable`。凭证AAD改为`CORE_V1:schoolId:quotaId:serial`，旧库恢复仍使用旧AAD，不能混用。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 const race = await raceEligibleSameClassStudents();
 assert.equal(race.fulfilledCount,1);
@@ -327,10 +329,10 @@ assert.deepEqual(race.netPoints.sort(),[0,1]);
 assert.equal((await mintPlan([20,25,25,30],100)).cardCount,100);
 await assert.rejects(mintPlan([25,25,25,26],100), {statusCode:422});
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_cards.test.js`。
-- [ ] **Step 3：实现合同与页面**：manager只改总额度，teacher只改本人计划；37类目标白名单排除劳美。发行班级校验、有效期、唯一序号、重复冲销约束；执行`npm install --save-exact yazl@3.3.1 --prefix backend`，每班独立PDF通过ZIP流输出，下载不造新卡，不新增打印表。卡有效期取学期、月份与领取截止的交集；直评截止限制新增，后台评分/审核可在采集截止后继续，发布冻结统一阻断回写。
-- [ ] **Step 4：运行GREEN**：同测试通过；真实解析ZIP中4个PDF、卡数20/25/25/30和二维码各唯一；再次下载token不变。正向5分两星、冲销后4分一星；跨班403、旧请求回放不+1、密钥未配置503且不占额度。
-- [ ] **Step 5：提交**：`git add backend/services/reportCoreCards.js backend/services/cardCredentials.js backend/routes/reportCore.js backend/__tests__/report_core_cards.test.js frontend/src/app/admin/cards.jsx frontend/src/app/student/claim.jsx frontend/src/app/teacher/directScore.jsx`；`git commit -m "feat: close classified card collection workflow"`。新增ZIP依赖时同时提交对应package文件。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_cards.test.js`。
+- [x] **Step 3：实现合同与页面**：manager只改总额度，teacher只改本人计划；37类目标白名单排除劳美。发行班级校验、有效期、唯一序号、重复冲销约束；执行`npm install --save-exact yazl@3.3.1 --prefix backend`，每班独立PDF通过ZIP流输出，下载不造新卡，不新增打印表。卡有效期取学期、月份与领取截止的交集；直评截止限制新增，后台评分/审核可在采集截止后继续，发布冻结统一阻断回写。
+- [x] **Step 4：运行GREEN**：同测试通过；真实解析ZIP中4个PDF、卡数20/25/25/30和二维码各唯一；再次下载token不变。正向5分两星、冲销后4分一星；跨班403、旧请求回放不+1、密钥未配置503且不占额度。
+- [x] **Step 5：提交**：`git add backend/services/reportCoreCards.js backend/services/cardCredentials.js backend/routes/reportCore.js backend/__tests__/report_core_cards.test.js frontend/src/app/admin/cards.jsx frontend/src/app/student/claim.jsx frontend/src/app/teacher/directScore.jsx`；`git commit -m "feat: close classified card collection workflow"`。新增ZIP依赖时同时提交对应package文件。
 
 ### Task 5:学籍、健康与学业导入
 
@@ -338,17 +340,17 @@ await assert.rejects(mintPlan([25,25,25,26],100), {statusCode:422});
 
 **Interfaces:** `previewImport({pool,actor,termId,kind,rows,command})->{batchId,validCount,errors,diffs}`；`commitImport({pool,actor,batchId,expectedRevision,command})->{updatedStudentIds}`。最多1000行；前端解析xlsx/csv为规范rows，服务端重新校验；ROSTER含users与assignments，HEALTH只五项原值及测量信息，ACADEMIC只对应导入列。空格留空不覆盖旧值，清空必须显式`clearFields`并预览。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 await assert.rejects(mathTeacherImportChinese(), {statusCode:403});
 await assert.rejects(commitAfterStudentRevisionChanged(), {statusCode:409});
 assert.equal((await importHealth({vision_left:'5.0',jump_rope_1min:160})).vision_left,'5.0');
 await assert.rejects(importKind('DIMENSION'), {statusCode:422});
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_imports.test.js`；前端解析回归`node --test frontend/src/util/__tests__/excelScoreParser.test.js`记录受旧模板约束的失败。
-- [ ] **Step 3：实现合同**：BATCH与每学生ITEM分开存；校验全批后提交，存在非法行时不默默部分成功。SELECT显式有效版本，不复制一门总分至多项能力；星级、字母、视力按公共合同处理。身高/体重须有限且大于0并可无损存为一位小数，跳绳为非负整数，视力为1–16码点非空字符串；超SQL类型范围明确422，不隐式截断/舍入。只刷新实际改变学生/目标，新增学生建立该学期宽表。
-- [ ] **Step 4：运行GREEN**：两命令通过；覆盖同名学生用稳定学号匹配、重复行冲突、0跳绳合法且不当空、非法UTF/emoji、超1000行、未知字段、父批次不能被学生读到其他行。
-- [ ] **Step 5：提交**：`git add backend/services/reportCoreImports.js backend/__tests__/report_core_imports.test.js backend/routes/reportCore.js frontend/src/app/admin/import.jsx frontend/src/app/admin/rosterImport.jsx frontend/src/util/excelScoreParser.js frontend/src/util/__tests__/excelScoreParser.test.js`；`git commit -m "feat: add scoped preview and commit imports"`。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_imports.test.js`；前端解析回归`node --test frontend/src/util/__tests__/excelScoreParser.test.js`记录受旧模板约束的失败。
+- [x] **Step 3：实现合同**：BATCH与每学生ITEM分开存；校验全批后提交，存在非法行时不默默部分成功。SELECT显式有效版本，不复制一门总分至多项能力；星级、字母、视力按公共合同处理。身高/体重须有限且大于0并可无损存为一位小数，跳绳为非负整数，视力为1–16码点非空字符串；超SQL类型范围明确422，不隐式截断/舍入。只刷新实际改变学生/目标，新增学生建立该学期宽表。
+- [x] **Step 4：运行GREEN**：两命令通过；覆盖同名学生用稳定学号匹配、重复行冲突、0跳绳合法且不当空、非法UTF/emoji、超1000行、未知字段、父批次不能被学生读到其他行。
+- [x] **Step 5：提交**：`git add backend/services/reportCoreImports.js backend/__tests__/report_core_imports.test.js backend/routes/reportCore.js frontend/src/app/admin/import.jsx frontend/src/app/admin/rosterImport.jsx frontend/src/util/excelScoreParser.js frontend/src/util/__tests__/excelScoreParser.test.js`；`git commit -m "feat: add scoped preview and commit imports"`。
 
 ### Task 6:评分/识别窄接口与奖状闭环
 
@@ -358,17 +360,17 @@ await assert.rejects(importKind('DIMENSION'), {statusCode:422});
 
 本任务同时产出`claimAssessmentJobs({pool,now,limit:2,leaseSeconds:90})->Job[]`、`applyCertificateFacts({pool,job,leaseToken,result})->{applied:boolean}`和`startCoreWorker({pool,provider,clock})->{tick(),stop()}`。T6先处理证书；T7扩展同一领取/租约机制处理故事。worker单向依赖材料/故事服务，这些业务服务不反向导入worker，避免循环依赖。单进程总在途调用最多2，tick不能每次再额外启动2个。先按30s/120s间隔完成最多3次尝试，之后FAILED；stop停止领取并等待/取消现有请求，未完成租约允许恢复。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 await assert.rejects(scoreWithUnconfiguredProvider(), {statusCode:503});
 assert.equal((await approveLaborAward()).fieldSources.labor_outcome_grade.sourceType,'CERTIFICATE');
 assert.equal((await studentWithNoAwardsReadiness()).complete,true);
 await assert.rejects(readOtherStudentCertificate(), {statusCode:403});
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_provider.test.js backend/__tests__/report_core_certificates.test.js backend/__tests__/report_core_worker.test.js`。
-- [ ] **Step 3：实现合同与上传/审核页面**：JPEG/PNG≤5MiB，魔数与声明类型同时验证；原文件私有原子落盘，数据库失败清理本次孤儿文件。无可靠识别进入人工事实确认；无映射时由审核教师在奖状认定内明确目标等级并记录理由，不能改成普通TEACHER来源。多成果取最高已认定档，撤回重算；不使自评和人工特长评价丢失。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_provider.test.js backend/__tests__/report_core_certificates.test.js backend/__tests__/report_core_worker.test.js`。
+- [x] **Step 3：实现合同与上传/审核页面**：JPEG/PNG≤5MiB，魔数与声明类型同时验证；原文件私有原子落盘，数据库失败清理本次孤儿文件。无可靠识别进入人工事实确认；无映射时由审核教师在奖状认定内明确目标等级并记录理由，不能改成普通TEACHER来源。多成果取最高已认定档，撤回重算；不使自评和人工特长评价丢失。
 - [ ] **Step 4：运行GREEN**：同测试通过，覆盖类型伪装、路径穿越、重传、同证多目标、人工认定、撤回后降档/无奖、未审核不算无奖；手动tick跑通上传→识别→认定，不依赖T7。用学校批准的真实供应方和虚构样本另做1次联调；mock通过不能替代该验收。
-- [ ] **Step 5：提交**：`git add backend/services/reportCoreProvider.js backend/services/reportCoreMaterials.js backend/services/reportCoreWorker.js backend/utils/privateFiles.js backend/__tests__/report_core_provider.test.js backend/__tests__/report_core_certificates.test.js backend/__tests__/report_core_worker.test.js backend/routes/reportCore.js frontend/src/app/student/honors.jsx frontend/src/app/teacher/honors.jsx`；`git commit -m "feat: add auditable certificate-derived outcomes"`。
+- [x] **Step 5：提交**：`git add backend/services/reportCoreProvider.js backend/services/reportCoreMaterials.js backend/services/reportCoreWorker.js backend/utils/privateFiles.js backend/__tests__/report_core_provider.test.js backend/__tests__/report_core_certificates.test.js backend/__tests__/report_core_worker.test.js backend/routes/reportCore.js frontend/src/app/student/honors.jsx frontend/src/app/teacher/honors.jsx`；`git commit -m "feat: add auditable certificate-derived outcomes"`。
 
 ### Task 7:月度文本故事与可恢复评分
 
@@ -376,17 +378,17 @@ await assert.rejects(readOtherStudentCertificate(), {statusCode:403});
 
 **Interfaces:** Consumes T6领取和worker合同，扩展到STORY/ITEM。Produces `saveStoryDraft({pool,actor,termId,monthKey,expectedRevision,articles,command})`；`submitStoryBatch({pool,actor,batchId,expectedRevision,command})`；`applyStoryResult({pool,job,leaseToken,contentHash,ruleVersion,result})->{applied:boolean}`；`reviewStoryItem({pool,actor,itemId,expectedRevision,dimensions,reason,command})`。重试沿用T6间隔及次数，教师可单项重试/复核。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 assert.equal((await submitStories({READ:1,LISTEN:1,TELL:1})).itemCount,3);
 await assert.rejects(submitStories({READ:4,LISTEN:1,TELL:1}), {statusCode:422});
 assert.equal(await termReadingMean([[80,90,100],[80]]),85);
 assert.equal((await applyOldLeaseAfterResubmit()).applied,false);
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_stories.test.js backend/__tests__/report_core_worker.test.js`。
-- [ ] **Step 3：实现合同与一次月批UI**：草稿可不完整，提交要求三类各1–3篇；文本粘贴与TXT回显编辑相同正文入口。评分外调不持DB锁；成功结果经四维总分/证据schema验证、当前批次/文本hash/ruleVersion/leaseToken全部一致后才回写。新提交立即使该月待重新评分，旧结果不覆盖。均分按月份等权、无提前四舍五入；失败不得给0。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_stories.test.js backend/__tests__/report_core_worker.test.js`。
+- [x] **Step 3：实现合同与一次月批UI**：草稿可不完整，提交要求三类各1–3篇；文本粘贴与TXT回显编辑相同正文入口。评分外调不持DB锁；成功结果经四维总分/证据schema验证、当前批次/文本hash/ruleVersion/leaseToken全部一致后才回写。新提交立即使该月待重新评分，旧结果不覆盖。均分按月份等权、无提前四舍五入；失败不得给0。
 - [ ] **Step 4：运行GREEN**：同测试通过；覆盖3/9篇边界、缺类别、UTF-8 BOM、CRLF、10000/10001码点、重试保留正文及其他成功项、两个worker抢同作业、租约超时、规则改变、发布冻结回写423后可恢复。真实评分器对三类各一个虚构文本完成联调。
-- [ ] **Step 5：提交**：`git add backend/services/reportCoreStories.js backend/services/reportCoreWorker.js backend/__tests__/report_core_stories.test.js backend/__tests__/report_core_worker.test.js backend/routes/reportCore.js frontend/src/app/student/stories.jsx frontend/src/app/teacher/stories.jsx`；`git commit -m "feat: add monthly story batches and fenced scoring"`。
+- [x] **Step 5：提交**：`git add backend/services/reportCoreStories.js backend/services/reportCoreWorker.js backend/__tests__/report_core_stories.test.js backend/__tests__/report_core_worker.test.js backend/routes/reportCore.js frontend/src/app/student/stories.jsx frontend/src/app/teacher/stories.jsx`；`git commit -m "feat: add monthly story batches and fenced scoring"`。
 
 ### Task 8:集中自评、教师评价与材料工作区
 
@@ -396,7 +398,7 @@ assert.equal((await applyOldLeaseAfterResubmit()).applied,false);
 
 同时产出`settleSources({pool,actor,termId,grade,classNo,subjectCode,targetKeys,settlement:'CARD_CLOSED'|'NO_AWARD',expectedRevisions,command})->MutationResult`。只改本学科或班主任范围内的完成状态；现存待审核/处理失败材料时声明无奖返回422。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 await assert.rejects(studentPatch({music_learning_teacher_star:3}), {statusCode:403});
 await assert.rejects(studentPatchSpecialty({teacher_star:3}), {statusCode:403});
@@ -405,10 +407,10 @@ assert.deepEqual(await readSpecialty(),{self_star:2,teacher_star:3});
 assert.equal((await settleCollectedZeroPoints()).star,1);
 await assert.rejects(declareNoAwardsWhileCertificatePending(),{statusCode:422});
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_forms.test.js`。
-- [ ] **Step 3：实现合同与角色工作区**：自评/教师输入及来源结算产生FORM记录，再投射指定列/状态。材料页合并扫码/奖状/月度故事/自评四页签；教师页合并任务/导入/卡/材料异常及按班结算。409后刷新仅本角色可读字段，保留本次草稿；若本次字段未变可自动重试一次，字段已变则显示差异让用户选择，绝不重放旧整行。未经发布不返回完整期末报告；保留本人故事评分反馈。
-- [ ] **Step 4：运行GREEN**：同测试通过；覆盖跨学生、伪造source_type、对象嵌套多塞字段、旧revision409、项目重排不换归属、无特长时跳过特长自评、超长说明明确422且原文不被截断保存。
-- [ ] **Step 5：提交**：`git add backend/services/reportCoreEvaluation.js backend/__tests__/report_core_forms.test.js backend/routes/reportCore.js frontend/src/app/student/materials.jsx frontend/src/app/student/selfEvaluation.jsx frontend/src/app/teacher/tasks.jsx frontend/src/App.jsx frontend/src/constant/menu.jsx`；`git commit -m "feat: add field-scoped self and teacher forms"`。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_forms.test.js`。
+- [x] **Step 3：实现合同与角色工作区**：自评/教师输入及来源结算产生FORM记录，再投射指定列/状态。材料页合并扫码/奖状/月度故事/自评四页签；教师页合并任务/导入/卡/材料异常及按班结算。409后刷新仅本角色可读字段，保留本次草稿；若本次字段未变可自动重试一次，字段已变则显示差异让用户选择，绝不重放旧整行。未经发布不返回完整期末报告；保留本人故事评分反馈。
+- [x] **Step 4：运行GREEN**：同测试通过；覆盖跨学生、伪造source_type、对象嵌套多塞字段、旧revision409、项目重排不换归属、无特长时跳过特长自评、超长说明明确422且原文不被截断保存。
+- [x] **Step 5：提交**：`git add backend/services/reportCoreEvaluation.js backend/__tests__/report_core_forms.test.js backend/routes/reportCore.js frontend/src/app/student/materials.jsx frontend/src/app/student/selfEvaluation.jsx frontend/src/app/teacher/tasks.jsx frontend/src/App.jsx frontend/src/constant/menu.jsx`；`git commit -m "feat: add field-scoped self and teacher forms"`。
 
 ### Task 9:完整报告草稿、版面与班主任确认
 
@@ -418,17 +420,17 @@ await assert.rejects(declareNoAwardsWhileCertificatePending(),{statusCode:422});
 
 报告HTML只在reportRenderService生成。草稿API在上述结果另附`html`，已发布API返回冻结`html`；TermReport只用无脚本iframe srcDoc承载同一文档（sandbox允许same-origin测量和modals打印，不允许scripts），按375–430px重排、按A4横向打印。组件在独立的固定打印宽度容器测量溢出，不能拿手机屏幕高度判断能否装进纸页。快照准备时将HTML保存在snapshot_json.renderedHtml，历史打印直接读取，不套用后续模板；HTML中的指纹使用已确认fingerprint，避免自含snapshot_hash造成循环计算。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 assert.equal((await buildCompleteDraft()).model.displayFieldCount,109);
 await changeOneSource(); await assert.rejects(confirmOldFingerprint(),{statusCode:409});
 assert.equal(await managerCanReadDraft(),false);
 assert.equal(renderPrintableA4({reportData:xssFixture}).includes('<script>alert'),false);
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_drafts.test.js`；浏览器测试先断言旧102位置原型缺7项而失败，不能用静态JSON数量冒充页面覆盖。
-- [ ] **Step 3：实现合同**：前后端使用同一字段目录；最新PDF劳美成果A/学业星级、故事两列星级必须独立。正面九段文字与开学日期读取草稿模型。前端预览实际检测打印容器溢出，layoutReview绑定templateVersion、fingerprint及检查结果；溢出不确认，提示教师调整文字或由管理员调整模板，不静默裁切或自动改成未经批准的附页。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_drafts.test.js`；浏览器测试先断言旧102位置原型缺7项而失败，不能用静态JSON数量冒充页面覆盖。
+- [x] **Step 3：实现合同**：前后端使用同一字段目录；最新PDF劳美成果A/学业星级、故事两列星级必须独立。正面九段文字与开学日期读取草稿模型。前端预览实际检测打印容器溢出，layoutReview绑定templateVersion、fingerprint及检查结果；溢出不确认，提示教师调整文字或由管理员调整模板，不静默裁切或自动改成未经批准的附页。
 - [ ] **Step 4：运行GREEN**：后端测试全过；运行`node frontend/tests/report-core-preview.cjs`，检查375/390/430/1440px、109个位置可见、零横向溢出、emoji/长中文、空奖状、双列及两行以上特长。样例明细A4横向1页，完整前后面样例2页；长文fixture必须显示溢出提示并保留原文。检查实际浏览器PDF渲染，不能只查CSS。
-- [ ] **Step 5：提交**：`git add backend/services/reportCoreEvaluation.js backend/services/reportRenderService.js backend/routes/reportCore.js frontend/src/app/teacher/reportDrafts.jsx frontend/src/app/student/report.jsx frontend/src/app/student/reportPrint.css frontend/src/component/TermReport/index.jsx backend/__tests__/report_core_drafts.test.js frontend/tests/report-core-preview.cjs`；`git commit -m "feat: add complete report preview and confirmation"`。
+- [x] **Step 5：提交**：`git add backend/services/reportCoreEvaluation.js backend/services/reportRenderService.js backend/routes/reportCore.js frontend/src/app/teacher/reportDrafts.jsx frontend/src/app/student/report.jsx frontend/src/app/student/reportPrint.css frontend/src/component/TermReport/index.jsx backend/__tests__/report_core_drafts.test.js frontend/tests/report-core-preview.cjs`；`git commit -m "feat: add complete report preview and confirmation"`。
 
 ### Task 10:全校发布、失败恢复与历史阅读
 
@@ -436,17 +438,17 @@ assert.equal(renderPrintableA4({reportData:xssFixture}).includes('<script>alert'
 
 **Interfaces:** Consumes T9的buildReportModel/renderPrintableA4；内部准备使用发布清单和已确认宽表，不伪装班主任调用受限草稿API，管理员接口只返回进度。Produces `getReadiness({pool,actor,termId})->Readiness`；`beginRelease({pool,actor,termId,command})->Release`；`prepareReleaseChunk({pool,termId,releaseKey,fence,limit:50})->Release`；`activateRelease({pool,actor,termId,releaseKey,fence,command})->Release`；`resumeRelease({pool,actor,termId,releaseKey,fence,command})->Release`；`cancelRelease({pool,actor,termId,releaseKey,fence,command})->Release`；`getPublishedReport({pool,actor,termId,studentId?,reportId?})->FrozenReport|null`。快照只含该学生报告值及来源ID/版本摘要，不混入全班导入payload、私有文件字节或令牌。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 await assert.rejects(beginWithOneMissingStudent(),{statusCode:422});
 await prepareThenCrashAtStudent(2); assert.equal(await visibleNewReports(),0);
 await resumeAndActivate(); assert.equal(await visibleNewReports(),expectedSchoolCount);
 await assert.rejects(oldFencePrepareOrActivate(),{statusCode:409});
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_release.test.js`。
-- [ ] **Step 3：实现合同**：名单由服务端全校宽表和有效学籍产生，缺宽表也阻断。begin独占学期行、冻结清单并推进fence；准备逐份/每50份短事务，重试通过唯一键复用。activate在一个短事务中复核全部清单、将目标PREPARED行设PUBLISHED及published_at，再切换active_release_version。历史查询只读status=PUBLISHED，绝不单凭`release_version<=active`开放失败批次；当前查询按active批次，legacy版0按原个人版本降序读取。
-- [ ] **Step 4：运行GREEN**：同测试通过，覆盖重试不多生成、终止后旧worker被拒、发布期间六来源/规则/学籍/任教写入423、取消恢复原批次、历史旧报告仍可读、直接猜PREPARED id也不可见、manager正文403、跨校404/403。发布中心不再勾选学生名单。
-- [ ] **Step 5：提交**：`git add backend/services/reportCorePublish.js backend/__tests__/report_core_release.test.js backend/routes/reportCore.js frontend/src/app/admin/reports.jsx frontend/src/app/student/report.jsx`；`git commit -m "feat: publish school reports atomically with recovery"`。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_release.test.js`。
+- [x] **Step 3：实现合同**：名单由服务端全校宽表和有效学籍产生，缺宽表也阻断。begin独占学期行、冻结清单并推进fence；准备逐份/每50份短事务，重试通过唯一键复用。activate在一个短事务中复核全部清单、将目标PREPARED行设PUBLISHED及published_at，再切换active_release_version。历史查询只读status=PUBLISHED，绝不单凭`release_version<=active`开放失败批次；当前查询按active批次，legacy版0按原个人版本降序读取。
+- [x] **Step 4：运行GREEN**：同测试通过，覆盖重试不多生成、终止后旧worker被拒、发布期间六来源/规则/学籍/任教写入423、取消恢复原批次、历史旧报告仍可读、直接猜PREPARED id也不可见、manager正文403、跨校404/403。发布中心不再勾选学生名单。
+- [x] **Step 5：提交**：`git add backend/services/reportCorePublish.js backend/__tests__/report_core_release.test.js backend/routes/reportCore.js frontend/src/app/admin/reports.jsx frontend/src/app/student/report.jsx`；`git commit -m "feat: publish school reports atomically with recovery"`。
 
 ### Task 11:正式入口整合、旧模块退役与规模验证
 
@@ -454,11 +456,11 @@ await assert.rejects(oldFencePrepareOrActivate(),{statusCode:409});
 
 **Interfaces:** Consumes T1–T10。最终`app.js`只挂载reportCore/auth/health；启动`startCoreWorker`而非旧scheduler。保留 `/api/auth/login|logout`，其余已退役业务前缀统一410，不导入旧controller。`backend/package.json`的test基线只跑`report_core_*.test.js`和更新后的health测试；health中旧db.pool/execute/query断言改为createDbPool且导入无DDL，token样例改成合法角色和tokenVersion。旧业务套件移至`backend/__tests__/legacy/`作历史资料，不据它们要求恢复旧表。新浏览器脚本沿用现有PLAYWRIGHT_MODULE或scripts/full-system-demo的Playwright解析方式，预检Node版本/浏览器可用性，输出缺依赖原因；脚本自行启动隔离测试库对应的后端与Vite，退出时关闭，不依赖人工启动中的服务。
 
-- [ ] **Step 1：写失败测试**：GET旧growth/kiosk/终测接口明确410；启动和轮询后表名仍恰好六张；从实际UI完成两个班、8个虚构学生的六来源→草稿→全校发布，source API只用只读对账，不用后台SQL替代可见业务动作。
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_bootstrap.test.js`和`node frontend/tests/report-core-flow.cjs`；先证明旧scheduler/旧菜单或旧接口依赖仍在。
-- [ ] **Step 3：收口实现**：移除旧入口挂载、临时兼容读写和成长主题请求；更新Node运行时版本和环境样例。PM2首版固定1个应用实例，避免多实例叠加供应方并发；外调30s超时、总在途2及三次尝试，数据库pool默认10。评分类故障独立于普通提交，停止服务时释放轮询并让租约可恢复。私有文件、打印密钥与数据库共同备份。
-- [ ] **Step 4：运行GREEN**：`npm test --prefix backend`、`npm test --prefix frontend`、`npm run build --prefix frontend`、`node frontend/tests/report-core-flow.cjs`；另在专用性能库跑`REPORT_PERF=1 NODE_ENV=test node --test backend/__tests__/report_core_performance.test.js`并记录本节预算，普通测试默认跳过大数据构造。用EXPLAIN检查学生项目、任务领取和发布索引；未达标先修SQL。新校样与完整前后面PDF实际查看无截断。
-- [ ] **Step 5：提交**：`git add backend/app.js backend/routes/api.js backend/package.json backend/__tests__ frontend/src/App.jsx frontend/src/constant/urls.js frontend/src/constant/menu.jsx frontend/src/component/StudentLayout/index.jsx frontend/package.json deploy/backend.env.example deploy/ecosystem.config.js backend/Dockerfile frontend/Dockerfile frontend/tests/report-core-flow.cjs docs/delivery/report-core/验收清单.md`；`git commit -m "refactor: retire non-report workflows and validate core release"`。
+- [x] **Step 1：写失败测试**：GET旧growth/kiosk/终测接口明确410；启动和轮询后表名仍恰好六张；从实际UI完成两个班、8个虚构学生的六来源→草稿→全校发布，source API只用只读对账，不用后台SQL替代可见业务动作。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_bootstrap.test.js`和`node frontend/tests/report-core-flow.cjs`；先证明旧scheduler/旧菜单或旧接口依赖仍在。
+- [x] **Step 3：收口实现**：移除旧入口挂载、临时兼容读写和成长主题请求；更新Node运行时版本和环境样例。PM2首版固定1个应用实例，避免多实例叠加供应方并发；外调30s超时、总在途2及三次尝试，数据库pool默认10。评分类故障独立于普通提交，停止服务时释放轮询并让租约可恢复。私有文件、打印密钥与数据库共同备份。
+- [x] **Step 4：运行GREEN**：`npm test --prefix backend`、`npm test --prefix frontend`、`npm run build --prefix frontend`、`node frontend/tests/report-core-flow.cjs`；另在专用性能库跑`REPORT_PERF=1 NODE_ENV=test node --test backend/__tests__/report_core_performance.test.js`并记录本节预算，普通测试默认跳过大数据构造。用EXPLAIN检查学生项目、任务领取和发布索引；未达标先修SQL。新校样与完整前后面PDF实际查看无截断。
+- [x] **Step 5：提交**：`git add backend/app.js backend/routes/api.js backend/package.json backend/__tests__ frontend/src/App.jsx frontend/src/constant/urls.js frontend/src/constant/menu.jsx frontend/src/component/StudentLayout/index.jsx frontend/package.json deploy/backend.env.example deploy/ecosystem.config.js backend/Dockerfile frontend/Dockerfile frontend/tests/report-core-flow.cjs docs/delivery/report-core/验收清单.md`；`git commit -m "refactor: retire non-report workflows and validate core release"`。
 
 ### Task 12:旧库迁移演练、上线与回退
 
@@ -466,17 +468,17 @@ await assert.rejects(oldFencePrepareOrActivate(),{statusCode:409});
 
 **Interfaces:** `migrateReportCore({sourceConnection,targetConnection,mode:'audit'|'apply',schoolId,termIds,assetMap})->MigrationReport`；source只读，target明确新库且不同于source。CLI `--audit`默认不写；`--apply`需指定目标。MigrationReport含counts、warnings、unmapped、checksums和可复跑business_key，不含密码/令牌/正文。
 
-- [ ] **Step 1：写失败测试**。
+- [x] **Step 1：写失败测试**。
 ```js
 await assert.rejects(migrateWithSameSourceAndTarget(),/different|不同/);
 assert.equal((await migrateUnknownSelfPerspective()).inventedValues,0);
 assert.equal((await rerunMigration()).duplicateSources,0);
 assert.equal(await legacySnapshotHashAfterMigration(),beforeHash);
 ```
-- [ ] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_migration.test.js`，使用旧schema最小fixture和新6表库，绝不指向真实师生库。
-- [ ] **Step 3：实现迁移与演练手册**：按users→学期→任教→宽表→来源→报告顺序导入，优先保留原ID/用户名/bcrypt哈希。已定分类且可准确映射的积分才迁入对应项目；不明卡/总分/视角进unmapped，不填默认三星。旧故事只具单一G分，保留原文历史记录，不拆造读听讲；旧版报告原JSON作LEGACY_V1归档，release_version=0、原个人version及发布时间保留。复制私有素材并核对sha256；旧AAD卡先在旧环境解密后以新来源上下文重新加密，无法恢复则列失效/补发名单，不能盲改密文上下文。
+- [x] **Step 2：运行RED**：`NODE_ENV=test node --test backend/__tests__/report_core_migration.test.js`，使用旧schema最小fixture和新6表库，绝不指向真实师生库。
+- [x] **Step 3：实现迁移与演练手册**：按users→学期→任教→宽表→来源→报告顺序导入，优先保留原ID/用户名/bcrypt哈希。已定分类且可准确映射的积分才迁入对应项目；不明卡/总分/视角进unmapped，不填默认三星。旧故事只具单一G分，保留原文历史记录，不拆造读听讲；旧版报告原JSON作LEGACY_V1归档，release_version=0、原个人version及发布时间保留。复制私有素材并核对sha256；旧AAD卡先在旧环境解密后以新来源上下文重新加密，无法恢复则列失效/补发名单，不能盲改密文上下文。
 - [ ] **Step 4：运行GREEN与上线Gate**：同迁移测试全过；在原库只读副本完成一次审计/应用/复跑，用户数、材料数、原始净积分、有效报告、文件哈希与异常名单逐项对账。上线窗口暂停旧入口写入，完成最终增量重放、校方确认补录名单和评分规则、切换DB_NAME与静态包后冒烟。备份/回退演练通过才切换；绝不在此步骤自动DROP旧库。
-- [ ] **Step 5：提交**：`git add backend/scripts/migrateReportCore.js backend/__tests__/report_core_migration.test.js deploy/report-core-cutover.md docs/delivery/report-core/迁移对账.md README.md deploy/deploy.sh`；`git commit -m "chore: add audited report-core migration and cutover"`。
+- [x] **Step 5：提交**：`git add backend/scripts/migrateReportCore.js backend/__tests__/report_core_migration.test.js deploy/report-core-cutover.md docs/delivery/report-core/迁移对账.md README.md deploy/deploy.sh`；`git commit -m "chore: add audited report-core migration and cutover"`。
 
 回退决策明确：新系统开放写入前可直接回原库/旧包；开放后发现故障先冻结新系统写入并备份差异。不能直接切回旧库丢新材料；默认在新库前向修复。确需回旧系统时，先将新来源增量按清单导回或保留只读新材料入口，由学校确认受影响范围后再开放旧系统。已有发布批次始终保留。
 
@@ -495,7 +497,7 @@ assert.equal(await legacySnapshotHashAfterMigration(),beforeHash);
 
 2026-10-28已完成文档静态核对：6个CREATE TABLE、97固定字段/109位置、37卡类别、44旧表逐一去向、14处外键的列类型与引用唯一键、39个不重复约束名、12任务/60复选步骤及7个本地链接均对应。该结果只验证设计文件的一致性，不等同于MySQL成功建表、业务测试或性能达标；这些验证分别属于T1、T2–T10及T11。
 
-本计划及SQL属于可评审交付物，尚未执行任何应用改造或数据库DDL。确认计划及执行方式后，再按T1开始实施；不跳过基础合同直接开发页面。
+计划编制时的交付为设计稿；当前已按文末实施记录完成核心代码及独立六表试运行，原44表库未改造。外部验收/生产切换仍需满足对应门槛。
 
 ## 2026-10-28 实施记录
 
