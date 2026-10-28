@@ -373,3 +373,15 @@ NODE_ENV=production npm start --prefix backend
 ## 许可
 
 仓库未提供项目级开源许可证。随附Noto CJK字体按其独立 [OFL许可](backend/assets/fonts/OFL.txt) 分发，详见 [字体说明](backend/assets/fonts/README.md)。
+
+## 六表期末报告核心系统（2026-10-28）
+
+当前应用入口已改为三角色的六来源工作台。使用Node >=22.12、MySQL >=8.0.21；原44表迁移脚本不用于新库。
+
+1. 按`deploy/backend.env.example`配置`backend/.env`，目标使用`REPORT_DB_NAME=liuyu_report_pilot`或专用prod库，指定SCHOOL_ID。密钥仅留本地。
+2. 全新库运行`node backend/scripts/initReportCore.js`；本机虚构演示可加`--demo`。随机账号密码保存到被忽略的`output/report-core/local-accounts.json`，控制台不会输出密码。已有用户拒绝再次初始化。
+3. 后端`npm start --prefix backend`；前端`npm run dev --prefix frontend -- --host 127.0.0.1`。前端默认代理3000，其他端口设置`VITE_API_TARGET=http://127.0.0.1:后端端口`。
+4. 学生：扫码、奖状、月度故事、自评、报告；教师：直评/制卡/导入/材料审核/结算/报告确认；管理员：配置/学籍健康导入/卡总额度/全校发布。
+5. 故事每月读听讲各1–3篇。自动调用真实LLM；失败不计0分，支持重试与教师异常复核。奖状仅生成已认定成果，劳美不发卡。
+
+完整验证记录见`docs/delivery/report-core/验收清单.md`，迁移与回退见`deploy/report-core-cutover.md`。原未分类卡和旧总分不能自动推断成新分项。上线前须通过学校版式、规则、模型供应方、素材迁移及回退验收。
