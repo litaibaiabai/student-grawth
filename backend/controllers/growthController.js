@@ -59,239 +59,53 @@ function getGameLevel(points = 0) {
   }
 }
 
-async function getMyGrowthData({ actor, studentId, termId = 1, connection = null }) {
+async function getMyGrowthData({ actor, studentId, termId = null, connection = null }) {
   const conn = connection || db;
-
-  // 1. 越权校验与隐私红线
-  if (actor.role === 'manager' || actor.role === 'admin') {
-    const err = new Error('管理员不得借学生端成长首页接口读取个人学生隐私详情');
-    err.status = 403;
-    throw err;
-  }
-
+  const reject = (message, status) => { const err = new Error(message); err.status = status; throw err; };
+  if (!actor || !['student', 'teacher'].includes(actor.role)) reject('无权读取学生个人成长详情', 403);
+  const schoolId = actor.schoolId || actor.school_id || 1;
   const targetStudentId = Number(studentId || actor.id);
-
-  if (actor.role === 'student' && actor.id !== targetStudentId) {
-    const err = new Error('无权查看其他学生的成长足迹与隐私数据');
-    err.status = 403;
-    throw err;
-  }
-
-  // 教师访问需受限于任教班级范围
+  if (actor.role === 'student' && Number(actor.id) !== targetStudentId) reject('无权查看其他学生的成长足迹与隐私数据', 403);
   if (actor.role === 'teacher') {
     const { requireStudentScope } = require('../middleware/studentScope');
     await requireStudentScope(actor, targetStudentId, conn);
   }
-
-  // 2. 查询学生基础资料
-  const [students] = await conn.query(
-    "SELECT id, username, real_name, grade, class_no FROM users WHERE id = ?",
-    [targetStudentId]
-  );
-  if (!students || students.length === 0) {
-    const err = new Error('学生不存在');
-    err.status = 404;
-    throw err;
-  }
+  const [students] = await conn.query("SELECT id, username, real_name, grade, class_no FROM users WHERE id = ? AND school_id = ? AND role = 'student'", [targetStudentId, schoolId]);
+  if (!students.length) reject('学生不存在', 404);
   const student = students[0];
+  const explicitTerm = termId !== null && termId !== undefined && termId !== '';
+  if (explicitTerm && (!Number.isSafeInteger(Number(termId)) || Number(termId) <= 0)) reject('学期参数无效', 422);
+  const [terms] = await conn.query(`SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND ${explicitTerm ? 'id = ?' : 'is_current = 1'} ORDER BY id DESC LIMIT 1`, explicitTerm ? [schoolId, termId] : [schoolId]);
+  if (!terms.length) reject(explicitTerm ? '指定学期不存在' : '尚未配置当前学期', 404);
+  termId = terms[0].id;
 
-  // 3. 查询当前积分状态
-  let currentPoints = 0;
-  try {
-    const [ptsRows] = await conn.query(
-      "SELECT COALESCE(SUM(delta), 0) AS total_points FROM score_record WHERE student_id = ?",
-      [targetStudentId]
-    );
-    if (ptsRows && ptsRows.length > 0) {
-      currentPoints = Number(ptsRows[0].total_points) || 0;
-    }
-  } catch (e) {
-    try {
-      const [ptsRows] = await conn.query(
-        "SELECT COALESCE(SUM(delta), 0) AS total_points FROM score_event WHERE student_id = ?",
-        [targetStudentId]
-      );
-      if (ptsRows && ptsRows.length > 0) {
-        currentPoints = Number(ptsRows[0].total_points) || 0;
-      }
-    } catch (e2) {}
-  }
-
-  // 4. 聚合真实足迹 (Timeline)
-  const timeline = [];
-
-  // 4.1 积分事件 (优先查 score_record，兼容 score_event)
-  try {
-    const [records] = await conn.query(
-      "SELECT id, student_id, source, delta, dimension_code, remark, created_at FROM score_record WHERE student_id = ? ORDER BY created_at DESC LIMIT 30",
-      [targetStudentId]
-    );
-    for (const r of records) {
-      timeline.push({
-        id: `score-${r.id}`,
-        studentId: r.student_id,
-        type: 'SCORE',
-        eventType: r.source,
-        title: r.delta > 0 ? `获得激励积分 +${r.delta}` : `积分冲销 ${r.delta}`,
-        detail: r.remark || `维度: ${r.dimension_code}`,
-        delta: r.delta,
-        createdAt: r.created_at
-      });
-    }
-  } catch (e) {
-    try {
-      const [events] = await conn.query(
-        "SELECT id, student_id, event_type, delta, current_balance, dimension_id, remark, created_at FROM score_event WHERE student_id = ? ORDER BY created_at DESC LIMIT 30",
-        [targetStudentId]
-      );
-      for (const ev of events) {
-        timeline.push({
-          id: `score-${ev.id}`,
-          studentId: ev.student_id,
-          type: 'SCORE',
-          eventType: ev.event_type,
-          title: ev.delta > 0 ? `获得激励积分 +${ev.delta}` : `积分变动 ${ev.delta}`,
-          detail: ev.remark || '日常表现奖励',
-          delta: ev.delta,
-          createdAt: ev.created_at
-        });
-      }
-    } catch (e2) {}
-  }
-
-  // 4.2 荣誉认定 (优先查 honor_record，兼容 honor_application)
-  try {
-    const [honors] = await conn.query(
-      "SELECT id, student_id, title, award_level, prize_level, status, created_at FROM honor_record WHERE student_id = ? ORDER BY created_at DESC LIMIT 20",
-      [targetStudentId]
-    );
-    for (const h of honors) {
-      timeline.push({
-        id: `honor-${h.id}`,
-        studentId: h.student_id,
-        type: 'HONOR',
-        title: `荣誉认定: ${h.title}`,
-        detail: `级别: ${h.award_level} ${h.prize_level}`,
-        status: h.status,
-        delta: 0,
-        createdAt: h.created_at
-      });
-    }
-  } catch (e) {
-    try {
-      const [honors] = await conn.query(
-        "SELECT id, student_id, honor_title, level, points, status, created_at FROM honor_application WHERE student_id = ? ORDER BY created_at DESC LIMIT 20",
-        [targetStudentId]
-      );
-      for (const h of honors) {
-        timeline.push({
-          id: `honor-${h.id}`,
-          studentId: h.student_id,
-          type: 'HONOR',
-          title: `荣誉申报: ${h.honor_title}`,
-          detail: `级别: ${h.level || '校级'}，获得积分: ${h.points}`,
-          status: h.status,
-          delta: h.status === 'APPROVED' ? h.points : 0,
-          createdAt: h.created_at
-        });
-      }
-    } catch (e2) {}
-  }
-
-  // 4.3 故事记录
-  try {
-    const [stories] = await conn.query(
-      "SELECT id, student_id, title, audit_status, final_score, created_at FROM student_story WHERE student_id = ? ORDER BY created_at DESC LIMIT 20",
-      [targetStudentId]
-    );
-    for (const s of stories) {
-      timeline.push({
-        id: `story-${s.id}`,
-        studentId: s.student_id,
-        type: 'STORY',
-        title: `成长故事: ${s.title}`,
-        detail: `终审得分: ${s.final_score !== null ? s.final_score : '审核中'}`,
-        status: s.audit_status,
-        delta: 0,
-        createdAt: s.created_at
-      });
-    }
-  } catch (e) {
-    // student_story 容错
-  }
-
-  // 按时间降序
-  timeline.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-  // 5. 趣味成长等级 (与官方评价区分)
-  const gameLevel = getGameLevel(currentPoints);
-
-  // 6. 六维评价现状（若已发布则读取已发布快照，若未发布则明确标注未发布）
-  let evaluation = null;
+  // Preserve the existing cumulative-points window. A query failure is not zero points.
+  const [[points]] = await conn.query('SELECT COALESCE(SUM(delta), 0) AS total_points FROM score_record WHERE student_id = ? AND school_id = ?', [targetStudentId, schoolId]);
+  const currentPoints = Number(points.total_points);
+  const [records] = await conn.query('SELECT id, source, delta, dimension_code, remark, created_at FROM score_record WHERE student_id = ? AND school_id = ? ORDER BY created_at DESC LIMIT 30', [targetStudentId, schoolId]);
+  const timeline = records.map(r => ({ id:`score-${r.id}`, studentId:targetStudentId, type:'SCORE', eventType:r.source, title:r.delta > 0 ? `获得激励积分 +${r.delta}` : `积分冲销 ${r.delta}`, detail:r.remark || `维度: ${r.dimension_code}`, delta:r.delta, createdAt:r.created_at }));
+  const [honors] = await conn.query('SELECT id, title, award_level, prize_level, status, created_at FROM honor_record WHERE student_id = ? AND school_id = ? ORDER BY created_at DESC LIMIT 20', [targetStudentId, schoolId]);
+  timeline.push(...honors.map(h => ({id:`honor-${h.id}`,studentId:targetStudentId,type:'HONOR',title:`荣誉申报: ${h.title}`,detail:`级别: ${h.award_level} ${h.prize_level}`,status:h.status,delta:0,createdAt:h.created_at})));
+  const [stories] = await conn.query('SELECT id, month_key, status, teacher_score, created_at FROM story_submission WHERE student_id = ? AND school_id = ? ORDER BY created_at DESC LIMIT 20', [targetStudentId, schoolId]);
+  timeline.push(...stories.map(story => ({id:`story-${story.id}`,studentId:targetStudentId,type:'STORY',title:`${story.month_key} 生活故事`,detail:story.status === 'REVIEWED' ? `终审得分: ${story.teacher_score ?? '待确认'}` : story.status === 'DRAFT' ? '故事草稿' : '故事已提交，等待审核',status:story.status,delta:0,createdAt:story.created_at})));
+  timeline.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const [reports] = await conn.query("SELECT snapshot_json, comprehensive_grade, version FROM term_report WHERE school_id = ? AND student_id = ? AND term_id = ? AND status = 'PUBLISHED' ORDER BY version DESC LIMIT 1", [schoolId, targetStudentId, termId]);
+  let evaluation = {isPublished:false,message:'期末报告尚未正式发布'};
   let officialGrade = null;
-  try {
-    const [reports] = await conn.query(
-      "SELECT snapshot_json, version, status FROM term_report WHERE student_id = ? AND term_id = ? AND status = 'PUBLISHED' ORDER BY version DESC LIMIT 1",
-      [targetStudentId, termId]
-    );
-    if (reports && reports.length > 0) {
-      const snap = typeof reports[0].snapshot_json === 'string'
-        ? JSON.parse(reports[0].snapshot_json)
-        : reports[0].snapshot_json;
-      evaluation = {
-        isPublished: true,
-        version: reports[0].version,
-        radarScores: snap.radarScores || snap.sixDimensions || null,
-        dimensions: snap.dimensions || null
-      };
-      officialGrade = snap.overallGrade || snap.compositeGrade || 'EXCELLENT';
-    } else {
-      evaluation = {
-        isPublished: false,
-        message: '期末评价报告正在生成与审核中，尚未正式发布'
-      };
-    }
-  } catch (e) {
-    evaluation = { isPublished: false, message: '未找到评价数据' };
+  if (reports.length) {
+    const report = reports[0];
+    const snapshot = require('../services/reportSnapshot').normalizeReportSnapshot(typeof report.snapshot_json === 'string' ? JSON.parse(report.snapshot_json) : report.snapshot_json);
+    evaluation = {isPublished:true,version:report.version,radarScores:snapshot.evaluation.dimensions,dimensions:snapshot.evaluation.dimensions};
+    officialGrade = report.comprehensive_grade || null;
   }
-
-  // 7. 读取学生主题偏好
-  let currentTheme = 'default';
-  try {
-    const [themeRows] = await conn.query(
-      "SELECT theme_id FROM student_theme_preference WHERE student_id = ?",
-      [targetStudentId]
-    );
-    if (themeRows && themeRows.length > 0) {
-      currentTheme = themeRows[0].theme_id;
-    }
-  } catch (e) {
-    // 容错表未建
-  }
-
-  return {
-    studentProfile: {
-      id: student.id,
-      name: student.real_name,
-      studentNo: student.student_no || student.username,
-      grade: student.grade,
-      classNo: student.class_no,
-      avatarUrl: student.avatar_url || null
-    },
-    currentPoints,
-    gameLevel,
-    officialGrade,
-    evaluation,
-    timeline,
-    theme: currentTheme,
-    availableThemes: ALLOWED_THEMES
-  };
+  const [themes] = await conn.query('SELECT theme_id FROM student_theme_preference WHERE student_id = ?', [targetStudentId]);
+  return {studentProfile:{id:student.id,name:student.real_name,studentNo:student.username,grade:student.grade,classNo:student.class_no,avatarUrl:null},termId,currentPoints,gameLevel:getGameLevel(currentPoints),officialGrade,evaluation,timeline,theme:themes[0]?.theme_id || 'default'};
 }
 
 async function setStudentTheme({ actor, themeId, connection = null }) {
   const conn = connection || db;
 
-  if (actor.role !== 'student') {
+  if (!actor || actor.role !== 'student') {
     const err = new Error('仅学生本人可设置个性化成长主题');
     err.status = 403;
     throw err;
@@ -317,8 +131,8 @@ async function setStudentTheme({ actor, themeId, connection = null }) {
 
 async function handleGetMyGrowth(req, res) {
   try {
-    const actor = req.user || { id: req.query.studentId, role: 'student', schoolId: 1 };
-    const termId = req.query.termId ? Number(req.query.termId) : 1;
+    const actor = req.user;
+    const termId = req.query.termId ?? null;
     const studentId = req.query.studentId ? Number(req.query.studentId) : actor.id;
 
     const data = await getMyGrowthData({ actor, studentId, termId });
@@ -330,7 +144,7 @@ async function handleGetMyGrowth(req, res) {
 
 async function handleSetTheme(req, res) {
   try {
-    const actor = req.user || { id: req.body.studentId, role: 'student', schoolId: 1 };
+    const actor = req.user;
     const { themeId } = req.body;
     const data = await setStudentTheme({ actor, themeId });
     return res.json({ code: 200, message: '主题切换成功', data });

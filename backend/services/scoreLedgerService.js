@@ -59,7 +59,24 @@ async function appendReward({
       }
     }
 
-    // 2. 插入 score_record (物理追加)
+    // 2. 确保 category_id 非空（回退匹配当前维度的三级子类）
+    let finalCategoryId = categoryId;
+    if (!finalCategoryId) {
+      const [catRows] = await mutationConn.query(
+        "SELECT id FROM edu_evaluation_category WHERE category_level = 3 AND category_code LIKE CONCAT(?, '%') LIMIT 1",
+        [dimensionCode || 'D']
+      );
+      if (catRows.length > 0) {
+        finalCategoryId = catRows[0].id;
+      } else {
+        const [fallbackCat] = await mutationConn.query(
+          "SELECT id FROM edu_evaluation_category WHERE category_level = 3 LIMIT 1"
+        );
+        if (fallbackCat.length > 0) finalCategoryId = fallbackCat[0].id;
+      }
+    }
+
+    // 3. 插入 score_record (物理追加)
     const [insertRes] = await mutationConn.query(
       `INSERT INTO score_record (
         school_id, term_id, student_id, class_snapshot, dimension_code, category_id,
@@ -71,7 +88,7 @@ async function appendReward({
         studentId,
         typeof snapshotStr === 'object' ? JSON.stringify(snapshotStr) : snapshotStr,
         dimensionCode,
-        categoryId || null,
+        finalCategoryId,
         source,
         delta,
         operatorId,

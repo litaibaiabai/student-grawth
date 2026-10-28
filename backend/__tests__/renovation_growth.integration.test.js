@@ -168,4 +168,30 @@ describe('Task 16: 学生成长首页与主题集成测试', () => {
       }
     );
   });
+  test('真实故事提交进入本人足迹，保留审核状态', async () => {
+    await connection.query("INSERT INTO story_submission(school_id,student_id,term_id,month_key,status) VALUES(1,?,1,'2026-10','SUBMITTED')", [studentAId]);
+    const data = await growthController.getMyGrowthData({ actor:{id:studentAId,role:'student',schoolId:1},connection });
+    const story = data.timeline.find(item => item.type === 'STORY');
+    assert.ok(story, '真实故事不能被不存在的兼容表查询吞掉');
+    assert.equal(story.status, 'SUBMITTED');
+  });
+  test('默认读取同校当前学期，并兼容确认快照；缺失等级不伪造优秀', async () => {
+    await connection.query("UPDATE academic_year SET is_current=0 WHERE id=1");
+    await connection.query("INSERT INTO academic_year(id,school_id,academic_year,semester,start_date,end_date,is_current,active) VALUES(2,1,'2026-2027',2,'2027-02-01','2027-08-31',1,1)");
+    const snapshot = {evaluationSnapshot:{sixDimensions:{D:{score:60,status:'NORMAL'}}}};
+    await connection.query("INSERT INTO term_report(school_id,student_id,term_id,version,rule_version,snapshot_json,comprehensive_score,comprehensive_grade,status) VALUES(1,?,2,1,'TEST',?,60,'合格','PUBLISHED')",[studentAId,JSON.stringify(snapshot)]);
+    try {
+      const args = {actor:{id:studentAId,role:'student',schoolId:1},connection};
+      const data=await growthController.getMyGrowthData(args);
+      assert.equal(data.termId,2);
+      assert.equal(data.evaluation.isPublished,true);
+      assert.equal(data.officialGrade,'合格');
+      assert.equal(data.evaluation.radarScores.D,60);
+      await connection.query('UPDATE term_report SET comprehensive_grade=NULL WHERE term_id=2');
+      assert.equal((await growthController.getMyGrowthData(args)).officialGrade,null);
+      await connection.query('UPDATE term_report SET snapshot_json=? WHERE term_id=2',[JSON.stringify({evaluation:{dimensions:{D:75}}})]);
+      assert.equal((await growthController.getMyGrowthData(args)).evaluation.radarScores.D,75);
+    } finally {await connection.query('UPDATE academic_year SET is_current=(id=1)');}
+  });
+
 });

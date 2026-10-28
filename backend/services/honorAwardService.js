@@ -78,6 +78,19 @@ async function reviewHonorWithLedger({
   if (dec === 'APPROVED') {
     const pts = Number(awardPoints) > 0 ? Number(awardPoints) : 1;
     const dim = dimensionCode || 'T';
+    let effCategoryId = categoryId || prev.category_id;
+    if (!effCategoryId) {
+      const [catRows] = await conn.query(
+        "SELECT id FROM edu_evaluation_category WHERE category_level = 3 AND category_code LIKE CONCAT(?, '%') LIMIT 1",
+        [dim]
+      );
+      if (catRows.length > 0) {
+        effCategoryId = catRows[0].id;
+      } else {
+        const [anyCat] = await conn.query("SELECT id FROM edu_evaluation_category WHERE category_level = 3 LIMIT 1");
+        effCategoryId = anyCat[0]?.id || 1;
+      }
+    }
 
     // 3. 消费 C3 appendReward 合同，写入学生评价账本
     const rewardRes = await appendReward({
@@ -85,7 +98,7 @@ async function reviewHonorWithLedger({
       termId: prev.term_id,
       studentId: prev.student_id,
       dimensionCode: dim,
-      categoryId: categoryId || null,
+      categoryId: effCategoryId,
       delta: pts,
       source: 'A_DIRECT',
       operatorId: teacherId,
@@ -101,7 +114,7 @@ async function reviewHonorWithLedger({
        SET status = 'APPROVED', reviewer_id = ?, reviewed_at = NOW(),
            dimension_code = ?, category_id = ?, award_points = ?, score_record_id = ?
        WHERE id = ?`,
-      [teacherId, dim, categoryId || null, pts, scoreRecordId, honorId]
+      [teacherId, dim, effCategoryId, pts, scoreRecordId, honorId]
     );
   } else {
     await conn.query(

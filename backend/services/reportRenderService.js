@@ -100,18 +100,17 @@ async function getPublishedReport({ actor, schoolId = 1, termId = 1, studentId, 
       ? JSON.parse(report.snapshot_json)
       : report.snapshot_json;
 
-    // 获取学生基础展示信息
-    const [u] = await conn.query("SELECT username, real_name, grade, class_no FROM users WHERE id = ? LIMIT 1", [targetStudentId]);
-    const studentInfo = u[0] || {};
+    // Identity is part of the approved snapshot, not a live roster lookup.
+    const studentInfo = snapshotJson?.student || {};
 
     return {
       reportId: report.id,
       schoolId: report.school_id,
       termId: report.term_id,
       studentId: report.student_id,
-      studentName: studentInfo.real_name || studentInfo.username,
+      studentName: studentInfo.name || studentInfo.username || '未记录姓名',
       grade: studentInfo.grade,
-      classNo: studentInfo.class_no,
+      classNo: studentInfo.classNo,
       version: report.version,
       ruleVersion: report.rule_version,
       status: report.status,

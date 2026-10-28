@@ -500,7 +500,6 @@ const TeacherDirectScore = () => {
                   type="primary"
                   size="large"
                   onClick={handleConfirmSubmit}
-                  loading={submitting}
                   disabled={selectedStudentIds.length === 0}
                   style={{
                     background: selectedStudentIds.length === 0 ? "#ccc" : "#277460",

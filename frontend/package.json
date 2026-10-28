@@ -8,7 +8,8 @@
     "test": "node --test src/util/*.test.js src/util/__tests__/*.test.js",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:student-ui": "node tests/student-ui.cjs && node tests/student-theme-session.cjs"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",

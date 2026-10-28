@@ -12,7 +12,8 @@ async function buildDraft(req, res, next) {
   try {
     const actor = {
       id: req.user?.id || req.user?.userId,
-      role: req.user?.role
+      role: req.user?.role,
+      schoolId: req.user?.schoolId
     };
 
     const { studentId, termId, schoolId, grade, classNo, expectedSourceRevision } = req.body;
@@ -23,7 +24,7 @@ async function buildDraft(req, res, next) {
     const draft = await reportDraftService.buildDraft({
       actor,
       studentKey: {
-        schoolId: schoolId || req.user?.schoolId || 1,
+        schoolId: req.user?.schoolId || 1,
         termId: termId || 1,
         studentId: Number(studentId),
         grade,
@@ -49,7 +50,8 @@ async function getDraft(req, res, next) {
   try {
     const actor = {
       id: req.user?.id || req.user?.userId,
-      role: req.user?.role
+      role: req.user?.role,
+      schoolId: req.user?.schoolId
     };
     const { draftId } = req.params;
 
@@ -75,7 +77,8 @@ async function confirmDraft(req, res, next) {
   try {
     const actor = {
       id: req.user?.id || req.user?.userId,
-      role: req.user?.role
+      role: req.user?.role,
+      schoolId: req.user?.schoolId
     };
 
     const { draftId, expectedFingerprint, comment } = req.body;
@@ -107,7 +110,8 @@ async function requestAiComment(req, res, next) {
   try {
     const actor = {
       id: req.user?.id || req.user?.userId,
-      role: req.user?.role
+      role: req.user?.role,
+      schoolId: req.user?.schoolId
     };
     const { draftId } = req.params;
     const { expectedFingerprint } = req.body;
@@ -140,7 +144,8 @@ async function applyAiComment(req, res, next) {
   try {
     const actor = {
       id: req.user?.id || req.user?.userId,
-      role: req.user?.role
+      role: req.user?.role,
+      schoolId: req.user?.schoolId
     };
     const { draftId } = req.params;
     const { jobId, expectedFingerprint, result } = req.body;

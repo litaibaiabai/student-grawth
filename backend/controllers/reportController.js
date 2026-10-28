@@ -7,177 +7,26 @@ const { pool } = require("../db");
 const {requireStudentScope}=require("../middleware/studentScope");
 const { ErrorCodes } = require("../constants/errorCodes");
 const { success, fail } = require("../utils/response");
-const { computeStudentScore } = require("../services/evaluationEngine");
+const { normalizeReportSnapshot } = require("../services/reportSnapshot");
 
 /**
  * POST /api/v1/admin/reports/publish-batch
  * 批量将已审定报告正式发布给学生（前置 6 项完整性强校验）
  */
 async function publishBatch(req, res, next) {
-  const rawStudentIds = req.body.studentIds || req.body.student_ids;
-  const studentIds = Array.isArray(rawStudentIds) ? rawStudentIds : [];
-  if (studentIds.length === 0) {
-    return fail(res, ErrorCodes.VALIDATION_ERROR, "请指定要发布报告的学生列表", 422);
-  }
-
-  const schoolId = req.user?.schoolId || 1;
-  const adminId = req.user?.id || req.user?.userId;
-
+  const studentIds = req.body.studentIds || req.body.student_ids;
+  if (!Array.isArray(studentIds) || !studentIds.length) return fail(res, ErrorCodes.VALIDATION_ERROR, '请指定要发布报告的学生列表', 422);
   let conn;
   try {
     conn = await pool.getConnection();
-
+    const schoolId = req.user.schoolId;
     let termId = req.body.termId || req.body.term_id;
-    if (!termId) {
-      const [termRows] = await conn.query(
-        "SELECT id FROM academic_year WHERE (school_id = ? OR school_id IS NULL) AND is_current = 1 LIMIT 1",
-        [schoolId]
-      );
-      termId = termRows.length > 0 ? termRows[0].id : 1;
-    }
-
-    const published = [];
-    const blocked = [];
-
-    for (const sid of studentIds) {
-      // 1. 获取学生基本信息
-      const [stuRows] = await conn.query(
-        "SELECT id, username, real_name, grade, class_no, status FROM users WHERE id = ? AND school_id = ?",
-        [sid, schoolId]
-      );
-      if (stuRows.length === 0 || stuRows[0].status !== 0) {
-        blocked.push({
-          studentId: sid,
-          reason: "学生账号不存在或状态异常"
-        });
-        continue;
-      }
-      const student = stuRows[0];
-
-      // 2. 完整性六维核算检查
-      const evalResult = await computeStudentScore(sid, termId, schoolId);
-      if (!evalResult.isComplete) {
-        blocked.push({
-          studentId: sid,
-          studentName: student.real_name,
-          reason: `六育指标缺失：[${evalResult.missingDimensions.join(", ")}]，无法核算期末报告`,
-          code: ErrorCodes.REPORT_SCORE_INCOMPLETE
-        });
-        continue;
-      }
-
-      // 3. 读取学科成绩快照
-      const [subjects] = await conn.query(
-        "SELECT subject_code, subject_name, raw_score AS score FROM subject_score WHERE student_id = ? AND term_id = ?",
-        [sid, termId]
-      );
-
-      // 4. 读取荣誉奖项快照
-      const [honors] = await conn.query(
-        "SELECT title AS award_name, award_level, award_date, honor_points AS points FROM honor_record WHERE student_id = ? AND term_id = ? AND status = 'APPROVED'",
-        [sid, termId]
-      );
-
-      // 5. 组装全景快照 snapshot_json
-      const snapshot = {
-        student: {
-          id: student.id,
-          name: student.real_name,
-          username: student.username,
-          grade: student.grade,
-          classNo: student.class_no
-        },
-        evaluation: evalResult,
-        subjects,
-        honors,
-        generatedAt: new Date().toISOString()
-      };
-
-      // 计算评定等级
-      const score = evalResult.comprehensiveScore;
-      let grade = "合格";
-      if (score >= 90) grade = "优秀";
-      else if (score >= 80) grade = "良好";
-      else if (score < 60) grade = "待提升";
-
-      // 默认评语建议
-      const defaultTeacherComment = `${student.real_name}同学本学期在德智体美劳各维度表现均衡，综合得分 ${score}分（${grade}）。在日常学习生活中能积极参与各项实践，希望在新的学期保持优势，再接再厉！`;
-
-      // 6. 插入或版本更新发布
-      const [revCount] = await conn.query(
-        "SELECT COALESCE(MAX(version), 0) AS max_v FROM term_report WHERE school_id = ? AND student_id = ? AND term_id = ?",
-        [schoolId, sid, termId]
-      );
-      const version = Number(revCount[0].max_v) + 1;
-
-      // 如果有历史版本，置为 SUPERSEDED
-      await conn.query(
-        "UPDATE term_report SET status = 'SUPERSEDED' WHERE school_id = ? AND student_id = ? AND term_id = ?",
-        [schoolId, sid, termId]
-      );
-
-      const [resInsert] = await conn.query(
-        `INSERT INTO term_report (
-          school_id, student_id, term_id, version, rule_version, snapshot_json,
-          comprehensive_score, comprehensive_grade, teacher_comment, teacher_comment_draft,
-          student_statement, family_message, family_source, status, published_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'STUDENT_TRANSCRIBED', 'PUBLISHED', NOW())`,
-        [
-          schoolId,
-          sid,
-          termId,
-          version,
-          evalResult.ruleVersion,
-          JSON.stringify(snapshot),
-          score,
-          grade,
-          defaultTeacherComment,
-          defaultTeacherComment,
-          "本学期我在各方面都有所收获，未来会更加努力！",
-          "孩子本学期成长明显，感谢老师们的辛勤付出！"
-        ]
-      );
-
-      // 写入审计
-      await conn.query(
-        `INSERT INTO operation_audit (
-          school_id, actor_user_id, actor_role, target_type, target_id, action, request_id, new_summary
-        ) VALUES (?, ?, ?, 'TERM_REPORT', ?, 'PUBLISH_REPORT', ?, ?)`,
-        [
-          schoolId,
-          adminId,
-          req.user?.role || "manager",
-          resInsert.insertId,
-          `REQ_PUB_${resInsert.insertId}_${Date.now()}`,
-          JSON.stringify({ studentId: sid, score, grade })
-        ]
-      );
-
-      published.push({
-        studentId: sid,
-        studentName: student.real_name,
-        reportId: resInsert.insertId,
-        score,
-        grade
-      });
-    }
-
-    success(
-      res,
-      {
-        total: studentIds.length,
-        publishedCount: published.length,
-        blockedCount: blocked.length,
-        published,
-        blocked
-      },
-      `批量报告发布完成：成功 ${published.length} 份，阻断 ${blocked.length} 份`
-    );
-  } catch (err) {
-    next(err);
-  } finally {
-    if (conn) conn.release();
-  }
+    const [[term]] = await conn.query(`SELECT id FROM academic_year WHERE (school_id=? OR school_id IS NULL) AND ${termId ? 'id=?' : 'is_current=1'} ORDER BY id DESC LIMIT 1`,termId ? [schoolId,termId] : [schoolId]);
+    if (!term) return fail(res, ErrorCodes.VALIDATION_ERROR, '指定学期不存在',422);
+    termId = term.id;
+    const result = await require('../services/reportPublishService').publishBatchReports({actor:req.user,schoolId,termId,studentIds,connection:conn});
+    return success(res,{...result,total:result.totalTarget,publishedCount:result.successCount,blocked:result.blockedList},`批量报告发布完成：成功 ${result.successCount} 份，阻断 ${result.blockedCount} 份`);
+  } catch(err) { next(err); } finally { if(conn)conn.release(); }
 }
 
 /**
@@ -230,7 +79,7 @@ async function getCurrentReport(req, res, next) {
       await conn.query("UPDATE term_report SET read_at = NOW() WHERE id = ?", [report.id]);
     }
 
-    const snapshot = typeof report.snapshot_json === "string" ? JSON.parse(report.snapshot_json) : report.snapshot_json;
+    const snapshot = normalizeReportSnapshot(typeof report.snapshot_json === "string" ? JSON.parse(report.snapshot_json) : report.snapshot_json);
 
     success(res, {
       id: report.id,
@@ -312,7 +161,12 @@ async function exportReportHtml(req, res, next) {
       if (!ok) return res.status(403).send("无权查看该报告");
     }
 
-    const snapshot = typeof rep.snapshot_json === "string" ? JSON.parse(rep.snapshot_json) : rep.snapshot_json;
+    const snapshot = normalizeReportSnapshot(typeof rep.snapshot_json === "string" ? JSON.parse(rep.snapshot_json) : rep.snapshot_json);
+    // Authorization above uses current class membership; report content uses frozen identity.
+    rep.student_name = snapshot.student?.name || '未记录姓名';
+    rep.username = snapshot.student?.username || '';
+    rep.grade = snapshot.student?.grade ?? '';
+    rep.class_no = snapshot.student?.classNo ?? '';
     const downloadTime = new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
     const watermarkText = esc(`${rep.student_name} (${rep.username}) · 查验时间：${downloadTime}`);
     const securityHash = crypto

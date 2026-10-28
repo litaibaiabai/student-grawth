@@ -133,7 +133,7 @@ const StudentLedger = () => {
   return (
     <div>
       {/* 标题 */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div className="student-page-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}>
             IMMUTABLE PROCESS LEDGER

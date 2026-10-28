@@ -21,7 +21,14 @@ async function initialize(runtime){
   ['周知行','许星禾','沈乐知','陆安然','程子墨','唐可欣','顾明远','叶小满'].forEach((name,i)=>users.push({id:11+i,username:'demo_s'+String(i+1).padStart(2,'0'),realName:name,role:'student',schoolId:1,grade:4,classNo:i<4?1:2}));
   users.push({id:91,username:'other_manager',realName:'异校管理员',role:'manager',schoolId:2},{id:92,username:'other_teacher',realName:'异校教师',role:'teacher',schoolId:2,classes:[{grade:4,class_no:1}]},{id:93,username:'other_student',realName:'异校学生',role:'student',schoolId:2,grade:4,classNo:1});
   const password='Demo123456',hash=await bcrypt.hash(password,10);
-  for(const u of users)await c.query('INSERT INTO users(id,school_id,username,password,real_name,role,grade,class_no,classes,status) VALUES (?,?,?,?,?,?,?,?,?,0)',[u.id,u.schoolId,u.username,hash,u.realName,u.role,u.grade||null,u.classNo||null,u.classes?JSON.stringify(u.classes):null]);
+  for(const u of users){
+    await c.query('INSERT INTO users(id,school_id,username,password,real_name,role,grade,class_no,classes,status) VALUES (?,?,?,?,?,?,?,?,?,0)',[u.id,u.schoolId,u.username,hash,u.realName,u.role,u.grade||null,u.classNo||null,u.classes?JSON.stringify(u.classes):null]);
+    if(u.role==='teacher'&&Array.isArray(u.classes)){
+      for(const cl of u.classes){
+        await c.query("INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) VALUES (?,1,?,?,?,'CHINESE',?) ON DUPLICATE KEY UPDATE is_head_teacher=VALUES(is_head_teacher)",[u.schoolId,u.id,cl.grade,cl.class_no,cl.class_no===1?1:0]);
+      }
+    }
+  }
   const [year,mon]=date.split('-').map(Number); const sem=mon>=9||mon<=1?1:2,ay=mon>=9?year:year-1;
   const term={id:1,academicYear:ay+'-'+(ay+1),semester:sem,startDate:sem===1?ay+'-09-01':(ay+1)+'-02-01',endDate:sem===1?(ay+1)+'-01-31':(ay+1)+'-08-31'};
   await c.query('INSERT INTO academic_year(id,school_id,academic_year,semester,start_date,end_date,is_current,active,effective_at,review_deadline_at) VALUES(1,1,?,?,?,?,1,1,NOW(),?)',[term.academicYear,sem,term.startDate,term.endDate,term.endDate+' 23:59:59']);

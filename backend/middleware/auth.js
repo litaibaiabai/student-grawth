@@ -69,10 +69,22 @@ async function requireAuth(req, res, next) {
     }
 
     req.actor = actor;
+    let effectiveClasses = (actor.assignments || []).map(a => ({ grade: a.grade, class_no: a.classNo, subject_code: a.subjectCode }));
+    if (effectiveClasses.length === 0) {
+      const rawClasses = actor.classes || decoded.classes;
+      if (rawClasses) {
+        try {
+          const parsed = typeof rawClasses === 'string' ? JSON.parse(rawClasses) : rawClasses;
+          if (Array.isArray(parsed)) {
+            effectiveClasses = parsed.map(c => ({ grade: Number(c.grade), class_no: Number(c.class_no || c.classNo) }));
+          }
+        } catch {}
+      }
+    }
     req.user = {
       ...decoded,
       ...actor,
-      classes: (actor.assignments || []).map(a => ({ grade: a.grade, class_no: a.classNo, subject_code: a.subjectCode }))
+      classes: effectiveClasses
     };
     next();
   } catch (err) {

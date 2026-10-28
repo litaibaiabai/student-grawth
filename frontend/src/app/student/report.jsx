@@ -107,7 +107,7 @@ const StudentReport = () => {
   return (
     <div style={{ maxWidth: 880, margin: "0 auto" }}>
       {/* 顶栏操作区 */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div className="student-page-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <div>
           <div
             style={{ fontSize: 10, letterSpacing: 1.5, color: "#8d9c90", fontWeight: 700, textTransform: "uppercase" }}
@@ -218,7 +218,7 @@ const StudentReport = () => {
               size="small"
               columns={[
                 { title: "学科名称", dataIndex: "subject_name", key: "name" },
-                { title: "期末得分", key: "score", render: (_, r) => <strong>{r.score ?? r.raw_score} 分</strong> },
+                { title: "期末得分", key: "score", render: (_, r) => <strong>{Number(r.score ?? r.raw_score ?? 0).toFixed(2)} 分</strong> },
                 {
                   title: "等级",
                   key: "level",

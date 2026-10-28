@@ -104,6 +104,7 @@ async function resolveActorContext({ userId, tokenHash, issuedRole, termId }, co
     role: user.role,
     assignments,
     headTeacherClass,
+    classes: user.classes,
     capabilities: {
       canManageSchool: user.role === 'manager' || user.role === 'admin',
       isTeacher: user.role === 'teacher',

@@ -179,7 +179,7 @@ const StudentEvaluation = () => {
       )}
 
       <Row gutter={24}>
-        <Col span={12}>
+        <Col xs={24} lg={12}>
           <Card
             title="六育正式成绩雷达与各维分"
             bordered={false}
@@ -220,7 +220,7 @@ const StudentEvaluation = () => {
           </Card>
         </Col>
 
-        <Col span={12}>
+        <Col xs={24} lg={12}>
           <Card
             title="过程表现与荣誉认定权重折算"
             bordered={false}

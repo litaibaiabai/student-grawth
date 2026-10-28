@@ -13,6 +13,7 @@ import { get } from "@/util/request";
 import { API_AUTH_ME } from "@/constant/urls";
 import Topbar from "@/component/Nav";
 import Sidebar from "@/component/Sidebar";
+import StudentLayout from "@/component/StudentLayout";
 
 dayjs.locale("zh-cn");
 message.config({ maxCount: 2 });
@@ -22,6 +23,7 @@ const Dashboard = lazy(() => import("./app/dashboard"));
 const Login = lazy(() => import("./app/login"));
 
 // 学生端视图
+const StudentGrowthDashboard = lazy(() => import("./app/student/growth"));
 const StudentClaim = lazy(() => import("./app/student/claim"));
 const StudentLedger = lazy(() => import("./app/student/ledger"));
 const StudentHonors = lazy(() => import("./app/student/honors"));
@@ -142,7 +144,7 @@ function App() {
 
   const RequireAuth = ({ children }) => {
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-    return <Layout>{children}</Layout>;
+    return userRole === "student" ? <StudentLayout>{children}</StudentLayout> : <Layout>{children}</Layout>;
   };
 
   return (
@@ -177,7 +179,7 @@ function App() {
               path="/dashboard"
               element={
                 <RequireAuth>
-                  <Dashboard />
+                  {userRole === "student" ? <StudentGrowthDashboard /> : <Dashboard />}
                 </RequireAuth>
               }
             />

@@ -161,7 +161,7 @@ const StudentStories = () => {
       </div>
 
       <Row gutter={24}>
-        <Col span={15}>
+        <Col xs={24} lg={15}>
           <Card
             title={
               <Space>
@@ -307,7 +307,7 @@ const StudentStories = () => {
           </Card>
         </Col>
 
-        <Col span={9}>
+        <Col xs={24} lg={9}>
           <Card
             title="写作小灵感"
             bordered={false}

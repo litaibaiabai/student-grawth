@@ -35,10 +35,13 @@ async function assertHeadmasterAuth({ actor, studentKey, conn }) {
     throw new HttpError('仅限班主任访问', 403);
   }
 
-  const schoolId = studentKey.schoolId || 1;
+  const schoolId = actor.schoolId || actor.school_id || studentKey.schoolId || 1;
+  if (Number(schoolId) !== Number(studentKey.schoolId || schoolId)) throw new HttpError('禁止跨校访问学生草稿', 403);
+  const [[student]] = await conn.query("SELECT id, school_id, username, real_name, grade, class_no FROM users WHERE id = ? AND school_id = ? AND role = 'student'", [studentKey.studentId, schoolId]);
+  if (!student) throw new HttpError('学生不存在', 404);
   const termId = Number(studentKey.termId) || 1;
-  const grade = Number(studentKey.grade);
-  const classNo = Number(studentKey.classNo);
+  const grade = student.grade;
+  const classNo = student.class_no;
   const teacherId = actor.id;
 
   const [rows] = await conn.query(
@@ -51,13 +54,21 @@ async function assertHeadmasterAuth({ actor, studentKey, conn }) {
   if (rows.length === 0) {
     throw new HttpError('非所负责班级的班主任，无权操作此报告草稿', 403);
   }
+  return student;
+}
+
+function canonicalStringify(obj) {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return '[' + obj.map(canonicalStringify).join(',') + ']';
+  const keys = Object.keys(obj).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalStringify(obj[k])).join(',') + '}';
 }
 
 /**
  * 计算审批指纹
  */
 function computeApprovalFingerprint({ schoolId, termId, studentId, sourceRevision, policyVersion, draftSnapshot, teacherComment }) {
-  const content = JSON.stringify({
+  const content = canonicalStringify({
     schoolId,
     termId,
     studentId,
@@ -81,23 +92,14 @@ async function buildDraft({ actor, studentKey, expectedSourceRevision, connectio
     const termId = Number(studentKey.termId) || 1;
     const studentId = Number(studentKey.studentId);
 
-    // 获取学生班级信息
-    let grade = studentKey.grade;
-    let classNo = studentKey.classNo;
-    if (grade === undefined || classNo === undefined) {
-      const [u] = await conn.query("SELECT grade, class_no FROM users WHERE id = ? LIMIT 1", [studentId]);
-      if (u.length > 0) {
-        grade = u[0].grade;
-        classNo = u[0].class_no;
-      }
-    }
-
+    const student = await assertHeadmasterAuth({ actor, studentKey: {schoolId,termId,studentId}, conn });
+    const grade = student.grade;
+    const classNo = student.class_no;
     const key = { schoolId, termId, studentId, grade, classNo };
-    await assertHeadmasterAuth({ actor, studentKey: key, conn });
 
     // 1. 获取最新 source_revision
     const [stateRows] = await conn.query(
-      "SELECT source_revision FROM student_term_state WHERE student_id = ? AND term_id = ? LIMIT 1",
+      "SELECT source_revision, profile_revision FROM student_term_state WHERE student_id = ? AND term_id = ? LIMIT 1",
       [studentId, termId]
     );
     const sourceRevision = stateRows[0]?.source_revision || 1;
@@ -122,6 +124,8 @@ async function buildDraft({ actor, studentKey, expectedSourceRevision, connectio
 
     // 5. 组装证据快照
     const draftSnapshot = {
+      student: {id:student.id,name:student.real_name,username:student.username,grade,classNo},
+      profileRevision: stateRows[0]?.profile_revision || 1,
       evaluationSnapshot,
       subjects,
       honors,
@@ -136,6 +140,11 @@ async function buildDraft({ actor, studentKey, expectedSourceRevision, connectio
       [schoolId, termId, studentId]
     );
 
+    // Freeze only feedback visible when this draft was built. Later feedback waits for a new draft.
+    const [[family]] = await conn.query('SELECT id,comment_text,proxy_by_student FROM family_feedback_record WHERE school_id=? AND term_id=? AND student_id=? ORDER BY id DESC LIMIT 1',[schoolId,termId,studentId]);
+    draftSnapshot.familyMessage = family?.comment_text ?? existing[0]?.parent_comment ?? null;
+    draftSnapshot.familyRevision = family?.id ?? null;
+    draftSnapshot.familySource = family && !family.proxy_by_student ? 'PARENT_DIRECT' : 'STUDENT_TRANSCRIBED';
     const teacherComment = existing[0]?.teacher_comment || null;
     const approvalFingerprint = computeApprovalFingerprint({
       schoolId,
@@ -212,7 +221,7 @@ async function confirmDraft({ actor, draftId, expectedFingerprint, comment, conn
 
     // 检查最新来源版本，判断是否陈旧
     const [stateRows] = await conn.query(
-      "SELECT source_revision FROM student_term_state WHERE student_id = ? AND term_id = ? LIMIT 1",
+      "SELECT source_revision, profile_revision FROM student_term_state WHERE student_id = ? AND term_id = ? LIMIT 1",
       [draft.student_id, draft.term_id]
     );
     const currentRev = stateRows[0]?.source_revision || 1;
@@ -295,7 +304,7 @@ async function getDraft({ actor, draftId, studentKey, connection }) {
 
     // 检查来源变更
     const [stateRows] = await conn.query(
-      "SELECT source_revision FROM student_term_state WHERE student_id = ? AND term_id = ? LIMIT 1",
+      "SELECT source_revision, profile_revision FROM student_term_state WHERE student_id = ? AND term_id = ? LIMIT 1",
       [draft.student_id, draft.term_id]
     );
     const latestRevision = stateRows[0]?.source_revision || 1;

@@ -223,7 +223,7 @@ const StudentHonors = () => {
       <Card
         title={
           <Space>
-            <TrophyOutlined style={{ color: "#8b5cf6", fontSize: 20 }} />
+            <TrophyOutlined style={{ color: "var(--forest, #277460)", fontSize: 20 }} />
             <span style={{ fontSize: 18, fontWeight: 700 }}>荣誉奖项申报与认定</span>
           </Space>
         }
@@ -232,7 +232,7 @@ const StudentHonors = () => {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setModalVisible(true)}
-            style={{ background: "#7c3aed", borderColor: "#7c3aed" }}
+            style={{ background: "var(--forest, #277460)", borderColor: "var(--forest, #277460)" }}
           >
             申报新荣誉
           </Button>
@@ -312,7 +312,7 @@ const StudentHonors = () => {
             <Button onClick={() => setModalVisible(false)} style={{ marginRight: 8 }}>
               取消
             </Button>
-            <Button type="primary" htmlType="submit" style={{ background: "#7c3aed", borderColor: "#7c3aed" }}>
+            <Button type="primary" htmlType="submit" style={{ background: "var(--forest, #277460)", borderColor: "var(--forest, #277460)" }}>
               确认申报
             </Button>
           </div>

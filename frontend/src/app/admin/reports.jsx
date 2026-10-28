@@ -31,6 +31,7 @@ const { Title, Text, Paragraph } = Typography;
 
 const AdminReports = () => {
   const [students, setStudents] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");

@@ -120,7 +120,7 @@ async function buildEvaluationSnapshot({ studentKey, sourceRevision, policyVersi
 
     // 5. 荣誉分 (单次计分，无荣誉不计为缺失)
     const [honors] = await conn.query(
-      "SELECT id, COALESCE(award_points, honor_points, 1) AS points FROM honor_record WHERE student_id = ? AND term_id = ? AND status = 'APPROVED'",
+      "SELECT id, GREATEST(COALESCE(honor_points, 0), COALESCE(award_points, 0)) AS points FROM honor_record WHERE student_id = ? AND term_id = ? AND status = 'APPROVED'",
       [studentId, termId]
     );
     const approvedHonorCount = honors.length;
