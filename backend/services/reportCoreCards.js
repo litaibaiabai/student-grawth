@@ -248,12 +248,28 @@ async function generateCards({
     },
   );
 }
-async function listCards({ pool, actor, termId }) {
+async function listCards({ pool, actor, termId, kind, offset = 0 }) {
   if (actor.role === "student") fail(403, "无卡管理权限");
-  const [rows] = await pool.query(
-    "SELECT id,parent_id,student_id,owner_teacher_id,record_kind,month_key,target_key,status,payload_json,revision FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind IN ('CARD','QUOTA') AND (?='manager' OR owner_teacher_id=?) ORDER BY id DESC LIMIT 100",
-    [actor.schoolId, termId, actor.role, actor.id],
-  );
+  const load = async (type) =>
+    (
+      await pool.query(
+        "SELECT id,parent_id,student_id,owner_teacher_id,record_kind,month_key,target_key,status,payload_json,revision FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind=? AND (?='manager' OR owner_teacher_id=?) ORDER BY id DESC LIMIT 100 OFFSET ?",
+        [
+          actor.schoolId,
+          termId,
+          type,
+          actor.role,
+          actor.id,
+          Math.max(0, Math.floor(Number(offset) || 0)),
+        ],
+      )
+    )[0];
+  const rows =
+    kind === "QUOTA"
+      ? await load("QUOTA")
+      : kind === "CARD"
+        ? await load("CARD")
+        : [...(await load("QUOTA")), ...(await load("CARD"))];
   return rows.map((r) => ({
     ...r,
     payload: parse(r.payload_json),

@@ -75,7 +75,7 @@ async function rebuildEvaluation({ connection, studentKey, targets, config }) {
         (s) =>
           s.source_type === "STORY" &&
           s.record_kind === "BATCH" &&
-          s.status !== "SUPERSEDED",
+          ["SUBMITTED", "SCORED"].includes(s.status),
       );
       const category = target.includes("_read_")
         ? "READ"

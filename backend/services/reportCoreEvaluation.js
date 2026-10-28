@@ -48,13 +48,27 @@ async function getEvaluationView({ pool, actor, studentKey }) {
     status: e.status,
     allowedFields,
     values: Object.fromEntries(visible.map((f) => [f, e[f]])),
-    sportsSpecialties: parse(e.sports_specialties),
-    artSpecialties: parse(e.art_specialties),
+    sportsSpecialties:
+      actor.role === "student" ||
+      scope.head ||
+      scope.assignments?.some((a) => a.subject_code === "PE")
+        ? parse(e.sports_specialties)
+        : [],
+    artSpecialties:
+      actor.role === "student" ||
+      scope.head ||
+      scope.assignments?.some((a) =>
+        ["MUSIC", "FINE_ART"].includes(a.subject_code),
+      )
+        ? parse(e.art_specialties)
+        : [],
     progress: Object.fromEntries(
-      Object.entries(parse(e.field_sources)).map(([k, v]) => [
-        k,
-        { settled: v.settled, noAward: v.noAward, hasValue: e[k] !== null },
-      ]),
+      Object.entries(parse(e.field_sources))
+        .filter(([k]) => visible.includes(k))
+        .map(([k, v]) => [
+          k,
+          { settled: v.settled, noAward: v.noAward, hasValue: e[k] !== null },
+        ]),
     ),
   };
 }
@@ -195,7 +209,7 @@ async function settleSources({
               termId,
               studentId: e.student_id,
             },
-            action: "score",
+            action: settlement === "NO_AWARD" ? "award" : "score",
             fields: targetKeys,
           },
           c,
@@ -328,6 +342,7 @@ async function missingItems(c, e, term) {
   return missing;
 }
 async function buildReportDraft({ pool, actor, studentKey }) {
+  if (actor.role !== "teacher") fail(403, "报告草稿仅班主任可查看");
   const scope = await assertScope(
     { actor, studentKey, action: "report" },
     pool,

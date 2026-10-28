@@ -109,7 +109,7 @@ const {
     await nav("卡额度下发");
     await page.getByLabel("额度教师").selectOption("2");
     await page.getByLabel("额度月份").fill("2026-10");
-    await page.getByLabel("额度总张数").fill("2");
+    await page.getByLabel("额度总张数").fill("100");
     await page.getByRole("button", { name: "下发总额度", exact: true }).click();
     await toast("额度已下发");
     await login("teacher");
@@ -118,7 +118,7 @@ const {
       .getByRole("button", { name: "管理此计划", exact: true })
       .first()
       .click();
-    await page.getByLabel("计划张数0", { exact: true }).fill("2");
+    await page.getByLabel("计划张数0", { exact: true }).fill("100");
     await page
       .getByRole("button", { name: "保存分班计划", exact: true })
       .click();
@@ -131,6 +131,20 @@ const {
       .getByRole("button", { name: "生成全部班级卡片", exact: true })
       .click();
     await toast("卡片已生成");
+    await page
+      .getByRole("button", { name: "管理此计划", exact: true })
+      .first()
+      .click();
+    const zipDownload = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "下载分班 PDF 压缩包", exact: true })
+      .click();
+    const zip = await zipDownload;
+    assert.ok(
+      (await zip.suggestedFilename()).endsWith(".zip"),
+      "100-card quota remains printable through actual UI",
+    );
+
     await page
       .getByRole("button", { name: "查看扫码凭证", exact: true })
       .first()
@@ -150,6 +164,13 @@ const {
       .getByRole("button", { name: "为选中学生记 1 分", exact: true })
       .click();
     await toast("直评已记分");
+    await page
+      .getByRole("button", { name: "加载更多材料与记录", exact: true })
+      .waitFor();
+    await page
+      .getByRole("button", { name: "加载更多材料与记录", exact: true })
+      .click();
+
     for (const student of students) {
       await login(student.username);
       if (student.id === "4") {
@@ -196,16 +217,14 @@ const {
       await toast("整月故事已提交");
       if (student.id === "3") {
         await nav("上传奖状");
-        await page
-          .getByLabel("奖状文件")
-          .setInputFiles({
-            name: "fictional-award.png",
-            mimeType: "image/png",
-            buffer: Buffer.from(
-              "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOEsAAAAASUVORK5CYII=",
-              "base64",
-            ),
-          });
+        await page.getByLabel("奖状文件").setInputFiles({
+          name: "fictional-award.png",
+          mimeType: "image/png",
+          buffer: Buffer.from(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOEsAAAAASUVORK5CYII=",
+            "base64",
+          ),
+        });
         await page
           .getByRole("button", { name: "提交奖状", exact: true })
           .click();

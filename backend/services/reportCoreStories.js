@@ -250,10 +250,23 @@ async function applyStoryResult({
         row.lease_token !== leaseToken ||
         p.contentHash !== contentHash ||
         p.scoringRuleVersion !== ruleVersion ||
-        term.rule_version !== ruleVersion ||
         parent.status !== "SUBMITTED"
       )
         return { result: { applied: false } };
+      if (term.rule_version !== ruleVersion) {
+        await c.query(
+          "UPDATE evaluation_source_record SET status='QUEUED',attempts=0,next_attempt_at=NULL,lease_token=NULL,locked_until=NULL,revision=revision+1,payload_json=? WHERE id=?",
+          [
+            JSON.stringify({
+              ...p,
+              scoringRuleVersion: term.rule_version,
+              lastError: "评分规则已更新，正在按新规则重试",
+            }),
+            row.id,
+          ],
+        );
+        return { result: { applied: false, requeued: true } };
+      }
       await c.query(
         "UPDATE evaluation_source_record SET status='SCORED',payload_json=?,revision=revision+1,lease_token=NULL,locked_until=NULL WHERE id=?",
         [JSON.stringify({ ...p, score: result, scoreMethod: "MODEL" }), row.id],

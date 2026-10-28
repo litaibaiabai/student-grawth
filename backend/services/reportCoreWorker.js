@@ -10,6 +10,10 @@ async function claimAssessmentJobs({
   const c = await pool.getConnection();
   try {
     await c.beginTransaction();
+    await c.query(
+      "UPDATE evaluation_source_record s JOIN academic_year t ON t.id=s.term_id AND t.school_id=s.school_id SET s.status='FAILED',s.lease_token=NULL,s.locked_until=NULL,s.payload_json=JSON_SET(s.payload_json,'$.lastError','处理租约超时且重试次数已耗尽，请重试或教师复核') WHERE t.release_status='IDLE' AND s.source_type IN ('CERTIFICATE','STORY') AND s.record_kind='ITEM' AND s.status='PROCESSING' AND s.attempts>=3 AND s.locked_until<=?",
+      [now],
+    );
     const [rows] = await c.query(
       "SELECT s.* FROM evaluation_source_record s JOIN academic_year t ON t.id=s.term_id AND t.school_id=s.school_id WHERE t.release_status='IDLE' AND s.source_type IN ('CERTIFICATE','STORY') AND s.record_kind='ITEM' AND s.attempts<3 AND ((s.status='QUEUED' AND (s.next_attempt_at IS NULL OR s.next_attempt_at<=?)) OR (s.status='PROCESSING' AND s.locked_until<=?)) ORDER BY s.id LIMIT ? FOR UPDATE SKIP LOCKED",
       [now, now, Math.max(0, Math.min(2, limit))],

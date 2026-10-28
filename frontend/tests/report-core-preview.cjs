@@ -57,6 +57,37 @@ const policy = require("../../backend/config/reportCorePolicy.json");
       ),
     };
     await page.setContent(renderPrintableA4({ reportData: model }));
+    assert.equal(
+      await page
+        .locator('section[data-section="conduct"] table thead th')
+        .count(),
+      6,
+      "PDF conduct table has two behavior/self/other groups",
+    );
+    assert.equal(
+      (await page
+        .locator('section[data-section="wisdom"] td[rowspan="5"]')
+        .count()) > 0,
+      true,
+      "PDF Chinese subject shares learning columns across five ability rows",
+    );
+    assert.equal(
+      (await page.locator('section[data-section="art"] thead tr').count()) >= 3,
+      true,
+      "PDF art table uses multi-level academic/art-skill headings",
+    );
+    assert.deepEqual(
+      await page
+        .locator('section[data-section="labor"] thead th')
+        .allTextContents(),
+      ["课程", "成果表现", "学业水平", "成果作品、实践经历与表现"],
+    );
+    assert.deepEqual(
+      await page
+        .locator('section[data-section="story"] thead th')
+        .allTextContents(),
+      ["故事实践活动", "学业水平", "成果表现", "实践经历与表现"],
+    );
     for (const width of [375, 390, 430, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       assert.equal(await page.locator("[data-view]").count(), 109);

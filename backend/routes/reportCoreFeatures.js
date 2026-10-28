@@ -73,7 +73,12 @@ function mountFeatures(r, { asyncRoute, ok }) {
     asyncRoute(async (req, res) =>
       ok(
         res,
-        await cards.listCards({ ...context(req), termId: req.query.termId }),
+        await cards.listCards({
+          ...context(req),
+          termId: req.query.termId,
+          kind: req.query.kind,
+          offset: req.query.offset,
+        }),
       ),
     ),
   );
@@ -202,86 +207,13 @@ function mountFeatures(r, { asyncRoute, ok }) {
   r.get(
     "/report-core/sources",
     asyncRoute(async (req, res) => {
-      const { pool, actor } = context(req),
-        termId = req.query.termId;
-      let params = [actor.schoolId, termId];
-      let filter = " AND record_kind<>'AUDIT'";
-      if (actor.role === "student") {
-        filter += " AND student_id=?";
-        params.push(actor.id);
-      }
-      if (req.query.studentId) {
-        filter += " AND student_id=?";
-        params.push(req.query.studentId);
-      }
-      const offset = Math.max(0, Number(req.query.offset) || 0);
-      const [rows] = await pool.query(
-        `SELECT * FROM evaluation_source_record WHERE school_id=? AND term_id=? ${filter} ORDER BY id DESC LIMIT 100 OFFSET ?`,
-        [...params, offset],
-      );
-      const out = [];
-      for (const s of rows) {
-        if (actor.role === "manager") {
-          out.push({
-            id: s.id,
-            student_id: s.student_id,
-            source_type: s.source_type,
-            record_kind: s.record_kind,
-            status: s.status,
-          });
-          continue;
-        }
-        if (s.student_id) {
-          try {
-            await assertScope(
-              {
-                actor,
-                studentKey: {
-                  schoolId: actor.schoolId,
-                  termId,
-                  studentId: s.student_id,
-                },
-                action: s.source_type === "STORY" ? "score" : "read",
-                fields: s.target_key
-                  ? [s.target_key]
-                  : s.source_type === "STORY"
-                    ? ["story_read_star"]
-                    : [],
-              },
-              pool,
-            );
-          } catch {
-            if (
-              actor.role === "student" &&
-              s.source_type === "STORY" &&
-              String(s.student_id) === actor.id
-            ) {
-            } else continue;
-          }
-        } else if (
-          String(s.owner_teacher_id) !== actor.id &&
-          String(s.actor_id) !== actor.id
-        )
-          continue;
-        const payload = parse(s.payload_json);
-        delete payload.fileRef;
-        delete payload.passwordHash;
-        delete payload.rows;
-        out.push({
-          id: s.id,
-          student_id: s.student_id,
-          source_type: s.source_type,
-          record_kind: s.record_kind,
-          status: s.status,
-          target_key: s.target_key,
-          parent_id: s.parent_id,
-          month_key: s.month_key,
-          version: s.version,
-          revision: s.revision,
-          payload,
-        });
-      }
-      ok(res, out);
+      const page = await require("../services/reportCoreSources").listSources({
+        ...context(req),
+        termId: req.query.termId,
+        studentId: req.query.studentId,
+        offset: req.query.offset,
+      });
+      ok(res, req.query.page === "1" ? page : page.rows);
     }),
   );
   r.get(

@@ -62,6 +62,7 @@ export default function ReportCoreApp() {
     [termId, setTermId] = useState(""),
     [students, setStudents] = useState([]),
     [sources, setSources] = useState([]),
+    [sourceNext, setSourceNext] = useState(null),
     [assignments, setAssignments] = useState([]),
     [refreshKey, setRefresh] = useState(0),
     [notice, setNotice] = useState(""),
@@ -117,12 +118,13 @@ export default function ReportCoreApp() {
     if (!actor || !termId) return;
     Promise.all([
       allStudents(termId),
-      api(`/report-core/sources?termId=${termId}`),
+      api(`/report-core/sources?termId=${termId}&page=1`),
       api(`/report-core/assignments?termId=${termId}`),
     ])
       .then(([s, r, a]) => {
         setStudents(s);
-        setSources(r);
+        setSources(r.rows);
+        setSourceNext(r.nextOffset);
         setAssignments(a);
       })
       .catch(reportError);
@@ -134,6 +136,19 @@ export default function ReportCoreApp() {
     students,
     sources,
     assignments,
+    sourceNext,
+    loadMoreSources: () =>
+      run(async () => {
+        const page = await api(
+          `/report-core/sources?termId=${termId}&page=1&offset=${sourceNext}`,
+        );
+        setSources((rows) => [
+          ...new Map(
+            [...rows, ...page.rows].map((s) => [String(s.id), s]),
+          ).values(),
+        ]);
+        setSourceNext(page.nextOffset);
+      }),
     refreshKey,
     refresh,
     notify,
@@ -329,6 +344,12 @@ export default function ReportCoreApp() {
             {tab === "cards-manage" && <CardManagement ctx={ctx} />}{" "}
             {tab === "config" && <Configuration ctx={ctx} />}{" "}
             {tab === "releases" && <Releases ctx={ctx} />}
+            {sourceNext !== null &&
+              ["stories", "awards", "reviews", "direct"].includes(tab) && (
+                <button onClick={ctx.loadMoreSources}>
+                  加载更多材料与记录
+                </button>
+              )}
           </div>
         )}
         <footer className="core-footer">

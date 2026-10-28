@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { normalizeImportRows } from "./importRows";
 import { api, resultOf, download } from "./api";
 import { EvaluationForm, statusName } from "./Materials";
 import TermReport from "../../component/TermReport";
@@ -198,29 +199,7 @@ export function ImportData({ ctx }) {
           password: r.password,
         })),
       );
-    } else
-      setRows(
-        raw.map((r) => ({
-          ...(r.studentId
-            ? { studentId: String(r.studentId) }
-            : { username: String(r.username) }),
-          values: Object.fromEntries(
-            fields
-              .filter(
-                (field) =>
-                  r[field.column] !== undefined && r[field.column] !== "",
-              )
-              .map((field) => [
-                field.column,
-                ["height_cm", "weight_kg", "jump_rope_1min"].includes(
-                  field.column,
-                ) || field.valueType === "star"
-                  ? Number(r[field.column])
-                  : String(r[field.column]),
-              ]),
-          ),
-        })),
-      );
+    } else setRows(normalizeImportRows(raw, fields));
     setPreview(null);
   }
   function template() {
@@ -706,6 +685,10 @@ export function Settlements({ ctx }) {
   ];
   const [cls, setCls] = useState(classes[0] || ""),
     [kind, setKind] = useState("CARD_CLOSED");
+  const [currentGrade, currentClass] = cls.split(":").map(Number);
+  const myClass = ctx.assignments.filter(
+    (a) => a.grade === currentGrade && a.class_no === currentClass,
+  );
   const targets =
     kind === "CARD_CLOSED"
       ? ctx.catalog.fields
@@ -725,7 +708,16 @@ export function Settlements({ ctx }) {
             .map((f) => f.column),
           "sports_specialties",
           "art_specialties",
-        ];
+        ].filter((column) =>
+          myClass.some(
+            (a) =>
+              a.is_head_teacher ||
+              a.subject_code === subjectFor(column) ||
+              (column === "sports_specialties" && a.subject_code === "PE") ||
+              (column === "art_specialties" &&
+                ["MUSIC", "FINE_ART"].includes(a.subject_code)),
+          ),
+        );
   return (
     <section className="panel">
       <h2>采集结算</h2>

@@ -64,7 +64,12 @@ test("quota restricts generation; same class concurrent redemption credits only 
     expectedRevision: "2",
     command: command(),
   });
-  const list = await cards.listCards({ pool: db.pool, actor, termId: "1" });
+  const list = await cards.listCards({
+    pool: db.pool,
+    actor,
+    termId: "1",
+    kind: "CARD",
+  });
   const token = await cards.cardToken({
     pool: db.pool,
     actor,

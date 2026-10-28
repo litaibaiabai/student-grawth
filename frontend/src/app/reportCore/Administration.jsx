@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { api, resultOf, download } from "./api";
 export function CardManagement({ ctx }) {
   const [cards, setCards] = useState([]),
+    [cardOffset, setCardOffset] = useState(0),
+    [moreCards, setMoreCards] = useState(false),
     [teacher, setTeacher] = useState(""),
     [total, setTotal] = useState(100),
     [month, setMonth] = useState(new Date().toISOString().slice(0, 7)),
@@ -16,8 +18,15 @@ export function CardManagement({ ctx }) {
     ]),
     [token, setToken] = useState("");
   useEffect(() => {
-    api(`/report-core/card-quotas?termId=${ctx.termId}`)
-      .then(setCards)
+    Promise.all([
+      api(`/report-core/card-quotas?termId=${ctx.termId}&kind=QUOTA`),
+      api(`/report-core/card-quotas?termId=${ctx.termId}&kind=CARD`),
+    ])
+      .then(([quotas, rows]) => {
+        setCards([...quotas, ...rows]);
+        setCardOffset(rows.length);
+        setMoreCards(rows.length === 100);
+      })
       .catch(ctx.error);
   }, [ctx.termId, ctx.refreshKey]);
   const teachers = [
@@ -267,6 +276,22 @@ export function CardManagement({ ctx }) {
       {ctx.actor.role === "teacher" && (
         <section className="panel">
           <h2>卡片查询</h2>
+          {moreCards && (
+            <button
+              onClick={() =>
+                ctx.run(async () => {
+                  const rows = await api(
+                    `/report-core/card-quotas?termId=${ctx.termId}&kind=CARD&offset=${cardOffset}`,
+                  );
+                  setCards((old) => [...old, ...rows]);
+                  setCardOffset(cardOffset + rows.length);
+                  setMoreCards(rows.length === 100);
+                })
+              }
+            >
+              加载更多卡片
+            </button>
+          )}
           <p>最多显示最近100条，未兑换卡不计分。打印包含完整卡片。</p>
           {cards
             .filter((c) => c.record_kind === "CARD")

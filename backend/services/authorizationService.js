@@ -60,7 +60,14 @@ async function assertScope(
     fail(403, "仅班主任可查看完整报告");
   const allowedFields = fields.filter(
     (f) =>
-      head ||
+      (head &&
+        ["read", "report", "confirm", "material", "award"].includes(action)) ||
+      (head &&
+        action === "score" &&
+        (["sports_specialties", "art_specialties"].includes(f) ||
+          subjectFor(f) === "STORY")) ||
+      (f === "art_specialties" &&
+        rows.some((a) => ["MUSIC", "FINE_ART"].includes(a.subject_code))) ||
       subjectFor(f) === "CONDUCT" ||
       rows.some((a) => a.subject_code === subjectFor(f)),
   );
