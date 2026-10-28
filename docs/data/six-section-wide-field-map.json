@@ -1,0 +1,1653 @@
+{
+  "status": "SUPERSEDED_BY_TERM_REPORT_CORE_DESIGN",
+  "table": "student_term_evaluation",
+  "rowGrain": "school_id + term_id + student_id",
+  "displayPositions": 102,
+  "fixedSixSectionColumns": 90,
+  "repeatingJsonColumns": [
+    "sports_specialties",
+    "art_specialties"
+  ],
+  "fields": [
+    {
+      "viewCode": "CONDUCT_1_SELF",
+      "section": "conduct",
+      "label": "有礼貌·自评",
+      "column": "conduct_politeness_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_1_OTHER",
+      "section": "conduct",
+      "label": "有礼貌·他评",
+      "column": "conduct_politeness_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_2_SELF",
+      "section": "conduct",
+      "label": "讲文明·自评",
+      "column": "conduct_civility_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_2_OTHER",
+      "section": "conduct",
+      "label": "讲文明·他评",
+      "column": "conduct_civility_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_3_SELF",
+      "section": "conduct",
+      "label": "讲信用·自评",
+      "column": "conduct_integrity_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_3_OTHER",
+      "section": "conduct",
+      "label": "讲信用·他评",
+      "column": "conduct_integrity_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_4_SELF",
+      "section": "conduct",
+      "label": "负责任·自评",
+      "column": "conduct_responsibility_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_4_OTHER",
+      "section": "conduct",
+      "label": "负责任·他评",
+      "column": "conduct_responsibility_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_5_SELF",
+      "section": "conduct",
+      "label": "有爱心·自评",
+      "column": "conduct_kindness_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_5_OTHER",
+      "section": "conduct",
+      "label": "有爱心·他评",
+      "column": "conduct_kindness_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_6_SELF",
+      "section": "conduct",
+      "label": "守规则·自评",
+      "column": "conduct_rules_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_6_OTHER",
+      "section": "conduct",
+      "label": "守规则·他评",
+      "column": "conduct_rules_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_7_SELF",
+      "section": "conduct",
+      "label": "善交流·自评",
+      "column": "conduct_communication_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_7_OTHER",
+      "section": "conduct",
+      "label": "善交流·他评",
+      "column": "conduct_communication_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_8_SELF",
+      "section": "conduct",
+      "label": "会合作·自评",
+      "column": "conduct_cooperation_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "CONDUCT_8_OTHER",
+      "section": "conduct",
+      "label": "会合作·他评",
+      "column": "conduct_cooperation_other_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceNotes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "MORAL_LEARNING_1",
+      "section": "wisdom",
+      "label": "道德与法治·学习兴趣",
+      "column": "moral_interest_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_LEARNING_2",
+      "section": "wisdom",
+      "label": "道德与法治·学习习惯",
+      "column": "moral_habit_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_LEARNING_3",
+      "section": "wisdom",
+      "label": "道德与法治·学习方法",
+      "column": "moral_method_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_ABILITY_1",
+      "section": "wisdom",
+      "label": "道德与法治·认知水平",
+      "column": "moral_cognition_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_ABILITY_2",
+      "section": "wisdom",
+      "label": "道德与法治·实践能力",
+      "column": "moral_practice_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_PROCESS",
+      "section": "wisdom",
+      "label": "道德与法治·过程表现",
+      "column": "moral_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_LEARNING_1",
+      "section": "wisdom",
+      "label": "语文·学习兴趣",
+      "column": "chinese_interest_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_LEARNING_2",
+      "section": "wisdom",
+      "label": "语文·学习习惯",
+      "column": "chinese_habit_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_LEARNING_3",
+      "section": "wisdom",
+      "label": "语文·学习方法",
+      "column": "chinese_method_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_1",
+      "section": "wisdom",
+      "label": "语文·积累与运用",
+      "column": "chinese_accumulation_application_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_2",
+      "section": "wisdom",
+      "label": "语文·阅读与鉴赏",
+      "column": "chinese_reading_appreciation_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_3",
+      "section": "wisdom",
+      "label": "语文·表达与交流",
+      "column": "chinese_expression_communication_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_4",
+      "section": "wisdom",
+      "label": "语文·梳理与探究",
+      "column": "chinese_organization_inquiry_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_5",
+      "section": "wisdom",
+      "label": "语文·书写",
+      "column": "chinese_handwriting_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_PROCESS",
+      "section": "wisdom",
+      "label": "语文·过程表现",
+      "column": "chinese_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_LEARNING_1",
+      "section": "wisdom",
+      "label": "数学·学习兴趣",
+      "column": "math_interest_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_LEARNING_2",
+      "section": "wisdom",
+      "label": "数学·学习习惯",
+      "column": "math_habit_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_LEARNING_3",
+      "section": "wisdom",
+      "label": "数学·学习方法",
+      "column": "math_method_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_1",
+      "section": "wisdom",
+      "label": "数学·基础知识",
+      "column": "math_basic_knowledge_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_2",
+      "section": "wisdom",
+      "label": "数学·数学思维",
+      "column": "math_thinking_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_3",
+      "section": "wisdom",
+      "label": "数学·信息提取",
+      "column": "math_information_extraction_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_4",
+      "section": "wisdom",
+      "label": "数学·解决问题",
+      "column": "math_problem_solving_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_PROCESS",
+      "section": "wisdom",
+      "label": "数学·过程表现",
+      "column": "math_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_LEARNING_1",
+      "section": "wisdom",
+      "label": "科学·学习兴趣",
+      "column": "science_interest_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_LEARNING_2",
+      "section": "wisdom",
+      "label": "科学·学习习惯",
+      "column": "science_habit_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_LEARNING_3",
+      "section": "wisdom",
+      "label": "科学·学习方法",
+      "column": "science_method_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_ABILITY_1",
+      "section": "wisdom",
+      "label": "科学·科学观念",
+      "column": "science_concepts_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_ABILITY_2",
+      "section": "wisdom",
+      "label": "科学·科学思维",
+      "column": "science_thinking_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_ABILITY_3",
+      "section": "wisdom",
+      "label": "科学·探究实践",
+      "column": "science_inquiry_practice_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_PROCESS",
+      "section": "wisdom",
+      "label": "科学·过程表现",
+      "column": "science_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_LEARNING_1",
+      "section": "wisdom",
+      "label": "英语·学习兴趣",
+      "column": "english_interest_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_LEARNING_2",
+      "section": "wisdom",
+      "label": "英语·学习习惯",
+      "column": "english_habit_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_LEARNING_3",
+      "section": "wisdom",
+      "label": "英语·学习方法",
+      "column": "english_method_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_1",
+      "section": "wisdom",
+      "label": "英语·听力素养",
+      "column": "english_listening_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_2",
+      "section": "wisdom",
+      "label": "英语·口语素养",
+      "column": "english_speaking_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_3",
+      "section": "wisdom",
+      "label": "英语·书面表达",
+      "column": "english_writing_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_4",
+      "section": "wisdom",
+      "label": "英语·阅读能力",
+      "column": "english_reading_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_PROCESS",
+      "section": "wisdom",
+      "label": "英语·过程表现",
+      "column": "english_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceNotes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "HEIGHT",
+      "section": "health",
+      "label": "身高",
+      "column": "height_cm",
+      "jsonPath": null,
+      "sqlType": "DECIMAL(5,1)",
+      "nullable": true,
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceNotes": [
+        "测量原值不直接转换为奖惩积分"
+      ]
+    },
+    {
+      "viewCode": "WEIGHT",
+      "section": "health",
+      "label": "体重",
+      "column": "weight_kg",
+      "jsonPath": null,
+      "sqlType": "DECIMAL(5,1)",
+      "nullable": true,
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceNotes": [
+        "测量原值不直接转换为奖惩积分"
+      ]
+    },
+    {
+      "viewCode": "VISION_LEFT",
+      "section": "health",
+      "label": "视力 · 左",
+      "column": "vision_left",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(16)",
+      "nullable": true,
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceNotes": [
+        "保存实际测量值，不能从积分推算",
+        "左右视力分别保存，视力标准待确认"
+      ]
+    },
+    {
+      "viewCode": "VISION_RIGHT",
+      "section": "health",
+      "label": "视力 · 右",
+      "column": "vision_right",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(16)",
+      "nullable": true,
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceNotes": [
+        "保存实际测量值，不能从积分推算",
+        "左右视力分别保存，视力标准待确认"
+      ]
+    },
+    {
+      "viewCode": "JUMP_ROPE_1MIN",
+      "section": "health",
+      "label": "1 分钟跳绳",
+      "column": "jump_rope_1min",
+      "jsonPath": null,
+      "sqlType": "INT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceNotes": [
+        "测量原值不直接转换为奖惩积分"
+      ]
+    },
+    {
+      "viewCode": "PE_ACADEMIC",
+      "section": "health",
+      "label": "体育与健康·学业水平",
+      "column": "pe_academic_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "SUBJECT_RESULT"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceNotes": [
+        "只有匹配体育与健康学业水平的正式等级才可映射"
+      ]
+    },
+    {
+      "viewCode": "PE_PROCESS",
+      "section": "health",
+      "label": "体育与健康·过程表现",
+      "column": "pe_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FITNESS_SELF",
+      "section": "health",
+      "label": "体质健康测试·自我评价",
+      "column": "fitness_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FITNESS_LEVEL",
+      "section": "health",
+      "label": "体质健康测试·体测水平",
+      "column": "fitness_level_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceNotes": [
+        "采用体测平台结果时须明确等级映射与确认规则，不用身高体重推算过程表现"
+      ]
+    },
+    {
+      "viewCode": "FITNESS_PROCESS",
+      "section": "health",
+      "label": "体质健康测试·过程表现",
+      "column": "fitness_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceNotes": [
+        "采用体测平台结果时须明确等级映射与确认规则，不用身高体重推算过程表现"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_NAME",
+      "section": "health",
+      "label": "体育技能特长·项目",
+      "column": "sports_specialties",
+      "jsonPath": "$[0].name",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "建议体育教师确认",
+      "sourceNotes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_SELF",
+      "section": "health",
+      "label": "体育技能特长·自我评价",
+      "column": "sports_specialties",
+      "jsonPath": "$[0].self_star",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_TEACHER",
+      "section": "health",
+      "label": "体育技能特长·教师评价",
+      "column": "sports_specialties",
+      "jsonPath": "$[0].teacher_star",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "建议体育教师确认",
+      "sourceNotes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_OUTCOME",
+      "section": "health",
+      "label": "体育技能特长·成果表现",
+      "column": "sports_specialties",
+      "jsonPath": "$[0].outcome",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "建议体育教师确认",
+      "sourceNotes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "MUSIC_LEARNING_SELF",
+      "section": "art",
+      "label": "音乐·学习过程·自我评价",
+      "column": "music_learning_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "MUSIC_LEARNING_TEACHER",
+      "section": "art",
+      "label": "音乐·学习过程·教师评价",
+      "column": "music_learning_teacher_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "MUSIC_ACADEMIC",
+      "section": "art",
+      "label": "音乐·学业水平",
+      "column": "music_academic_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "SUBJECT_RESULT"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceNotes": [
+        "仅引用对应学科有效正式等级，不影响自评、技能等其他项目"
+      ]
+    },
+    {
+      "viewCode": "MUSIC_PROCESS",
+      "section": "art",
+      "label": "音乐·过程表现",
+      "column": "music_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "MUSIC_SKILL_SELF",
+      "section": "art",
+      "label": "音乐·艺术技能·自我评价",
+      "column": "music_skill_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "MUSIC_SKILL_TEACHER",
+      "section": "art",
+      "label": "音乐·艺术技能·教师评价",
+      "column": "music_skill_teacher_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FINE_ART_LEARNING_SELF",
+      "section": "art",
+      "label": "美术·学习过程·自我评价",
+      "column": "fine_art_learning_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FINE_ART_LEARNING_TEACHER",
+      "section": "art",
+      "label": "美术·学习过程·教师评价",
+      "column": "fine_art_learning_teacher_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FINE_ART_ACADEMIC",
+      "section": "art",
+      "label": "美术·学业水平",
+      "column": "fine_art_academic_grade",
+      "jsonPath": null,
+      "sqlType": "VARCHAR(8)",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "SUBJECT_RESULT"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceNotes": [
+        "仅引用对应学科有效正式等级，不影响自评、技能等其他项目"
+      ]
+    },
+    {
+      "viewCode": "FINE_ART_PROCESS",
+      "section": "art",
+      "label": "美术·过程表现",
+      "column": "fine_art_process_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FINE_ART_SKILL_SELF",
+      "section": "art",
+      "label": "美术·艺术技能·自我评价",
+      "column": "fine_art_skill_self_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "FINE_ART_SKILL_TEACHER",
+      "section": "art",
+      "label": "美术·艺术技能·教师评价",
+      "column": "fine_art_skill_teacher_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceNotes": []
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_NAME",
+      "section": "art",
+      "label": "艺术特长项目1·项目",
+      "column": "art_specialties",
+      "jsonPath": "$[0].name",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_SELF",
+      "section": "art",
+      "label": "艺术特长项目1·自我评价",
+      "column": "art_specialties",
+      "jsonPath": "$[0].self_star",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_TEACHER",
+      "section": "art",
+      "label": "艺术特长项目1·教师评价",
+      "column": "art_specialties",
+      "jsonPath": "$[0].teacher_star",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_OUTCOME",
+      "section": "art",
+      "label": "艺术特长项目1·成果表现",
+      "column": "art_specialties",
+      "jsonPath": "$[0].outcome",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_NAME",
+      "section": "art",
+      "label": "艺术特长项目2·项目",
+      "column": "art_specialties",
+      "jsonPath": "$[1].name",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_SELF",
+      "section": "art",
+      "label": "艺术特长项目2·自我评价",
+      "column": "art_specialties",
+      "jsonPath": "$[1].self_star",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "responsibleRole": "学生本人",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_TEACHER",
+      "section": "art",
+      "label": "艺术特长项目2·教师评价",
+      "column": "art_specialties",
+      "jsonPath": "$[1].teacher_star",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_OUTCOME",
+      "section": "art",
+      "label": "艺术特长项目2·成果表现",
+      "column": "art_specialties",
+      "jsonPath": "$[1].outcome",
+      "sqlType": "JSON",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceNotes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "LABOR_1_ACADEMIC",
+      "section": "labor",
+      "label": "信息科技·学业水平",
+      "column": "information_technology_academic_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "信息科技教师",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_1_EXPERIENCE",
+      "section": "labor",
+      "label": "信息科技·成果作品、实践经历与表现",
+      "column": "information_technology_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "信息科技教师",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_2_ACADEMIC",
+      "section": "labor",
+      "label": "劳动·学业水平",
+      "column": "labor_academic_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "劳动课程教师",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_2_EXPERIENCE",
+      "section": "labor",
+      "label": "劳动·成果作品、实践经历与表现",
+      "column": "labor_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "劳动课程教师",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_3_ACADEMIC",
+      "section": "labor",
+      "label": "综合实践活动·学业水平",
+      "column": "integrated_practice_academic_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "综合实践课程负责人",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_3_EXPERIENCE",
+      "section": "labor",
+      "label": "综合实践活动·成果作品、实践经历与表现",
+      "column": "integrated_practice_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "综合实践课程负责人",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_4_ACADEMIC",
+      "section": "labor",
+      "label": "地方课程·学业水平",
+      "column": "local_course_academic_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "地方课程负责人",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_4_EXPERIENCE",
+      "section": "labor",
+      "label": "地方课程·成果作品、实践经历与表现",
+      "column": "local_course_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "responsibleRole": "地方课程负责人",
+      "sourceNotes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "STORY_READ_ASSESSMENT",
+      "section": "story",
+      "label": "我爱读故事·分项评价",
+      "column": "story_read_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "EXTERNAL_STORY_FINAL",
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "指定故事评价教师/外部成绩接收负责人",
+      "sourceNotes": [
+        "来源优先级及星级制式待校方确定",
+        "小程序总成绩不能复制为读、听、讲三项"
+      ]
+    },
+    {
+      "viewCode": "STORY_READ_EXPERIENCE",
+      "section": "story",
+      "label": "我爱读故事·实践经历与表现",
+      "column": "story_read_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_TEXT_CONFIRMED",
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "学生提供事实，建议故事评价教师确认",
+      "sourceNotes": [
+        "本系统月度故事仅可作为证据；默认不接收小程序原稿或实践描述"
+      ]
+    },
+    {
+      "viewCode": "STORY_LISTEN_ASSESSMENT",
+      "section": "story",
+      "label": "我爱听故事·分项评价",
+      "column": "story_listen_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "EXTERNAL_STORY_FINAL",
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "指定故事评价教师/外部成绩接收负责人",
+      "sourceNotes": [
+        "来源优先级及星级制式待校方确定",
+        "小程序总成绩不能复制为读、听、讲三项"
+      ]
+    },
+    {
+      "viewCode": "STORY_LISTEN_EXPERIENCE",
+      "section": "story",
+      "label": "我爱听故事·实践经历与表现",
+      "column": "story_listen_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_TEXT_CONFIRMED",
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "学生提供事实，建议故事评价教师确认",
+      "sourceNotes": [
+        "本系统月度故事仅可作为证据；默认不接收小程序原稿或实践描述"
+      ]
+    },
+    {
+      "viewCode": "STORY_TELL_ASSESSMENT",
+      "section": "story",
+      "label": "我爱讲故事·分项评价",
+      "column": "story_tell_star",
+      "jsonPath": null,
+      "sqlType": "TINYINT UNSIGNED",
+      "nullable": true,
+      "sourceCandidates": [
+        "EXTERNAL_STORY_FINAL",
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "指定故事评价教师/外部成绩接收负责人",
+      "sourceNotes": [
+        "来源优先级及星级制式待校方确定",
+        "小程序总成绩不能复制为读、听、讲三项"
+      ]
+    },
+    {
+      "viewCode": "STORY_TELL_EXPERIENCE",
+      "section": "story",
+      "label": "我爱讲故事·实践经历与表现",
+      "column": "story_tell_experience",
+      "jsonPath": null,
+      "sqlType": "TEXT",
+      "nullable": true,
+      "sourceCandidates": [
+        "STUDENT_TEXT_CONFIRMED",
+        "TEACHER_ENTRY"
+      ],
+      "responsibleRole": "学生提供事实，建议故事评价教师确认",
+      "sourceNotes": [
+        "本系统月度故事仅可作为证据；默认不接收小程序原稿或实践描述"
+      ]
+    }
+  ],
+  "additionalHealthColumns": [
+    "health_tested_at",
+    "vision_standard",
+    "extra_health"
+  ],
+  "notes": [
+    "90个六板块固定展示值使用普通列，重复特长使用sports_specialties和art_specialties两个数组",
+    "健康日期、视力标准及其他原值用额外字段保留，不计入原图展示位置数量",
+    "来源分工沿用建议，仍须学校确认相应提供方和规则"
+  ],
+  "supersededBy": "term-report-core-source-policy.json"
+}

@@ -1,0 +1,3631 @@
+{
+  "status": "SUPERSEDED_VERTICAL_MODEL",
+  "preparedAt": "2026-10-28",
+  "basis": "实库结构清单 + 用户附件 + 已制作页面稿",
+  "notes": [
+    "字段来源与负责角色为实施建议，不代表校方已经确认",
+    "页面102个展示位置含自评、文字与可重复项目，不等于原Word的74个合并字段",
+    "viewCode 是页面位置；indicatorCode + perspective + instanceKey 才是建议的结果记录定位",
+    "未包含真实学生数据或设计稿样例分数"
+  ],
+  "fieldCount": 102,
+  "fields": [
+    {
+      "viewCode": "CONDUCT_1_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "有礼貌·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_1",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_1_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "有礼貌·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_2_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "讲文明·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_2",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_2_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "讲文明·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_3_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "讲信用·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_3",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_3_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "讲信用·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_4_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "负责任·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_4",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_4_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "负责任·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_4",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_5_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "有爱心·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_5",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_5_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "有爱心·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_5",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_6_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "守规则·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_6",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_6_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "守规则·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_6",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_7_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "善交流·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_7",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_7_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "善交流·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_7",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "CONDUCT_8_SELF",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "会合作·自评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_8",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "CONDUCT_8_OTHER",
+      "section": "conduct",
+      "sectionName": "德美少年",
+      "label": "会合作·他评",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CONDUCT_8",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "RULE_COMPUTED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "建议班主任确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "同伴评价或积分自动映射规则尚未确认"
+      ]
+    },
+    {
+      "viewCode": "MORAL_LEARNING_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "道德与法治·学习兴趣",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MORAL_LEARNING_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_LEARNING_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "道德与法治·学习习惯",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MORAL_LEARNING_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_LEARNING_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "道德与法治·学习方法",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MORAL_LEARNING_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_ABILITY_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "道德与法治·认知水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MORAL_ABILITY_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_ABILITY_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "道德与法治·实践能力",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MORAL_ABILITY_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MORAL_PROCESS",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "道德与法治·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MORAL_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "道德与法治教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_LEARNING_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·学习兴趣",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_LEARNING_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_LEARNING_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·学习习惯",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_LEARNING_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_LEARNING_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·学习方法",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_LEARNING_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·积累与运用",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_ABILITY_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·阅读与鉴赏",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_ABILITY_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·表达与交流",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_ABILITY_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_4",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·梳理与探究",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_ABILITY_4",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_ABILITY_5",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·书写",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_ABILITY_5",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "CHINESE_PROCESS",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "语文·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "CHINESE_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "语文教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_LEARNING_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·学习兴趣",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_LEARNING_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_LEARNING_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·学习习惯",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_LEARNING_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_LEARNING_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·学习方法",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_LEARNING_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·基础知识",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_ABILITY_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·数学思维",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_ABILITY_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·信息提取",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_ABILITY_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_ABILITY_4",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·解决问题",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_ABILITY_4",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "MATH_PROCESS",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "数学·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MATH_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "数学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_LEARNING_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·学习兴趣",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_LEARNING_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_LEARNING_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·学习习惯",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_LEARNING_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_LEARNING_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·学习方法",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_LEARNING_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_ABILITY_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·科学观念",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_ABILITY_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_ABILITY_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·科学思维",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_ABILITY_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_ABILITY_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·探究实践",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_ABILITY_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "SCIENCE_PROCESS",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "科学·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SCIENCE_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "科学教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_LEARNING_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·学习兴趣",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_LEARNING_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_LEARNING_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·学习习惯",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_LEARNING_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_LEARNING_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·学习方法",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_LEARNING_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_1",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·听力素养",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_ABILITY_1",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_2",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·口语素养",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_ABILITY_2",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_3",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·书面表达",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_ABILITY_3",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_ABILITY_4",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·阅读能力",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_ABILITY_4",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "ENGLISH_PROCESS",
+      "section": "wisdom",
+      "sectionName": "智美少年",
+      "label": "英语·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ENGLISH_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "score_record",
+        "honor_record"
+      ],
+      "responsibleRole": "英语教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "学科总分不可直接复制为各能力分项；匹配的外部分项结果可在明确接收合同后采用"
+      ]
+    },
+    {
+      "viewCode": "HEIGHT",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "身高",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "number",
+      "storage": {
+        "table": "student_health_record",
+        "column": "height",
+        "fieldState": "已有",
+        "unitFieldOrUnit": "height_unit"
+      },
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "sourceTables": [
+        "health_import_batch",
+        "学校健康/体测平台（待确认）"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceDecision": "待校方确认提供者及对接方式",
+      "notes": [
+        "测量原值不直接转换为奖惩积分"
+      ]
+    },
+    {
+      "viewCode": "WEIGHT",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体重",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "number",
+      "storage": {
+        "table": "student_health_record",
+        "column": "weight",
+        "fieldState": "已有",
+        "unitFieldOrUnit": "weight_unit"
+      },
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "sourceTables": [
+        "health_import_batch",
+        "学校健康/体测平台（待确认）"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceDecision": "待校方确认提供者及对接方式",
+      "notes": [
+        "测量原值不直接转换为奖惩积分"
+      ]
+    },
+    {
+      "viewCode": "VISION_LEFT",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "视力 · 左",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "vision_raw",
+      "storage": {
+        "table": "student_health_record",
+        "column": "left_vision",
+        "fieldState": "已有",
+        "unitFieldOrUnit": null
+      },
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "sourceTables": [
+        "health_import_batch",
+        "学校健康/体测平台（待确认）"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceDecision": "待校方确认提供者及对接方式",
+      "notes": [
+        "保存实际测量值，不能从积分推算",
+        "左右视力分别保存，视力标准待确认"
+      ]
+    },
+    {
+      "viewCode": "VISION_RIGHT",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "视力 · 右",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "vision_raw",
+      "storage": {
+        "table": "student_health_record",
+        "column": "right_vision",
+        "fieldState": "已有",
+        "unitFieldOrUnit": null
+      },
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "sourceTables": [
+        "health_import_batch",
+        "学校健康/体测平台（待确认）"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceDecision": "待校方确认提供者及对接方式",
+      "notes": [
+        "保存实际测量值，不能从积分推算",
+        "左右视力分别保存，视力标准待确认"
+      ]
+    },
+    {
+      "viewCode": "JUMP_ROPE_1MIN",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "1 分钟跳绳",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "number",
+      "storage": {
+        "table": "student_health_record",
+        "column": "jump_rope_1min",
+        "fieldState": "需新增字段",
+        "unitFieldOrUnit": "次"
+      },
+      "sourceCandidates": [
+        "HEALTH_IMPORT",
+        "HEALTH_PLATFORM"
+      ],
+      "sourceTables": [
+        "health_import_batch",
+        "学校健康/体测平台（待确认）"
+      ],
+      "responsibleRole": "学校指定健康数据负责人；跳绳通常由体育教师确认",
+      "sourceDecision": "待校方确认提供者及对接方式",
+      "notes": [
+        "测量原值不直接转换为奖惩积分"
+      ]
+    },
+    {
+      "viewCode": "PE_ACADEMIC",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体育与健康·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "PE_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "SUBJECT_RESULT"
+      ],
+      "sourceTables": [
+        "subject_score"
+      ],
+      "evidenceTables": [
+        "student_health_record"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "只有匹配体育与健康学业水平的正式等级才可映射"
+      ]
+    },
+    {
+      "viewCode": "PE_PROCESS",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体育与健康·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "PE_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "student_health_record"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FITNESS_SELF",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体质健康测试·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FITNESS_SELF",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FITNESS_LEVEL",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体质健康测试·体测水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FITNESS_LEVEL",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "student_health_record"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "采用体测平台结果时须明确等级映射与确认规则，不用身高体重推算过程表现"
+      ]
+    },
+    {
+      "viewCode": "FITNESS_PROCESS",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体质健康测试·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FITNESS_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "student_health_record"
+      ],
+      "responsibleRole": "体育教师或指定体测评价负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "采用体测平台结果时须明确等级映射与确认规则，不用身高体重推算过程表现"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_NAME",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体育技能特长·项目",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SPORTS_SKILL_NAME",
+        "perspective": "NONE",
+        "instanceKey": "SPORTS_SKILL_1",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "建议体育教师确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_SELF",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体育技能特长·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SPORTS_SKILL_EVALUATION",
+        "perspective": "SELF",
+        "instanceKey": "SPORTS_SKILL_1",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_TEACHER",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体育技能特长·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SPORTS_SKILL_EVALUATION",
+        "perspective": "OTHER",
+        "instanceKey": "SPORTS_SKILL_1",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "建议体育教师确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "SPORTS_SKILL_OUTCOME",
+      "section": "health",
+      "sectionName": "健美少年",
+      "label": "体育技能特长·成果表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "SPORTS_SKILL_OUTCOME",
+        "perspective": "NONE",
+        "instanceKey": "SPORTS_SKILL_1",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "建议体育教师确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "instance_key 为稳定项目标识，可扩展更多项目，不按固定列存储"
+      ]
+    },
+    {
+      "viewCode": "MUSIC_LEARNING_SELF",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "音乐·学习过程·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MUSIC_LEARNING",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "MUSIC_LEARNING_TEACHER",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "音乐·学习过程·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MUSIC_LEARNING",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "MUSIC_ACADEMIC",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "音乐·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MUSIC_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "SUBJECT_RESULT"
+      ],
+      "sourceTables": [
+        "subject_score"
+      ],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "仅引用对应学科有效正式等级，不影响自评、技能等其他项目"
+      ]
+    },
+    {
+      "viewCode": "MUSIC_PROCESS",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "音乐·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MUSIC_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "MUSIC_SKILL_SELF",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "音乐·艺术技能·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MUSIC_SKILL",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "MUSIC_SKILL_TEACHER",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "音乐·艺术技能·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "MUSIC_SKILL",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "音乐教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FINE_ART_LEARNING_SELF",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "美术·学习过程·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FINE_ART_LEARNING",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FINE_ART_LEARNING_TEACHER",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "美术·学习过程·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FINE_ART_LEARNING",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FINE_ART_ACADEMIC",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "美术·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "grade",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FINE_ART_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "typed_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "SUBJECT_RESULT"
+      ],
+      "sourceTables": [
+        "subject_score"
+      ],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "仅引用对应学科有效正式等级，不影响自评、技能等其他项目"
+      ]
+    },
+    {
+      "viewCode": "FINE_ART_PROCESS",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "美术·过程表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FINE_ART_PROCESS",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FINE_ART_SKILL_SELF",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "美术·艺术技能·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FINE_ART_SKILL",
+        "perspective": "SELF",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "FINE_ART_SKILL_TEACHER",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "美术·艺术技能·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "FINE_ART_SKILL",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "subject_score",
+        "honor_record"
+      ],
+      "responsibleRole": "美术教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": []
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_NAME",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目1·项目",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_NAME",
+        "perspective": "NONE",
+        "instanceKey": "ART_SPECIALTY_1",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_SELF",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目1·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_EVALUATION",
+        "perspective": "SELF",
+        "instanceKey": "ART_SPECIALTY_1",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_TEACHER",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目1·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_EVALUATION",
+        "perspective": "OTHER",
+        "instanceKey": "ART_SPECIALTY_1",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_1_OUTCOME",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目1·成果表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_OUTCOME",
+        "perspective": "NONE",
+        "instanceKey": "ART_SPECIALTY_1",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_NAME",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目2·项目",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_NAME",
+        "perspective": "NONE",
+        "instanceKey": "ART_SPECIALTY_2",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_SELF",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目2·自我评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_EVALUATION",
+        "perspective": "SELF",
+        "instanceKey": "ART_SPECIALTY_2",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_SELF"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [],
+      "responsibleRole": "学生本人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_TEACHER",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目2·教师评价",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_EVALUATION",
+        "perspective": "OTHER",
+        "instanceKey": "ART_SPECIALTY_2",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "ART_SPECIALTY_2_OUTCOME",
+      "section": "art",
+      "sectionName": "艺美少年",
+      "label": "艺术特长项目2·成果表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "ART_SPECIALTY_OUTCOME",
+        "perspective": "NONE",
+        "instanceKey": "ART_SPECIALTY_2",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "学校指定艺术特长负责教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "页面两行是示例；正式数据按稳定项目实例扩展"
+      ]
+    },
+    {
+      "viewCode": "LABOR_1_ACADEMIC",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "信息科技·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_1_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "信息科技教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_1_EXPERIENCE",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "信息科技·成果作品、实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_1_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "信息科技教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_2_ACADEMIC",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "劳动·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_2_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "劳动课程教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_2_EXPERIENCE",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "劳动·成果作品、实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_2_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "劳动课程教师",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_3_ACADEMIC",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "综合实践活动·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_3_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "综合实践课程负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_3_EXPERIENCE",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "综合实践活动·成果作品、实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_3_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "综合实践课程负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_4_ACADEMIC",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "地方课程·学业水平",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_4_ACADEMIC",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "地方课程负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "LABOR_4_EXPERIENCE",
+      "section": "labor",
+      "sectionName": "劳美少年",
+      "label": "地方课程·成果作品、实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "LABOR_4_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "TEACHER_ENTRY",
+        "STUDENT_TEXT_CONFIRMED"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "score_record",
+        "honor_record",
+        "material_revision"
+      ],
+      "responsibleRole": "地方课程负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "实践描述基于实际事实，等级与描述分别追踪来源"
+      ]
+    },
+    {
+      "viewCode": "STORY_READ_ASSESSMENT",
+      "section": "story",
+      "sectionName": "故事美少年",
+      "label": "我爱读故事·分项评价",
+      "origin": "SUPPLEMENTAL_REQUIREMENT",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "STORY_READ_ASSESSMENT",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "EXTERNAL_STORY_FINAL",
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [
+        "external_story_result（建议新增）"
+      ],
+      "evidenceTables": [],
+      "responsibleRole": "指定故事评价教师/外部成绩接收负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "来源优先级及星级制式待校方确定",
+        "小程序总成绩不能复制为读、听、讲三项"
+      ]
+    },
+    {
+      "viewCode": "STORY_READ_EXPERIENCE",
+      "section": "story",
+      "sectionName": "故事美少年",
+      "label": "我爱读故事·实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "STORY_READ_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_TEXT_CONFIRMED",
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "story_submission",
+        "material_revision"
+      ],
+      "responsibleRole": "学生提供事实，建议故事评价教师确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "本系统月度故事仅可作为证据；默认不接收小程序原稿或实践描述"
+      ]
+    },
+    {
+      "viewCode": "STORY_LISTEN_ASSESSMENT",
+      "section": "story",
+      "sectionName": "故事美少年",
+      "label": "我爱听故事·分项评价",
+      "origin": "SUPPLEMENTAL_REQUIREMENT",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "STORY_LISTEN_ASSESSMENT",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "EXTERNAL_STORY_FINAL",
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [
+        "external_story_result（建议新增）"
+      ],
+      "evidenceTables": [],
+      "responsibleRole": "指定故事评价教师/外部成绩接收负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "来源优先级及星级制式待校方确定",
+        "小程序总成绩不能复制为读、听、讲三项"
+      ]
+    },
+    {
+      "viewCode": "STORY_LISTEN_EXPERIENCE",
+      "section": "story",
+      "sectionName": "故事美少年",
+      "label": "我爱听故事·实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "STORY_LISTEN_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_TEXT_CONFIRMED",
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "story_submission",
+        "material_revision"
+      ],
+      "responsibleRole": "学生提供事实，建议故事评价教师确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "本系统月度故事仅可作为证据；默认不接收小程序原稿或实践描述"
+      ]
+    },
+    {
+      "viewCode": "STORY_TELL_ASSESSMENT",
+      "section": "story",
+      "sectionName": "故事美少年",
+      "label": "我爱讲故事·分项评价",
+      "origin": "SUPPLEMENTAL_REQUIREMENT",
+      "valueType": "star",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "STORY_TELL_ASSESSMENT",
+        "perspective": "OTHER",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "numeric_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "EXTERNAL_STORY_FINAL",
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [
+        "external_story_result（建议新增）"
+      ],
+      "evidenceTables": [],
+      "responsibleRole": "指定故事评价教师/外部成绩接收负责人",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "来源优先级及星级制式待校方确定",
+        "小程序总成绩不能复制为读、听、讲三项"
+      ]
+    },
+    {
+      "viewCode": "STORY_TELL_EXPERIENCE",
+      "section": "story",
+      "sectionName": "故事美少年",
+      "label": "我爱讲故事·实践经历与表现",
+      "origin": "REFERENCE_IMAGE",
+      "valueType": "text",
+      "storage": {
+        "table": "student_indicator_value",
+        "fieldState": "已有表需扩展",
+        "indicatorCode": "STORY_TELL_EXPERIENCE",
+        "perspective": "NONE",
+        "instanceKey": "DEFAULT",
+        "valueColumn": "raw_value",
+        "rawColumn": "raw_value",
+        "sourceColumns": [
+          "source_type",
+          "source_ref",
+          "source_version"
+        ],
+        "evidenceColumn": "evidence_refs"
+      },
+      "sourceCandidates": [
+        "STUDENT_TEXT_CONFIRMED",
+        "TEACHER_ENTRY"
+      ],
+      "sourceTables": [],
+      "evidenceTables": [
+        "story_submission",
+        "material_revision"
+      ],
+      "responsibleRole": "学生提供事实，建议故事评价教师确认",
+      "sourceDecision": "本方案建议；学校来源规则确认后选定正式来源",
+      "notes": [
+        "本系统月度故事仅可作为证据；默认不接收小程序原稿或实践描述"
+      ]
+    }
+  ],
+  "supersededBy": "six-section-wide-field-map.json"
+}
