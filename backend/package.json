@@ -21,7 +21,8 @@
     "multer": "^2.5.0",
     "mysql2": "^3.15.3",
     "pdfkit": "^0.20.2",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "yazl": "3.3.1"
   },
   "devDependencies": {
     "jsqr": "^1.4.0",
