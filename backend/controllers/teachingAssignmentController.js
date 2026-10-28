@@ -23,17 +23,40 @@ async function getTeachingAssignments(req, res, next) {
       termId = termRows.length > 0 ? termRows[0].id : 1;
     }
 
-    const [rows] = await pool.query(`
+    const grade = req.query.grade ? Number(req.query.grade) : null;
+    let querySql = `
       SELECT 
         a.id, a.school_id, a.term_id, a.teacher_id, a.grade, a.class_no, a.subject_code, a.is_head_teacher, a.created_at,
         u.real_name as teacher_name, u.username as teacher_username
       FROM teacher_teaching_assignment a
       JOIN users u ON a.teacher_id = u.id
       WHERE a.school_id = ? AND a.term_id = ?
-      ORDER BY a.grade, a.class_no, a.subject_code
-    `, [schoolId, termId]);
+    `;
+    const queryParams = [schoolId, termId];
+    if (grade) {
+      querySql += " AND a.grade = ?";
+      queryParams.push(grade);
+    }
+    querySql += " ORDER BY a.grade, a.class_no, a.subject_code";
 
-    success(res, { assignments: rows || [] });
+    const [rows] = await pool.query(querySql, queryParams);
+
+    const formattedRows = (rows || []).map((r) => ({
+      ...r,
+      termId: r.term_id,
+      teacherId: r.teacher_id,
+      teacher_code: r.teacher_username,
+      teacherCode: r.teacher_username,
+      classNo: r.class_no,
+      class_name: `${r.class_no}班`,
+      subject: r.subject_code,
+      subjectCode: r.subject_code,
+      isHeadTeacher: Boolean(r.is_head_teacher),
+      status: "ACTIVE"
+    }));
+
+    // 同时兼顾直接返回数组与 { assignments } 结构
+    success(res, formattedRows);
   } catch (err) {
     next(err);
   }
@@ -46,7 +69,24 @@ async function getTeachingAssignments(req, res, next) {
 async function saveTeachingAssignment(req, res, next) {
   try {
     const schoolId = req.user.schoolId || req.user.school_id;
-    const { termId, teacherId, grade, classNo, subjectCode, isHeadTeacher } = req.body;
+    const body = req.body || {};
+    const teacherId = body.teacherId || body.teacher_id;
+    const grade = body.grade ? Number(body.grade) : null;
+    
+    let rawClassNo = body.classNo !== undefined ? body.classNo : (body.class_no !== undefined ? body.class_no : body.class_name);
+    let classNo = null;
+    if (typeof rawClassNo === "number") {
+      classNo = rawClassNo;
+    } else if (typeof rawClassNo === "string") {
+      const match = rawClassNo.match(/\d+/);
+      if (match) classNo = parseInt(match[0], 10);
+    }
+
+    const subjectCode = body.subjectCode || body.subject_code || body.subject;
+    const isHeadTeacher = body.isHeadTeacher !== undefined 
+      ? (body.isHeadTeacher ? 1 : 0) 
+      : (body.is_head_teacher ? 1 : 0);
+    const termId = body.termId || body.term_id;
 
     if (!teacherId || !grade || !classNo || !subjectCode) {
       return fail(res, ErrorCodes.VALIDATION_ERROR, "缺少教师、年级、班级或学科参数", 422);
@@ -72,9 +112,17 @@ async function saveTeachingAssignment(req, res, next) {
         (school_id, term_id, teacher_id, grade, class_no, subject_code, is_head_teacher)
       VALUES (?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE is_head_teacher = VALUES(is_head_teacher)
-    `, [schoolId, resolvedTermId, teacherId, grade, classNo, subjectCode, isHeadTeacher ? 1 : 0]);
+    `, [schoolId, resolvedTermId, teacherId, grade, classNo, subjectCode, isHeadTeacher]);
 
-    success(res, { saved: true }, "任教授权保存成功");
+    success(res, {
+      saved: true,
+      termId: resolvedTermId,
+      teacherId,
+      grade,
+      classNo,
+      subjectCode,
+      isHeadTeacher
+    }, "任教授权保存成功");
   } catch (err) {
     next(err);
   }
@@ -89,10 +137,14 @@ async function deleteTeachingAssignment(req, res, next) {
     const schoolId = req.user.schoolId || req.user.school_id;
     const { id } = req.params;
 
-    await pool.query(
+    const [delResult] = await pool.query(
       "DELETE FROM teacher_teaching_assignment WHERE id = ? AND school_id = ?",
       [id, schoolId]
     );
+
+    if (delResult && delResult.affectedRows === 0) {
+      return fail(res, ErrorCodes.NOT_FOUND, "未找到该任教授权记录或无权删除", 404);
+    }
 
     success(res, { deleted: true }, "任教授权已撤销");
   } catch (err) {

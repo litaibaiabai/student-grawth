@@ -75,8 +75,8 @@ export default function TeachingAssignments() {
 
         const termList = termRes?.data || [];
         setTerms(termList);
-        const cur = termList.find((t) => t.is_current) || termList[0];
-        if (cur) setCurrentTermId(cur.id);
+        const cur = termList.find((t) => t.is_current || t.isCurrent) || termList[0];
+        if (cur) setCurrentTermId(cur.id || cur.termId);
 
         setTeachers(teacherRes?.data || []);
       } catch (err) {
@@ -94,7 +94,10 @@ export default function TeachingAssignments() {
       const params = { term_id: currentTermId };
       if (filterGrade) params.grade = filterGrade;
       const res = await get(urls.API_ADMIN_TEACHING_ASSIGNMENTS, params);
-      setAssignments(res?.data || []);
+      const list = Array.isArray(res?.data) 
+        ? res.data 
+        : (res?.data?.assignments || []);
+      setAssignments(list);
     } catch (err) {
       message.error("获取任教授权失败: " + err.message);
     } finally {
@@ -111,13 +114,24 @@ export default function TeachingAssignments() {
     try {
       const values = await form.validateFields();
       setSubmitting(true);
+      const classNo = typeof values.class_name === "number"
+        ? values.class_name
+        : parseInt(String(values.class_name).replace(/\D/g, "") || values.class_name, 10);
+
       await post(urls.API_ADMIN_TEACHING_ASSIGNMENTS, {
         term_id: currentTermId,
+        termId: currentTermId,
         teacher_id: values.teacher_id,
-        grade: values.grade,
-        class_name: values.class_name,
+        teacherId: values.teacher_id,
+        grade: Number(values.grade),
+        class_no: classNo,
+        classNo: classNo,
+        class_name: `${classNo}班`,
         subject: values.subject,
+        subject_code: values.subject,
+        subjectCode: values.subject,
         is_head_teacher: values.is_head_teacher ? 1 : 0,
+        isHeadTeacher: values.is_head_teacher ? 1 : 0,
         status: "ACTIVE"
       });
       message.success("任教授权创建成功");
@@ -149,9 +163,13 @@ export default function TeachingAssignments() {
       dataIndex: "teacher_name",
       key: "teacher_name",
       render: (text, row) => (
-        <Space orientation="vertical" size={0}>
-          <Text strong>{text || `教师 #${row.teacher_id}`}</Text>
-          {row.teacher_code && <Text type="secondary" style={{ fontSize: 12 }}>工号: {row.teacher_code}</Text>}
+        <Space direction="vertical" size={0}>
+          <Text strong>{text || row.teacher_real_name || row.teacher_username || `教师 #${row.teacher_id}`}</Text>
+          {(row.teacher_code || row.teacher_username) && (
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              账号: {row.teacher_code || row.teacher_username}
+            </Text>
+          )}
         </Space>
       )
     },
@@ -159,24 +177,25 @@ export default function TeachingAssignments() {
       title: "年级班级",
       key: "grade_class",
       render: (_, row) => (
-        <span>{row.grade}年级{row.class_name}</span>
+        <span>{row.grade}年级{row.class_name || (row.class_no ? `${row.class_no}班` : "")}</span>
       )
     },
     {
       title: "任教学科",
-      dataIndex: "subject",
-      key: "subject",
-      render: (subject) => {
-        const found = SUBJECT_OPTIONS.find((s) => s.value === subject);
-        return <Tag color="blue">{found ? found.label.split(" ")[0] : subject}</Tag>;
+      dataIndex: "subject_code",
+      key: "subject_code",
+      render: (subjectCode, row) => {
+        const code = subjectCode || row.subject;
+        const found = SUBJECT_OPTIONS.find((s) => s.value === code);
+        return <Tag color="blue">{found ? found.label.split(" ")[0] : code}</Tag>;
       }
     },
     {
       title: "班主任职责",
       dataIndex: "is_head_teacher",
       key: "is_head_teacher",
-      render: (val) => (
-        val === 1 ? <Tag color="gold">班主任</Tag> : <Text type="secondary">任课教师</Text>
+      render: (val, row) => (
+        val === 1 || row.isHeadTeacher ? <Tag color="gold">班主任</Tag> : <Text type="secondary">任课教师</Text>
       )
     },
     {
@@ -184,7 +203,9 @@ export default function TeachingAssignments() {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        status === "ACTIVE" ? <Tag color="green">生效中</Tag> : <Tag color="default">已停用</Tag>
+        status === "ARCHIVED" || status === "INACTIVE"
+          ? <Tag color="default">已停用</Tag>
+          : <Tag color="green">生效中</Tag>
       )
     },
     {
@@ -257,8 +278,8 @@ export default function TeachingAssignments() {
               value={currentTermId}
               onChange={setCurrentTermId}
               options={terms.map((t) => ({
-                label: `${t.name || t.academic_year + '学年'} ${t.is_current ? '(当前)' : ''}`,
-                value: t.id
+                label: `${t.termName || t.term_name || t.name || (t.academic_year || t.academicYear) + '学年'} ${t.is_current || t.isCurrent ? '(当前)' : ''}`,
+                value: t.id || t.termId
               }))}
             />
           </Col>
@@ -310,7 +331,7 @@ export default function TeachingAssignments() {
                 (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
               }
               options={teachers.map((t) => ({
-                label: `${t.name || t.username} (${t.phone || t.email || '教师'})`,
+                label: `${t.real_name || t.name || t.username} (${t.username || t.phone || t.email || '教师'})`,
                 value: t.id
               }))}
             />
@@ -329,10 +350,24 @@ export default function TeachingAssignments() {
             <Col span={12}>
               <Form.Item
                 name="class_name"
-                label="班级名称"
-                rules={[{ required: true, message: "请输入班级（如 1班、2班）" }]}
+                label="任教班级"
+                rules={[{ required: true, message: "请选择班级" }]}
               >
-                <Input placeholder="如 1班 或 2班" />
+                <Select
+                  placeholder="选择班级"
+                  options={[
+                    { label: "1班", value: 1 },
+                    { label: "2班", value: 2 },
+                    { label: "3班", value: 3 },
+                    { label: "4班", value: 4 },
+                    { label: "5班", value: 5 },
+                    { label: "6班", value: 6 },
+                    { label: "7班", value: 7 },
+                    { label: "8班", value: 8 },
+                    { label: "9班", value: 9 },
+                    { label: "10班", value: 10 }
+                  ]}
+                />
               </Form.Item>
             </Col>
           </Row>
