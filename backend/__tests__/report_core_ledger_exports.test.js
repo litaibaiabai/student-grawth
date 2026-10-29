@@ -62,3 +62,9 @@ test('filtered views agree and an interrupted download releases its connection',
   const [[row]] = await db.pool.query('SELECT 1 AS healthy');
   assert.equal(Number(row.healthy), 1);
 });
+test('CSV and print honor the event source mode selected on screen',async t=>{
+ const db=await fixture(t,3),response=new Response();
+ await ledger.streamLedgerCsv({pool:db.pool,actor:teacher,filters:db.filters,view:'events',sourceMode:'paper',response});
+ const parsed=parseCsv(response.data),header=parsed.findIndex(row=>row.includes('变动分'));assert.equal(parsed.length-header-1,0);
+ const print=await ledger.getLedgerPrintModel({pool:db.pool,actor:teacher,filters:db.filters,view:'events',sourceMode:'paper'});assert.equal(print.rowCount,0);
+});

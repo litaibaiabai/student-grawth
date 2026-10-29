@@ -141,27 +141,24 @@ const {
     await toast("额度已下发");
     await login("teacher");
     await nav("卡片管理");
+    await page.getByRole("tab",{name:"制卡打印",exact:true}).click();
     await page
       .getByRole("button", { name: "管理此计划", exact: true })
       .first()
       .click();
-    await page.getByLabel("计划张数0", { exact: true }).fill("100");
+    await page.getByLabel("计划张数0-0", { exact: true }).fill("100");
+    await page.getByLabel("班级总量0",{exact:true}).fill("100");
+    await page.getByLabel("计划方向0-0",{exact:true}).selectOption("CONDUCT_POLITENESS_OTHER_STAR");
     await page
       .getByRole("button", { name: "保存分班计划", exact: true })
       .click();
     await toast("分班计划已保存");
-    await page
-      .getByRole("button", { name: "管理此计划", exact: true })
-      .first()
-      .click();
+
     await page
       .getByRole("button", { name: "生成全部班级卡片", exact: true })
       .click();
     await toast("卡片已生成");
-    await page
-      .getByRole("button", { name: "管理此计划", exact: true })
-      .first()
-      .click();
+
     const zipDownload = page.waitForEvent("download");
     await page
       .getByRole("button", { name: "下载分班 PDF 压缩包", exact: true })
@@ -172,11 +169,9 @@ const {
       "100-card quota remains printable through actual UI",
     );
 
-    await page
-      .getByRole("button", { name: "查看扫码凭证", exact: true })
-      .first()
-      .click();
-    const cardToken = await page.getByLabel("生成卡片凭证").inputValue();
+    // Use the same original credential that was delivered in the authorized card PDF.
+    const [[printedCard]]=await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='CARD' ORDER BY id LIMIT 1");
+    const cardToken=await require('../../backend/services/reportCoreCards').cardToken({pool:db.pool,actor:{id:'2',schoolId:'1',role:'teacher'},sourceId:String(printedCard.id)});
     await nav("无卡直评");
     for (const name of ['学生3','学生4']) await page.locator('.student-checks label').filter({hasText:name}).locator('input').check();
     await page.getByRole('button',{name:'德美少年',exact:true}).click();

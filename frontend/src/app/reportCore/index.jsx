@@ -4,6 +4,7 @@ import RoleShell from "./RoleShell";
 import SelfEvaluation from "./SelfEvaluation";
 import DirectScore from "./DirectScore";
 import AcademicImport from "./AcademicImport";
+import CardLedger from "./CardLedger";
 import StudentHome, { StudentArchive } from "./StudentHome";
 import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm } from "./Materials";
@@ -296,7 +297,8 @@ export default function ReportCoreApp() {
             {tab === "reviews" && <ReviewMaterials ctx={ctx} />}{" "}
             {tab === "drafts" && <ReportDrafts ctx={ctx} />}{" "}
             {tab === "settlements" && <Settlements ctx={ctx} />}{" "}
-            {["cards-manage", "quota"].includes(tab) && <CardManagement ctx={ctx} />}{" "}
+            {tab === "cards-manage" && actor.role === "teacher" && <CardLedger ctx={ctx} />}
+            {tab === "quota" && <CardManagement ctx={ctx} />}{" "}
             {tab === "config" && <Configuration ctx={ctx} />}{" "}
             {tab === "releases" && <Releases ctx={ctx} />}
             {sourceNext !== null &&

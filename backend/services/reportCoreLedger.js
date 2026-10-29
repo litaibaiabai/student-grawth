@@ -288,7 +288,8 @@ const exportColumns = {
   indicators: [['指标','categoryName'],['加分','positive'],['撤销','reversals'],['净分','net']],
   monthly: [['月份','month'],['教师','teacherName'],['已制卡','generated'],['已领取','redeemed'],['直评','direct'],['净分','net']],
 };
-async function exportRows(ctx, view, max) {
+async function exportRows(ctx, view, max, sourceMode = 'all') {
+  if (!['paper','direct','all'].includes(sourceMode)) fail(422,'评价来源不合法');
   let count = 0; const grouped = new Map();
   async function* rows() {
     for await (const row of scan(ctx)) {
@@ -299,7 +300,7 @@ async function exportRows(ctx, view, max) {
         if (!grouped.has(key)) grouped.set(key, { month: key, teacherName: ctx.owner.real_name, ...emptyCounts() });
         addCount(grouped.get(key), row); continue;
       }
-      for (const event of eventsOf(row, ctx, 'all')) {
+      for (const event of eventsOf(row, ctx, sourceMode)) {
         if (view === 'events') { yield event; continue; }
         const key = view === 'students' ? event.studentId : event.categoryCode;
         if (!key) continue;
@@ -335,7 +336,7 @@ async function writeResponse(response, chunk) {
 async function streamLedgerCsv(args) {
   const view = exportView(args.view);
   return snapshot(args, async ctx => {
-    const model = await exportRows(ctx, view, 50000), columns = exportColumns[view], response = args.response;
+    const model = await exportRows(ctx, view, 50000, args.sourceMode), columns = exportColumns[view], response = args.response;
     if (response.destroyed) throw new Error('下载连接已断开');
     response.setHeader('Content-Type', 'text/csv; charset=utf-8');
     response.setHeader('Content-Disposition', 'attachment; filename="card-ledger.csv"');
@@ -350,7 +351,7 @@ const htmlText = value => String(value ?? '').replaceAll('&','&amp;').replaceAll
 async function getLedgerPrintModel(args) {
   const view = exportView(args.view);
   return snapshot(args, async ctx => {
-    const model = await exportRows(ctx, view, 1000), columns = exportColumns[view], body = [];
+    const model = await exportRows(ctx, view, 1000, args.sourceMode), columns = exportColumns[view], body = [];
     let net = 0;
     for await (const row of model.iterate()) { body.push('<tr>' + columns.map(c => '<td>' + htmlText(row[c[1]]) + '</td>').join('') + '</tr>'); net += row.delta ?? row.net ?? 0; }
     return { rowCount: model.count, asOf: ctx.asOf, html: `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>卡片台账</title><style>@page{size:A4 landscape;margin:12mm}body{font:12px sans-serif;color:#172b38}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aaa;padding:6px;white-space:pre-wrap;overflow-wrap:anywhere}thead{display:table-header-group}tr{break-inside:avoid}</style><h1>卡片台账</h1><p>Asia/Shanghai · 截至 ${htmlText(ctx.asOf)}</p><p>筛选：${htmlText(JSON.stringify(ctx.f))}</p><p>共 ${model.count} 行 · 筛选净分 ${net}</p><table><thead><tr>${columns.map(c => '<th>'+htmlText(c[0])+'</th>').join('')}</tr></thead><tbody>${body.join('')}</tbody></table></html>` };

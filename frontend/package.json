@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:student-ui": "node tests/student-ui.cjs && node tests/student-theme-session.cjs",
-    "test:report-core": "node tests/report-core-flow.cjs"
+    "test:report-core": "node tests/report-core-flow.cjs",
+    "test:report-core-ledger": "node tests/report-core-ledger.cjs"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
