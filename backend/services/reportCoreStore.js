@@ -2,8 +2,9 @@ const { stableHash, fail } = require("./reportCorePolicy");
 const { resolveActorContext } = require("./authorizationService");
 const parse = (v) => (typeof v === "string" ? JSON.parse(v) : v || {});
 async function getTerm(connection, schoolId, termId, lock = false) {
+  if (![false, true, 'shared', 'exclusive'].includes(lock)) fail(400, '锁模式不合法');
   const [[term]] = await connection.query(
-    `SELECT * FROM academic_year WHERE school_id=? AND id=?${lock ? " FOR SHARE" : ""}`,
+    `SELECT * FROM academic_year WHERE school_id=? AND id=?${lock === 'exclusive' ? ' FOR UPDATE' : lock ? ' FOR SHARE' : ''}`,
     [schoolId, termId],
   );
   if (!term) fail(404, "学期不存在");
@@ -44,7 +45,7 @@ async function addSource(c, s) {
   return String(r.insertId);
 }
 async function withMutation(
-  { pool, actor, termId, studentIds = [], command, action },
+  { pool, actor, termId, studentIds = [], command, action, termLock = 'shared' },
   mutate,
 ) {
   if (
@@ -85,7 +86,7 @@ async function withMutation(
   const c = await pool.getConnection();
   try {
     await c.beginTransaction();
-    const term = await getTerm(c, actor.schoolId, termId, true);
+    const term = await getTerm(c, actor.schoolId, termId, termLock);
     await resolveActorContext(
       {
         userId: actor.id,

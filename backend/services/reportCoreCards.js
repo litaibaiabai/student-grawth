@@ -5,7 +5,7 @@ const QRCode = require("qrcode");
 const yazl = require("yazl");
 const { encryptToken, decryptToken, tokenHash } = require("./cardCredentials");
 const { withMutation, addSource, parse } = require("./reportCoreStore");
-const { fail, catalog } = require("./reportCorePolicy");
+const { fail, catalog, subjectFor, getSchoolMonthBounds, schoolDayStart, collectionCutoff } = require("./reportCorePolicy");
 const { assertScope, assignments } = require("./authorizationService");
 async function source(pool, actor, id) {
   const [[s]] = await pool.query(
@@ -19,6 +19,51 @@ async function source(pool, actor, id) {
 function owner(actor, s) {
   if (actor.role !== "teacher" || String(s.owner_teacher_id) !== actor.id)
     fail(403, "仅本人可管理卡计划");
+}
+function validatePlans(plans, teaching, quotaTotal) {
+  if (!Array.isArray(plans)) fail(422, '班级计划格式不合法');
+  let total = 0;
+  const classes = new Set();
+  for (const p of plans) {
+    const key = `${p.grade}:${p.classNo}`;
+    if (classes.has(key)) fail(422, '班级重复');
+    classes.add(key);
+    if (!Number.isInteger(p.grade) || p.grade < 1 || !Number.isInteger(p.classNo) || p.classNo < 1 || !Number.isInteger(p.classTotal) || p.classTotal < 0 || !Array.isArray(p.items)) fail(422, '班卡量不合法');
+    let subtotal = 0;
+    for (const item of p.items) {
+      const category = catalog.cardCatalog.find(x => x.code === item.categoryCode);
+      if (!category || !Number.isInteger(item.count) || item.count < 0) fail(422, '卡类别或数量不合法');
+      if (!teaching.some(a => a.grade === p.grade && a.class_no === p.classNo && (category.group === '德美' || a.subject_code === subjectFor(category.targetColumn)))) fail(403, '不在任教范围');
+      subtotal += item.count;
+    }
+    if (subtotal !== p.classTotal) fail(422, '班级明细与总量不符');
+    total += subtotal;
+  }
+  if (total > quotaTotal) fail(422, '超过管理员总额度');
+  return total;
+}
+async function saveQuotaInTransaction(c, { actor, termId, teacherId, monthKey, total, command }) {
+  if (actor.role !== 'manager') fail(403, '仅管理员下发额度');
+  if (!Number.isInteger(total) || total < 0 || total > 10000 || !/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey)) fail(422, '卡额度或月份不合法');
+  const [[u]] = await c.query("SELECT id FROM users WHERE id=? AND school_id=? AND role='teacher' AND status=0", [teacherId, actor.schoolId]);
+  if (!u) fail(422, '教师不存在');
+  const [[existing]] = await c.query("SELECT * FROM evaluation_source_record WHERE school_id=? AND record_kind='QUOTA' AND term_id=? AND owner_teacher_id=? AND month_key=? FOR UPDATE", [actor.schoolId, termId, teacherId, monthKey]);
+  let quotaId, revision = '1', oldTotal = 0;
+  if (existing) {
+    const p = parse(existing.payload_json);
+    const [[count]] = await c.query("SELECT COUNT(*) n FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD'", [existing.id]);
+    const planned = (p.plans || []).reduce((n, row) => n + row.classTotal, 0);
+    if (total < Math.max(planned, Number(count.n))) fail(422, '不得少于已分配或已生成卡量');
+    quotaId = String(existing.id); revision = String(existing.revision); oldTotal = p.quotaTotal;
+    if (oldTotal === total) return { quotaId, revision, changed: false };
+    p.quotaTotal = total;
+    await c.query('UPDATE evaluation_source_record SET payload_json=?,revision=revision+1 WHERE id=?', [JSON.stringify(p), existing.id]);
+    revision = String(BigInt(revision) + 1n);
+  } else {
+    quotaId = await addSource(c, { schoolId: actor.schoolId, termId, ownerId: teacherId, actorId: actor.id, sourceType: 'CARD', kind: 'QUOTA', monthKey, status: 'DRAFT', payload: { quotaTotal: total, planVersion: 0, plans: [] }, key: ['QUOTA', actor.schoolId, termId, teacherId, monthKey] });
+  }
+  await addSource(c, { schoolId: actor.schoolId, termId, parentId: quotaId, ownerId: teacherId, actorId: actor.id, kind: 'AUDIT', monthKey, status: 'COMMITTED', key: ['QUOTA_CHANGE', actor.id, command.requestKey, teacherId, monthKey], payload: { action: 'QUOTA_CHANGE', quotaId, monthKey, oldTotal, newTotal: total, delta: total - oldTotal } });
+  return { quotaId, revision, changed: true };
 }
 async function saveQuota({
   pool,
@@ -39,46 +84,7 @@ async function saveQuota({
     fail(422, "卡额度或月份不合法");
   return withMutation(
     { pool, actor, termId, command, action: "quota" },
-    async (c) => {
-      const [[u]] = await c.query(
-        "SELECT id FROM users WHERE id=? AND school_id=? AND role='teacher' AND status=0",
-        [teacherId, actor.schoolId],
-      );
-      if (!u) fail(422, "教师不存在");
-      const key = ["QUOTA", actor.schoolId, termId, teacherId, monthKey];
-      const [[existing]] = await c.query(
-        "SELECT * FROM evaluation_source_record WHERE school_id=? AND record_kind='QUOTA' AND term_id=? AND owner_teacher_id=? AND month_key=? FOR UPDATE",
-        [actor.schoolId, termId, teacherId, monthKey],
-      );
-      let quotaId;
-      if (existing) {
-        const p = parse(existing.payload_json);
-        const [[count]] = await c.query(
-          "SELECT COUNT(*) n FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD'",
-          [existing.id],
-        );
-        if (total < count.n) fail(422, "不得少于已生成卡量");
-        p.quotaTotal = total;
-        await c.query(
-          "UPDATE evaluation_source_record SET payload_json=?,revision=revision+1 WHERE id=?",
-          [JSON.stringify(p), existing.id],
-        );
-        quotaId = String(existing.id);
-      } else
-        quotaId = await addSource(c, {
-          schoolId: actor.schoolId,
-          termId,
-          ownerId: teacherId,
-          actorId: actor.id,
-          sourceType: "CARD",
-          kind: "QUOTA",
-          monthKey,
-          status: "DRAFT",
-          payload: { quotaTotal: total, planVersion: 0, plans: [] },
-          key,
-        });
-      return { result: { quotaId } };
-    },
+    async c => ({ result: await saveQuotaInTransaction(c, { actor, termId, teacherId, monthKey, total, command }) }),
   );
 }
 async function savePlan({
@@ -91,6 +97,7 @@ async function savePlan({
 }) {
   const q = await source(pool, actor, quotaId);
   owner(actor, q);
+  if (q.record_kind !== 'QUOTA' || q.source_type !== 'CARD') fail(422, '需要教师月度额度记录');
   return withMutation(
     { pool, actor, termId: q.term_id, command, action: "card-plan" },
     async (c) => {
@@ -101,43 +108,7 @@ async function savePlan({
       if (String(row.revision) !== String(expectedRevision))
         fail(409, "额度已变化");
       const a = await assignments(actor, q.term_id, c);
-      let total = 0;
-      const seen = new Set();
-      for (const p of plans) {
-        const cls = `${p.grade}:${p.classNo}`;
-        if (seen.has(cls)) fail(422, "班级重复");
-        seen.add(cls);
-        if (
-          !Number.isInteger(p.classTotal) ||
-          p.classTotal < 0 ||
-          !Array.isArray(p.items)
-        )
-          fail(422, "班卡量不合法");
-        let subtotal = 0;
-        for (const item of p.items) {
-          const category = catalog.cardCatalog.find(
-            (x) => x.code === item.categoryCode,
-          );
-          if (!category || !Number.isInteger(item.count) || item.count < 0)
-            fail(422, "卡类别或数量不合法");
-          const { subjectFor } = require("./reportCorePolicy");
-          if (
-            !a.some(
-              (x) =>
-                x.grade === p.grade &&
-                x.class_no === p.classNo &&
-                (category.group === "德美" ||
-                  x.subject_code === subjectFor(category.targetColumn)),
-            )
-          )
-            fail(403, "不在任教范围");
-          subtotal += item.count;
-        }
-        if (subtotal !== p.classTotal) fail(422, "班级明细与总量不符");
-        total += subtotal;
-      }
-      if (total > parse(row.payload_json).quotaTotal)
-        fail(422, "超过管理员总额度");
+      validatePlans(plans, a, parse(row.payload_json).quotaTotal);
       const [[generated]] = await c.query(
         "SELECT COUNT(*) n FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD'",
         [quotaId],
@@ -153,6 +124,7 @@ async function savePlan({
         "UPDATE evaluation_source_record SET payload_json=?,revision=revision+1,status='CONFIRMED' WHERE id=?",
         [JSON.stringify(payload), quotaId],
       );
+      await addSource(c, { schoolId: actor.schoolId, termId: q.term_id, parentId: quotaId, ownerId: actor.id, actorId: actor.id, kind: 'AUDIT', monthKey: q.month_key, status: 'COMMITTED', key: ['PLAN_SAVE', quotaId, command.requestKey], payload: { action: 'PLAN_SAVE', quotaId, planVersion: payload.planVersion, previousPlans: parse(row.payload_json).plans, plans } });
       return {
         result: { quotaId, revision: String(BigInt(row.revision) + 1n) },
       };
@@ -168,6 +140,7 @@ async function generateCards({
 }) {
   const q = await source(pool, actor, quotaId);
   owner(actor, q);
+  if (q.record_kind !== 'QUOTA' || q.source_type !== 'CARD') fail(422, '需要教师月度额度记录');
   return withMutation(
     { pool, actor, termId: q.term_id, command, action: "generate-cards" },
     async (c, term) => {
@@ -180,6 +153,7 @@ async function generateCards({
       const p = parse(row.payload_json);
       if (row.status !== "CONFIRMED" || !p.plans.length)
         fail(422, "先确认分班计划");
+      validatePlans(p.plans, await assignments(actor, q.term_id, c), p.quotaTotal);
       const [[old]] = await c.query(
         "SELECT COUNT(*) n FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD'",
         [quotaId],
@@ -187,16 +161,9 @@ async function generateCards({
       if (Number(old.n)) fail(409, "该计划已生成");
       const cardIds = [];
       let serial = 0;
-      const validFrom = new Date(`${q.month_key}-01T00:00:00+08:00`);
-      const validUntil = new Date(validFrom);
-      validUntil.setUTCMonth(validUntil.getUTCMonth() + 1);
-      const start = new Date(Math.max(+validFrom, +new Date(term.start_date)));
-      const end = new Date(
-        Math.min(
-          +validUntil,
-          +new Date(term.evaluation_config.collectionDeadline || term.end_date),
-        ),
-      );
+      const bounds = getSchoolMonthBounds(q.month_key);
+      const start = new Date(Math.max(+bounds.startInclusive, +schoolDayStart(term.start_date)));
+      const end = new Date(Math.min(+bounds.endExclusive, +collectionCutoff(term)));
       if (start >= end) fail(422, "卡有效期不合法");
       for (const plan of p.plans)
         for (const item of plan.items) {
@@ -244,6 +211,7 @@ async function generateCards({
         "UPDATE evaluation_source_record SET revision=revision+1 WHERE id=?",
         [quotaId],
       );
+      await addSource(c, { schoolId: actor.schoolId, termId: q.term_id, parentId: quotaId, ownerId: actor.id, actorId: actor.id, kind: 'AUDIT', monthKey: q.month_key, status: 'COMMITTED', key: ['CARD_GENERATE', quotaId, command.requestKey], payload: { action: 'CARD_GENERATE', quotaId, planVersion: p.planVersion, generated: serial, classes: p.plans.map(plan => ({ grade: plan.grade, classNo: plan.classNo, count: plan.classTotal })) } });
       return { result: { cardIds, counts: serial } };
     },
   );
@@ -371,11 +339,13 @@ async function directScore({
   categoryCode,
   reason,
   command,
+  now = new Date(),
 }) {
   const category = catalog.cardCatalog.find((x) => x.code === categoryCode);
+  if (reason !== undefined && reason !== null && typeof reason !== 'string') fail(422, '评价说明需为文字');
+  reason = reason?.trim() || '';
   if (
     !category ||
-    !reason?.trim() ||
     !Array.isArray(studentIds) ||
     !studentIds.length ||
     studentIds.length > 100
@@ -385,10 +355,7 @@ async function directScore({
   return withMutation(
     { pool, actor, termId, studentIds, command, action: "direct-score" },
     async (c, term) => {
-      if (
-        new Date() >
-        new Date(term.evaluation_config.collectionDeadline || term.end_date)
-      )
+      if (now >= collectionCutoff(term))
         fail(422, "采集已截止");
       const changed = {};
       for (const id of new Set(studentIds)) {
@@ -411,7 +378,7 @@ async function directScore({
           target: category.targetColumn,
           status: "CONFIRMED",
           delta: 1,
-          payload: { reason, categoryCode },
+          payload: { reason, categoryCode, occurredAt: now.toISOString() },
           key: ["DIRECT", actor.id, command.requestKey, id, categoryCode],
         });
         changed[id] = [category.targetColumn];
@@ -422,6 +389,20 @@ async function directScore({
       };
     },
   );
+}
+async function voidCard({ pool, actor, sourceId, expectedRevision, reason, command }) {
+  const s = await source(pool, actor, sourceId);
+  owner(actor, s);
+  if (s.record_kind !== 'CARD' || s.source_type !== 'CARD') fail(422, '只能作废原卡');
+  if (typeof reason !== 'string' || !reason.trim()) fail(422, '作废需填写原因');
+  return withMutation({ pool, actor, termId: s.term_id, command, action: 'void-card' }, async c => {
+    const [[row]] = await c.query('SELECT * FROM evaluation_source_record WHERE id=? FOR UPDATE', [sourceId]);
+    if (row.status !== 'UNUSED' || String(row.revision) !== String(expectedRevision)) fail(409, '卡片已领取或状态已变化');
+    const payload = { ...parse(row.payload_json), voidReason: reason.trim(), voidedAt: new Date().toISOString() };
+    await c.query("UPDATE evaluation_source_record SET status='VOID',revision=revision+1,payload_json=? WHERE id=?", [JSON.stringify(payload), sourceId]);
+    await addSource(c, { schoolId: actor.schoolId, termId: s.term_id, parentId: sourceId, ownerId: actor.id, actorId: actor.id, kind: 'AUDIT', monthKey: s.month_key, status: 'COMMITTED', key: ['CARD_VOID', sourceId, command.requestKey], payload: { action: 'CARD_VOID', sourceId, previousStatus: row.status, status: 'VOID', reason: reason.trim() } });
+    return { result: { sourceId: String(sourceId), revision: String(BigInt(row.revision) + 1n) } };
+  });
 }
 async function reverseSource({ pool, actor, sourceId, reason, command }) {
   if (actor.role !== "teacher" || !reason?.trim())
@@ -533,6 +514,7 @@ async function buildClassPrintZip({ pool, actor, quotaId }) {
 }
 module.exports = {
   saveQuota,
+  saveQuotaInTransaction,
   savePlan,
   generateCards,
   redeemCard,
@@ -542,4 +524,5 @@ module.exports = {
   cardToken,
   previewCard,
   buildClassPrintZip,
+  voidCard,
 };

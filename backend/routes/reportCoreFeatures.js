@@ -124,7 +124,8 @@ function mountFeatures(r, { asyncRoute, ok }) {
   post("/report-core/cards/redeem", (req) =>
     cards.redeemCard({ ...args(req), now: req.app.locals.clock() }),
   );
-  post("/report-core/direct-scores", (req) => cards.directScore(args(req)));
+  post("/report-core/direct-scores", (req) => cards.directScore({ ...args(req), now: req.app.locals.clock() }));
+  post('/report-core/cards/:id/void', req => cards.voidCard({ ...args(req), sourceId: req.params.id }));
   post("/report-core/sources/:id/reverse", (req) =>
     cards.reverseSource({ ...args(req), sourceId: req.params.id }),
   );

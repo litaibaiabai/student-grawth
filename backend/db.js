@@ -17,7 +17,15 @@ function dbConfig(overrides = {}) {
   };
 }
 function createDbPool(config = {}) {
-  return mysql.createPool(dbConfig(config));
+  const pool = mysql.createPool(dbConfig(config));
+  // mysql2 emits this before handing a new connection to its borrower.
+  // Enqueue SET synchronously so the first application query follows it.
+  pool.on('connection', connection => {
+    connection.query("SET time_zone='+00:00'", error => {
+      if (error) connection.destroy();
+    });
+  });
+  return pool;
 }
 // Legacy exports remain lazy for archived consumers; no initialization DDL or connection.
 let legacyPool;

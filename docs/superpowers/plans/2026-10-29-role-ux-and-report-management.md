@@ -16,7 +16,7 @@
 - `docs/superpowers/specs/2026-10-29-admin-term-configuration-design.md`
 - 可点击视觉参考：`docs/ui-prototype/three-role-design/index.html`，仅作布局参考，禁止把虚构数据、内存保存或toast代入正式业务。
 
-**审查修订 R1（2026-10-29）：** [功能合同与闭环审查](../reviews/2026-10-29-role-ux-plan-closure-review.md)记录28项问题（高12/中14/低2）。本计划已补工程合同，产品代码尚未修复；报告合法长内容与固定页数的冲突为开放裁定D01，未裁定不得宣称所有合法输入均能完成打印/全校发布。
+**审查修订 R1（2026-10-29）：** [功能合同与闭环审查](../reviews/2026-10-29-role-ux-plan-closure-review.md)记录28项问题（高12/中14/低2）。用户已裁定D01：主报告保留双面，超出内容加带学生姓名和页码的续页。计划已补工程合同，产品修复和续页验证仍待执行。
 
 ## Global Constraints
 
@@ -28,7 +28,7 @@
 - 沿用六表，不新建分类、指标值、卡库存、统计、导出任务表；不DROP旧业务库或修改真实上传资料。
 - 教师获配额度与学生领取分开；纸卡和无卡直评分开；补打原码不产生新卡或新积分。
 - 班级报告范围为当前教师负责的全部班级；任课教师仅获完整六育明细，班主任另获正面、自述寄语与确认；管理员无正文权限。
-- 导出报告使用浏览器打印面板另存PDF；六育明细A4横向1页，完整报告正反2页；溢出阻止打印/确认，页面保留全文，不裁字。
+- 导出报告使用浏览器打印面板另存PDF；六育明细A4横向主1页，完整报告主正反2页；超出内容加带姓名/页码的续页。续页排版仍溢出或丢内容时阻止打印/确认，页面保留全文，不裁字。
 - 卡台账CSV为UTF-8 BOM，导出当前筛选全量，最大50000行；台账HTML打印最大1000行，超限明确报错不截断。
 - 学校时区Asia/Shanghai；数据库时刻使用UTC契约，边界查询先转换，不以浏览器时区决定月份。
 - 保留现有期末报告六板块、合并表头、自评/他评和109个呈现位置；109不是每位学生的必填常量。
@@ -48,7 +48,7 @@
 
 ## 0. 执行上下文、依赖与交付顺序
 
-经核对的源码目录：`/Users/quanta/Downloads/task/六育学生评价系统v2`，本次审查基线提交`eaaa1cd`（含学期配置设计）。聊天曾附加的`/Users/quanta/.codex/worktrees/term-report-core/六育学生评价系统v2`为空的旧基线，不能拿它当当前源码。执行前按using-git-worktrees核对附件与HEAD，复用合适工作区；若需隔离，只从已核对提交建立允许写入的工作区，不复制/提交密钥。
+审查源码来自`/Users/quanta/Downloads/task/六育学生评价系统v2`，本轮实施基线为审查修订提交fda825b。现已通过原生attach_worktree复用`/Users/quanta/.codex/worktrees/term-report-core/六育学生评价系统v2`，从fda825b创建codex/role-ux；该工作树不再是07ae1c2旧基线，实施命令必须显式使用此工作目录。原Downloads目录和用户材料保持不变，不复制/提交生产密钥。
 
 使用当前Node≥22.12；本机可用二进制为`/Users/quanta/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node`。命令中的`node/npm`必须来自该版本或等价受支持版本，不能使用系统Node18。
 
@@ -102,7 +102,7 @@
 
 ## R1. 审查后必须遵循的跨模块合同
 
-以下是原任务的补充实现/测试要求，不代表已经实现。仍为18个主任务、六张表；用现有字段/JSON/AUDIT，不新增通用引擎或队列表。D01外的工程取舍按下文实施；D01须先取得学校对页数/内容预算的明确裁定。
+以下是原任务的补充实现/测试要求，不代表已经实现。仍为18个主任务、六张表；用现有字段/JSON/AUDIT，不新增通用引擎或队列表。D01已由用户选择带姓名和页码续页，按下文实施和验证。
 
 ### R1.1 公共命令、锁及会话（Task1/4/6/12A/12B；R01–R04）
 
@@ -154,8 +154,8 @@
 - 详情DTO固定为`{model,html,viewVersion:'current'|'published',scope:'detail'|'full',revision,fingerprint,templateVersion,ruleVersion,configVersion,releaseVersion,missingItems,permissions}`；不适用值明确null。published的revision是快照修订，permissions.canConfirm/canEditComment恒false；正常教师无FULL正文/叙述。
 - documentKey绑定studentId+termId+viewVersion+scope+上述版本/指纹。确认只能current且班主任，须FULL两面布局通过；DETAIL_ONLY测量不能充当正面通过。编辑当前草稿必须显式切current，保存后保持current并重取，不自动跳回published。
 - 新发布在现有term_report.snapshot_json增加冻结安全明细HTML及哈希，FULL仍取其中已有renderedHtml；读取校验对应快照，不能用新renderer悄悄更换旧发布版式。旧CORE/LEGACY缺安全明细且无匹配版本renderer时，普通教师明示不支持；不回传完整HTML或拿当前模板假装旧版。
-- **D01开放门槛**：当前保持A4明细1页/完整2页，溢出阻止确认/打印且保留全文。但合法文本上限/多特长可能无法容纳，需学校选择批准续页，或批准可证明的版面内容预算及全文合法去向。未裁定只交付可容纳样本，不能将“合法长文永久阻断”标为验收PASS。
-- 必测`detail_dto_has_all_confirmation_versions`、`published_view_never_confirms_current_draft`、`detail_layout_is_not_full_layout_approval`、`template_change_does_not_change_frozen_detail_print`；D01选定后补其反例与完整测试。
+- **D01已确认**：主报告A4双面保持，超出文字/特长放带学生姓名、学期和“第X页/共N页”的续页；DETAIL_ONLY为明细主页+获准明细续页，FULL为主正反2页+全部续页。主格明确标“全文/其余项目见第X页”，不静默截字；续页保留完整原值、自评/他评和稳定项目身份。合法长内容应可完成确认/打印，只有实际排版错误/遗漏仍阻断。打印工具栏显示真实页数。
+- 必测`detail_dto_has_all_confirmation_versions`、`published_view_never_confirms_current_draft`、`detail_layout_is_not_full_layout_approval`、`template_change_does_not_change_frozen_detail_print`、`long_legal_text_and_specialties_print_on_named_numbered_continuations`；普通教师续页不含正面叙述，重印冻结续页不混入新草稿。
 
 ### R1.7 容量、切换与任务粒度（Task13–16；R25–R28）
 
@@ -314,7 +314,7 @@
 - [ ] **Step 1 — 写失败浏览器测试：** 默认所有负责班级及6名以上真实测试学生、按班/姓名/状态过滤；点学生开独立路由；返回恢复条件/页码/滚动；慢A请求后快B返回时不得把A报告挂到B名下。
 - [ ] **Step 2 — 跑红：** `cd frontend && node tests/report-core-reports.cjs`。
 - [ ] **Step 3 — 实现列表与详情：** 侧班级+学生摘要，六板块filled/applicable而非总分；默认有发布版本选published，否则current；明细默认一页，班主任可切完整两页。published只读，编辑需显式切current；保存后保持current、拉新草稿与FULL两面布局再确认。任课没有正面选项/寄语编辑/确认；DETAIL_ONLY通过不等于完整报告确认通过。
-- [ ] **Step 4 — 实现打印与边界验证：** 两按钮明确“导出PDF”需打印面板另存；打印当前iframe获准范围，草稿标识印入内容。隔离探针以目标A4打印CSS检查每页真实溢出；D01裁定前，长Unicode文本/多特长超出禁用导出打印与确认、屏幕全文可读，不裁切/假造layoutReview，也不能将永久阻断合法输入当成完整验收PASS。裁定后按批准规则完成长内容路径。验证6表/109位置、表头合并、原始值；390/1440、快速切人/版本、登录过期清旧DOM，以及published不能确认、DETAIL测量不能批准FULL均通过。
+- [ ] **Step 4 — 实现打印与边界验证：** 两按钮明确“导出PDF”需打印面板另存；打印当前iframe获准范围，草稿标识印入内容。按D01将合法超长文本/多特长完整排到带姓名/页码续页，主页面标续页指引，显示实际页数；隔离探针检查每页真实溢出，不裁切/假造layoutReview。验证6表/109位置、表头合并、原始值、续页完整无重漏；390/1440、快速切人/版本、登录过期清旧DOM，以及published不能确认、DETAIL测量不能批准FULL均通过。
 - [ ] **Step 5 — 提交：** `feat: render class report summaries and printable student detail pages`。
 
 ## Task 12: 教师待办与管理员发布中心

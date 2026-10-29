@@ -62,6 +62,30 @@ const narratives = [
   "teacher_comment",
   "family_message",
 ];
+function schoolDayStart(value) {
+  const date = value instanceof Date ? value.toISOString().slice(0, 10) : value;
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) fail(422, '校历日期不合法');
+  const check = new Date(date + 'T00:00:00Z');
+  if (!Number.isFinite(+check) || check.toISOString().slice(0, 10) !== date) fail(422, '校历日期不合法');
+  return new Date(date + 'T00:00:00+08:00');
+}
+function schoolDayEnd(value) { return new Date(+schoolDayStart(value) + 86400000); }
+function getSchoolMonthBounds(monthKey) {
+  if (typeof monthKey !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey)) fail(422, '月份不合法');
+  const [year, month] = monthKey.split('-').map(Number);
+  const next = `${month === 12 ? year + 1 : year}-${String(month === 12 ? 1 : month + 1).padStart(2, '0')}-01`;
+  return { startInclusive: schoolDayStart(monthKey + '-01'), endExclusive: schoolDayStart(next) };
+}
+function collectionCutoff(term) {
+  const configured = term.evaluation_config?.collectionDeadline;
+  const termEnd = schoolDayEnd(term.end_date);
+  if (!configured) return termEnd;
+  let deadline;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(configured)) deadline = schoolDayEnd(configured);
+  else if (typeof configured === 'string' && /^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(configured)) deadline = new Date(configured);
+  if (!deadline || !Number.isFinite(+deadline)) fail(422, '采集截止日期不合法');
+  return new Date(Math.min(+termEnd, +deadline));
+}
 module.exports = {
   fail,
   stableHash,
@@ -70,6 +94,10 @@ module.exports = {
   byColumn,
   narratives,
   subjectFor,
+  schoolDayStart,
+  schoolDayEnd,
+  getSchoolMonthBounds,
+  collectionCutoff,
 };
 function cardStars({ points, target = 10, settled }) {
   if (

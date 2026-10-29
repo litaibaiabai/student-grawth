@@ -1,6 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { createDbPool } = require("../db");
+const { createDbPool, dbConfig } = require("../db");
+const { addSource, parse } = require('../services/reportCoreStore');
+const { stableHash } = require('../services/reportCorePolicy');
 const tables = [
   "users",
   "academic_year",
@@ -44,21 +46,48 @@ async function runCoreMigrations({ connection, targetDb, mode = "check" }) {
     await connection.query(statement);
   return { tables, unchanged: false };
 }
+async function recordUtcCutover({ connection, targetDb, schoolId, verifiedLegacyOffsetMinutes = null }) {
+  if (!/^\d+$/.test(String(schoolId)) || (verifiedLegacyOffsetMinutes !== null && (!Number.isInteger(verifiedLegacyOffsetMinutes) || Math.abs(verifiedLegacyOffsetMinutes) > 14 * 60))) throw Error('School or verified clock offset is invalid');
+  await runCoreMigrations({ connection, targetDb });
+  const [[clock]] = await connection.query('SELECT TIMESTAMPDIFF(MINUTE,UTC_TIMESTAMP(),NOW()) offsetMinutes');
+  await connection.query("SET time_zone='+00:00'");
+  await connection.beginTransaction();
+  try {
+    const [[term]] = await connection.query('SELECT id FROM academic_year WHERE school_id=? ORDER BY id LIMIT 1 FOR UPDATE', [schoolId]);
+    if (!term) throw Error('School must have a term before recording cutover');
+    const key = ['SOURCE_CLOCK_BASELINE', String(schoolId), 'UTC_V1'];
+    const [[old]] = await connection.query('SELECT id,payload_json FROM evaluation_source_record WHERE school_id=? AND business_key=?', [schoolId, stableHash(key)]);
+    if (old) { await connection.commit(); return { ...parse(old.payload_json), auditId: String(old.id), replayed: true }; }
+    const [[last]] = await connection.query('SELECT MAX(id) id FROM evaluation_source_record WHERE school_id=?', [schoolId]);
+    const payload = { action: 'SOURCE_CLOCK_BASELINE', schoolId: String(schoolId), lastLegacySourceId: String(last.id || '0'), previousSessionOffsetMinutes: Number(clock.offsetMinutes), verifiedLegacyOffsetMinutes, utcFrom: new Date().toISOString() };
+    const auditId = await addSource(connection, { schoolId, termId: term.id, kind: 'AUDIT', status: 'COMMITTED', key, payload });
+    await connection.commit();
+    return { ...payload, auditId, replayed: false };
+  } catch (error) { await connection.rollback(); throw error; }
+}
 if (require.main === module) {
   const targetDb = process.env.REPORT_DB_NAME;
   if (!targetDb)
     throw Error("Set REPORT_DB_NAME to an empty dedicated database");
-  const pool = createDbPool({ database: targetDb });
-  runCoreMigrations({
-    connection: pool,
-    targetDb,
-    mode: process.argv.includes("--apply") ? "apply" : "check",
-  })
+  const cutover = process.argv.includes('--record-utc-cutover');
+  const option = name => process.argv.find(v => v.startsWith(name + '='))?.slice(name.length + 1);
+  let pool;
+  (async () => {
+    if (cutover) {
+      if (process.argv.includes('--apply')) throw Error('Cutover audit and schema apply must be separate operations');
+      // A dedicated raw probe observes the pre-cutover server session; app pools always use UTC.
+      pool = await require('mysql2/promise').createConnection(dbConfig({ database: targetDb }));
+      const verified = option('--verified-legacy-offset-minutes');
+      return recordUtcCutover({ connection: pool, targetDb, schoolId: option('--school-id'), verifiedLegacyOffsetMinutes: verified === undefined ? null : Number(verified) });
+    }
+    pool = createDbPool({ database: targetDb });
+    return runCoreMigrations({ connection: pool, targetDb, mode: process.argv.includes('--apply') ? 'apply' : 'check' });
+  })()
     .then((r) => console.log(r))
     .catch((e) => {
       console.error(e.message);
       process.exitCode = 1;
     })
-    .finally(() => pool.end());
+    .finally(() => pool?.end());
 }
-module.exports = { runCoreMigrations, tables };
+module.exports = { runCoreMigrations, recordUtcCutover, tables };
