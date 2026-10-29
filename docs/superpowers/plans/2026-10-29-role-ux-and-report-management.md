@@ -299,11 +299,11 @@
 - `getReportDetail({pool,actor,studentKey,version,scope})` → R1.6完整DTO，含fingerprint/templateVersion/configVersion/ruleVersion/releaseVersion及viewVersion，另保留publishedVersion兼容字段；version=`current|published`，scope=`detail|full`。published不允许确认或编辑当前草稿。
 - 新动作`report-detail-read`允许有效任教班级；`report-front-read/confirm`仍head。`renderPrintableA4({reportData,renderScope='FULL',draftLabel})`接受`DETAIL_ONLY`并在服务端根本不生成正面HTML。
 
-- [ ] **Step 1 — 写失败权限测试：** 一教师两班、一班任课一班班主任，同班多学科只算一次；两班所有学生可列表；无关班级/跨校/学生账号拒绝；任课可取detail但full403、确认403，响应与HTML不含带唯一标识的自述/家长/寄语文本。补R1.6的DTO必需版本与模板更新后冻结明细不变测试。
-- [ ] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_report_browser.test.js`。
-- [ ] **Step 3 — 实现：** 复用Task9批量完整度；当前草稿和发布快照分开读取，published取当前有效releaseVersion冻结数据。教师必须当前仍有任教；参数不能扩权。普通教师model也不带narratives，不能只CSS隐藏。未知结构LEGACY_V1原始HTML无法安全裁剪时，任课返回明确不支持，不走renderer的renderedHtml直接返回捷径；班主任沿历史读取规则。
-- [ ] **Step 4 — 验证：** 发布后改草稿，不改变已发布视图；任教撤销后列表/猜ID/导出均拒绝；筛选“已发布”与“当前草稿缺项”可分别匹配同一人，counts不宣称互斥求和。DETAIL_ONLY保留全部六育呈现字段和自评他评，FULL两面，测试PASS并重跑原auth/drafts/release测试。
-- [ ] **Step 5 — 提交：** `feat: browse all assigned classes with scoped report details`。
+- [x] **Step 1 — 写失败权限测试：** 一教师两班、一班任课一班班主任，同班多学科只算一次；两班所有学生可列表；无关班级/跨校/学生账号拒绝；任课可取detail但full403、确认403，响应与HTML不含带唯一标识的自述/家长/寄语文本。补R1.6的DTO必需版本与模板更新后冻结明细不变测试。
+- [x] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_report_browser.test.js`。
+- [x] **Step 3 — 实现：** 复用Task9批量完整度；当前草稿和发布快照分开读取，published取当前有效releaseVersion冻结数据。教师必须当前仍有任教；参数不能扩权。普通教师model也不带narratives，不能只CSS隐藏。未知结构LEGACY_V1原始HTML无法安全裁剪时，任课返回明确不支持，不走renderer的renderedHtml直接返回捷径；班主任沿历史读取规则。
+- [x] **Step 4 — 验证：** 发布后改草稿，不改变已发布视图；任教撤销后列表/猜ID/导出均拒绝；筛选“已发布”与“当前草稿缺项”可分别匹配同一人，counts不宣称互斥求和。DETAIL_ONLY保留全部六育呈现字段和自评他评，FULL两面，测试PASS并重跑原auth/drafts/release测试。
+- [x] **Step 5 — 提交：** `feat: browse all assigned classes with scoped report details`。
 
 ## Task 11: 班级摘要页与PDF式学生详情
 

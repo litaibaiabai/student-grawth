@@ -27,8 +27,11 @@ function evaluateCompletion({ evaluation:e, config = {}, blockingMaterials = [] 
   if(blockingMaterials.length) missingItems.push({field:'materials',reason:'仍有材料等待评分或审核'});
   return {missingItems,sectionProgress,narrativeReady:!narrativeMissing.length,selfProgress:{total:selfTotal,complete:selfComplete}};
 }
-async function resolveTermRoster({connection,schoolId,termId}) {
-  const [rows]=await connection.query('SELECT * FROM student_term_evaluation WHERE school_id=? AND term_id=? ORDER BY student_id',[schoolId,termId]);
+async function resolveTermRoster({connection,schoolId,termId,teacherId,studentId}) {
+  let sql='SELECT e.* FROM student_term_evaluation e WHERE e.school_id=? AND e.term_id=?';const params=[schoolId,termId];
+  if(teacherId){sql+=' AND EXISTS(SELECT 1 FROM teacher_teaching_assignment a WHERE a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot AND a.teacher_id=? AND a.enabled=1)';params.push(teacherId);}
+  if(studentId){sql+=' AND e.student_id=?';params.push(studentId);}
+  const [rows]=await connection.query(sql+' ORDER BY e.student_id',params);
   return rows.filter(e=>parse(e.section_meta).roster?.included!==false);
 }
 async function getBlockingMaterials({connection,schoolId,termId,config,studentId}) {
@@ -56,7 +59,7 @@ async function getWorkspace(args) {
     await c.beginTransaction();const term=await getTerm(c,actor.schoolId,termId);
     const [assignments]=await c.query('SELECT a.*,u.real_name FROM teacher_teaching_assignment a LEFT JOIN users u ON u.school_id=a.school_id AND u.id=a.teacher_id WHERE a.school_id=? AND a.term_id=? AND a.enabled=1',[actor.schoolId,termId]);
     const mine=assignments.filter(a=>String(a.teacher_id)===actor.id);
-    let roster=await resolveTermRoster({connection:c,schoolId:actor.schoolId,termId});
+    let roster=await resolveTermRoster({connection:c,schoolId:actor.schoolId,termId,...(actor.role==='teacher'?{teacherId:actor.id}:actor.role==='student'?{studentId:actor.id}:{})});
     roster=roster.filter(e=>(actor.role==='manager'||actor.role==='student'&&String(e.student_id)===actor.id||actor.role==='teacher'&&mine.some(a=>a.grade===e.grade_snapshot&&a.class_no===e.class_no_snapshot&&(!args.subjectCode||a.subject_code===args.subjectCode)))&&(!args.grade||e.grade_snapshot===Number(args.grade))&&(!args.classNo||e.class_no_snapshot===Number(args.classNo)));
     const ids=new Set(roster.map(e=>String(e.student_id)));
     const blocking=(await getBlockingMaterials({connection:c,schoolId:actor.schoolId,termId,config:term.evaluation_config})).filter(r=>ids.has(String(r.student_id)));
@@ -98,4 +101,4 @@ async function listTeachers(args) {
   const [rows]=await pool.query("SELECT id,real_name realName,username FROM users WHERE school_id=? AND role='teacher' AND status=0 AND (LOCATE(?,real_name)>0 OR LOCATE(?,username)>0) ORDER BY id LIMIT ? OFFSET ?",[actor.schoolId,q,q,page.limit+1,page.offset]);
   return {rows:rows.slice(0,page.limit).map(r=>({...r,id:String(r.id)})),nextCursor:rows.length>page.limit?page.next(page.offset+rows.length):null};
 }
-module.exports={evaluateCompletion,resolveTermRoster,getBlockingMaterials,getWorkspace,listTeachers};
+module.exports={pagination,evaluateCompletion,resolveTermRoster,getBlockingMaterials,getWorkspace,listTeachers};

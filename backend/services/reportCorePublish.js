@@ -232,11 +232,11 @@ async function prepareReleaseChunk({
         nextRegistrationDate: term.next_term_registration_date,
       };
       model.templateVersion = term.template_version;
+      model.ruleVersion = term.rule_version;
+      model.configVersion = String(term.config_version);
       model.fingerprint = s.fingerprint;
-      const snapshot = {
-        ...model,
-        renderedHtml: renderPrintableA4({ reportData: model }),
-      };
+      const renderedDetailHtml=renderPrintableA4({reportData:model,renderScope:'DETAIL_ONLY'});
+      const snapshot=JSON.parse(JSON.stringify({...model,renderedHtml:renderPrintableA4({reportData:model}),renderedDetailHtml,renderedDetailHash:stableHash(renderedDetailHtml)}));
       const [[max]] = await c.query(
         "SELECT MAX(version) n FROM term_report WHERE school_id=? AND term_id=? AND student_id=?",
         [term.school_id, termId, s.studentId],
@@ -393,6 +393,7 @@ async function getPublishedReport({
     return null;
   }
   const snapshot = parse(r.snapshot_json);
+  if(snapshot.renderedDetailHtml)require("./reportCoreReportBrowser").validateFrozenSnapshot(snapshot,r);
   return {
     id: String(r.id),
     termId: String(r.term_id),

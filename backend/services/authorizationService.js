@@ -46,7 +46,7 @@ async function assertScope(
     fail(403, "需要教师权限");
   }
   if (actor.role === "manager") {
-    if (["report", "confirm", "form", "material"].includes(action))
+    if (["report", "report-detail-read", "report-front-read", "confirm", "form", "material"].includes(action))
       fail(403, "管理员无权访问报告正文");
     return { allowedFields: fields, evaluation: e, head: false };
   }
@@ -56,7 +56,7 @@ async function assertScope(
   );
   if (!rows.length) fail(403, "不在任教范围");
   const head = rows.some((a) => a.is_head_teacher === 1);
-  if (["report", "confirm"].includes(action) && !head)
+  if (["report", "report-front-read", "confirm"].includes(action) && !head)
     fail(403, "仅班主任可查看完整报告");
   const allowedFields = fields.filter(
     (f) =>
