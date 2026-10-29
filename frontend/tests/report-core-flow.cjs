@@ -163,7 +163,6 @@ const {
     await page.getByLabel("计划张数0-0", { exact: true }).fill("100");
     await page.getByLabel("班级总量0",{exact:true}).fill("100");
     await page.getByLabel("计划方向0-0",{exact:true}).selectOption("CONDUCT_POLITENESS_OTHER_STAR");
-    if(await page.getByRole('button',{name:'保存分班计划',exact:true}).isDisabled())console.error('CARD_PLAN_DIAGNOSTIC',await page.locator('.card-plan').innerText(),await page.locator('.card-plan input,.card-plan select').evaluateAll(es=>es.map(e=>({label:e.ariaLabel,value:e.value,options:e.options?[...e.options].map(o=>o.value):null}))));
     await page.getByRole("button", { name: "保存分班计划", exact: true }).click();
     await toast("分班计划已保存");
 
@@ -301,7 +300,13 @@ const {
       }
     }
     await login("teacher");
+    await page.getByRole('button',{name:'奖状',exact:true}).click();
+    await page.getByRole('button',{name:'前往处理 →',exact:true}).first().click();
+    await page.locator('.review-box').waitFor();
+    assert.equal(await page.getByRole('heading',{name:/材料 #/}).count(),1);
+    await page.screenshot({path:path.join(screenshotDir,'teacher-review-new-ui.png'),fullPage:true});
     await nav("材料认定");
+    await page.getByRole('button',{name:'全部材料',exact:true}).click();
     let reviewButtons = page.getByRole("button", {
       name: "查看与处理",
       exact: true,
@@ -409,6 +414,11 @@ const {
       .getByRole("button", { name: "准备全校报告", exact: true })
       .click();
     await toast("全校报告准备完成");
+    await page.reload();
+    await page.getByRole('heading',{name:'全校发布进度',exact:true}).waitFor();
+    await page.getByRole('button',{name:'统一发布',exact:true}).waitFor();
+    await page.reload();
+    await page.getByRole('heading',{name:'全校发布进度',exact:true}).waitFor();
     await page.getByRole("button", { name: "统一发布", exact: true }).click();
     await toast("全校报告已统一发布");
     await page.screenshot({
@@ -488,7 +498,7 @@ const {
       "PASS actual browser six-source / three-role / two-class / eight-student whole-school report flow",
     );
   } finally {
-    if(browser){const p=browser.contexts()[0]?.pages()[0];if(p&&await p.locator('.card-plan').count())console.error('FINAL_CARD_PLAN_STATE',await p.locator('.card-plan').innerText(),await p.locator('.card-plan input,.card-plan select').evaluateAll(es=>es.map(e=>({label:e.ariaLabel,value:e.value,disabled:e.disabled}))));await browser.close();}
+    if(browser){const p=browser.contexts()[0]?.pages()[0];if(p&&await p.locator('.report-detail-header').count())console.error('REPORT_DETAIL_STATE',await p.locator('.report-detail-header').innerText(),await p.locator('.report-toolbar').innerText());if(p&&await p.locator('.card-plan').count())console.error('FINAL_CARD_PLAN_STATE',await p.locator('.card-plan').innerText(),await p.locator('.card-plan input,.card-plan select').evaluateAll(es=>es.map(e=>({label:e.ariaLabel,value:e.value,disabled:e.disabled}))));await browser.close();}
     if (vite) vite.kill();
     if (server) await new Promise((r) => server.close(r));
     for (const f of cleanups.reverse()) await f();

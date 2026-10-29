@@ -56,3 +56,15 @@ test('old_month_worker_result_does_not_advance_unrelated_report_revision', async
   const [[after]]=await db.pool.query('SELECT revision FROM student_term_evaluation WHERE student_id=3');
   assert.equal(after.revision,before.revision);
 });
+test('workspace material filters apply before pagination and retain real academic completion counts',async t=>{
+ const db=await createCoreTestDb(t);await db.seedBase();
+ await db.pool.query("UPDATE academic_year SET evaluation_config=JSON_SET(evaluation_config,'$.applicableFields',JSON_ARRAY('math_basic_knowledge_grade')) WHERE id=1");
+ await db.pool.query("UPDATE student_term_evaluation SET math_basic_knowledge_grade='A' WHERE student_id=3");
+ const add=require('../services/reportCoreStore').addSource;
+ for(let i=0;i<26;i++)await add(db.pool,{schoolId:'1',termId:'1',studentId:'3',sourceType:'CERTIFICATE',actorId:'3',kind:'ITEM',status:'SUBMITTED',key:['workspace-cert',i]});
+ const result=await read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'CERTIFICATE',subjectCode:'MATH',limit:25});
+ assert.equal(result.tasks.length,25);assert.ok(result.tasks.every(t=>t.type==='CERTIFICATE'));assert.ok(result.nextCursor);
+ assert.equal(result.counts.academicExpected,2);assert.equal(result.counts.academicComplete,1);
+ const next=await read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'CERTIFICATE',subjectCode:'MATH',limit:25,cursor:result.nextCursor});assert.equal(next.tasks.length,1);
+ await assert.rejects(read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'STORY',subjectCode:'MATH',cursor:result.nextCursor}),{statusCode:422});
+});

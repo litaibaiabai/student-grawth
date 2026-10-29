@@ -48,6 +48,9 @@ test("whole-school release hides prepared reports and activates together; cancel
     limit: 1,
   });
   assert.equal(partial.prepared, 1);
+  const restored=await p.getReadiness({pool:db.pool,actor,termId:'1'});
+  assert.equal(restored.release.prepared,1);assert.equal(restored.release.total,2);assert.equal(restored.release.releaseKey,r.releaseKey);
+  assert.ok(!JSON.stringify(restored).includes('继续努力'));
   const student = { id: "3", schoolId: "1", role: "student", tokenVersion: 1 };
   assert.equal(
     await p.getPublishedReport({ pool: db.pool, actor: student, termId: "1" }),

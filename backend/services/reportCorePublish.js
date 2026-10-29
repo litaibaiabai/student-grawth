@@ -52,6 +52,7 @@ async function getReadiness({ pool, actor, termId }) {
     missing,
     counts: { total: rows.length, confirmed },
     releaseStatus: term.release_status,
+    release: term.release_status==='IDLE'?null:releaseInfo(term),
   };
 }
 function releaseInfo(term) {

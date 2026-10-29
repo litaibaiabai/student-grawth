@@ -35,7 +35,7 @@ async function resolveTermRoster({connection,schoolId,termId,teacherId,studentId
   return rows.filter(e=>parse(e.section_meta).roster?.included!==false);
 }
 async function getBlockingMaterials({connection,schoolId,termId,config,studentId}) {
-  const [rows]=await connection.query(`SELECT i.id,i.student_id,i.source_type,i.status,i.month_key,i.target_key,i.parent_id FROM evaluation_source_record i
+  const [rows]=await connection.query(`SELECT i.id,i.created_at,i.student_id,i.source_type,i.status,i.month_key,i.target_key,i.parent_id FROM evaluation_source_record i
     LEFT JOIN evaluation_source_record b ON b.school_id=i.school_id AND b.id=i.parent_id
     WHERE i.school_id=? AND i.term_id=? AND i.record_kind='ITEM' AND i.status IN ('QUEUED','PROCESSING','SUBMITTED','FAILED')
     AND (i.source_type='CERTIFICATE' OR (i.source_type='STORY' AND b.record_kind='BATCH' AND b.status IN ('SUBMITTED','SCORED')
@@ -53,7 +53,8 @@ async function getWorkspace(args) {
   if(!['student','teacher','manager'].includes(actor.role))fail(403,'无工作台权限');
   if(!/^[1-9]\d*$/.test(String(termId)))fail(422,'请选择学期');
   for(const k of ['grade','classNo'])if(args[k]!==undefined&&(!Number.isInteger(Number(args[k]))||Number(args[k])<1))fail(422,'班级不合法');
-  const page=pagination(args,{actor,termId,grade:args.grade,classNo:args.classNo,subjectCode:args.subjectCode});
+  if(args.taskType&&!['all','CERTIFICATE','STORY','MISSING_FIELD'].includes(args.taskType))fail(422,'待办类型不合法');
+  const page=pagination(args,{actor,termId,grade:args.grade,classNo:args.classNo,subjectCode:args.subjectCode,taskType:args.taskType});
   const c=await pool.getConnection();
   try {
     await c.beginTransaction();const term=await getTerm(c,actor.schoolId,termId);
@@ -92,10 +93,12 @@ async function getWorkspace(args) {
       for(const material of byStudent.get(sid)||[]){
         const canHandle=actor.role==='teacher'&&(material.source_type==='STORY'?own.some(a=>a.is_head_teacher===1||a.subject_code==='STORY'):require('./authorizationService').canManageCertificate({head:own.some(a=>a.is_head_teacher===1),assignments:own}));
         if(actor.role==='teacher'&&!canHandle)continue;
-        tasks.push({taskId:`source:${material.id}`,type:material.source_type,studentId:sid,sourceId:String(material.id),monthKey:material.month_key,reason:material.status==='FAILED'?'自动处理失败':'材料待处理',canHandle,route:{page:actor.role==='student'?(material.source_type==='STORY'?'stories':'awards'):'reviews',termId:String(termId)}});
+        tasks.push({taskId:`source:${material.id}`,type:material.source_type,studentId:sid,sourceId:String(material.id),monthKey:material.month_key,occurredAt:material.created_at,reason:material.status==='FAILED'?'自动处理失败':'材料待处理',canHandle,route:{page:actor.role==='student'?(material.source_type==='STORY'?'stories':'awards'):'reviews',termId:String(termId)}});
       }
     }
-    const out={counts,tasks:tasks.slice(page.offset,page.offset+page.limit),taskCount:tasks.length,classRows:[...classes.values()],nextCursor:page.next(tasks.length),asOf:new Date().toISOString()};
+    tasks.sort((a,b)=>(a.type==='MISSING_FIELD')-(b.type==='MISSING_FIELD')||(a.occurredAt?+new Date(a.occurredAt):0)-(b.occurredAt?+new Date(b.occurredAt):0)||a.taskId.localeCompare(b.taskId));
+    const filtered=tasks.filter(t=>!args.taskType||args.taskType==='all'||t.type===args.taskType);
+    const out={counts,tasks:filtered.slice(page.offset,page.offset+page.limit),taskCount:tasks.length,classRows:[...classes.values()],nextCursor:page.next(filtered.length),asOf:new Date().toISOString()};
     await c.commit();return out;
   }catch(e){await c.rollback();throw e;}finally{c.release();}
 }

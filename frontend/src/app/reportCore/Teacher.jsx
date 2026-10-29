@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { normalizeImportRows } from "./importRows";
-import { api, resultOf, download } from "./api";
+import { api, resultOf, download, allStudents } from "./api";
 import { EvaluationForm, statusName } from "./Materials";
 import TermReport from "../../component/TermReport";
 export const subjectFor = (column) =>
@@ -765,8 +765,9 @@ export function Settlements({ ctx }) {
         onClick={() =>
           ctx.run(async () => {
             const [grade, classNo] = cls.split(":").map(Number);
+            const currentStudents=await allStudents(ctx.termId);
             const expectedRevisions = Object.fromEntries(
-              ctx.students
+              currentStudents
                 .filter(
                   (s) =>
                     s.grade_snapshot === grade &&
