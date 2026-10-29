@@ -79,6 +79,8 @@ test("monthly READ LISTEN TELL each need 1–3 texts, scores aggregate and obsol
     ...args,
     articles: articles.map((a) => ({ ...a, text: a.text + "新版" })),
     expectedRevision: "3",
+    expectedBatchId: id,
+    expectedVersion: 1,
     command: cmd(),
   });
   await story.submitStoryBatch({

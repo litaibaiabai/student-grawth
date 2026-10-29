@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { api, allStudents, resetApiSession } from "./api";
 import RoleShell from "./RoleShell";
 import SelfEvaluation from "./SelfEvaluation";
+import StudentHome, { StudentArchive } from "./StudentHome";
 import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm } from "./Materials";
 import {
@@ -138,6 +139,8 @@ export default function ReportCoreApp() {
   const ctx = {
     actor,
     termId,
+    navigate,
+    term: terms.find(t => String(t.id) === termId),
     setLeaveGuard: fn => { leaveGuard.current = fn; },
     catalog,
     students,
@@ -279,6 +282,8 @@ export default function ReportCoreApp() {
           </section>
         ) : (
           <div className="content" key={`${actor.id}:${termId}`} aria-busy={busy}>
+            {tab === "home" && <StudentHome ctx={ctx} />}
+            {tab === "archive" && <StudentArchive ctx={ctx} />}
             {tab === "cards" && <Cards ctx={ctx} />}{" "}
             {tab === "awards" && <AwardUpload ctx={ctx} />}{" "}
             {tab === "stories" && <StoryForm ctx={ctx} />}{" "}

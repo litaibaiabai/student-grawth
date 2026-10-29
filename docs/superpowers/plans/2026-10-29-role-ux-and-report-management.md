@@ -243,11 +243,11 @@
 
 **Interfaces:** sources查询增加`monthKey/sourceType/recordKind/latest`，月视图采用R1.4的`getStudentStoryMonth`返回草稿/有效批次及关联ITEM原文，学生仅本人，不依赖旧第一页或假设BATCH保留articles。故事保存/提交按R1.4身份三元组CAS；`StudentHome({ctx,summary})`消费Task9学生workspace，StoryForm仍为三分类页签。
 
-- [ ] **Step 1 — 写失败测试：** 存超过100条来源，指定月仍取得正确最新版；切月不取其他月草稿，非本人403/空结果；已评分旧版保留。读听讲每类1–3篇、4篇拒绝、篇数不增权。加入R1.4的20000字边界、revision同为1的双草稿、旧稿晚提交和提交后原文回读，以及R1.1上传丢响应重试一次效果。
-- [ ] **Step 2 — 跑红并最小实现查询：** `cd backend && node --test __tests__/report_core_story_lookup.test.js __tests__/report_core_stories.test.js`，先确认新测试红，再补服务端精确条件。
-- [ ] **Step 3 — 实现页面：** 云朵首页双主动作领卡/奖状、真实月度故事/自评进度；故事同月三页签、篇目与TXT载入，文件失败保留原文；保存/提交状态来自真实响应。档案分组原材料、故事历史、自评、已发布报告；无发布只显示说明，不读取草稿。
-- [ ] **Step 4 — 验证：** 新查询测试PASS；真实浏览器执行扫码登录回跳→预览→领1分；PNG/JPEG≤5MB上传，提交不假称已识别；故事每类1篇整月提交、UTF-8非法/64KB超限/断网/切月/409均不丢输入。禁止持久化学生全文至公共设备localStorage。
-- [ ] **Step 5 — 提交：** `feat: streamline student monthly stories and personal archive`。
+- [x] **Step 1 — 写失败测试：** 存超过100条来源，指定月仍取得正确最新版；切月不取其他月草稿，非本人403/空结果；已评分旧版保留。读听讲每类1–3篇、4篇拒绝、篇数不增权。加入R1.4的20000字边界、revision同为1的双草稿、旧稿晚提交和提交后原文回读，以及R1.1上传丢响应重试一次效果。
+- [x] **Step 2 — 跑红并最小实现查询：** `cd backend && node --test __tests__/report_core_story_lookup.test.js __tests__/report_core_stories.test.js`，先确认新测试红，再补服务端精确条件。
+- [x] **Step 3 — 实现页面：** 云朵首页双主动作领卡/奖状、真实月度故事/自评进度；故事同月三页签、篇目与TXT载入，文件失败保留原文；保存/提交状态来自真实响应。档案分组原材料、故事历史、自评、已发布报告；无发布只显示说明，不读取草稿。
+- [x] **Step 4 — 验证：** 新查询测试PASS；真实浏览器执行扫码登录回跳→预览→领1分；PNG/JPEG≤5MB上传，提交不假称已识别；故事每类1篇整月提交、UTF-8非法/64KB超限/断网/切月/409均不丢输入。禁止持久化学生全文至公共设备localStorage。
+- [x] **Step 5 — 提交：** `feat: streamline student monthly stories and personal archive`。
 
 ## Task 7: 教师单页快速直评与整班录入
 

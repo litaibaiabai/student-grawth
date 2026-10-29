@@ -23,7 +23,7 @@ function normalizeArticles(articles, formal = false) {
     if (!categories.includes(a.category) || typeof a.text !== "string")
       fail(422, "故事类别或正文不合法");
     const text = a.text.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
-    if (!text.trim() || [...text].length > 10000) fail(422, "每篇需1至10000字");
+    if (!text.trim() || [...text].length > 20000) fail(422, "每篇需1至20000字");
     if (++counts[a.category] > 3) fail(422, "每类最多3篇");
     return {
       category: a.category,
@@ -42,6 +42,8 @@ async function saveStoryDraft({
   termId,
   monthKey,
   expectedRevision,
+  expectedBatchId,
+  expectedVersion,
   articles,
   command,
 }) {
@@ -71,12 +73,7 @@ async function saveStoryDraft({
         [actor.schoolId, termId, actor.id, monthKey],
       );
       const latest = old[0];
-      if (
-        latest &&
-        expectedRevision !== undefined &&
-        String(latest.revision) !== String(expectedRevision)
-      )
-        fail(409, "月批次已变化");
+      if (latest ? String(latest.id) !== String(expectedBatchId) || String(latest.version) !== String(expectedVersion) || String(latest.revision) !== String(expectedRevision) : [expectedBatchId,expectedVersion,expectedRevision].some(v => v !== undefined && v !== null)) fail(409, '月批次已变化，请重新读取并保留本次输入');
       const version = latest ? latest.version + 1 : 1;
       const groupKey = `STORY:${actor.id}:${monthKey}`;
       const batchId = await addSource(c, {
@@ -148,6 +145,8 @@ async function submitStoryBatch({
         !(term.evaluation_config.requiredMonths || []).includes(row.month_key)
       )
         fail(422, "此月不在应交月份");
+      const [[latest]] = await c.query("SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND student_id=? AND month_key=? AND source_type='STORY' AND record_kind='BATCH' ORDER BY version DESC LIMIT 1 FOR UPDATE", [actor.schoolId,row.term_id,actor.id,row.month_key]);
+      if (String(latest.id) !== String(row.id)) fail(409, '已有更新的月度草稿，请刷新后提交');
       const p = parse(row.payload_json),
         articles = normalizeArticles(p.articles, true);
       const [[e]] = await c.query(
@@ -410,7 +409,24 @@ async function retryStoryItem({ pool, actor, itemId, command }) {
     },
   );
 }
+async function getStudentStoryMonth({pool,actor,termId,monthKey,studentId}) {
+  if(actor.role !== 'student' || studentId && String(studentId) !== actor.id) fail(403,'仅本人查看月度故事');
+  if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey))fail(422,'月份不合法');
+  const c=await pool.getConnection();
+  try {
+    await c.beginTransaction();
+    await assertScope({actor,studentKey:{schoolId:actor.schoolId,termId,studentId:actor.id},action:'material'},c);
+    const [batches]=await c.query("SELECT id,version,revision,status,month_key,payload_json FROM evaluation_source_record WHERE school_id=? AND term_id=? AND student_id=? AND source_type='STORY' AND record_kind='BATCH' AND month_key=? ORDER BY version DESC",[actor.schoolId,termId,actor.id,monthKey]);
+    const dto=b=>b?{batchId:String(b.id),version:b.version,revision:String(b.revision),status:b.status,monthKey:b.month_key,...(b.status==='DRAFT'?{articles:parse(b.payload_json).articles||[]}: {})}:null;
+    const latest=batches[0],effective=batches.find(b=>['SUBMITTED','SCORED'].includes(b.status));
+    let articles=[];
+    if(effective){const [items]=await c.query("SELECT id,status,record_ordinal,payload_json FROM evaluation_source_record WHERE school_id=? AND parent_id=? AND record_kind='ITEM' ORDER BY record_ordinal",[actor.schoolId,effective.id]);articles=items.map(r=>{const p=parse(r.payload_json);return {id:String(r.id),status:r.status,ordinal:r.record_ordinal,category:p.category,title:p.title||'',text:p.text,score:p.score||null,error:p.lastError||null};});}
+    const summary={};for(const item of articles)summary[item.status]=(summary[item.status]||0)+1;
+    await c.commit();return {latestBatch:dto(latest),draftBatch:latest?.status==='DRAFT'?dto(latest):null,effectiveBatch:dto(effective),articles,processingSummary:summary};
+  }catch(e){await c.rollback();throw e;}finally{c.release();}
+}
 module.exports = {
+  getStudentStoryMonth,
   saveStoryDraft,
   submitStoryBatch,
   applyStoryResult,

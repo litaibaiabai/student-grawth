@@ -1,6 +1,6 @@
 const { parse } = require("./reportCoreStore");
 const { assertScope, assignments } = require("./authorizationService");
-const { subjectFor } = require("./reportCorePolicy");
+const { subjectFor, fail } = require("./reportCorePolicy");
 function mayReadField(scope, field) {
   return (
     scope.head ||
@@ -19,6 +19,7 @@ async function listSources({
   actor,
   termId,
   studentId,
+  monthKey, sourceType, recordKind, latest = false,
   offset = 0,
   limit = 100,
 }) {
@@ -39,6 +40,10 @@ async function listSources({
     filter += " AND s.student_id=?";
     params.push(studentId);
   }
+  if (monthKey) { if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey))fail(422,'月份不合法');filter+=' AND s.month_key=?';params.push(monthKey); }
+  if (sourceType) { if(!['CARD','IMPORT','CERTIFICATE','SELF','TEACHER','STORY'].includes(sourceType))fail(422,'来源类型不合法');filter+=' AND s.source_type=?';params.push(sourceType); }
+  if (recordKind) { if(!['QUOTA','CARD','DIRECT','BATCH','ITEM','FORM','REVERSAL'].includes(recordKind))fail(422,'记录类型不合法');filter+=' AND s.record_kind=?';params.push(recordKind); }
+  if(latest === true || latest === 'true')filter+=" AND NOT EXISTS(SELECT 1 FROM evaluation_source_record newer WHERE newer.school_id=s.school_id AND newer.term_id=s.term_id AND newer.student_id=s.student_id AND newer.source_type=s.source_type AND newer.record_kind=s.record_kind AND newer.month_key<=>s.month_key AND newer.version>s.version)";
   const [rows] = await pool.query(
     `SELECT s.* FROM evaluation_source_record s WHERE s.school_id=? AND s.term_id=? ${filter} ORDER BY s.id DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset],

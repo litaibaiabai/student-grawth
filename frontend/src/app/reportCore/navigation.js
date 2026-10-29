@@ -1,5 +1,5 @@
 export const navigation = {
-  student: [['cards','扫码领取'],['stories','月度故事'],['awards','上传奖状'],['self','自我评价'],['report','我的期末报告']],
+  student: [['home','我的成长首页'],['archive','成长档案'],['cards','扫码领取'],['stories','月度故事'],['awards','上传奖状'],['self','自我评价'],['report','我的期末报告']],
   teacher: [['direct','无卡直评'],['cards-manage','卡片管理'],['imports','学业导入'],['reviews','材料认定'],['settlements','采集结算'],['drafts','班级报告确认']],
   manager: [['config','学期配置'],['roster','学籍与账号'],['health','体测原始值'],['quota','月度卡额度'],['releases','全校发布']],
 };

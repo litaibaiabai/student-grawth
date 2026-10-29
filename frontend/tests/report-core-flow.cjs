@@ -233,12 +233,37 @@ const {
       await toast("评价已保存");
       await nav("月度故事");
       await page.getByLabel("故事月份").fill("2026-10");
-      for (const label of ["我爱读故事1", "我爱听故事1", "我爱讲故事1"])
+      for (const label of ["我爱读故事1", "我爱听故事1", "我爱讲故事1"]) {
+        await page.getByRole("tab", {name:new RegExp(label.slice(0,-1))}).click();
         await page
           .getByLabel(label, { exact: true })
           .fill(
             "虚构的学习材料。我读懂了小马过河的故事，明白要听取建议，也要独立思考。",
           );
+      }
+      if (student.id === '3') {
+        await page.getByRole('tab',{name:/我爱读故事/}).click();
+        const original=await page.getByLabel('我爱读故事1',{exact:true}).inputValue();
+        await page.getByLabel('我爱读故事文本文件',{exact:true}).setInputFiles({name:'bad.txt',mimeType:'text/plain',buffer:Buffer.from([255])});
+        assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original);
+        await page.getByLabel('我爱读故事文本文件',{exact:true}).setInputFiles({name:'large.txt',mimeType:'text/plain',buffer:Buffer.alloc(65537)});
+        assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original);
+        await page.getByLabel('故事月份').fill('2026-11');
+        await page.getByLabel('故事月份').fill('2026-10');
+        await page.getByLabel('我爱读故事1',{exact:true}).waitFor();
+        assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original);
+        await page.getByRole('button',{name:'保存草稿',exact:true}).click();
+        await toast('草稿已保存');
+        const stories=require('../../backend/services/reportCoreStories');
+        const [[u]]=await db.pool.query('SELECT token_version FROM users WHERE id=3');
+        const storyArgs={pool:db.pool,actor:{id:'3',schoolId:'1',role:'student',tokenVersion:u.token_version},termId:'1',monthKey:'2026-10'};
+        const current=(await stories.getStudentStoryMonth(storyArgs)).latestBatch;
+        await stories.saveStoryDraft({...storyArgs,expectedBatchId:current.batchId,expectedVersion:current.version,expectedRevision:current.revision,articles:['READ','LISTEN','TELL'].map(category=>({category,text:'另一窗口保存的故事。'})),command:{requestKey:'browser-other-tab',payloadHash:'e'.repeat(64)}});
+        await page.getByLabel('我爱读故事1',{exact:true}).fill(original+'我的新填写。');
+        await page.getByRole('button',{name:'保存草稿',exact:true}).click();
+        await page.getByText('服务器已有新版本，本次文字已保留。核对后可保存为新草稿。',{exact:true}).waitFor();
+        assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original+'我的新填写。');
+      }
       await page
         .getByRole("button", { name: "提交本月三类故事", exact: true })
         .click();

@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { api, resultOf, download } from "./api";
+import { decodeStoryBytes } from "./storyText";
+import { defaultStoryMonth } from "../../util/storyMonths";
 export function Cards({ ctx }) {
   const [token, setToken] = useState(() => {
     const match = location.hash.match(/[?&]card=([^&]+)/);
@@ -110,168 +112,48 @@ export function AwardUpload({ ctx }) {
   );
 }
 export function StoryForm({ ctx }) {
-  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7)),
-    [articles, setArticles] = useState(
-      ["READ", "LISTEN", "TELL"].map((category) => ({ category, text: "" })),
-    );
-  const [saved, setSaved] = useState(null);
-  const labels = {
-    READ: "我爱读故事",
-    LISTEN: "我爱听故事",
-    TELL: "我爱讲故事",
-  };
-  const update = (index, text) => {
-    setArticles((a) => a.map((x, i) => (i === index ? { ...x, text } : x)));
-    setSaved(null);
-  };
-  async function save() {
-    if (saved) return saved;
-    const last = ctx.sources
-      .filter(
-        (s) =>
-          s.record_kind === "BATCH" &&
-          s.source_type === "STORY" &&
-          s.month_key === month,
-      )
-      .sort((a, b) => b.version - a.version)[0];
-    const r = resultOf(
-      await api("/report-core/story-batches", {
-        termId: ctx.termId,
-        monthKey: month,
-        expectedRevision: last?.revision,
-        articles: articles.filter((a) => a.text.trim()),
-      }),
-    );
-    setSaved(r);
-    return r;
-  }
-  return (
-    <>
-      <section className="panel">
-        <h2>每月故事 · 一次提交</h2>
-        <p>
-          读、听、讲每类 1–3 篇，可粘贴文字或上传
-          TXT。系统按类别评价，篇数不会增加权重。
-        </p>
-        <label>
-          所属月份
-          <input
-            aria-label="故事月份"
-            type="month"
-            value={month}
-            onChange={(e) => {
-              setMonth(e.target.value);
-              setSaved(null);
-            }}
-          />
-        </label>
-        {Object.entries(labels).map(([category, label]) => (
-          <div className="story-group" key={category}>
-            <h3>
-              {label}{" "}
-              <span>
-                {articles.filter((a) => a.category === category).length} / 3 篇
-              </span>
-            </h3>
-            {articles.map(
-              (a, index) =>
-                a.category === category && (
-                  <div key={index}>
-                    <label>
-                      {label}第
-                      {
-                        articles
-                          .slice(0, index + 1)
-                          .filter((x) => x.category === category).length
-                      }
-                      篇
-                      <textarea
-                        aria-label={`${label}${articles.slice(0, index + 1).filter((x) => x.category === category).length}`}
-                        maxLength={20000}
-                        rows={5}
-                        value={a.text}
-                        onChange={(e) => update(index, e.target.value)}
-                        placeholder="输入或粘贴故事文本…"
-                      />
-                    </label>
-                    <div className="actions compact">
-                      <input
-                        aria-label={`${label}文本文件`}
-                        type="file"
-                        accept=".txt,text/plain"
-                        onChange={(e) =>
-                          ctx.run(async () => {
-                            const f = e.target.files[0];
-                            if (f.size > 65536) throw Error("TXT最大64KB");
-                            const text = new TextDecoder("utf-8", {
-                              fatal: true,
-                            }).decode(await f.arrayBuffer());
-                            update(index, text);
-                          })
-                        }
-                      />
-                      {articles.filter((x) => x.category === category).length >
-                        1 && (
-                        <button
-                          onClick={() => {
-                            setArticles(articles.filter((_, i) => i !== index));
-                            setSaved(null);
-                          }}
-                        >
-                          删除此篇
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ),
-            )}
-            <button
-              disabled={
-                articles.filter((a) => a.category === category).length >= 3
-              }
-              onClick={() => {
-                setArticles([...articles, { category, text: "" }]);
-                setSaved(null);
-              }}
-            >
-              ＋ 添加一篇
-            </button>
-          </div>
-        ))}
-        <div className="actions">
-          <button
-            onClick={() =>
-              ctx.run(async () => {
-                await save();
-                ctx.notify("草稿已保存");
-                ctx.refresh();
-              })
-            }
-          >
-            保存草稿
-          </button>
-          <button
-            className="primary"
-            onClick={() =>
-              ctx.run(async () => {
-                const d = await save();
-                await api(`/report-core/story-batches/${d.batchId}/submit`, {
-                  expectedRevision: d.revision,
-                });
-                setSaved(null);
-                ctx.refresh();
-                ctx.notify("整月故事已提交，评分中");
-              })
-            }
-          >
-            提交本月三类故事
-          </button>
-        </div>
-      </section>
-      <SourceList ctx={ctx} types={["STORY"]} />
-    </>
-  );
+ const labels={READ:'我爱读故事',LISTEN:'我爱听故事',TELL:'我爱讲故事'};
+ const blank=()=>Object.keys(labels).map(category=>({category,text:''}));
+ const [month,setMonth]=useState(()=>defaultStoryMonth(ctx.term)),[articles,setArticles]=useState(blank),[view,setView]=useState(null),[category,setCategory]=useState('READ'),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false),[message,setMessage]=useState('');
+ const cache=useRef(new Map()),live=useRef({dirty:false});live.current={dirty};
+ const lookup=(key=month,signal)=>api(`/report-core/story-month?termId=${ctx.termId}&monthKey=${key}`,undefined,undefined,{signal});
+ useEffect(()=>{
+  const controller=new AbortController();setLoading(true);setMessage('');setView(null);
+  const stored=cache.current.get(month);setArticles(stored?.articles||blank());setDirty(stored?.dirty||false);
+  lookup(month,controller.signal).then(result=>{
+   if(controller.signal.aborted)return;setView(result);
+   if(!stored?.dirty){const existing=result.draftBatch?.articles||result.articles;setArticles(existing?.length?Object.keys(labels).flatMap(c=>existing.some(a=>a.category===c)?existing.filter(a=>a.category===c):[{category:c,text:''}]):blank());setDirty(false);}
+  }).catch(e=>{if(e.name!=='AbortError')ctx.error(e);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
+  return()=>controller.abort();
+ },[month,ctx.termId]);
+ useEffect(()=>{ctx.setLeaveGuard?.(()=>!live.current.dirty&&![...cache.current.values()].some(v=>v.dirty)||window.confirm('故事还有未保存内容，离开会放弃本次填写。是否离开？'));return()=>ctx.setLeaveGuard?.(null);},[]);
+ const update=next=>{setArticles(next);setDirty(true);cache.current.set(month,{articles:next,dirty:true});};
+ const valid=articles.every(a=>[...a.text].length<=20000),formal=Object.keys(labels).every(c=>articles.filter(a=>a.category===c&&a.text.trim()).length>=1);
+ const save=async()=>{
+  const b=view?.latestBatch;
+  const r=resultOf(await api('/report-core/story-batches',{termId:ctx.termId,monthKey:month,expectedBatchId:b?.batchId??null,expectedVersion:b?.version??null,expectedRevision:b?.revision??null,articles:articles.filter(a=>a.text.trim())}));
+  setView(old=>({...old,latestBatch:{...r,status:'DRAFT'},draftBatch:{...r,articles}}));setDirty(false);cache.current.set(month,{articles,dirty:false});return r;
+ };
+ const execute=async submit=>{
+  setBusy(true);setMessage('');
+  try{
+   const draft=dirty||!view?.draftBatch?await save():view.draftBatch;
+   if(submit){await api(`/report-core/story-batches/${draft.batchId}/submit`,{expectedRevision:draft.revision});setView(await lookup());ctx.notify('整月故事已提交，评分中');}
+   else ctx.notify('草稿已保存');
+   ctx.refresh();
+  }catch(e){if(e.status===409){setDirty(true);cache.current.set(month,{articles,dirty:true});try{setView(await lookup());}catch{}setMessage('服务器已有新版本，本次文字已保留。核对后可保存为新草稿。');}else ctx.error(e);}
+  finally{setBusy(false);}
+ };
+ return <><section className="panel story-book"><p className="kicker">每月一次 · 阅读、倾听与表达</p><h2>我的故事小书房</h2><p>读、听、讲每类1–3篇，直接输入、粘贴或载入TXT。每篇最多20000字，篇数不会增加权重。</p>
+ <label>所属月份<input aria-label="故事月份" type="month" value={month} disabled={busy} onChange={e=>setMonth(e.target.value)}/></label>
+ <div className="self-steps" role="tablist" aria-label="故事类别">{Object.entries(labels).map(([c,label])=><button key={c} role="tab" aria-selected={category===c} onClick={()=>setCategory(c)}>{label} · {articles.filter(a=>a.category===c&&a.text.trim()).length}/3</button>)}</div>
+ {loading&&<p role="status">正在读取本月草稿…</p>}
+ <section role="tabpanel" aria-label={labels[category]}><h3>{labels[category]}</h3>{articles.map((a,i)=>a.category===category&&<div className="story-group" key={i}><label>{labels[category]}第{articles.slice(0,i+1).filter(x=>x.category===category).length}篇<textarea aria-label={`${labels[category]}${articles.slice(0,i+1).filter(x=>x.category===category).length}`} disabled={busy||loading||!view} rows={7} value={a.text} onChange={e=>update(articles.map((x,j)=>j===i?{...x,text:e.target.value}:x))} placeholder="写下、粘贴你的故事文本…"/></label><small>{[...a.text].length} / 20000字</small><div className="actions"><label>载入TXT<input aria-label={`${labels[category]}文本文件`} type="file" accept=".txt,text/plain" disabled={busy||loading} onChange={async e=>{const file=e.target.files?.[0];if(!file)return;try{const text=decodeStoryBytes(await file.arrayBuffer());update(articles.map((x,j)=>j===i?{...x,text}:x));}catch(error){ctx.error(error);}e.target.value='';}}/></label>{articles.filter(x=>x.category===category).length>1&&<button disabled={busy} onClick={()=>update(articles.filter((_,j)=>j!==i))}>删除此篇</button>}</div></div>)}</section>
+ <button disabled={busy||loading||articles.filter(a=>a.category===category).length>=3} onClick={()=>update([...articles,{category,text:''}])}>＋ 添加一篇</button>
+ {message&&<p role="alert">{message}</p>}<div className="self-save"><button disabled={busy||loading||!view||!valid||!dirty} onClick={()=>execute(false)}>保存草稿</button><button className="primary" disabled={busy||loading||!view||!valid||!formal||!dirty&&!view.draftBatch} onClick={()=>execute(true)}>{busy?'正在提交…':'提交本月三类故事'}</button></div>
+ </section><section className="panel"><h2>本月正式提交与评分</h2>{view?.effectiveBatch?<><p>版本 {view.effectiveBatch.version} · {statusName[view.effectiveBatch.status]||view.effectiveBatch.status}，新草稿不会替换此版本，正式提交后才更新。</p>{view.articles.map(a=><details key={a.id}><summary>{labels[a.category]} · {a.title||`篇目${a.ordinal}`} · {statusName[a.status]||a.status}{a.score?` · ${a.score.total}分`:''}</summary><p className="story-text">{a.text}</p><p>{a.score?.feedback||a.error||'等待系统评分'}</p></details>)}</>:<p>本月尚未正式提交。读、听、讲各至少一篇后再提交。</p>}</section></>;
 }
+
 export function EvaluationForm({ ctx, studentId = ctx.actor.id }) {
   const [view, setView] = useState(null),
     [dirty, setDirty] = useState({}),
@@ -453,7 +335,7 @@ export function SourceList({ ctx, types }) {
               <strong>
                 {s.source_type === "STORY"
                   ? s.payload.category || "整月故事"
-                  : s.payload.facts?.title || "奖状材料"}{" "}
+                  : s.source_type === "SELF" ? "自评保存记录" : s.payload.facts?.title || "奖状材料"}{" "}
                 <small>#{s.id}</small>
               </strong>
               <p>

@@ -194,6 +194,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
       );
     }),
   );
+  r.get('/report-core/story-month', asyncRoute(async (req,res) => ok(res,await stories.getStudentStoryMonth({ ...context(req),termId:req.query.termId,monthKey:req.query.monthKey,studentId:req.query.studentId }))));
   post("/report-core/story-batches", (req) =>
     stories.saveStoryDraft(args(req)),
   );
@@ -223,6 +224,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
         termId: req.query.termId,
         studentId: req.query.studentId,
         offset: req.query.offset,
+        monthKey: req.query.monthKey, sourceType: req.query.sourceType, recordKind: req.query.recordKind, latest: req.query.latest,
       });
       ok(res, req.query.page === "1" ? page : page.rows);
     }),

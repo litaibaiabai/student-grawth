@@ -81,3 +81,12 @@ test("award review generates labor outcomes and revocation recalculates; student
     null,
   );
 });
+test('upload_response_lost_replays_once without retaining an orphan private file',async t=>{
+ const db=await createCoreTestDb(t);await db.seedBase();const folder=await fs.mkdtemp(path.join(os.tmpdir(),'award-replay-'));process.env.REPORT_FILES_DIR=folder;t.after(()=>fs.rm(folder,{recursive:true,force:true}));
+ const args={pool:db.pool,actor:{id:'3',schoolId:'1',role:'student',tokenVersion:1},termId:'1',file:{buffer:Buffer.from('89504e470d0a1a0a00000000','hex'),mimetype:'image/png'},command:{requestKey:'upload-lost',payloadHash:'a'.repeat(64)}};
+ const first=await require('../services/reportCoreMaterials').submitCertificate(args);
+ const retry=await require('../services/reportCoreMaterials').submitCertificate(args);
+ assert.equal(retry.result.sourceId,first.result.sourceId);assert.equal(retry.replayed,true);
+ const [[count]]=await db.pool.query("SELECT COUNT(*) n FROM evaluation_source_record WHERE source_type='CERTIFICATE' AND record_kind='ITEM'");assert.equal(Number(count.n),1);
+ assert.equal((await fs.readdir(folder)).length,1);
+});

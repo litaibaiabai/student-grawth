@@ -8,3 +8,7 @@ export function storyMonths(term){
  while(result.length<24){const key=`${y}-${String(m).padStart(2,'0')}`;if(key>end)break;result.push({key,label:`${m} 月`});if(++m===13){m=1;y++;}}
  return result;
 }
+export function defaultStoryMonth(term, date=new Date()) {
+ const month=currentSchoolMonth(date), first=String(term?.start_date||'').slice(0,7),last=String(term?.end_date||'').slice(0,7);
+ return /^\d{4}-\d{2}$/.test(first)&&month<first?first:/^\d{4}-\d{2}$/.test(last)&&month>last?last:month;
+}

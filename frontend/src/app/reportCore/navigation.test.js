@@ -10,6 +10,6 @@ test('legacy QR links restore a credential while ordinary routes never propagate
 test('report details and role-safe defaults roundtrip', () => {
   const route = { role: 'teacher', page: 'drafts', termId: '12', classKey: '4:2', studentId: '300' };
   assert.deepEqual(parseCoreLocation(formatCoreLocation(route)), route);
-  assert.equal(routeForRole({ role: 'manager', page: 'config' }, 'student').page, 'cards');
-  assert.equal(routeForRole({ role: 'student', page: 'config' }, 'student').page, 'cards');
+  assert.equal(routeForRole({ role: 'manager', page: 'config' }, 'student').page, 'home');
+  assert.equal(routeForRole({ role: 'student', page: 'config' }, 'student').page, 'home');
 });
