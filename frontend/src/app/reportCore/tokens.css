@@ -1,4 +1,4 @@
-:root{--core-ink:#193f39;--core-muted:#697a73;--core-primary:#24634f;--core-soft:#edf3e6;--core-paper:#f5f6f0;--core-danger:#a13232;--core-radius:18px;--core-gap:20px;--core-focus:#a77a31}
+:root{--core-ink:#193f39;--core-muted:#5c7065;--core-primary:#24634f;--core-soft:#edf3e6;--core-paper:#f5f6f0;--core-danger:#a13232;--core-radius:18px;--core-gap:20px;--core-focus:#a77a31}
 .core-app{color:var(--core-ink);font-family:"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
 .core-app button,.core-app input,.core-app select{min-height:44px}.role-student button{min-height:48px}
 .core-app :focus-visible{outline:3px solid var(--core-focus);outline-offset:3px}

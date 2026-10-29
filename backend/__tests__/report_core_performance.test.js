@@ -76,45 +76,34 @@ test(
         [e.reportFingerprint(row, term), row.id],
       );
     const sourceCount = Number(process.env.REPORT_PERF_SOURCES || 2000000);
-    for (let start = 0; start < sourceCount; start += 5000) {
-      const rows = [];
-      for (let i = start; i < Math.min(start + 5000, sourceCount); i++)
-        rows.push([
-          1,
-          1,
-          3 + (i % total),
-          "CARD",
-          "DIRECT",
-          "CONFIRMED",
-          1,
-          p.catalog.cardCatalog[i % 37].targetColumn,
-          p.stableHash(["perf", i]),
-          "a".repeat(64),
-          "{}",
-        ]);
-      await db.pool.query(
-        "INSERT INTO evaluation_source_record(school_id,term_id,student_id,source_type,record_kind,status,delta,target_key,business_key,payload_hash,payload_json) VALUES ?",
-        [rows],
-      );
-      if (start % 250000 === 0) console.log("performance sources", start);
+    const teachers=Array.from({length:100},(_,i)=>i===0?2:5000+i);
+    for(let i=1;i<teachers.length;i++){
+      await db.pool.query("INSERT INTO users(id,school_id,username,password,real_name,role) VALUES(?,1,?,?,?,'teacher')",[teachers[i],'teacher'+i,u.password,'教师'+i]);
+      for(const code of ['MORAL','CHINESE','MATH','SCIENCE','ENGLISH','PE','MUSIC','FINE_ART','INFORMATION_TECHNOLOGY','LABOR','INTEGRATED_PRACTICE','LOCAL_COURSE','STORY'])await db.pool.query('INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) VALUES(1,1,?,4,?,?,?)',[teachers[i],i%60+1,code,i<60?1:0]);
     }
-    const durations = await Promise.all(
-      Array.from({ length: 50 }, async () => {
-        const start = performance.now();
-        await db.pool.query(
-          "SELECT student_id,revision,status FROM student_term_evaluation WHERE school_id=1 AND term_id=1 AND grade_snapshot=4 AND class_no_snapshot=1 LIMIT 100",
-        );
-        return performance.now() - start;
-      }),
-    );
-    durations.sort((a, b) => a - b);
-    const p95 = durations[47];
-    assert.ok(p95 <= 800, `list p95 ${p95}`);
-    const actor = { id: "1", schoolId: "1", role: "manager", tokenVersion: 1 },
-      command = (n) => ({
-        requestKey: "perf-" + n,
-        payloadHash: p.stableHash(n),
-      });
+    const actor={id:'1',schoolId:'1',role:'manager',tokenVersion:1},command=n=>({requestKey:'perf-'+n,payloadHash:p.stableHash(n)}),teacher=index=>({id:String(teachers[index]),schoolId:'1',role:'teacher',tokenVersion:1});
+    const cards=require('../services/reportCoreCards'),ledger=require('../services/reportCoreLedger'),browser=require('../services/reportCoreReportBrowser'),read=require('../services/reportCoreReadModels');
+    const quota=await cards.saveQuota({pool:db.pool,actor,termId:'1',teacherId:'2',monthKey:'2026-10',total:100,command:command('quota')});
+    const plan=await cards.savePlan({pool:db.pool,actor:teacher(0),quotaId:quota.result.quotaId,expectedRevision:'1',plans:[{grade:4,classNo:1,classTotal:100,items:[{categoryCode:'CONDUCT_POLITENESS_OTHER_STAR',count:100}]}],command:command('plan')});
+    await cards.generateCards({pool:db.pool,actor:teacher(0),quotaId:quota.result.quotaId,expectedRevision:plan.result.revision,command:command('generate')});
+    for (let start=0;start<sourceCount;start+=5000){
+      const rows=[];for(let i=start;i<Math.min(start+5000,sourceCount);i++){const ti=i%100,cls=ti%60+1,sid=3+(cls-1)*50+Math.floor(i/100)%50;rows.push([1,1,sid,'CARD','DIRECT','CONFIRMED',1,p.catalog.cardCatalog[i%37].targetColumn,i.toString(16).padStart(64,'0'),'a'.repeat(64),JSON.stringify({occurredAt:'2026-10-15T00:00:00.000Z'}),teachers[ti],teachers[ti],'2026-10']);}
+      await db.pool.query('INSERT INTO evaluation_source_record(school_id,term_id,student_id,source_type,record_kind,status,delta,target_key,business_key,payload_hash,payload_json,actor_id,owner_teacher_id,month_key) VALUES ?',[rows]);if(start%250000===0)console.log('performance sources',start);
+    }
+    const metrics={};
+    async function measure(name,fn,budget=800){const durations=await Promise.all(Array.from({length:50},async(_,i)=>{const started=performance.now();await fn(i);return performance.now()-started;}));durations.sort((a,b)=>a-b);metrics[name]={p95Ms:durations[47],maxMs:durations[49],budgetMs:budget,passed:budget?durations[47]<=budget:null};console.log('performance metric',name,metrics[name]);return durations[47];}
+    const p95=await measure('indexedClassSql',()=>db.pool.query('SELECT student_id,revision,status FROM student_term_evaluation WHERE school_id=1 AND term_id=1 AND grade_snapshot=4 AND class_no_snapshot=1 LIMIT 100'));
+    await measure('reportStudentList',i=>browser.listReportStudents({pool:db.pool,actor:teacher(i),termId:'1',limit:25}));
+    await measure('workspace',i=>read.getWorkspace({pool:db.pool,actor:teacher(i),termId:'1',limit:25}));
+    const ledgerArgs=i=>({pool:db.pool,actor:teacher(i),filters:ledger.normalizeLedgerQuery({termId:'1',monthFrom:'2026-10',monthTo:'2026-10'},teacher(i)),limit:25});
+    await measure('ledgerCardListFirstTouch',i=>ledger.listLedgerCards(ledgerArgs(i)),null);
+    await measure('ledgerCardList',async i=>{const result=await ledger.listLedgerCards(ledgerArgs(i));assert.equal(result.summary.direct,Math.floor(sourceCount/100));if(i===0)assert.equal(result.rows.length,25);});
+    await measure('ledgerEventList',i=>ledger.listLedgerUsage({...ledgerArgs(i),groupBy:'event'}));
+    await measure('ordinaryDirectWrite',i=>cards.directScore({pool:db.pool,actor:teacher(0),termId:'1',studentIds:[String(3+i)],categoryCode:'CONDUCT_POLITENESS_OTHER_STAR',reason:'',command:command('write-'+i)}),1500);
+    const {Writable}=require('node:stream');let bytes=0,firstByteMs=null;const exportStart=performance.now(),response=new Writable({write(chunk,encoding,callback){bytes+=chunk.length;if(firstByteMs===null)firstByteMs=performance.now()-exportStart;callback();}});response.setHeader=()=>{};
+    const exported=await ledger.streamLedgerCsv({...ledgerArgs(0),view:'events',response});metrics.csvExport={rows:exported.rowCount,bytes,firstByteMs,totalMs:performance.now()-exportStart};
+    // Writes above legitimately invalidate their current reports; reconfirm only the disposable fixture for publication timing.
+    for(const row of (await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id BETWEEN 3 AND 52'))[0])await db.pool.query("UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=2,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=? WHERE id=?",[e.reportFingerprint(row,term),row.id]);
     const r = await pub.beginRelease({
       pool: db.pool,
       actor,
@@ -142,8 +131,14 @@ test(
       command: command(2),
     });
     const activateMs = performance.now() - active;
-    assert.ok(prepareMs <= 120000, `prepare ${prepareMs}`);
-    assert.ok(activateMs <= 3000, `activate ${activateMs}`);
+
+    const settings=require('../services/reportCoreTermSettings');
+    const settingsStart=performance.now();
+    const settingsPreview=await settings.previewTermSettings({pool:db.pool,actor,termId:'1',section:'rules',expectedConfigVersion:term.config_version,expectedRuleVersion:term.rule_version,changes:{cardTarget:3,requiredMonths:['2026-10']},command:command('settings-preview')});
+    const settingsPreviewMs=performance.now()-settingsStart,commitStart=performance.now();
+    const recalculated=await settings.commitTermSettingsPreview({pool:db.pool,actor,previewId:settingsPreview.result.previewId,expectedRevision:'1',command:command('settings-commit')});
+    metrics.configurationRecalculation={students:3000,previewMs:settingsPreviewMs,commitTransactionMs:performance.now()-commitStart,bodyLockMs:recalculated.result.elapsedMs};
+
     const dir = path.join(__dirname, "../../output/report-core");
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(
@@ -154,6 +149,7 @@ test(
           sources: sourceCount,
           concurrentReads: 50,
           classListP95Ms: p95,
+          teacherCount:teachers.length,metrics,
           prepareMs,
           activateMs,
         },
@@ -161,5 +157,8 @@ test(
         2,
       ),
     );
+    assert.ok(prepareMs <= 120000, `prepare ${prepareMs}`);
+    assert.ok(activateMs <= 3000, `activate ${activateMs}`);
+    for(const [name,result] of Object.entries(metrics))if(result.budgetMs)assert.ok(result.passed,`${name} p95 ${result.p95Ms} exceeds ${result.budgetMs}`);
   },
 );

@@ -8,7 +8,9 @@ export default function TermReport({html,documentKey,printScope='FULL',onLayout,
  const current=(t,f)=>t.active&&latest.current===t&&frame.current===f;
  const measure=async element=>{
   const t=token;if(!current(t,element))return;const d=element.contentDocument;if(!d)return;
-  const resize=()=>{if(current(t,element))setHeight(Math.ceil(d.body.getBoundingClientRect().height)+30);};resize();t.observer?.disconnect();t.observer=new ResizeObserver(resize);t.observer.observe(d.body);
+  // Screen preview grows with its contents; the original print CSS and frozen HTML stay intact.
+  const screenStyle=d.createElement('style');screenStyle.media='screen';screenStyle.textContent='.paper{height:auto}';d.head.append(screenStyle);
+  const resize=()=>{if(current(t,element))setHeight(Math.ceil(d.body.getBoundingClientRect().bottom+(d.defaultView?.scrollY||0))+30);};resize();t.observer?.disconnect();t.observer=new ResizeObserver(resize);t.observer.observe(d.body);
   const probe=document.createElement('iframe');t.probe?.remove();t.probe=probe;probe.setAttribute('aria-hidden','true');probe.tabIndex=-1;probe.style.cssText='position:fixed;left:-10000px;top:0;width:1123px;height:900px;visibility:hidden';probe.sandbox='allow-same-origin';
   probe.onload=async()=>{
    try {

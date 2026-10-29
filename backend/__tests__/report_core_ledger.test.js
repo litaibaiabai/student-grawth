@@ -112,3 +112,15 @@ test('historical asOf does not expose a future recipient or apply a later void; 
   assert.equal(unknownCards.generated, null);
   assert.equal(unknownCards.historyCompleteness.cardState, 'PARTIAL');
 });
+test('current SQL aggregate keeps direct counts, mixed event ordering and pagination identical to exact asOf projection',async t=>{
+ const db=await setup(t,2,3);
+ for(let i=0;i<30;i++)await cards.directScore({pool:db.pool,actor:teacher,termId:'1',studentIds:[String(3+i%2)],categoryCode:'MORAL_PROCESS_STAR',now:new Date('2026-10-15T00:00:00Z'),command:command()});
+ const token=await cards.cardToken({pool:db.pool,actor:teacher,sourceId:String(db.rawCards[0].id)});await cards.redeemCard({pool:db.pool,actor:{...teacher,id:'3',role:'student'},token,now:new Date('2026-10-16T00:00:00Z'),command:command()});
+ const now=new Date(Date.now()+1000),args={pool:db.pool,actor:teacher,filters:db.filters,now,limit:25};
+ const fast=await ledger.listLedgerUsage(args),exact=await ledger.listLedgerUsage({...args,asOf:now.toISOString()});
+ assert.equal(fast.summary.direct,30);assert.deepEqual(fast,exact);
+ assert.deepEqual(await ledger.listLedgerUsage({...args,cursor:fast.nextCursor}),await ledger.listLedgerUsage({...args,cursor:exact.nextCursor,asOf:now.toISOString()}));
+ assert.deepEqual(await ledger.listLedgerCards(args),await ledger.listLedgerCards({...args,asOf:now.toISOString()}));
+ const [[source]]=await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='DIRECT' LIMIT 1");await cards.reverseSource({pool:db.pool,actor:teacher,sourceId:String(source.id),reason:'更正',command:command()});
+ const later=new Date(Date.now()+1000);assert.deepEqual(await ledger.listLedgerUsage({...args,now:later}),await ledger.listLedgerUsage({...args,asOf:later.toISOString()}));
+});

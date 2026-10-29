@@ -107,14 +107,17 @@ async function* scan(ctx) {
   const sql = `SELECT s.id,s.parent_id,s.student_id,s.target_key,s.record_kind,s.month_key,s.status,s.revision,s.payload_json,s.created_at,s.valid_from,s.valid_until,
     e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,u.real_name student_name,u.username student_number,
     r.id reverse_id,r.created_at reverse_created_at,r.payload_json reverse_payload,ru.real_name reverse_actor_name
-    FROM evaluation_source_record s
+    FROM (
+      SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND source_type='CARD' AND record_kind='CARD' AND owner_teacher_id=? AND month_key>=? AND month_key<=?
+      UNION ALL
+      SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND source_type='CARD' AND record_kind='DIRECT' AND actor_id=? AND ?=0
+    ) owned JOIN evaluation_source_record s ON s.id=owned.id
     LEFT JOIN student_term_evaluation e ON e.school_id=s.school_id AND e.term_id=s.term_id AND e.student_id=s.student_id
     LEFT JOIN users u ON u.school_id=s.school_id AND u.id=s.student_id
     LEFT JOIN evaluation_source_record r ON r.school_id=s.school_id AND r.reversal_of=s.id
     LEFT JOIN users ru ON ru.school_id=r.school_id AND ru.id=r.actor_id
-    WHERE s.school_id=? AND s.term_id=? AND s.source_type='CARD' AND ((s.record_kind='CARD' AND s.owner_teacher_id=? AND s.month_key>=? AND s.month_key<=?) OR (s.record_kind='DIRECT' AND s.actor_id=?))
     ORDER BY ${sorts[ctx.f.sort]} ${ctx.f.order.toUpperCase()},s.id ${ctx.f.order.toUpperCase()}`;
-  const stream = ctx.c.connection.query(sql, [ctx.actor.schoolId, ctx.f.termId, ctx.f.ownerId, ctx.f.monthFrom, ctx.f.monthTo, ctx.f.ownerId]).stream({ highWaterMark: 64 });
+  const stream = ctx.c.connection.query(sql, [ctx.actor.schoolId, ctx.f.termId, ctx.f.ownerId, ctx.f.monthFrom, ctx.f.monthTo, ctx.actor.schoolId, ctx.f.termId, ctx.f.ownerId, ctx.fastDirect ? 1 : 0]).stream({ highWaterMark: 64 });
   try {
     for await (const source of stream) {
       const row = project(source, ctx);
@@ -206,8 +209,58 @@ async function collect(ctx, { select, page }) {
   if (overall.unknownStateCount) summary.historyCompleteness.cardState = 'PARTIAL';
   return { rows, total, summary, filteredSummary: normalizeCounts(filtered), asOf: ctx.asOf, nextCursor: page?.next(total) || null };
 }
-async function getLedgerSummary(args) { return snapshot(args, async ctx => { const result = await collect(ctx, {}); return { ...result.summary, filteredSummary: result.filteredSummary }; }); }
-async function listLedgerCards(args) { return snapshot(args, ctx => collect(ctx, { page: pageSpec(ctx, args, 'cards'), select: row => row.kind === 'CARD' && matches(row, ctx.f) ? [row] : [] })); }
+// The usual current-month lists aggregate modern, unreversed direct facts in SQL.
+// Historical/uncertain clocks and advanced filters retain the exact projection path.
+const simpleKeys = new Set(['termId','ownerId','sort','order','monthFrom','monthTo']);
+const directAt = "s.ledger_occurred_utc";
+async function currentDirectAggregate(ctx) {
+  if (!ctx.currentSnapshot || ctx.f.sort !== 'id' || Object.keys(ctx.f).some(k => !simpleKeys.has(k))) return null;
+  const from = getSchoolMonthBounds(ctx.f.monthFrom).startInclusive, to = getSchoolMonthBounds(ctx.f.monthTo).endExclusive;
+  const instant = value => new Date(value).toISOString();
+  const bounds = [instant(from), instant(to), ctx.asOf];
+  const [[reversal]]=await ctx.c.query(`SELECT r.id FROM evaluation_source_record r
+    JOIN evaluation_source_record original ON original.id=r.reversal_of AND original.school_id=r.school_id
+    WHERE r.school_id=? AND r.term_id=? AND r.source_type='CARD' AND r.record_kind='REVERSAL' AND original.actor_id=? LIMIT 1`,[ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId]);
+  if(reversal)return null;
+  let groups;
+  try {
+    [groups] = await ctx.c.query(`SELECT g.*,e.grade_snapshot grade,e.class_no_snapshot classNo FROM (
+      SELECT s.student_id,
+      SUM(${directAt}>=? AND ${directAt}<? AND ${directAt}<=?) n,
+      SUM(NOT (COALESCE(${directAt},'') REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$')) uncertain,MAX(s.created_at) created
+      FROM evaluation_source_record s FORCE INDEX(idx_source_ledger_direct)
+      WHERE s.school_id=? AND s.term_id=? AND s.source_type='CARD' AND s.record_kind='DIRECT' AND s.actor_id=?
+      GROUP BY s.student_id
+    ) g LEFT JOIN student_term_evaluation e ON e.school_id=? AND e.term_id=? AND e.student_id=g.student_id`,
+      [...bounds,ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId,ctx.actor.schoolId,ctx.f.termId]);
+  } catch(error) { if(['ER_BAD_FIELD_ERROR','ER_KEY_DOES_NOT_EXITS'].includes(error.code))return null;throw error; }
+  if (groups.some(g => Number(g.uncertain) || iso(g.created)>ctx.asOf)) return null;
+  return { groups, count: groups.reduce((n,g)=>n+Number(g.n),0), bounds };
+}
+function mergeDirectCounts(result, aggregate) {
+  if (!aggregate) return result;
+  for (const counts of [result.summary,result.filteredSummary]) { counts.direct+=aggregate.count; if(counts.net!==null)counts.net+=aggregate.count; }
+  for(const group of aggregate.groups) {
+    let row=result.summary.classRows.find(r=>r.grade===group.grade&&r.classNo===group.classNo);
+    if(!row) {row={grade:group.grade,classNo:group.classNo,...emptyCounts(),generatedRecords:0,planned:0,indicatorPlans:{}};result.summary.classRows.push(row);}
+    row.direct+=Number(group.n);if(row.net!==null)row.net+=Number(group.n);
+  }
+  return result;
+}
+async function directEventPage(ctx, aggregate, limit) {
+  if(!aggregate.count)return [];
+  const [sources]=await ctx.c.query(`SELECT s.*,e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,u.real_name student_name,u.username student_number
+    FROM (SELECT s.id FROM evaluation_source_record s FORCE INDEX(idx_source_ledger_direct)
+      WHERE s.school_id=? AND s.term_id=? AND s.source_type='CARD' AND s.record_kind='DIRECT' AND s.actor_id=?
+      AND ${directAt}>=? AND ${directAt}<? AND ${directAt}<=? ORDER BY s.id ${ctx.f.order.toUpperCase()} LIMIT ?
+    ) matched JOIN evaluation_source_record s ON s.id=matched.id
+    LEFT JOIN student_term_evaluation e ON e.school_id=s.school_id AND e.term_id=s.term_id AND e.student_id=s.student_id
+    LEFT JOIN users u ON u.school_id=s.school_id AND u.id=s.student_id ORDER BY s.id ${ctx.f.order.toUpperCase()}`,
+    [ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId,...aggregate.bounds,limit]);
+  return sources.map(source=>({...project(source,ctx),delta:1}));
+}
+async function getLedgerSummary(args) { return snapshot(args, async ctx => { ctx.fastDirect=await currentDirectAggregate(ctx); const result=mergeDirectCounts(await collect(ctx,{}),ctx.fastDirect); return { ...result.summary, filteredSummary: result.filteredSummary }; }); }
+async function listLedgerCards(args) { return snapshot(args, async ctx => {ctx.fastDirect=await currentDirectAggregate(ctx);return mergeDirectCounts(await collect(ctx, { page: pageSpec(ctx, args, 'cards'), select: row => row.kind === 'CARD' && matches(row, ctx.f) ? [row] : [] }),ctx.fastDirect);}); }
 function eventsOf(row, ctx, sourceMode) {
   if (sourceMode !== 'all' && sourceMode !== row.sourceMode || !matches(row, ctx.f, { ignoreEventRange: true })) return [];
   const events = [];
@@ -230,7 +283,16 @@ async function listLedgerUsage(args) {
       return events;
     }
     if (groupBy === 'event') {
-      const result = await collect(ctx, { page, select: selectedEvents });
+      ctx.fastDirect=await currentDirectAggregate(ctx);
+      const fast=ctx.fastDirect;
+      const result = mergeDirectCounts(await collect(ctx, { page: fast ? null : page, select: selectedEvents }),fast);
+      if(fast) {
+        const direct=sourceMode==='paper'?[]:await directEventPage(ctx,fast,page.offset+page.limit);
+        const directCount=sourceMode==='paper'?0:fast.count;
+        const combined=[...result.rows,...direct].sort((a,b)=>{const x=BigInt(a.originalId||a.id),y=BigInt(b.originalId||b.id);return(x<y?-1:x>y?1:0)*(ctx.f.order==='asc'?1:-1);});
+        result.total+=directCount;result.rows=combined.slice(page.offset,page.offset+page.limit);result.nextCursor=page.next(result.total);
+        eventSummary.positive+=directCount;eventSummary.net+=directCount;
+      }
       result.eventSummary = eventSummary;
       result.summaryLabel = ctx.f.eventFrom || ctx.f.eventTo ? '筛选事件变动合计' : '按原评价归属月'; return result;
     }

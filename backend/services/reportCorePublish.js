@@ -296,11 +296,13 @@ async function activateRelease(args) {
       );
       if (Number(count.n) !== manifest.students.length)
         fail(409, "准备报告数不符");
+      const [evaluations] = manifest.students.length ? await c.query(
+        "SELECT student_id,revision,confirmed_revision,status,approval_fingerprint FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id IN (?)",
+        [term.school_id, term.id, manifest.students.map(s=>s.studentId)],
+      ) : [[]];
+      const byStudent=new Map(evaluations.map(e=>[String(e.student_id),e]));
       for (const s of manifest.students) {
-        const [[e]] = await c.query(
-          "SELECT revision,confirmed_revision,status,approval_fingerprint FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id=?",
-          [term.school_id, term.id, s.studentId],
-        );
+        const e=byStudent.get(String(s.studentId));
         if (
           !e ||
           e.status !== "CONFIRMED" ||

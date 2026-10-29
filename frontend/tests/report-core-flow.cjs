@@ -64,6 +64,12 @@ const {
     const errors = [];
     const capture=async options=>{await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo({top:0,behavior:'instant'});});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));return page.screenshot(options);};
 
+    const reflowChecks=[];
+    const checkReflow=async role=>{
+      for(const width of [390,768,1440]){await page.setViewportSize({width,height:1000});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),role+' at '+width);}
+      const cdp=await page.context().newCDPSession(page);try{await cdp.send('Emulation.setDeviceMetricsOverride',{width:720,height:500,deviceScaleFactor:2,mobile:false});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),role+' equivalent 200% reflow');assert.equal(await page.evaluate(()=>devicePixelRatio),2);}finally{await cdp.send('Emulation.clearDeviceMetricsOverride');await cdp.detach();await page.setViewportSize({width:1439,height:1000});await page.setViewportSize({width:1440,height:1000});}
+      reflowChecks.push({role,widths:[390,768,1440],equivalentZoom:{cssWidth:720,devicePixelRatio:2,physicalWidth:1440}});
+    };
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("http://127.0.0.1:19372");
     await page
@@ -143,10 +149,15 @@ const {
       username: i ? "student" + (i + 1) : "student",
     }));
     const catalog = require("../../backend/config/reportCorePolicy.json");
+    await checkReflow('student-self');
+    const beforeSkip=page.url();await page.locator('.skip-link').focus();await page.keyboard.press('Enter');await page.waitForTimeout(100);
+    assert.equal(page.url(),beforeSkip,'keyboard skip link must focus content without changing hash route');
+    assert.equal(await page.locator('main').evaluate(el=>el===document.activeElement),true);
     await page.locator('body').click({position:{x:2,y:2}});await capture({path:path.join(screenshotDir,'student-self-new-ui.png'),fullPage:true});
     await nav('首页');await capture({path:path.join(screenshotDir,'student-home-new-ui.png'),fullPage:true});
     await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.core-app').count(),1);await capture({path:path.join(screenshotDir,'student-home-new-ui-mobile.png'),fullPage:false,animations:'disabled'});await page.setViewportSize({width:1440,height:1000});
     await login("admin");
+    await checkReflow('admin-release');
     await capture({path:path.join(screenshotDir,'admin-new-ui.png'),fullPage:true});
     await nav("月度卡额度");
     await page.getByLabel('选择额度教师2',{exact:true}).check();
@@ -191,6 +202,7 @@ const {
     await page.getByRole('button',{name:'德美少年',exact:true}).click();
     await page.getByRole('button',{name:'日常行为',exact:true}).click();
     await page.getByRole('button',{name:'有礼貌',exact:true}).click();
+    await checkReflow('teacher-direct');
     await capture({path:path.join(screenshotDir,'teacher-direct-new-ui.png'),fullPage:true});
     await page.getByRole('button',{name:'为2名学生各记1分',exact:true}).click();
     await toast('已为2名学生各记1分');
@@ -262,6 +274,12 @@ const {
         assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original);
         await page.getByLabel('我爱读故事文本文件',{exact:true}).setInputFiles({name:'large.txt',mimeType:'text/plain',buffer:Buffer.alloc(65537)});
         assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original);
+        await page.evaluate(()=>{const original=File.prototype.arrayBuffer;window.restoreStoryFileRead=()=>{File.prototype.arrayBuffer=original;};File.prototype.arrayBuffer=function(){const file=this;return new Promise(resolve=>{window.finishStoryFileRead=()=>original.call(file).then(resolve);});};});
+        await page.getByLabel('我爱读故事文本文件',{exact:true}).setInputFiles({name:'delayed.txt',mimeType:'text/plain',buffer:Buffer.from('延迟载入的旧文件')});
+        await page.waitForFunction(()=>!!window.finishStoryFileRead);await page.getByLabel('我爱读故事1',{exact:true}).fill(original+'新编辑');
+        await page.evaluate(async()=>{await window.finishStoryFileRead();window.restoreStoryFileRead();});await page.waitForTimeout(100);
+        assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original+'新编辑','late TXT read must not overwrite subsequent typing');
+        await page.getByLabel('我爱读故事1',{exact:true}).fill(original);
         await page.getByLabel('故事月份').fill('2026-11');
         await page.getByLabel('故事月份').fill('2026-10');
         await page.getByLabel('我爱读故事1',{exact:true}).waitFor();
@@ -437,7 +455,7 @@ const {
       path: path.join(screenshotDir, "student-report-desktop.png"),
       fullPage: true,
     });
-    for (const width of [375, 390, 430]) {
+    for (const width of [375, 390, 430, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.waitForTimeout(150);
       assert.ok(
@@ -451,13 +469,14 @@ const {
           .evaluate(
             (el) => el.clientHeight >= el.contentDocument.body.scrollHeight,
           ),
-        "iframe must grow to show all report sections",
+        `iframe must grow to show all report sections at width ${width}: ${JSON.stringify(await page.locator('iframe[title="六育评价报告"]').evaluate(el=>({frame:el.clientHeight,body:el.contentDocument.body.scrollHeight,bounds:el.contentDocument.body.getBoundingClientRect().toJSON()})))}`,
       );
       await capture({
         path: path.join(screenshotDir, `student-report-${width}.png`),
         fullPage: true,
       });
     }
+    await fs.writeFile(path.join(screenshotDir,'responsive-new-ui.json'),JSON.stringify(reflowChecks,null,2));
     const [[count]] = await db.pool.query(
       "SELECT COUNT(*) n FROM term_report WHERE status='PUBLISHED'",
     );
