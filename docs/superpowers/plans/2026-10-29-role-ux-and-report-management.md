@@ -191,11 +191,11 @@
 - `resolveSourceInstant(source,clockBaseline)` → `{occurredAt:string|null,timeBasis:'UTC'|'VERIFIED_LEGACY'|'UNKNOWN'}`；扫码优先原ISO usedAt，直评按时钟审计边界读取，新连接写入为UTC，已核实旧offset只在读取时换算；未知旧行不猜日期，保留原始显示与未知数量，精确事件日期筛选不混入未知行。
 - 路由路径按卡台账设计第6.2节，不复用现有前100条列表假装全量。
 
-- [ ] **Step 1 — 写失败集成：** 额度100、原卡80（52已领、26待领、2VOID），2张已领已冲正，断言生成80、领取52、净分50；插入121卡测试101以后可分页查询/统计。加入其他教师/其他学校、未来卡、失效卡和无卡直评；R1.2的asOf后VOID/领取和缺历史Q/P审计不能用现值冒充旧值。
-- [ ] **Step 2 — 跑失败：** `cd backend && node --test __tests__/report_core_ledger.test.js`；期望服务不存在/业务断言失败。
-- [ ] **Step 3 — 实现：** 使用同一查询构造器的参数化WHERE与排序白名单，先按school/term/owner/month限制候选；CARD关联QUOTA、当学期学生快照和唯一REVERSAL。状态由asOf派生；“已领”含冲正，“有效积分”扣冲正，DIRECT不占纸卡张数。公共目录/聚合不读取学生私有正文。
-- [ ] **Step 4 — 验证月边界：** 学校10月1日00:00对应UTC9月30日16:00；10月直评11月冲正回溯10月净分，事件发生时刻保持11月。UTC新行、已核实UTC+8旧行换算为同一真实时刻，未知旧行明确计入“待核对时间N条”且不伪分月份。事件日期额外筛选汇总标“筛选事件变动合计”。历史证据完整时相同asOf下各状态互斥求和=G；证据不齐有unknown计数/完整性标记，nullable量不强行加和。重复学科任教不重复计学生。测试PASS；典型EXPLAIN写交付记录，初版不先加DDL。
-- [ ] **Step 5 — 提交：** `feat: add scoped monthly card ledger and student flows`。
+- [x] **Step 1 — 写失败集成：** 额度100、原卡80（52已领、26待领、2VOID），2张已领已冲正，断言生成80、领取52、净分50；插入121卡测试101以后可分页查询/统计。加入其他教师/其他学校、未来卡、失效卡和无卡直评；R1.2的asOf后VOID/领取和缺历史Q/P审计不能用现值冒充旧值。
+- [x] **Step 2 — 跑失败：** `cd backend && node --test __tests__/report_core_ledger.test.js`；期望服务不存在/业务断言失败。
+- [x] **Step 3 — 实现：** 使用同一查询构造器的参数化WHERE与排序白名单，先按school/term/owner/month限制候选；CARD关联QUOTA、当学期学生快照和唯一REVERSAL。状态由asOf派生；“已领”含冲正，“有效积分”扣冲正，DIRECT不占纸卡张数。公共目录/聚合不读取学生私有正文。
+- [x] **Step 4 — 验证月边界：** 学校10月1日00:00对应UTC9月30日16:00；10月直评11月冲正回溯10月净分，事件发生时刻保持11月。UTC新行、已核实UTC+8旧行换算为同一真实时刻，未知旧行明确计入“待核对时间N条”且不伪分月份。事件日期额外筛选汇总标“筛选事件变动合计”。历史证据完整时相同asOf下各状态互斥求和=G；证据不齐有unknown计数/完整性标记，nullable量不强行加和。重复学科任教不重复计学生。测试PASS；典型EXPLAIN写交付记录，初版不先加DDL。
+- [x] **Step 5 — 提交：** `feat: add scoped monthly card ledger and student flows`。
 
 ## Task 3: 卡台账导出、打印及原卡补打
 
@@ -207,11 +207,11 @@
 - `createCardPrintRequest({pool,actor,quotaId,grade,classNo,cardIds,command})` → `{requestId,downloadUrl,cardCount}`，写现有AUDIT，非新打印任务表。
 - `buildClassPrintZip`与单班PDF读取获准原凭证，补打同ID/同token；打印请求POST与文件GET分开，查询GET不变更业务状态。
 
-- [ ] **Step 1 — 写失败测试：** 121条导出全量而非100条，筛选学生与指标一致；中文/BOM/引号/换行、公式文本`=1+1`、`@x`与学号`0012`安全按文本保存，数值−1不被改成文本；非法owner/学生导出403，正文不含任何token字段；旧print/token URL不能绕过R1.2状态守卫。
-- [ ] **Step 2 — 跑失败：** `cd backend && node --test __tests__/report_core_ledger_exports.test.js __tests__/report_core_card_print_scopes.test.js`。
-- [ ] **Step 3 — 实现：** CSV一致性快照流式读取，开始响应前检验上限与条件，连接中断释放查询/事务；不做持久导出队列。文本危险首字符与学号/卡号列用明确文本前缀加CSV引号编码，数值列按原数值输出，不能仅靠双引号假定Excel保留前导零。打印台账重复表头/筛选/时间与汇总。打印原卡默认只取当前可领取原卡；POST仅留`PRINT_REQUEST`审计及当时选择范围，GET下载只读，不伪造GENERATED或物理打印成功事件。
-- [ ] **Step 4 — 验证：** 同一原卡两次下载二维码一致且卡数/积分不变；已用/失效不输出可领二维码，学生在请求后先领取需刷新范围；ZIP按班分PDF且中文正常。测试50001/1001条报422不截断，导出中断连接回收，测试PASS。
-- [ ] **Step 5 — 提交：** `feat: export filtered card ledgers and reprint original cards safely`。
+- [x] **Step 1 — 写失败测试：** 121条导出全量而非100条，筛选学生与指标一致；中文/BOM/引号/换行、公式文本`=1+1`、`@x`与学号`0012`安全按文本保存，数值−1不被改成文本；非法owner/学生导出403，正文不含任何token字段；旧print/token URL不能绕过R1.2状态守卫。
+- [x] **Step 2 — 跑失败：** `cd backend && node --test __tests__/report_core_ledger_exports.test.js __tests__/report_core_card_print_scopes.test.js`。
+- [x] **Step 3 — 实现：** CSV一致性快照流式读取，开始响应前检验上限与条件，连接中断释放查询/事务；不做持久导出队列。文本危险首字符与学号/卡号列用明确文本前缀加CSV引号编码，数值列按原数值输出，不能仅靠双引号假定Excel保留前导零。打印台账重复表头/筛选/时间与汇总。打印原卡默认只取当前可领取原卡；POST仅留`PRINT_REQUEST`审计及当时选择范围，GET下载只读，不伪造GENERATED或物理打印成功事件。
+- [x] **Step 4 — 验证：** 同一原卡两次下载二维码一致且卡数/积分不变；已用/失效不输出可领二维码，学生在请求后先领取需刷新范围；ZIP按班分PDF且中文正常。测试50001/1001条报422不截断，导出中断连接回收，测试PASS。
+- [x] **Step 5 — 提交：** `feat: export filtered card ledgers and reprint original cards safely`。
 
 ## Task 4: 角色外壳与受控导航
 
@@ -219,11 +219,11 @@
 
 **Interfaces:** `RoleShell({actor,term,scope,route,onNavigate,children})`；`parseCoreLocation(hash)`/`formatCoreLocation(route)` → `{page,termId,classKey,studentId,cardToken?}`。`api`保留原契约并支持`{signal}`；错误保留status/定位信息。ui.jsx仅`StarPicker`、`StatusBadge`、`ConfirmDialog`、`EmptyState`等实际共享组件，不含业务状态。
 
-- [ ] **Step 1 — 写失败单测：** 原`#/student/materials?card=...`仍恢复入站凭证；报告详情路由可编码/解码，普通导航不把卡token写入列表URL；非法角色路由回默认。补R1.1命令意图、错误details与401同账号草稿恢复测试。`node --test src/app/reportCore/navigation.test.js`旧代码FAIL；API行为测试放新增`api.test.js`，草稿恢复加入core-flow。
-- [ ] **Step 2 — 接入外壳：** 三角色导航、学期/班级/学科合法组合、真实退出、局部busy、错误状态。新任务相关页面先复用旧核心组件，确保此任务后仍可登录和使用所有六类输入。清除草稿/凭证的边界以actorId+termId隔离，退出不跨账号回放。
-- [ ] **Step 3 — 接入视觉与无障碍：** 使用总设计token、统一SVG、44/48px目标和focus；对话框焦点捕获/返回、Escape、reduced-motion；ErrorBoundary用原生可访问错误页替换antd，先不删依赖。按设计范围保留草稿离开提示，正常浏览不弹无意义确认。
-- [ ] **Step 4 — 验证：** 单测PASS；`npm run build`；现有`test:report-core`必要改成新菜单定位但不删业务断言，三角色真实登录/退出及入站扫码可用。记录390/768/1440与键盘核验结果。
-- [ ] **Step 5 — 提交：** `feat: unify role navigation and accessible interface foundations`。
+- [x] **Step 1 — 写失败单测：** 原`#/student/materials?card=...`仍恢复入站凭证；报告详情路由可编码/解码，普通导航不把卡token写入列表URL；非法角色路由回默认。补R1.1命令意图、错误details与401同账号草稿恢复测试。`node --test src/app/reportCore/navigation.test.js`旧代码FAIL；API行为测试放新增`api.test.js`，草稿恢复加入core-flow。
+- [x] **Step 2 — 接入外壳：** 三角色导航、学期/班级/学科合法组合、真实退出、局部busy、错误状态。新任务相关页面先复用旧核心组件，确保此任务后仍可登录和使用所有六类输入。清除草稿/凭证的边界以actorId+termId隔离，退出不跨账号回放。
+- [x] **Step 3 — 接入视觉与无障碍：** 使用总设计token、统一SVG、44/48px目标和focus；对话框焦点捕获/返回、Escape、reduced-motion；ErrorBoundary用原生可访问错误页替换antd，先不删依赖。按设计范围保留草稿离开提示，正常浏览不弹无意义确认。
+- [x] **Step 4 — 验证：** 单测PASS；`npm run build`；现有`test:report-core`必要改成新菜单定位但不删业务断言，三角色真实登录/退出及入站扫码可用。记录390/768/1440与键盘核验结果。
+- [x] **Step 5 — 提交：** `feat: unify role navigation and accessible interface foundations`。
 
 ## Task 5: 学生四步自评与可靠保存
 
@@ -231,11 +231,11 @@
 
 **Interfaces:** `getEvaluationView`增加`applicableSelfFields,editable,lockReason`；既有`allowedFields/values/revision/sportsSpecialties/artSpecialties`不变。`buildSelfGroups(view,catalog)`、`getSelfProgress(...)`；`mergeSelfDraft({base,local,remote,specialtyChanges})` → `{merged,conflicts,removedSpecialtyIds}`。`SelfEvaluation({ctx})`按原PATCH提交dirty及稳定特长ID。
 
-- [ ] **Step 1 — 写失败测试：** 13固定字段全部落入日常8/健康1/艺术4；五自述+收获+目标七文本，家长寄语不进必填分母；未适用项不计数；无特长不造行，数组调序后仍按id写；服务端不返回他评可写权限。
-- [ ] **Step 2 — 跑红：** `cd frontend && node --test src/app/reportCore/selfEvaluationModel.test.js`；`cd backend && node --test __tests__/report_core_self_view.test.js`。
-- [ ] **Step 3 — 实现：** 四步卡通表单、1–3星/清除null、独立7文本、可选家长寄语；不默认满星，不新建completion字段。先保存可部分提交，下一步只切组；成功后新revision，保存中继续编辑不清新dirty，失败保留输入，409三方合并同格冲突让用户选，不自动覆盖。
-- [ ] **Step 4 — 验证：** 单测/后端测试PASS；浏览器验证清除/返回回看、刷新服务器恢复、旧修订409、特长被撤回、冻结只读、账号切换不带入他人草稿。七文本≤2000 Unicode字符、家长≤1000，自评不能改teacher_star。
-- [ ] **Step 5 — 提交：** `feat: simplify complete student self-evaluation with conflict-safe saves`。
+- [x] **Step 1 — 写失败测试：** 13固定字段全部落入日常8/健康1/艺术4；五自述+收获+目标七文本，家长寄语不进必填分母；未适用项不计数；无特长不造行，数组调序后仍按id写；服务端不返回他评可写权限。
+- [x] **Step 2 — 跑红：** `cd frontend && node --test src/app/reportCore/selfEvaluationModel.test.js`；`cd backend && node --test __tests__/report_core_self_view.test.js`。
+- [x] **Step 3 — 实现：** 四步卡通表单、1–3星/清除null、独立7文本、可选家长寄语；不默认满星，不新建completion字段。先保存可部分提交，下一步只切组；成功后新revision，保存中继续编辑不清新dirty，失败保留输入，409三方合并同格冲突让用户选，不自动覆盖。
+- [x] **Step 4 — 验证：** 单测/后端测试PASS；浏览器验证清除/返回回看、刷新服务器恢复、旧修订409、特长被撤回、冻结只读、账号切换不带入他人草稿。七文本≤2000 Unicode字符、家长≤1000，自评不能改teacher_star。
+- [x] **Step 5 — 提交：** `feat: simplify complete student self-evaluation with conflict-safe saves`。
 
 ## Task 6: 学生首页、月度故事与档案
 
@@ -283,11 +283,11 @@
 - `getWorkspace({pool,actor,termId,grade,classNo,subjectCode,cursor,limit})` → `{counts,tasks,classRows,nextCursor,asOf}`。
 - `listTeachers({pool,actor,q,cursor,limit})` → 本校启用教师`{id,realName,username}`及分页，仅管理员。
 
-- [ ] **Step 1 — 写失败测试：** NULL/零分已结算/未结算、noAward、动态特长缺自评、可选家长寄语、不适用字段、材料FAIL各影响正确；重复任教学科不重复计学生，121学生不漏；管理员响应不含健康值/故事/寄语正文。R1.3跨学期账号不改变旧名单、R1.4移除月份的FAILED不阻断、旧月worker完成不推进无关修订均需具名断言。
-- [ ] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_read_models.test.js`。
-- [ ] **Step 3 — 实现：** 分页任务与全量计数分离，批量读取来源状态/学籍/职责，避免每学生SQL或每行HTTP；任务ID复用来源/学生/fieldKey。负责人按任教/班主任映射，未配置明确显示，不随意猜老师。学生workspace只本人、教师只本人责任范围。
-- [ ] **Step 4 — 验证：** 新测试PASS，同时`report_core_drafts.test.js`、`report_core_release.test.js`原完整性结论一致；全校发布必须全量就绪，不能被分页误判。教师搜索同名加账号区分，不要求手填ID。
-- [ ] **Step 5 — 提交：** `feat: share completion rules and add role workspace summaries`。
+- [x] **Step 1 — 写失败测试：** NULL/零分已结算/未结算、noAward、动态特长缺自评、可选家长寄语、不适用字段、材料FAIL各影响正确；重复任教学科不重复计学生，121学生不漏；管理员响应不含健康值/故事/寄语正文。R1.3跨学期账号不改变旧名单、R1.4移除月份的FAILED不阻断、旧月worker完成不推进无关修订均需具名断言。
+- [x] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_read_models.test.js`。
+- [x] **Step 3 — 实现：** 分页任务与全量计数分离，批量读取来源状态/学籍/职责，避免每学生SQL或每行HTTP；任务ID复用来源/学生/fieldKey。负责人按任教/班主任映射，未配置明确显示，不随意猜老师。学生workspace只本人、教师只本人责任范围。
+- [x] **Step 4 — 验证：** 新测试PASS，同时`report_core_drafts.test.js`、`report_core_release.test.js`原完整性结论一致；全校发布必须全量就绪，不能被分页误判。教师搜索同名加账号区分，不要求手填ID。
+- [x] **Step 5 — 提交：** `feat: share completion rules and add role workspace summaries`。
 
 ## Task 10: 全部负责班级、只读明细与版本安全
 

@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { api, allStudents, resetApiSession } from "./api";
 import RoleShell from "./RoleShell";
+import SelfEvaluation from "./SelfEvaluation";
 import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
-import { Cards, AwardUpload, StoryForm, EvaluationForm } from "./Materials";
+import { Cards, AwardUpload, StoryForm } from "./Materials";
 import {
   DirectScore,
   ImportData,
@@ -47,6 +48,9 @@ export default function ReportCoreApp() {
     [notice, setNotice] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const leaveGuard = useRef(null);
+  const loadedScope = useRef(null);
+  const mayLeave = () => !leaveGuard.current || leaveGuard.current();
   const refresh = () => setRefresh((n) => n + 1);
   const notify = (message) => {
     setNotice(message);
@@ -98,7 +102,8 @@ export default function ReportCoreApp() {
   useEffect(() => {
     if (!actor || !termId) return;
     const controller = new AbortController();
-    setStudents([]); setSources([]); setAssignments([]);
+    const scopeKey = `${actor.id}:${termId}`;
+    if (loadedScope.current !== scopeKey) { setStudents([]); setSources([]); setAssignments([]); loadedScope.current = scopeKey; }
     Promise.all([
       allStudents(termId, { signal: controller.signal }),
       api(`/report-core/sources?termId=${termId}&page=1`, undefined, undefined, { signal: controller.signal }),
@@ -118,19 +123,22 @@ export default function ReportCoreApp() {
     if (!actor || !termId) return;
     const update = () => {
       const route = routeForRole(parseCoreLocation(location.hash), actor.role);
+      if ((route.page !== tab || route.termId && route.termId !== termId) && !mayLeave()) { location.hash = formatCoreLocation({role:actor.role,page:tab,termId}); return; }
       setTab(route.page);
       if (route.termId && terms.some(t => String(t.id) === route.termId)) setTermId(route.termId);
     };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
-  }, [actor, termId, terms]);
+  }, [actor, termId, terms, tab]);
   const navigate = page => {
+    if (page !== tab) { if (!mayLeave()) return; leaveGuard.current = null; }
     setTab(page); setError(''); setNotice('');
     location.hash = formatCoreLocation({ role: actor.role, page, termId });
   };
   const ctx = {
     actor,
     termId,
+    setLeaveGuard: fn => { leaveGuard.current = fn; },
     catalog,
     students,
     sources,
@@ -237,13 +245,13 @@ export default function ReportCoreApp() {
     {expired && <section className="reauth-overlay" role="dialog" aria-modal="true" aria-label="重新登录"><form className="panel" onSubmit={e => { e.preventDefault(); run(async () => {
       const data = await api('/auth/login', { username: username || actor.username, password });
       localStorage.setItem('REPORT_CORE_TOKEN', data.token); setPassword('');
-      if (String(data.user.id) !== String(actor.id)) { resetApiSession(data.user.id, { clear: true }); setTermId(''); setSources([]); setStudents([]); setAssignments([]); setActor(data.user); }
+      if (String(data.user.id) !== String(actor.id)) { sessionStorage.removeItem('pendingCard'); resetApiSession(data.user.id, { clear: true }); setTermId(''); setSources([]); setStudents([]); setAssignments([]); setActor(data.user); }
       setExpired(false); setError('');
     }); }}><h2>登录已过期</h2><p>使用原账号登录，继续填写当前内容。</p><label>账号<input aria-label="重新登录账号" value={username || actor.username || ''} onChange={e => setUsername(e.target.value)} required autoComplete="username"/></label><label>密码<input aria-label="重新登录密码" type="password" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password"/></label>{error && <p role="alert">{error}</p>}<button className="primary" disabled={busy}>重新登录</button></form></section>}
     <div inert={expired ? '' : undefined} aria-hidden={expired || undefined}>
-    <RoleShell actor={actor} route={{ page: tab }} term={terms.find(t => String(t.id) === termId)} onNavigate={navigate} header={<><select aria-label="当前学期" value={termId} onChange={e => { setTermId(e.target.value); location.hash = formatCoreLocation({ role: actor.role, page: tab, termId: e.target.value }); }}>{terms.map(t => <option key={t.id} value={t.id}>{t.term_name}</option>)}</select><button onClick={refresh}>刷新</button></>} onLogout={() => run(async () => {
+    <RoleShell actor={actor} route={{ page: tab }} term={terms.find(t => String(t.id) === termId)} onNavigate={navigate} header={<><select aria-label="当前学期" value={termId} onChange={e => { if (!mayLeave()) return; leaveGuard.current = null; setTermId(e.target.value); location.hash = formatCoreLocation({ role: actor.role, page: tab, termId: e.target.value }); }}>{terms.map(t => <option key={t.id} value={t.id}>{t.term_name}</option>)}</select><button onClick={refresh}>刷新</button></>} onLogout={() => { if (!mayLeave()) return; return run(async () => {
       await api('/auth/logout', {}); localStorage.removeItem('REPORT_CORE_TOKEN'); sessionStorage.removeItem('pendingCard'); resetApiSession('anonymous', { clear: true }); setActor(null); setSources([]); setStudents([]); setTermId('');
-    })}>
+    }); }}> 
         {error && (
           <div role="alert" className="feedback error">
             {error}
@@ -274,7 +282,7 @@ export default function ReportCoreApp() {
             {tab === "cards" && <Cards ctx={ctx} />}{" "}
             {tab === "awards" && <AwardUpload ctx={ctx} />}{" "}
             {tab === "stories" && <StoryForm ctx={ctx} />}{" "}
-            {tab === "self" && <EvaluationForm ctx={ctx} />}{" "}
+            {tab === "self" && <SelfEvaluation ctx={ctx} />}{" "}
             {tab === "report" && <Published ctx={ctx} />}{" "}
             {tab === "direct" && <DirectScore ctx={ctx} />}{" "}
             {["imports", "roster", "health"].includes(tab) && <ImportData key={tab} ctx={ctx} initialKind={tab === "roster" ? "ROSTER" : tab === "health" ? "HEALTH" : "ACADEMIC"} />}{" "}

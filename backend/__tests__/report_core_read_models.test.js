@@ -18,6 +18,7 @@ test('workspace counts all 121 students once, pages tasks and returns no report 
   await db.pool.query("UPDATE student_term_evaluation SET teacher_comment='私密寄语',height_cm=141 WHERE student_id=3");
   const result=await read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',limit:25});
   assert.equal(result.counts.total,121); assert.equal(result.classRows[0].studentCount,121); assert.equal(result.tasks.length,25); assert.ok(result.nextCursor);
+  assert.ok(!result.tasks.some(task=>task.canHandle&&(/_self_star$/.test(task.fieldKey)||/^self_/.test(task.fieldKey))));
   const admin=await read.getWorkspace({pool:db.pool,actor:manager,termId:'1'});
   assert.ok(!JSON.stringify(admin).includes('私密寄语')); assert.ok(!JSON.stringify(admin).includes('141')); 
   const student=await read.getWorkspace({pool:db.pool,actor:{...teacher,id:'3',role:'student'},termId:'1'}); assert.equal(student.counts.total,1);

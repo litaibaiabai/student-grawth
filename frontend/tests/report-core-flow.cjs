@@ -70,14 +70,15 @@ const {
     await page.getByLabel("密码", { exact: true }).fill("Test-pass-2026");
     await page.getByRole("button", { name: "登录", exact: true }).click();
     await page.getByRole("button", { name: "自我评价", exact: true }).click();
-    await page.getByLabel("有礼貌·自评", { exact: true }).selectOption("2");
+    try { await page.getByRole("radio", { name: "有礼貌·自评 2星", exact: true }).waitFor({timeout:8000}); } catch(e) { console.error('SELF_DIAGNOSTIC', await page.locator('body').innerText(), errors); throw e; }
+    await page.getByRole("radio", { name: "有礼貌·自评 2星", exact: true }).check();
     await page.route('**/api/v1/report-core/forms/3', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message:'登录已过期' }) }), { times: 1 });
     await page.getByRole('button', { name:'保存评价', exact:true }).click();
     await page.getByRole('dialog', { name:'重新登录' }).waitFor();
     await page.getByLabel('重新登录密码').fill('Test-pass-2026');
     await page.getByRole('button', { name:'重新登录', exact:true }).click();
     await page.getByRole('dialog', { name:'重新登录' }).waitFor({ state:'hidden' });
-    assert.equal(await page.getByLabel('有礼貌·自评', { exact:true }).inputValue(), '2');
+    assert.equal(await page.getByRole('radio', { name:'有礼貌·自评 2星', exact:true }).isChecked(), true);
     for (const width of [390,768,1440]) {
       await page.setViewportSize({ width, height:900 });
       await page.keyboard.press('Tab');
@@ -85,6 +86,20 @@ const {
     }
     await page.getByRole("button", { name: "保存评价", exact: true }).click();
     await page.getByText("评价已保存", { exact: true }).waitFor();
+    await page.getByRole('button',{name:'清除有礼貌·自评',exact:true}).click();
+    await page.getByRole('button',{name:'保存评价',exact:true}).click();
+    await page.waitForFunction(() => { const b=document.querySelector('.self-save button'); return b?.disabled === true && b?.textContent === '保存评价'; });
+    await page.reload();
+    await page.getByRole('radio',{name:'有礼貌·自评 1星',exact:true}).waitFor();
+    assert.equal(await page.getByRole('radio',{name:'有礼貌·自评 2星',exact:true}).isChecked(),false);
+    await page.getByRole('radio',{name:'有礼貌·自评 2星',exact:true}).check();
+    await db.pool.query('UPDATE student_term_evaluation SET conduct_politeness_self_star=1,revision=revision+1 WHERE student_id=3');
+    await page.getByRole('button',{name:'保存评价',exact:true}).click();
+    await page.getByRole('button',{name:'保留我的填写',exact:true}).waitFor();
+    assert.equal(await page.getByRole('radio',{name:'有礼貌·自评 2星',exact:true}).isChecked(),true);
+    await page.getByRole('button',{name:'保留我的填写',exact:true}).click();
+    await page.getByRole('button',{name:'保存评价',exact:true}).click();
+    await page.waitForFunction(() => { const b=document.querySelector('.self-save button'); return b?.disabled === true && b?.textContent === '保存评价'; });
     assert.deepEqual(errors, []);
     const screenshotDir = path.join(root, "output/report-core");
     await fs.mkdir(screenshotDir, { recursive: true });
@@ -197,10 +212,11 @@ const {
         await toast("领取成功");
       }
       await nav("自我评价");
-      for (const f of catalog.fields.filter(
-        (f) => !f.jsonPath && f.sourceType === "SELF",
-      ))
-        await page.getByLabel(f.label, { exact: true }).selectOption("3");
+      for (const [section,label] of [['conduct','1 · 日常行为'],['health','2 · 健康与体育特长'],['art','3 · 艺术与艺术特长']]) {
+        await page.getByRole('button',{name:label,exact:true}).click();
+        for (const f of catalog.fields.filter(f=>!f.jsonPath&&f.sourceType==='SELF'&&f.section===section)) await page.getByRole('radio',{name:`${f.label} 3星`,exact:true}).check();
+      }
+      await page.getByRole('button',{name:'4 · 七段小记录，留下这个学期的自己',exact:true}).click();
       for (const name of [
         "品行美自述",
         "智慧美自述",
@@ -278,7 +294,9 @@ const {
       await page
         .getByLabel("审核依据")
         .fill("联调虚构材料，教师依据文本或奖状事实确认。");
+      const reviewReload = page.waitForResponse(r => r.url().includes("/report-core/sources?"));
       await page.getByRole("button", { name: "保存认定", exact: true }).click();
+      await (await reviewReload).json();
       await toast("认定已保存");
       await page.waitForTimeout(100);
     }

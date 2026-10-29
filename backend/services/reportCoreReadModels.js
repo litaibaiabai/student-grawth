@@ -77,8 +77,8 @@ async function getWorkspace(args) {
       for(const m of completion.missingItems){
         if(m.field==='materials')continue;
         const subject=subjectFor(m.field), self=byColumn.get(m.field)?.sourceType==='SELF'||narratives.includes(m.field)&&m.field!=='teacher_comment';
-        const responsible=related.filter(a=>m.field==='teacher_comment'||narratives.includes(m.field)?a.is_head_teacher===1:a.subject_code===subject||subject==='CONDUCT'&&a.is_head_teacher===1);
-        const canHandle=actor.role==='student'?self:actor.role==='teacher'&&responsible.some(a=>String(a.teacher_id)===actor.id);
+        const responsible=self?[{teacher_id:sid,real_name:e.student_name_snapshot}]:related.filter(a=>m.field==='teacher_comment'||narratives.includes(m.field)?a.is_head_teacher===1:a.subject_code===subject||subject==='CONDUCT'&&a.is_head_teacher===1);
+        const canHandle=actor.role==='student'?self:actor.role==='teacher'&&!self&&responsible.some(a=>String(a.teacher_id)===actor.id);
         if(actor.role==='student'&&!self || actor.role==='teacher'&&!canHandle)continue;
         tasks.push({taskId:`student:${sid}:${m.field}${m.itemId?':'+m.itemId:''}`,type:'MISSING_FIELD',studentId:sid,fieldKey:m.field,reason:m.reason,canHandle,responsible:responsible.length?responsible.map(a=>({id:String(a.teacher_id),name:a.real_name})).filter((r,i,a)=>a.findIndex(v=>v.id===r.id)===i):[],responsibilityStatus:responsible.length?'ASSIGNED':'UNCONFIGURED',route:{page:self?'self':'drafts',studentId:sid,termId:String(termId)}});
       }

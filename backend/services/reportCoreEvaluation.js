@@ -29,6 +29,9 @@ async function getEvaluationView({ pool, actor, studentKey }) {
   const scope = await assertScope({ actor, studentKey }, pool);
   const allowedFields = editable(actor, scope);
   const e = scope.evaluation;
+  const term = await getTerm(pool, actor.schoolId, studentKey.termId);
+  const applicable = new Set(term.evaluation_config.applicableFields || fixedFields.map(f => f.column));
+  const applicableSelfFields = fixedFields.filter(f => f.sourceType === "SELF" && applicable.has(f.column)).map(f => f.column);
   let visible = allowedFields;
   if (actor.role === "teacher") {
     visible = fixedFields
@@ -45,6 +48,9 @@ async function getEvaluationView({ pool, actor, studentKey }) {
   }
   return {
     revision: String(e.revision),
+    applicableSelfFields,
+    editable: term.release_status === "IDLE",
+    lockReason: term.release_status === "IDLE" ? null : "全校报告发布准备中，暂时只读",
     status: e.status,
     allowedFields,
     values: Object.fromEntries(visible.map((f) => [f, e[f]])),
@@ -52,7 +58,7 @@ async function getEvaluationView({ pool, actor, studentKey }) {
       actor.role === "student" ||
       scope.head ||
       scope.assignments?.some((a) => a.subject_code === "PE")
-        ? parse(e.sports_specialties)
+        ? (Array.isArray(parse(e.sports_specialties)) ? parse(e.sports_specialties) : [])
         : [],
     artSpecialties:
       actor.role === "student" ||
@@ -60,7 +66,7 @@ async function getEvaluationView({ pool, actor, studentKey }) {
       scope.assignments?.some((a) =>
         ["MUSIC", "FINE_ART"].includes(a.subject_code),
       )
-        ? parse(e.art_specialties)
+        ? (Array.isArray(parse(e.art_specialties)) ? parse(e.art_specialties) : [])
         : [],
     progress: Object.fromEntries(
       Object.entries(parse(e.field_sources))
