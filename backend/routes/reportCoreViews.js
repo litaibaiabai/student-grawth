@@ -4,6 +4,8 @@ function mountViews(router, { asyncRoute, ok }) {
   const get = (path, fn) => router.get(path, asyncRoute(async (req, res) => { res.setHeader('Cache-Control','private, no-store'); return ok(res, await fn(req)); }));
   router.get('/report-core/card-ledger/export', asyncRoute(async (req, res) => ledger.streamLedgerCsv({ ...args(req), view: req.query.view, sourceMode:req.query.sourceMode, response: res })));
   get('/report-core/card-ledger/print', req => ledger.getLedgerPrintModel({ ...args(req), view: req.query.view, sourceMode:req.query.sourceMode }));
+  for(const [path,method] of [['accounts','listAccounts'],['health','listHealth'],['imports','listImportHistory'],['teacher-quotas','listTeacherQuotas'],['quota-batches','listQuotaBatches']])get('/admin/report-core/'+path,req=>require('../services/reportCoreAdminData')[method]({...req.query,pool:req.app.locals.pool,actor:req.actor}));
+  get('/admin/report-core/imports/:id',req=>require('../services/reportCoreAdminData').listImportHistory({...req.query,batchId:req.params.id,pool:req.app.locals.pool,actor:req.actor}));
   get('/report-core/report-classes', req => require('../services/reportCoreReportBrowser').listReportClasses({...req.query,pool:req.app.locals.pool,actor:req.actor}));
   get('/report-core/report-students', req => require('../services/reportCoreReportBrowser').listReportStudents({...req.query,pool:req.app.locals.pool,actor:req.actor}));
   get('/report-core/report-detail/:studentId', req => require('../services/reportCoreReportBrowser').getReportDetail({pool:req.app.locals.pool,actor:req.actor,studentKey:{schoolId:req.actor.schoolId,termId:req.query.termId,studentId:req.params.studentId},version:req.query.version,scope:req.query.scope}));

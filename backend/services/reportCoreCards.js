@@ -534,6 +534,7 @@ async function buildClassPrintZip({ pool, actor, quotaId, now = new Date() }) {
 }
 
 module.exports = {
+  ...require('./reportCoreQuotaBatch'),
   saveQuota,
   saveQuotaInTransaction,
   savePlan,

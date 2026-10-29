@@ -18,7 +18,8 @@ const errorHandler = (err, req, res, next) => {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       code: err.code,
-      message: err.message
+      message: err.message,
+      ...(err.safeDetails?{details:err.details}:{})
     });
   }
 

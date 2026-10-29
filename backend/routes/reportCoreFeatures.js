@@ -82,6 +82,8 @@ function mountFeatures(r, { asyncRoute, ok }) {
       ),
     ),
   );
+  post('/report-core/card-quota-batches/preview',req=>cards.previewQuotaBatch(args(req)));
+  post('/report-core/card-quota-batches/:id/commit',req=>cards.commitQuotaBatch({...args(req),batchId:req.params.id}));
   post("/report-core/card-quotas", (req) => cards.saveQuota(args(req)));
   r.patch(
     "/report-core/card-quotas/:id/plan",

@@ -6,6 +6,9 @@ import DirectScore from "./DirectScore";
 import AcademicImport from "./AcademicImport";
 import CardLedger from "./CardLedger";
 import ClassReports from "./ClassReports";
+import AdminRoster from './AdminRoster';
+import AdminHealth from './AdminHealth';
+import AdminQuota from './AdminQuota';
 import ManagerWorkspace from './ManagerWorkspace';
 import TeacherWorkspace from "./TeacherWorkspace";
 import StudentHome, { StudentArchive } from "./StudentHome";
@@ -321,12 +324,12 @@ export default function ReportCoreApp() {
             {tab === "report" && <Published ctx={ctx} />}{" "}
             {["entry","direct"].includes(tab) && <DirectScore ctx={ctx} />}{" "}
             {tab === "imports" && actor.role === "teacher" && <AcademicImport ctx={ctx} />}
-            {["imports", "roster", "health"].includes(tab) && actor.role !== "teacher" && <ImportData key={tab} ctx={ctx} initialKind={tab === "roster" ? "ROSTER" : tab === "health" ? "HEALTH" : "ACADEMIC"} />}{" "}
+            {tab==='roster'&&<AdminRoster ctx={ctx}/>} {tab==='health'&&<AdminHealth ctx={ctx}/>}{" "}
             {tab === "reviews" && <ReviewMaterials ctx={ctx} />}{" "}
             {tab === "drafts" && <ClassReports ctx={ctx} />}{" "}
             {tab === "settlements" && <Settlements ctx={ctx} />}{" "}
             {tab === "cards-manage" && actor.role === "teacher" && <CardLedger ctx={ctx} />}
-            {tab === "quota" && <CardManagement ctx={ctx} />}{" "}
+            {tab === "quota" && <AdminQuota ctx={ctx} />}{" "}
             {tab === "config" && <Configuration ctx={ctx} />}{" "}
             {tab === "releases" && <ManagerWorkspace ctx={ctx} />}
             {sourceNext !== null &&

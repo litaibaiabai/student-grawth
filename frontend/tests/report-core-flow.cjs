@@ -62,6 +62,7 @@ const {
     browser = await chromium.launch({ headless: true, channel: "chrome" });
     const page = await browser.newPage();
     const errors = [];
+    const capture=async options=>{await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo({top:0,behavior:'instant'});});await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));return page.screenshot(options);};
 
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("http://127.0.0.1:19372");
@@ -142,17 +143,18 @@ const {
       username: i ? "student" + (i + 1) : "student",
     }));
     const catalog = require("../../backend/config/reportCorePolicy.json");
-    await page.locator('body').click({position:{x:2,y:2}});await page.screenshot({path:path.join(screenshotDir,'student-self-new-ui.png'),fullPage:true});
-    await nav('首页');await page.screenshot({path:path.join(screenshotDir,'student-home-new-ui.png'),fullPage:true});
-    await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.core-app').count(),1);await page.screenshot({path:path.join(screenshotDir,'student-home-new-ui-mobile.png'),fullPage:false,animations:'disabled'});await page.setViewportSize({width:1440,height:1000});
+    await page.locator('body').click({position:{x:2,y:2}});await capture({path:path.join(screenshotDir,'student-self-new-ui.png'),fullPage:true});
+    await nav('首页');await capture({path:path.join(screenshotDir,'student-home-new-ui.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.core-app').count(),1);await capture({path:path.join(screenshotDir,'student-home-new-ui-mobile.png'),fullPage:false,animations:'disabled'});await page.setViewportSize({width:1440,height:1000});
     await login("admin");
-    await page.screenshot({path:path.join(screenshotDir,'admin-new-ui.png'),fullPage:true});
+    await capture({path:path.join(screenshotDir,'admin-new-ui.png'),fullPage:true});
     await nav("月度卡额度");
-    await page.getByLabel("额度教师").selectOption("2");
-    await page.getByLabel("额度月份").fill("2026-10");
-    await page.getByLabel("额度总张数").fill("100");
-    await page.getByRole("button", { name: "下发总额度", exact: true }).click();
-    await toast("额度已下发");
+    await page.getByLabel('选择额度教师2',{exact:true}).check();
+    await page.getByLabel('统一月总额',{exact:true}).fill('100');
+    await page.getByRole('button',{name:'应用到已选教师',exact:true}).click();
+    await page.getByRole('button',{name:'预览下发',exact:true}).click();
+    await page.getByRole('button',{name:'确认批量下发',exact:true}).click();
+    await toast('批量额度已下发');
     await login("teacher");
     await nav("卡片管理");
     await page.getByRole("tab",{name:"制卡打印",exact:true}).click();
@@ -189,7 +191,7 @@ const {
     await page.getByRole('button',{name:'德美少年',exact:true}).click();
     await page.getByRole('button',{name:'日常行为',exact:true}).click();
     await page.getByRole('button',{name:'有礼貌',exact:true}).click();
-    await page.screenshot({path:path.join(screenshotDir,'teacher-direct-new-ui.png'),fullPage:true});
+    await capture({path:path.join(screenshotDir,'teacher-direct-new-ui.png'),fullPage:true});
     await page.getByRole('button',{name:'为2名学生各记1分',exact:true}).click();
     await toast('已为2名学生各记1分');
     for (const name of ['学生3','学生4']) await page.locator('.student-checks label').filter({hasText:name}).locator('input').check();
@@ -276,7 +278,7 @@ const {
         await page.getByText('服务器已有新版本，本次文字已保留。核对后可保存为新草稿。',{exact:true}).waitFor();
         assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original+'我的新填写。');
       }
-      if(student.id==='3')await page.screenshot({path:path.join(screenshotDir,'student-story-new-ui.png'),fullPage:true});
+      if(student.id==='3')await capture({path:path.join(screenshotDir,'student-story-new-ui.png'),fullPage:true});
       await page
         .getByRole("button", { name: "提交本月三类故事", exact: true })
         .click();
@@ -292,7 +294,7 @@ const {
           ),
         });
         await page.getByAltText('待提交奖状预览').waitFor();
-        await page.screenshot({path:path.join(screenshotDir,'student-award-new-ui.png'),fullPage:true});
+        await capture({path:path.join(screenshotDir,'student-award-new-ui.png'),fullPage:true});
         await page
           .getByRole("button", { name: "提交奖状", exact: true })
           .click();
@@ -304,7 +306,7 @@ const {
     await page.getByRole('button',{name:'前往处理 →',exact:true}).first().click();
     await page.locator('.review-box').waitFor();
     assert.equal(await page.getByRole('heading',{name:/材料 #/}).count(),1);
-    await page.screenshot({path:path.join(screenshotDir,'teacher-review-new-ui.png'),fullPage:true});
+    await capture({path:path.join(screenshotDir,'teacher-review-new-ui.png'),fullPage:true});
     await nav("材料认定");
     await page.getByRole('button',{name:'全部材料',exact:true}).click();
     let reviewButtons = page.getByRole("button", {
@@ -366,23 +368,11 @@ const {
     await page.getByRole('button',{name:'确认导入',exact:true}).click();await toast('导入已提交');
     await login("admin");
     await nav("体测原始值");
-    for (const student of students) {
-      await page
-        .getByLabel("选择学生", { exact: true })
-        .selectOption(student.id);
-      for (const [label, val] of [
-        ["身高", "141"],
-        ["体重", "35"],
-        ["视力 · 左", "5.0"],
-        ["视力 · 右", "5.0"],
-        ["1 分钟跳绳", "160"],
-      ])
-        await page.getByLabel(label, { exact: true }).fill(val);
-      await page.getByRole("button", { name: "预览导入", exact: true }).click();
-      await toast("预览完成");
-      await page.getByRole("button", { name: "确认导入", exact: true }).click();
-      await toast("导入已提交");
-    }
+    for(const student of students)for(const [label,value] of [['身高','141'],['体重','35'],['左视力','5.0'],['右视力','5.0'],['1分钟跳绳','160']])await page.getByLabel(`${student.id} · ${label}`,{exact:true}).fill(value);
+    await page.getByRole('button',{name:'预览导入',exact:true}).click();
+    await toast('预览完成');
+    await page.getByRole('button',{name:'确认导入',exact:true}).click();
+    await toast('导入已提交');
     await login("teacher");
     await nav("采集结算");
     for (const cls of ["4:1", "4:2"]) {
@@ -421,7 +411,7 @@ const {
     await page.getByRole('heading',{name:'全校发布进度',exact:true}).waitFor();
     await page.getByRole("button", { name: "统一发布", exact: true }).click();
     await toast("全校报告已统一发布");
-    await page.screenshot({
+    await capture({
       path: path.join(screenshotDir, "admin-release.png"),
       fullPage: true,
     });
@@ -443,7 +433,7 @@ const {
       preferCSSPageSize: true,
     });
     await printPage.close();
-    await page.screenshot({
+    await capture({
       path: path.join(screenshotDir, "student-report-desktop.png"),
       fullPage: true,
     });
@@ -463,7 +453,7 @@ const {
           ),
         "iframe must grow to show all report sections",
       );
-      await page.screenshot({
+      await capture({
         path: path.join(screenshotDir, `student-report-${width}.png`),
         fullPage: true,
       });
