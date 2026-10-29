@@ -304,43 +304,11 @@ function reportFingerprint(e, term) {
   });
 }
 async function missingItems(c, e, term) {
-  const missing = [];
-  const sources = parse(e.field_sources);
-  for (const column of term.evaluation_config.applicableFields ||
-    fixedFields.map((f) => f.column)) {
-    const f = byColumn.get(column);
-    if (f.sourceType === "CARD" && !sources[column]?.settled) {
-      missing.push({ field: column, reason: "卡项目尚未结算" });
-      continue;
-    }
-    if (e[column] === null || e[column] === "") {
-      if (f.sourceType === "CERTIFICATE" && sources[column]?.noAward) continue;
-      missing.push({ field: column, reason: "尚未完成" });
-    }
-  }
-  for (const column of narratives.filter((n) => n !== "family_message"))
-    if (!e[column]?.trim())
-      missing.push({ field: column, reason: "报告文字未填写" });
-  const [[pending]] = await c.query(
-    "SELECT COUNT(*) n FROM evaluation_source_record WHERE school_id=? AND term_id=? AND student_id=? AND source_type IN ('STORY','CERTIFICATE') AND status IN ('QUEUED','PROCESSING','SUBMITTED','FAILED') AND record_kind='ITEM'",
-    [e.school_id, e.term_id, e.student_id],
-  );
-  if (Number(pending.n))
-    missing.push({ field: "materials", reason: "仍有材料等待评分或审核" });
-  for (const [name, array] of [
-    ["sports_specialties", parse(e.sports_specialties)],
-    ["art_specialties", parse(e.art_specialties)],
-  ])
-    if (Array.isArray(array))
-      for (const item of array) {
-        if (!item.self_star || !item.teacher_star)
-          missing.push({
-            field: name,
-            reason: `${item.name}自评/教师评价不完整`,
-          });
-      }
-  return missing;
+  const { getBlockingMaterials, evaluateCompletion } = require('./reportCoreReadModels');
+  const blockingMaterials = await getBlockingMaterials({connection:c,schoolId:String(e.school_id),termId:String(e.term_id),studentId:String(e.student_id),config:term.evaluation_config});
+  return evaluateCompletion({evaluation:e,config:term.evaluation_config,blockingMaterials}).missingItems;
 }
+
 async function buildReportDraft({ pool, actor, studentKey }) {
   if (actor.role !== "teacher") fail(403, "报告草稿仅班主任可查看");
   const scope = await assertScope(

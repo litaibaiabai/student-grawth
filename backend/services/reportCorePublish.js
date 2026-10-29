@@ -8,12 +8,18 @@ const {
 } = require("./reportCoreEvaluation");
 const { renderPrintableA4 } = require("./reportRenderService");
 async function getReadiness({ pool, actor, termId }) {
+  if (actor.role !== 'manager') fail(403, '仅管理员查看发布状态');
+  if (typeof pool.getConnection === 'function') {
+    const connection = await pool.getConnection();
+    try { await connection.beginTransaction(); const result = await getReadiness({pool:connection,actor,termId}); await connection.commit(); return result; }
+    catch(error) { await connection.rollback(); throw error; } finally { connection.release(); }
+  }
   if (actor.role !== "manager") fail(403, "仅管理员查看发布状态");
   const term = await getTerm(pool, actor.schoolId, termId);
-  const [rows] = await pool.query(
-    "SELECT u.id user_id,e.* FROM users u LEFT JOIN student_term_evaluation e ON e.student_id=u.id AND e.term_id=? AND e.school_id=u.school_id WHERE u.school_id=? AND u.role='student' AND u.status=0",
-    [termId, actor.schoolId],
-  );
+  const {resolveTermRoster,getBlockingMaterials,evaluateCompletion}=require('./reportCoreReadModels');
+  const rows=await resolveTermRoster({connection:pool,schoolId:actor.schoolId,termId});
+  const blocking=await getBlockingMaterials({connection:pool,schoolId:actor.schoolId,termId,config:term.evaluation_config});
+  const byStudent=new Map();for(const row of blocking){const id=String(row.student_id);if(!byStudent.has(id))byStudent.set(id,[]);byStudent.get(id).push(row);}
   const missing = [];
   let confirmed = 0;
   for (const e of rows) {
@@ -25,7 +31,7 @@ async function getReadiness({ pool, actor, termId }) {
       });
       continue;
     }
-    const items = await missingItems(pool, e, term);
+    const items = evaluateCompletion({evaluation:e,config:term.evaluation_config,blockingMaterials:byStudent.get(String(e.student_id))||[]}).missingItems;
     missing.push(
       ...items.map((i) => ({ ...i, studentId: String(e.student_id) })),
     );
@@ -131,10 +137,7 @@ async function beginRelease(args) {
       });
       if (!readiness.complete)
         fail(422, `全校尚有${readiness.missing.length}项待完成`);
-      const [students] = await c.query(
-        "SELECT e.* FROM student_term_evaluation e JOIN users u ON u.id=e.student_id WHERE e.school_id=? AND e.term_id=? AND u.status=0 AND u.role='student' ORDER BY e.student_id",
-        [args.actor.schoolId, args.termId],
-      );
+      const students = await require('./reportCoreReadModels').resolveTermRoster({connection:c,schoolId:args.actor.schoolId,termId:args.termId});
       const key = stableHash([
         "RELEASE",
         args.actor.schoolId,

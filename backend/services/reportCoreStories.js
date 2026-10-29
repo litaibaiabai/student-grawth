@@ -274,7 +274,7 @@ async function applyStoryResult({
       await completeBatch(c, row.parent_id);
       return {
         result: { applied: true },
-        changedTargetsByStudent: { [row.student_id]: targets },
+        changedTargetsByStudent: (term.evaluation_config.requiredMonths || []).includes(row.month_key) ? { [row.student_id]: targets } : {},
       };
     },
   );
