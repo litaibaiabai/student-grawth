@@ -3,7 +3,7 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 const { spawn } = require("node:child_process");
 const assert = require("node:assert/strict");
-const root = path.resolve(__dirname, "../..");
+const root = path.resolve(__dirname, "../.."),apiPort=20000+(process.pid%10000)*2,webPort=apiPort+1;
 const runtime =
   "/Users/quanta/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright";
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || runtime);
@@ -36,7 +36,7 @@ const {
     );
     server = require("../../backend/app")
       .createApp({ pool: db.pool, schoolId: "1" })
-      .listen(19371);
+      .listen(apiPort);
     vite = spawn(
       process.execPath,
       [
@@ -44,18 +44,18 @@ const {
         "--host",
         "127.0.0.1",
         "--port",
-        "19372",
+        String(webPort),
         "--strictPort",
       ],
       {
         cwd: path.join(root, "frontend"),
-        env: { ...process.env, VITE_API_TARGET: "http://127.0.0.1:19371" },
+        env: { ...process.env, VITE_API_TARGET: "http://127.0.0.1:"+apiPort },
         stdio: "ignore",
       },
     );
     for (let i = 0; i < 80; i++) {
       try {
-        if ((await fetch("http://127.0.0.1:19372")).ok) break;
+        if ((await fetch("http://127.0.0.1:"+webPort)).ok) break;
       } catch {}
       await new Promise((r) => setTimeout(r, 100));
     }
@@ -71,7 +71,7 @@ const {
       reflowChecks.push({role,widths:[390,768,1440],equivalentZoom:{cssWidth:720,devicePixelRatio:2,physicalWidth:1440}});
     };
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto("http://127.0.0.1:19372");
+    await page.goto("http://127.0.0.1:"+webPort);
     await page
       .getByRole("heading", { name: /让每一份成长/ })
       .waitFor({ timeout: 8000 });
@@ -317,6 +317,8 @@ const {
           .getByRole("button", { name: "提交奖状", exact: true })
           .click();
         await toast("奖状已提交");
+        await page.getByLabel('奖状文件',{exact:true}).setInputFiles({name:'体育奖状.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOEsAAAAASUVORK5CYII=','base64')});
+        await page.getByRole('button',{name:'提交奖状',exact:true}).click();await toast('奖状已提交');
       }
     }
     await login("teacher");
@@ -333,7 +335,8 @@ const {
     });
     await reviewButtons.first().waitFor();
     // Every queued story is manually exception-reviewed because provider account is in arrears; no fake auto scorer.
-    for (let i = 0; i < 25; i++) {
+    let certificateNumber=0;
+    for (let i = 0; i < 30; i++) {
       const rows = page
         .locator(".source-row")
         .filter({ hasText: /排队中|处理中|待认定|处理失败/ });
@@ -354,8 +357,9 @@ const {
         ])
           await page.getByLabel(label, { exact: true }).fill("22");
       } else {
-        await page.getByLabel("成果归属").selectOption("labor_outcome_grade");
-        await page.getByLabel("成果认定值").selectOption("A");
+        certificateNumber++;
+        await page.getByLabel("成果归属").selectOption(certificateNumber===1?'sports_specialties':'labor_outcome_grade');
+        if(certificateNumber===1)await page.getByLabel('成果认定值').fill('跳绳｜校级运动展示');else await page.getByLabel("成果认定值").selectOption("A");
       }
       await page
         .getByLabel("审核依据")
@@ -404,11 +408,14 @@ const {
         await page.waitForTimeout(100);
       }
     }
+    await page.getByLabel('特长评价学生',{exact:true}).selectOption('3');await page.getByRole('radio',{name:'跳绳 · 教师评价 3星',exact:true}).check();await page.getByRole('button',{name:'保存特长教师评价',exact:true}).click();await toast('特长教师评价已保存');
+    await login('student');await nav('自我评价');await page.getByRole('button',{name:'2 · 健康与体育特长',exact:true}).click();await page.getByRole('radio',{name:'跳绳 · 自评 2星',exact:true}).check();await page.getByRole('button',{name:'保存评价',exact:true}).click();await toast('评价已保存');
+    await login('teacher');
     console.log("UI all six sources collected/settled");
     await nav("班级报告");
     for (const student of students) {
       console.log("UI confirm student", student.id);
-      await page.getByRole('button',{name:`学生${student.id} · 查看报告`,exact:true}).click();
+      await page.getByRole('button',{name:new RegExp(`学生${student.id} · .* · 查看报告`),exact:true}).click();
       await page.getByRole('button',{name:'完整报告',exact:true}).click();
       await page.getByLabel('学期寄语',{exact:true}).fill('认真学习，勇于尝试，继续保持。');
       await page.getByRole('button',{name:'保存学期寄语',exact:true}).click();await toast('学期寄语已保存');
@@ -428,6 +435,7 @@ const {
     await page.reload();
     await page.getByRole('heading',{name:'全校发布进度',exact:true}).waitFor();
     await page.getByRole("button", { name: "统一发布", exact: true }).click();
+    const releaseDialog=page.getByRole('dialog',{name:'确认全校统一发布',exact:true});await releaseDialog.getByRole('button',{name:'确认',exact:true}).click();
     await toast("全校报告已统一发布");
     await capture({
       path: path.join(screenshotDir, "admin-release.png"),

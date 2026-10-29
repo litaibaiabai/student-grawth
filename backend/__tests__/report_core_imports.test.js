@@ -79,3 +79,15 @@ test('academic_import_returns_all_errors_and_keeps_blank_values',async t=>{
  await service.commitImport({pool:db.pool,actor,batchId:good.result.batchId,expectedRevision:'1',command:command()});
  const [[row]]=await db.pool.query('SELECT math_basic_knowledge_grade,math_thinking_grade FROM student_term_evaluation WHERE student_id=3');assert.equal(row.math_basic_knowledge_grade,'A');assert.equal(row.math_thinking_grade,null);
 });
+test('committed redacted imports replay after a lost success response without reapplying any rows',async t=>{
+ const service=require('../services/reportCoreImports'),{stableHash}=require('../services/reportCorePolicy');
+ for(const kind of ['HEALTH','ACADEMIC','ROSTER'])await t.test(kind,async t=>{
+  const db=await createCoreTestDb(t);await db.seedBase();const actor={id:kind==='ACADEMIC'?'2':'1',schoolId:'1',role:kind==='ACADEMIC'?'teacher':'manager',tokenVersion:1},command=n=>({requestKey:'lost-'+kind+'-'+n,payloadHash:stableHash([kind,n])});
+  const rows=kind==='HEALTH'?[{studentId:'3',values:{height_cm:143}}]:kind==='ACADEMIC'?[{studentId:'3',values:{math_basic_knowledge_grade:'A'}}]:[{username:'replay_teacher',real_name:'重试教师',role:'teacher',password:'Test-pass-2026'}];
+  const preview=await service.previewImport({pool:db.pool,actor,termId:'1',kind,rows,command:command('preview')}),args={pool:db.pool,actor,batchId:preview.result.batchId,expectedRevision:'1',command:command('commit')};
+  const first=await service.commitImport(args),[[batch]]=await db.pool.query('SELECT payload_json FROM evaluation_source_record WHERE id=?',[args.batchId]);assert.equal(Object.hasOwn(typeof batch.payload_json==='string'?JSON.parse(batch.payload_json):batch.payload_json,'rows'),false);
+  const before=(await db.pool.query('SELECT COUNT(*) n FROM evaluation_source_record'))[0][0].n;
+  const replay=await service.commitImport(args);assert.equal(replay.replayed,true);assert.deepEqual(replay.result,first.result);assert.equal((await db.pool.query('SELECT COUNT(*) n FROM evaluation_source_record'))[0][0].n,before);
+  await assert.rejects(service.commitImport({...args,command:command('another')}),{statusCode:409});
+ });
+});

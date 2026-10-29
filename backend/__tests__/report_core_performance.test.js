@@ -9,6 +9,7 @@ test(
   async (t) => {
     const db = await createCoreTestDb(t);
     await db.seedBase();
+    const clockConnection=await db.pool.getConnection();try{await require('../scripts/runCoreMigrations').recordUtcCutover({connection:clockConnection,targetDb:db.name,schoolId:'1',verifiedLegacyOffsetMinutes:0});}finally{clockConnection.release();}
     const p = require("../services/reportCorePolicy");
     const e = require("../services/reportCoreEvaluation");
     const pub = require("../services/reportCorePublish");
@@ -99,6 +100,11 @@ test(
     await measure('ledgerCardListFirstTouch',i=>ledger.listLedgerCards(ledgerArgs(i)),null);
     await measure('ledgerCardList',async i=>{const result=await ledger.listLedgerCards(ledgerArgs(i));assert.equal(result.summary.direct,Math.floor(sourceCount/100));if(i===0)assert.equal(result.rows.length,25);});
     await measure('ledgerEventList',i=>ledger.listLedgerUsage({...ledgerArgs(i),groupBy:'event'}));
+    for(const [name,filter] of [['ledgerClassFilter',i=>({grade:4,classNo:i%60+1})],['ledgerStudentFilter',i=>({studentId:String(3+(i%60)*50)})],['ledgerIndicatorFilter',()=>({categoryCode:'CONDUCT_POLITENESS_OTHER_STAR'})]])await measure(name,i=>ledger.listLedgerUsage({...ledgerArgs(i),filters:{...ledgerArgs(i).filters,...filter(i)},groupBy:'event'}));
+    // One ordinary reversal per teacher must not disable the grouped list path.
+    for(let i=0;i<50;i++){const [[source]]=await db.pool.query("SELECT id,student_id,target_key FROM evaluation_source_record WHERE actor_id=? AND record_kind='DIRECT' AND school_id=1 AND term_id=1 ORDER BY id LIMIT 1",[teachers[i]]);await require('../services/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:source.student_id,actorId:String(teachers[i]),sourceType:'CARD',kind:'REVERSAL',originalId:source.id,target:source.target_key,status:'CONFIRMED',delta:-1,key:['perf-reversal',i],payload:{reason:'disposable single reversal',occurredAt:new Date().toISOString()}});}
+    for(const groupBy of ['student','indicator'])await measure('ledgerGrouped_'+groupBy,i=>ledger.listLedgerUsage({...ledgerArgs(i),groupBy}));
+    await measure('ledgerAfterSingleReversal',i=>ledger.listLedgerUsage({...ledgerArgs(i),filters:{...ledgerArgs(i).filters,grade:4,classNo:i%60+1},groupBy:'event'}));
     await measure('ordinaryDirectWrite',i=>cards.directScore({pool:db.pool,actor:teacher(0),termId:'1',studentIds:[String(3+i)],categoryCode:'CONDUCT_POLITENESS_OTHER_STAR',reason:'',command:command('write-'+i)}),1500);
     const {Writable}=require('node:stream');let bytes=0,firstByteMs=null;const exportStart=performance.now(),response=new Writable({write(chunk,encoding,callback){bytes+=chunk.length;if(firstByteMs===null)firstByteMs=performance.now()-exportStart;callback();}});response.setHeader=()=>{};
     const exported=await ledger.streamLedgerCsv({...ledgerArgs(0),view:'events',response});metrics.csvExport={rows:exported.rowCount,bytes,firstByteMs,totalMs:performance.now()-exportStart};

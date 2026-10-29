@@ -132,7 +132,7 @@ async function commitImport({
       pool,
       actor,
       termId: batch.term_id,
-      studentIds: p.rows.map((r) => r.studentId).filter(Boolean),
+      studentIds: (Array.isArray(p.rows) ? p.rows : []).map((r) => r.studentId).filter(Boolean),
       command,
       action: "import-commit",
       termLock:p.kind==='ROSTER'?'exclusive':'shared',
@@ -147,6 +147,7 @@ async function commitImport({
         String(current.revision) !== String(expectedRevision)
       )
         fail(409, "导入批次已改变");
+      if (!Array.isArray(p.rows)) fail(409, "导入预览已失效，请重新预览");
       const changed = {},
         updatedStudentIds = [];
       for (let i = 0; i < p.rows.length; i++) {

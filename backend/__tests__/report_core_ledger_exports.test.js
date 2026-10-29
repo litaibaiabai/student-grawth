@@ -68,3 +68,15 @@ test('CSV and print honor the event source mode selected on screen',async t=>{
  const parsed=parseCsv(response.data),header=parsed.findIndex(row=>row.includes('变动分'));assert.equal(parsed.length-header-1,0);
  const print=await ledger.getLedgerPrintModel({pool:db.pool,actor:teacher,filters:db.filters,view:'events',sourceMode:'paper'});assert.equal(print.rowCount,0);
 });
+test('monthly CSV includes ungenerated quota months and card/event trace fields preserve reversal reasons',async t=>{
+ const db=await fixture(t,2),manager={...teacher,id:'1',role:'manager'};
+ await cards.saveQuota({pool:db.pool,actor:manager,termId:'1',teacherId:'2',monthKey:'2026-11',total:35,command:command()});
+ const response=new Response();await ledger.streamLedgerCsv({pool:db.pool,actor:teacher,filters:{...db.filters,monthTo:'2026-11'},view:'monthly',response});const parsed=parseCsv(response.data),header=parsed.findIndex(r=>r.includes('获配额度'));assert.ok(header>=0,'monthly needs Q/P/remaining');const columns=parsed[header],nov=parsed.slice(header+1).find(r=>r[0]==='2026-11');assert.ok(nov);assert.equal(nov[columns.indexOf('获配额度')],'35');assert.equal(nov[columns.indexOf('未制卡余额')],'35');
+ const [[source]]=await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='DIRECT' LIMIT 1");await cards.reverseSource({pool:db.pool,actor:teacher,sourceId:String(source.id),reason:'实际冲正原因',command:command()});const events=new Response();await ledger.streamLedgerCsv({pool:db.pool,actor:teacher,filters:db.filters,view:'events',response:events});const rows=parseCsv(events.data),h=rows.findIndex(r=>r.includes('变动分')),cols=rows[h],negative=rows.slice(h+1).find(r=>r[cols.indexOf('变动分')]==='-1');assert.equal(negative[cols.indexOf('说明')],'实际冲正原因');
+ const cardResponse=new Response();await ledger.streamLedgerCsv({pool:db.pool,actor:teacher,filters:db.filters,view:'cards',response:cardResponse});const cardHeader=parseCsv(cardResponse.data).find(r=>r.includes('卡号'));for(const name of ['生成时间','领取时间','生效时间','失效时间','冲正时间','冲正原因'])assert.ok(cardHeader.includes(name),name);
+});
+test('disconnect during CSV preflight aborts source scan before headers and releases transaction',async t=>{
+ const db=await fixture(t,200),response=new Response(),get=db.pool.getConnection.bind(db.pool);let examined=0,rolledBack=false;
+ db.pool.getConnection=async()=>{const c=await get(),query=c.connection.query.bind(c.connection),rollback=c.rollback.bind(c);c.rollback=async()=>{rolledBack=true;return rollback();};c.connection.query=(...args)=>{const q=query(...args);if(typeof args[0]==='string'&&args[0].includes('owned JOIN')){const original=q.stream.bind(q);q.stream=options=>{const stream=original(options);stream.on('data',()=>{examined++;if(examined===1)response.destroy();});return stream;};}return q;};return c;};
+ await assert.rejects(ledger.streamLedgerCsv({pool:db.pool,actor:teacher,filters:db.filters,view:'events',response}));assert.equal(response.headersSent,false);assert.ok(examined<200,'preflight must stop, not drain every source');assert.equal(rolledBack,true);await db.pool.query('SELECT 1');
+});

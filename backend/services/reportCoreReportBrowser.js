@@ -19,7 +19,7 @@ function summarize(e,data){
  const head=data.teaching.some(a=>a.grade===e.grade_snapshot&&a.class_no===e.class_no_snapshot&&a.is_head_teacher===1),confirmed=e.status==='CONFIRMED'&&String(e.confirmed_revision)===String(e.revision)&&e.approval_fingerprint===reportFingerprint(e,data.term),published=data.published.get(sid);
  const stars={1:0,2:0,3:0,missing:0},grades={};
  for(const key of data.term.evaluation_config.applicableFields||fixedFields.map(f=>f.column)){const f=byColumn.get(key);if(!f)continue;const value=e[key];if(f.valueType==='star'){if([1,2,3].includes(Number(value)))stars[Number(value)]++;else stars.missing++;}if(f.valueType==='grade'&&value)grades[value]=(grades[value]||0)+1;}
- return {studentId:sid,name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot,currentRevision:String(e.revision),publishedVersion:published?Number(published.version):null,releaseVersion:published?Number(published.release_version):null,sectionProgress:completion.sectionProgress,starCounts:stars,gradeCounts:grades,missingCount:completion.missingItems.length,hasMissing:completion.missingItems.length>0,isConfirmed:confirmed,isPublished:!!published,canViewDetail:true,canViewFull:head,canConfirm:head&&data.term.release_status==='IDLE'&&!completion.missingItems.length,canEditComment:head&&data.term.release_status==='IDLE'};
+ return {studentId:sid,studentNumber:e.student_number,name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot,currentRevision:String(e.revision),publishedVersion:published?Number(published.version):null,releaseVersion:published?Number(published.release_version):null,sectionProgress:completion.sectionProgress,starCounts:stars,gradeCounts:grades,missingCount:completion.missingItems.length,hasMissing:completion.missingItems.length>0,isConfirmed:confirmed,isPublished:!!published,canViewDetail:true,canViewFull:head,canConfirm:head&&data.term.release_status==='IDLE'&&!completion.missingItems.length,canEditComment:head&&data.term.release_status==='IDLE'};
 }
 const countsOf=rows=>({total:rows.length,missing:rows.filter(r=>r.hasMissing).length,confirmed:rows.filter(r=>r.isConfirmed).length,published:rows.filter(r=>r.isPublished).length});
 async function listReportClasses({pool,actor,termId}){
@@ -33,7 +33,7 @@ async function listReportStudents(args){
  const page=pagination(args,{actor,termId,grade,classNo,keyword,status});
  return readSnapshot(pool,async c=>{const data=await dataset(c,actor,termId);if(hasClass&&!data.teaching.some(a=>a.grade===grade&&a.class_no===classNo))fail(403,'不在任教班级范围');
  const all=data.roster.filter(e=>!hasClass||e.grade_snapshot===grade&&e.class_no_snapshot===classNo).map(e=>summarize(e,data));
- const rows=all.filter(r=>(!keyword||r.name.includes(keyword)||r.studentId.includes(keyword))&&(status==='all'||status==='missing'&&r.hasMissing||status==='confirmed'&&r.isConfirmed||status==='published'&&r.isPublished||status==='ready'&&!r.hasMissing||status==='draft'&&!r.isConfirmed));
+ const rows=all.filter(r=>(!keyword||r.name.includes(keyword)||String(r.studentNumber||'').includes(keyword))&&(status==='all'||status==='missing'&&r.hasMissing||status==='confirmed'&&r.isConfirmed||status==='published'&&r.isPublished||status==='ready'&&!r.hasMissing||status==='draft'&&!r.isConfirmed));
  return {rows:rows.slice(page.offset,page.offset+page.limit),total:rows.length,counts:countsOf(all),nextCursor:page.next(rows.length),asOf:new Date().toISOString()};});
 }
 function validateFrozenSnapshot(snapshot,row){

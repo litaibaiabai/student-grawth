@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { api, allStudents } from "./api";
+import TeacherSpecialties from './TeacherSpecialties';
 import { statusName } from "./materialStatus";
 const subjectFor = (column) =>
   ({
@@ -40,7 +41,7 @@ export function ReviewMaterials({ ctx }) {
       !["SUPERSEDED", "REVOKED", "REJECTED"].includes(s.status) && (materialKind==='all'||s.source_type===materialKind),
   );
   const selectMaterial=useCallback(s=>{setSelected(s);setTarget('');setOutput('');setReason('');setDimensions([0,0,0,0]);},[]);
-  useEffect(()=>{const id=selectedTask?.sourceId;if(id){const row=sources.find(s=>String(s.id)===String(id));if(row){selectMaterial(row);setMaterialKind(row.source_type);focusTask?.(null);}}},[selectedTask,sources,focusTask,selectMaterial]);
+  useEffect(()=>{const id=selectedTask?.sourceId,c=new AbortController();if(id){const open=row=>{selectMaterial(row);setMaterialKind(row.source_type);focusTask?.(null);};const row=sources.find(s=>String(s.id)===String(id));if(row)open(row);else api(`/report-core/sources?termId=${ctx.termId}&page=1&sourceId=${id}`,undefined,undefined,{signal:c.signal}).then(result=>{if(c.signal.aborted)return;const source=result.rows.find(s=>String(s.id)===String(id));if(!source)throw Error('材料已撤回或无处理权限');open(source);}).catch(e=>{if(e.name!=='AbortError')onError(e);});}return()=>c.abort();},[selectedTask,sources,focusTask,selectMaterial,ctx.termId,onError]);
   const fields = ctx.catalog.fields.filter(
     (f) => f.sourceType === "CERTIFICATE" && !f.jsonPath,
   );
@@ -278,7 +279,7 @@ export function Settlements({ ctx }) {
               f.sourceType === "CARD" &&
               !f.jsonPath &&
               (subjectFor(f.column) === "CONDUCT" ||
-                ctx.assignments.some(
+                myClass.some(
                   (a) => a.subject_code === subjectFor(f.column),
                 )),
           )
@@ -300,7 +301,7 @@ export function Settlements({ ctx }) {
           ),
         );
   return (
-    <section className="panel">
+    <><TeacherSpecialties ctx={ctx}/><section className="panel">
       <h2>采集结算</h2>
       <p>
         完成记录后再结算。真实零积分折为一星；暂无奖状保持空值，不虚构成果。
@@ -360,6 +361,6 @@ export function Settlements({ ctx }) {
       >
         确认结算
       </button>
-    </section>
+    </section></>
   );
 }

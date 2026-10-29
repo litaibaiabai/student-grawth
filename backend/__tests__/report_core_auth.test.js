@@ -49,11 +49,8 @@ test("login uses live school identity, logout revokes tokens and cross-school to
     ).json()
   ).data;
   await db.pool.query("DELETE FROM teacher_teaching_assignment");
-  assert.equal(
-    (await call("/api/v1/report-core/students?termId=1", null, teacher.token))
-      .status,
-    403,
-  );
+  const emptyRoster=await call("/api/v1/report-core/students?termId=1",null,teacher.token);
+  assert.equal(emptyRoster.status,200);assert.deepEqual((await emptyRoster.json()).data,[]);
   await db.pool.query("UPDATE users SET status=1 WHERE id=2");
   assert.equal((await call("/api/v1/me", null, teacher.token)).status, 401);
 });

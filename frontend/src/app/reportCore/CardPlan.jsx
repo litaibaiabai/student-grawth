@@ -1,9 +1,13 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {api,resultOf,download} from './api';
+import {useDraftGuard} from './adminData';
 import {cardSubject} from './cardModel';
-export default function CardPlan({ctx,quotaId,onSaved}) {
+export default function CardPlan({ctx,quotaId,onSaved,onGuardChange}) {
  const {termId,error:onError}=ctx;
  const [quota,setQuota]=useState(null),[plans,setPlans]=useState([]),[generated,setGenerated]=useState(0),[dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[printClass,setPrintClass]=useState('');
+ const dirtyRef=useRef(dirty);dirtyRef.current=dirty;useDraftGuard(ctx,dirty,'分班计划尚未保存，离开会放弃修改。是否离开？');
+ const guard=useCallback(()=>!dirtyRef.current||window.confirm('分班计划尚未保存，切换会放弃修改。是否切换？'),[]);
+ useEffect(()=>{onGuardChange?.(guard);return()=>onGuardChange?.(null);},[onGuardChange,guard]);
  const sequence=useRef(0);
  const classes=[...new Map(ctx.assignments.map(a=>[`${a.grade}:${a.class_no}`,{grade:a.grade,classNo:a.class_no}])).values()];
  const classList=useRef(classes);classList.current=classes;

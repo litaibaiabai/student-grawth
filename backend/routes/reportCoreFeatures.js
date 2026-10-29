@@ -226,7 +226,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
         termId: req.query.termId,
         studentId: req.query.studentId,
         offset: req.query.offset,
-        monthKey: req.query.monthKey, sourceType: req.query.sourceType, recordKind: req.query.recordKind, latest: req.query.latest,
+        sourceId:req.query.sourceId, monthKey: req.query.monthKey, sourceType: req.query.sourceType, recordKind: req.query.recordKind, latest: req.query.latest,
       });
       ok(res, req.query.page === "1" ? page : page.rows);
     }),

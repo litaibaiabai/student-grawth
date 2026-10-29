@@ -60,7 +60,7 @@ async function snapshot(args, run) {
     const [[clock]] = await c.query("SELECT payload_json FROM evaluation_source_record WHERE school_id=? AND business_key=?", [args.actor.schoolId, stableHash(['SOURCE_CLOCK_BASELINE', args.actor.schoolId, 'UTC_V1'])]);
     const baseline = clock ? parse(clock.payload_json) : null;
     const [metadata] = await c.query("SELECT id,parent_id,actor_id,record_kind,month_key,payload_json,revision,created_at FROM evaluation_source_record WHERE school_id=? AND term_id=? AND owner_teacher_id=? AND month_key>=? AND month_key<=? AND record_kind IN ('QUOTA','AUDIT') ORDER BY id", [args.actor.schoolId, f.termId, f.ownerId, f.monthFrom, f.monthTo]);
-    const context = { c, actor: args.actor, f, asOf, baseline, metadata, owner: owners[0], currentSnapshot: !args.asOf };
+    const context = { c, actor: args.actor, f, asOf, baseline, metadata, owner: owners[0], currentSnapshot: !args.asOf, signal:args.signal,disconnected:()=>!!args.response?.destroyed };
     const result = await run(context);
     await c.commit(); return result;
   } catch (error) { await c.rollback(); throw error; } finally { c.release(); }
@@ -104,6 +104,7 @@ function project(source, ctx) {
   };
 }
 async function* scan(ctx) {
+  const interrupted=()=>{if(ctx.signal?.aborted||ctx.disconnected?.())throw Object.assign(Error('下载连接已断开'),{code:'CLIENT_DISCONNECTED'});};interrupted();
   const sql = `SELECT s.id,s.parent_id,s.student_id,s.target_key,s.record_kind,s.month_key,s.status,s.revision,s.payload_json,s.created_at,s.valid_from,s.valid_until,
     e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,u.real_name student_name,u.username student_number,
     r.id reverse_id,r.created_at reverse_created_at,r.payload_json reverse_payload,ru.real_name reverse_actor_name
@@ -118,12 +119,15 @@ async function* scan(ctx) {
     LEFT JOIN users ru ON ru.school_id=r.school_id AND ru.id=r.actor_id
     ORDER BY ${sorts[ctx.f.sort]} ${ctx.f.order.toUpperCase()},s.id ${ctx.f.order.toUpperCase()}`;
   const stream = ctx.c.connection.query(sql, [ctx.actor.schoolId, ctx.f.termId, ctx.f.ownerId, ctx.f.monthFrom, ctx.f.monthTo, ctx.actor.schoolId, ctx.f.termId, ctx.f.ownerId, ctx.fastDirect ? 1 : 0]).stream({ highWaterMark: 64 });
+  const abort=()=>stream.destroy(Object.assign(Error('下载连接已断开'),{code:'CLIENT_DISCONNECTED'}));ctx.signal?.addEventListener('abort',abort,{once:true});const checkDisconnected=()=>{if(ctx.disconnected?.())abort();};stream.on('data',checkDisconnected);if(ctx.signal?.aborted||ctx.disconnected?.())abort();
   try {
     for await (const source of stream) {
+      interrupted();
       const row = project(source, ctx);
       if (row && (row.kind !== 'DIRECT' || !row.occurredAt || row.occurredAt <= ctx.asOf)) yield row;
     }
-  } finally { stream.destroy(); }
+  } finally {ctx.signal?.removeEventListener('abort',abort);stream.off('data',checkDisconnected);stream.destroy();}
+  for(const row of ctx.fastDirect?.reversedRows||[])yield row;
 }
 function matches(row, f, { ignoreEventRange = false } = {}) {
   if (!monthMatches(row.attributionMonth, f)) return false;
@@ -211,54 +215,83 @@ async function collect(ctx, { select, page }) {
 }
 // The usual current-month lists aggregate modern, unreversed direct facts in SQL.
 // Historical/uncertain clocks and advanced filters retain the exact projection path.
-const simpleKeys = new Set(['termId','ownerId','sort','order','monthFrom','monthTo']);
+const simpleKeys = new Set(['termId','ownerId','sort','order','monthFrom','monthTo','grade','classNo','studentId','cardId','categoryCode','section','primary','keyword','status']);
 const directAt = "s.ledger_occurred_utc";
 async function currentDirectAggregate(ctx) {
-  if (!ctx.currentSnapshot || ctx.f.sort !== 'id' || Object.keys(ctx.f).some(k => !simpleKeys.has(k))) return null;
+  if (!ctx.currentSnapshot || ctx.f.cardId || /^\d+$/.test(ctx.f.keyword||'') || ctx.f.sort !== 'id' || Object.keys(ctx.f).some(k => !simpleKeys.has(k))) return null;
   const from = getSchoolMonthBounds(ctx.f.monthFrom).startInclusive, to = getSchoolMonthBounds(ctx.f.monthTo).endExclusive;
   const instant = value => new Date(value).toISOString();
   const bounds = [instant(from), instant(to), ctx.asOf];
-  const [[reversal]]=await ctx.c.query(`SELECT r.id FROM evaluation_source_record r
+  const [reversedSources]=await ctx.c.query(`SELECT original.*,e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,u.real_name student_name,u.username student_number,
+    r.id reverse_id,r.created_at reverse_created_at,r.payload_json reverse_payload,ru.real_name reverse_actor_name
+    FROM evaluation_source_record r
     JOIN evaluation_source_record original ON original.id=r.reversal_of AND original.school_id=r.school_id
-    WHERE r.school_id=? AND r.term_id=? AND r.source_type='CARD' AND r.record_kind='REVERSAL' AND original.actor_id=? LIMIT 1`,[ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId]);
-  if(reversal)return null;
+    LEFT JOIN student_term_evaluation e ON e.school_id=original.school_id AND e.term_id=original.term_id AND e.student_id=original.student_id
+    LEFT JOIN users u ON u.school_id=original.school_id AND u.id=original.student_id
+    LEFT JOIN users ru ON ru.school_id=r.school_id AND ru.id=r.actor_id
+    WHERE r.school_id=? AND r.term_id=? AND r.source_type='CARD' AND r.record_kind='REVERSAL' AND original.record_kind='DIRECT' AND original.actor_id=?`,[ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId]);
+  const reversedRows=reversedSources.map(source=>project(source,ctx)).filter(Boolean);
+  if(reversedRows.some(row=>!row.occurredAt||!row.reversedAt&&row.reversed))return null;
+  const f=ctx.f,byStudent=ctx.ledgerGroupBy==='student',conditions=[],conditionParams=[];
+  const targetCodes=catalog.cardCatalog.filter(c=>(!f.categoryCode||c.code===f.categoryCode)&&(!f.section||sectionOf(c.group)===f.section)&&(!f.primary||(c.group==='德美'?'日常行为':c.group)===f.primary)).map(c=>c.targetColumn);
+  for(const [key,column] of [['grade','e.grade_snapshot'],['classNo','e.class_no_snapshot'],['studentId','g.student_id']])if(f[key]){conditions.push(column+'=?');conditionParams.push(f[key]);}
+  if(f.keyword){conditions.push('(LOCATE(BINARY ?,BINARY e.student_name_snapshot)>0 OR LOCATE(BINARY ?,BINARY u.username)>0)');conditionParams.push(f.keyword,f.keyword);}
+  if(f.categoryCode||f.section||f.primary){conditions.push(targetCodes.length?'g.target_key IN (?)':'FALSE');if(targetCodes.length)conditionParams.push(targetCodes);}
+  if(f.status&&f.status!=='CONFIRMED')conditions.push('FALSE');
+  const selection=conditions.length?conditions.join(' AND '):'TRUE';
+  const groupColumns=byStudent?'g.student_id,e.grade_snapshot,e.class_no_snapshot':'g.target_key,e.grade_snapshot,e.class_no_snapshot';
   let groups;
   try {
-    [groups] = await ctx.c.query(`SELECT g.*,e.grade_snapshot grade,e.class_no_snapshot classNo FROM (
-      SELECT s.student_id,
+    [groups] = await ctx.c.query(`SELECT ${byStudent?'g.student_id':'NULL student_id'},${byStudent?'NULL target_key':'g.target_key'},
+      SUM(g.n) n,SUM(CASE WHEN ${selection} THEN g.n ELSE 0 END) selectedCount,SUM(g.uncertain) uncertain,MAX(g.created) created,
+      MIN(e.student_name_snapshot) student_name_snapshot,e.grade_snapshot grade,e.class_no_snapshot classNo,MIN(u.username) studentNumber FROM (
+      SELECT s.student_id,s.target_key,
       SUM(${directAt}>=? AND ${directAt}<? AND ${directAt}<=?) n,
       SUM(NOT (COALESCE(${directAt},'') REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$')) uncertain,MAX(s.created_at) created
       FROM evaluation_source_record s FORCE INDEX(idx_source_ledger_direct)
       WHERE s.school_id=? AND s.term_id=? AND s.source_type='CARD' AND s.record_kind='DIRECT' AND s.actor_id=?
-      GROUP BY s.student_id
-    ) g LEFT JOIN student_term_evaluation e ON e.school_id=? AND e.term_id=? AND e.student_id=g.student_id`,
-      [...bounds,ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId,ctx.actor.schoolId,ctx.f.termId]);
+      GROUP BY s.student_id,s.target_key
+    ) g LEFT JOIN student_term_evaluation e ON e.school_id=? AND e.term_id=? AND e.student_id=g.student_id LEFT JOIN users u ON u.school_id=e.school_id AND u.id=e.student_id GROUP BY ${groupColumns}`,
+      [...conditionParams,...bounds,ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId,ctx.actor.schoolId,ctx.f.termId]);
   } catch(error) { if(['ER_BAD_FIELD_ERROR','ER_KEY_DOES_NOT_EXITS'].includes(error.code))return null;throw error; }
   if (groups.some(g => Number(g.uncertain) || iso(g.created)>ctx.asOf)) return null;
-  return { groups, count: groups.reduce((n,g)=>n+Number(g.n),0), bounds };
+  const exclusions=reversedRows.filter(row=>monthMatches(row.attributionMonth,ctx.f)&&row.occurredAt<=ctx.asOf);
+  for(const row of exclusions){const group=groups.find(g=>(byStudent?String(g.student_id)===row.studentId:g.target_key===row.targetKey)&&g.grade===row.grade&&g.classNo===row.classNo);if(group){group.n=Number(group.n)-1;if(matches({...row,reversed:false},ctx.f))group.selectedCount=Number(group.selectedCount)-1;}}
+  const entry=g=>{const category=catalog.cardCatalog.find(c=>c.targetColumn===g.target_key);return {count:Number(g.n),row:{kind:'DIRECT',id:null,studentId:g.student_id===null?null:String(g.student_id),studentName:g.student_name_snapshot,studentNumber:g.studentNumber,grade:g.grade,classNo:g.classNo,targetKey:g.target_key,categoryCode:category?.code,categoryName:category?.item||g.target_key,status:'CONFIRMED',reversed:false,net:1,occurredAt:bounds[0],attributionMonth:ctx.f.monthFrom}};};
+  const entries=groups.filter(g=>Number(g.n)>0).map(entry),selected=groups.filter(g=>Number(g.selectedCount)>0).map(g=>({...entry(g),count:Number(g.selectedCount)}));
+  return {entries,selected,count:entries.reduce((n,e)=>n+e.count,0),selectedCount:selected.reduce((n,e)=>n+e.count,0),reversedRows:exclusions,excludedIds:reversedRows.map(r=>r.id),bounds,targetCodes};
 }
+
 function mergeDirectCounts(result, aggregate) {
   if (!aggregate) return result;
-  for (const counts of [result.summary,result.filteredSummary]) { counts.direct+=aggregate.count; if(counts.net!==null)counts.net+=aggregate.count; }
-  for(const group of aggregate.groups) {
+  const add=(counts,n)=>{counts.direct+=n;if(counts.net!==null)counts.net+=n;};
+  add(result.summary,aggregate.count);add(result.filteredSummary,aggregate.selectedCount);
+  for(const {row:group,count} of aggregate.entries) {
     let row=result.summary.classRows.find(r=>r.grade===group.grade&&r.classNo===group.classNo);
-    if(!row) {row={grade:group.grade,classNo:group.classNo,...emptyCounts(),generatedRecords:0,planned:0,indicatorPlans:{}};result.summary.classRows.push(row);}
-    row.direct+=Number(group.n);if(row.net!==null)row.net+=Number(group.n);
+    if(!row){row={grade:group.grade,classNo:group.classNo,...emptyCounts(),generatedRecords:0,planned:0,indicatorPlans:{}};result.summary.classRows.push(row);}
+    add(row,count);
   }
   return result;
 }
 async function directEventPage(ctx, aggregate, limit) {
-  if(!aggregate.count)return [];
+  if(!aggregate.selectedCount)return [];
+  const f=ctx.f,clauses=[],params=[ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId,...aggregate.bounds];
+  if(aggregate.excludedIds.length){clauses.push('s.id NOT IN (?)');params.push(aggregate.excludedIds);}
+  if(f.studentId){clauses.push('s.student_id=?');params.push(f.studentId);}
+  if(f.categoryCode||f.section||f.primary){clauses.push('s.target_key IN (?)');params.push(aggregate.targetCodes);}
+  if(f.grade||f.classNo||f.keyword){const checks=['e.school_id=?','e.term_id=?'],values=[ctx.actor.schoolId,ctx.f.termId];for(const [key,col] of [['grade','grade_snapshot'],['classNo','class_no_snapshot']])if(f[key]){checks.push('e.'+col+'=?');values.push(f[key]);}if(f.keyword){checks.push('(LOCATE(BINARY ?,BINARY e.student_name_snapshot)>0 OR LOCATE(BINARY ?,BINARY u.username)>0)');values.push(f.keyword,f.keyword);}clauses.push('s.student_id IN (SELECT e.student_id FROM student_term_evaluation e JOIN users u ON u.school_id=e.school_id AND u.id=e.student_id WHERE '+checks.join(' AND ')+')');params.push(...values);}
+  if(!clauses.length)clauses.push('TRUE');
   const [sources]=await ctx.c.query(`SELECT s.*,e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,u.real_name student_name,u.username student_number
     FROM (SELECT s.id FROM evaluation_source_record s FORCE INDEX(idx_source_ledger_direct)
       WHERE s.school_id=? AND s.term_id=? AND s.source_type='CARD' AND s.record_kind='DIRECT' AND s.actor_id=?
-      AND ${directAt}>=? AND ${directAt}<? AND ${directAt}<=? ORDER BY s.id ${ctx.f.order.toUpperCase()} LIMIT ?
+      AND ${directAt}>=? AND ${directAt}<? AND ${directAt}<=? AND ${clauses.join(' AND ')} ORDER BY s.id ${ctx.f.order.toUpperCase()} LIMIT ?
     ) matched JOIN evaluation_source_record s ON s.id=matched.id
     LEFT JOIN student_term_evaluation e ON e.school_id=s.school_id AND e.term_id=s.term_id AND e.student_id=s.student_id
     LEFT JOIN users u ON u.school_id=s.school_id AND u.id=s.student_id ORDER BY s.id ${ctx.f.order.toUpperCase()}`,
-    [ctx.actor.schoolId,ctx.f.termId,ctx.f.ownerId,...aggregate.bounds,limit]);
-  return sources.map(source=>({...project(source,ctx),delta:1}));
+    [...params,limit]);
+  return sources.map(source=>({...project(source,ctx),delta:1})).filter(row=>matches(row,f));
 }
+
 async function getLedgerSummary(args) { return snapshot(args, async ctx => { ctx.fastDirect=await currentDirectAggregate(ctx); const result=mergeDirectCounts(await collect(ctx,{}),ctx.fastDirect); return { ...result.summary, filteredSummary: result.filteredSummary }; }); }
 async function listLedgerCards(args) { return snapshot(args, async ctx => {ctx.fastDirect=await currentDirectAggregate(ctx);return mergeDirectCounts(await collect(ctx, { page: pageSpec(ctx, args, 'cards'), select: row => row.kind === 'CARD' && matches(row, ctx.f) ? [row] : [] }),ctx.fastDirect);}); }
 function eventsOf(row, ctx, sourceMode) {
@@ -268,14 +301,14 @@ function eventsOf(row, ctx, sourceMode) {
     const at = row.kind === 'CARD' ? row.usedAt : row.occurredAt;
     if (!ctx.f.eventFrom && !ctx.f.eventTo || inRange(at, ctx.f.eventFrom, ctx.f.eventTo)) events.push({ ...row, id: row.id, delta: 1, occurredAt: at });
   }
-  if (row.reversed && (!ctx.f.eventFrom && !ctx.f.eventTo || inRange(row.reversedAt, ctx.f.eventFrom, ctx.f.eventTo))) events.push({ ...row, id: row.reverseId, originalId: row.id, kind: 'REVERSAL', delta: -1, occurredAt: row.reversedAt });
+  if (row.reversed && (!ctx.f.eventFrom && !ctx.f.eventTo || inRange(row.reversedAt, ctx.f.eventFrom, ctx.f.eventTo))) events.push({ ...row, id: row.reverseId, originalId: row.id, kind: 'REVERSAL', delta: -1, reason:row.reverseReason, occurredAt: row.reversedAt });
   return events;
 }
 async function listLedgerUsage(args) {
   const groupBy = args.groupBy || 'event', sourceMode = args.sourceMode || 'all';
   if (!['event', 'student', 'indicator'].includes(groupBy) || !['paper', 'direct', 'all'].includes(sourceMode)) fail(422, '评价流向视图不合法');
   return snapshot(args, async ctx => {
-    const page = pageSpec(ctx, args, 'usage:' + groupBy + ':' + sourceMode);
+    ctx.ledgerGroupBy=groupBy;const page = pageSpec(ctx, args, 'usage:' + groupBy + ':' + sourceMode);
     const eventSummary = { positive: 0, reversals: 0, net: 0 };
     function selectedEvents(row) {
       const events = eventsOf(row, ctx, sourceMode);
@@ -288,7 +321,7 @@ async function listLedgerUsage(args) {
       const result = mergeDirectCounts(await collect(ctx, { page: fast ? null : page, select: selectedEvents }),fast);
       if(fast) {
         const direct=sourceMode==='paper'?[]:await directEventPage(ctx,fast,page.offset+page.limit);
-        const directCount=sourceMode==='paper'?0:fast.count;
+        const directCount=sourceMode==='paper'?0:fast.selectedCount;
         const combined=[...result.rows,...direct].sort((a,b)=>{const x=BigInt(a.originalId||a.id),y=BigInt(b.originalId||b.id);return(x<y?-1:x>y?1:0)*(ctx.f.order==='asc'?1:-1);});
         result.total+=directCount;result.rows=combined.slice(page.offset,page.offset+page.limit);result.nextCursor=page.next(result.total);
         eventSummary.positive+=directCount;eventSummary.net+=directCount;
@@ -297,7 +330,8 @@ async function listLedgerUsage(args) {
       result.summaryLabel = ctx.f.eventFrom || ctx.f.eventTo ? '筛选事件变动合计' : '按原评价归属月'; return result;
     }
     const groups = new Map();
-    const result = await collect(ctx, { select: row => {
+    ctx.fastDirect=await currentDirectAggregate(ctx);
+    const result = mergeDirectCounts(await collect(ctx, { select: row => {
       for (const event of selectedEvents(row)) {
         const key = groupBy === 'student' ? event.studentId : event.categoryCode;
         if (!key) continue;
@@ -305,7 +339,12 @@ async function listLedgerUsage(args) {
         const g = groups.get(key); g.net += event.delta; if (event.delta > 0) g.positive++; else g.reversals++;
       }
       return [];
-    } });
+    } }),ctx.fastDirect);
+    if(ctx.fastDirect&&sourceMode!=='paper')for(const {row:event,count} of ctx.fastDirect.selected){
+      const key=groupBy==='student'?event.studentId:event.categoryCode;if(!key)continue;
+      if(!groups.has(key))groups.set(key,{id:key,studentId:groupBy==='student'?key:null,studentName:groupBy==='student'?event.studentName:null,categoryCode:groupBy==='indicator'?key:null,categoryName:groupBy==='indicator'?event.categoryName:null,positive:0,reversals:0,net:0});
+      const g=groups.get(key);g.positive+=count;g.net+=count;eventSummary.positive+=count;eventSummary.net+=count;
+    }
     const all = [...groups.values()].sort((a, b) => a.id.localeCompare(b.id, 'zh-CN', { numeric: true }));
     return { ...result, eventSummary, rows: all.slice(page.offset, page.offset + page.limit), total: all.length, nextCursor: page.next(all.length) };
   });
@@ -345,10 +384,10 @@ function exportView(view = 'events') {
 }
 const exportColumns = {
   events: [['编号','id',true],['教师','teacherName'],['学生','studentName'],['学号','studentNumber',true],['归属月','attributionMonth'],['指标','categoryName'],['发生时间','occurredAt'],['变动分','delta'],['说明','reason']],
-  cards: [['卡号','id',true],['教师','teacherName'],['学生','studentName'],['学号','studentNumber',true],['归属月','attributionMonth'],['年级','grade'],['班级','classNo'],['指标','categoryName'],['状态','status'],['净分','net']],
+  cards: [['卡号','id',true],['教师','teacherName'],['学生','studentName'],['学号','studentNumber',true],['归属月','attributionMonth'],['年级','grade'],['班级','classNo'],['指标','categoryName'],['状态','status'],['净分','net'],['生成时间','generatedAt'],['领取时间','usedAt'],['生效时间','validFrom'],['失效时间','validUntil'],['冲正时间','reversedAt'],['冲正原因','reverseReason'],['作废时间','voidedAt'],['作废原因','voidReason']],
   students: [['学生编号','id',true],['学生','studentName'],['学号','studentNumber',true],['加分','positive'],['撤销','reversals'],['净分','net']],
   indicators: [['指标','categoryName'],['加分','positive'],['撤销','reversals'],['净分','net']],
-  monthly: [['月份','month'],['教师','teacherName'],['已制卡','generated'],['已领取','redeemed'],['直评','direct'],['净分','net']],
+  monthly: [['月份','month'],['教师','teacherName'],['统计范围','quotaScope'],['获配额度','quota'],['分班计划','planned'],['已制卡','generated'],['未制卡余额','remaining'],['已领取','redeemed'],['待领取','pending'],['未生效','future'],['已失效','expired'],['已作废','voided'],['卡冲正','reversed'],['直评','direct'],['直评冲正','directReversed'],['净分','net']],
 };
 async function exportRows(ctx, view, max, sourceMode = 'all') {
   if (!['paper','direct','all'].includes(sourceMode)) fail(422,'评价来源不合法');
@@ -357,7 +396,7 @@ async function exportRows(ctx, view, max, sourceMode = 'all') {
     for await (const row of scan(ctx)) {
       if (view === 'cards') { if (row.kind === 'CARD' && matches(row, ctx.f)) yield row; continue; }
       if (view === 'monthly') {
-        if (!matches(row, ctx.f)) continue;
+        if (!monthMatches(row.attributionMonth, ctx.f)) continue;
         const key = row.attributionMonth;
         if (!grouped.has(key)) grouped.set(key, { month: key, teacherName: ctx.owner.real_name, ...emptyCounts() });
         addCount(grouped.get(key), row); continue;
@@ -369,6 +408,14 @@ async function exportRows(ctx, view, max, sourceMode = 'all') {
         if (!grouped.has(key)) grouped.set(key, { ...event, id: key, positive: 0, reversals: 0, net: 0 });
         const g = grouped.get(key); g.net += event.delta; g[event.delta > 0 ? 'positive' : 'reversals']++;
         if (grouped.size > max) fail(422, `最多导出${max}行，请缩小查询范围`);
+      }
+    }
+    if(view==='monthly') {
+      for(const record of ctx.metadata.filter(r=>r.record_kind==='QUOTA'))if(!grouped.has(record.month_key))grouped.set(record.month_key,{month:record.month_key,teacherName:ctx.owner.real_name,...emptyCounts()});
+      for(const [month,row] of grouped){
+        const quantities=quotaValues({...ctx,metadata:ctx.metadata.filter(r=>r.month_key===month)});
+        row.quota=quantities.quota;row.planned=quantities.planned;row.remaining=quantities.quota===null||row.unknownGenerationCount?null:quantities.quota-row.generated;
+        row.generated=row.unknownGenerationCount?null:row.generated;row.quotaScope='教师整月总盘（不随学生/指标筛选改变）';
       }
     }
     yield* grouped.values();
@@ -397,7 +444,8 @@ async function writeResponse(response, chunk) {
 }
 async function streamLedgerCsv(args) {
   const view = exportView(args.view);
-  return snapshot(args, async ctx => {
+  const controller=new AbortController(),cancel=()=>controller.abort();args.response.once('close',cancel);if(args.response.destroyed)cancel();
+  try { return await snapshot({...args,signal:controller.signal}, async ctx => {
     const model = await exportRows(ctx, view, 50000, args.sourceMode), columns = exportColumns[view], response = args.response;
     if (response.destroyed) throw new Error('下载连接已断开');
     response.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -407,7 +455,7 @@ async function streamLedgerCsv(args) {
     await writeResponse(response, columns.map(c => csvCell(c[0])).join(',') + '\r\n');
     for await (const row of model.iterate()) await writeResponse(response, columns.map(c => csvCell(row[c[1]], c[2])).join(',') + '\r\n');
     response.end(); return { rowCount: model.count, asOf: ctx.asOf };
-  });
+  }); } finally {args.response.off('close',cancel);}
 }
 const htmlText = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 async function getLedgerPrintModel(args) {

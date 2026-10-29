@@ -1,6 +1,6 @@
 const {runCoreMigrations}=require('./runCoreMigrations');
 const columnDdl="ADD COLUMN ledger_occurred_utc CHAR(24) COLLATE utf8mb4_bin GENERATED ALWAYS AS (CASE WHEN record_kind='DIRECT' AND JSON_TYPE(JSON_EXTRACT(payload_json,'$.occurredAt'))='STRING' AND CHAR_LENGTH(JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.occurredAt')))=24 THEN JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.occurredAt')) ELSE NULL END) STORED";
-const indexColumns=['school_id','term_id','actor_id','source_type','record_kind','student_id','ledger_occurred_utc','created_at'];
+const indexColumns=['school_id','term_id','actor_id','source_type','record_kind','student_id','target_key','ledger_occurred_utc','created_at'];
 async function upgradeLedgerIndex({connection,targetDb,apply=false}) {
  await runCoreMigrations({connection,targetDb});
  const [columns]=await connection.query("SHOW COLUMNS FROM evaluation_source_record LIKE 'ledger_occurred_utc'");

@@ -13,7 +13,8 @@
     "test:report-core-ledger": "node tests/report-core-ledger.cjs",
     "test:report-core-admin": "node tests/report-core-admin.cjs",
     "test:report-core-reports": "node tests/report-core-reports.cjs",
-    "test:report-core-preview": "node tests/report-core-preview.cjs"
+    "test:report-core-preview": "node tests/report-core-preview.cjs",
+    "test:report-core-inputs": "node tests/report-core-inputs.cjs"
   },
   "dependencies": {
     "react": "18",

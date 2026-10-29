@@ -19,7 +19,7 @@ async function listSources({
   actor,
   termId,
   studentId,
-  monthKey, sourceType, recordKind, latest = false,
+  monthKey, sourceType, recordKind, sourceId, latest = false,
   offset = 0,
   limit = 100,
 }) {
@@ -36,6 +36,7 @@ async function listSources({
       " AND ((s.student_id IS NULL AND (s.owner_teacher_id=? OR s.actor_id=?)) OR EXISTS (SELECT 1 FROM student_term_evaluation e JOIN teacher_teaching_assignment a ON a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot WHERE e.school_id=s.school_id AND e.term_id=s.term_id AND e.student_id=s.student_id AND a.teacher_id=? AND a.enabled=1 AND (s.source_type<>'STORY' OR a.subject_code='STORY' OR a.is_head_teacher=1)))";
     params.push(actor.id, actor.id, actor.id);
   }
+  if(sourceId){if(!/^[1-9]\d*$/.test(String(sourceId)))fail(422,'材料编号不合法');filter+=' AND s.id=?';params.push(sourceId);}
   if (studentId) {
     filter += " AND s.student_id=?";
     params.push(studentId);

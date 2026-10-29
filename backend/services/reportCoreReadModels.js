@@ -21,14 +21,14 @@ function evaluateCompletion({ evaluation:e, config = {}, blockingMaterials = [] 
   for(const [collection,array] of [['sports_specialties',parse(e.sports_specialties)],['art_specialties',parse(e.art_specialties)]]) {
     for(const item of Array.isArray(array)?array:[]) {
       selfTotal++;if(item.self_star)selfComplete++;
-      if(!item.self_star || !item.teacher_star)missingItems.push({field:collection,itemId:item.id,reason:'特长自评/教师评价不完整'});
+      for(const property of ['self_star','teacher_star'])if(!item[property])missingItems.push({field:collection,itemId:item.id,property,reason:property==='self_star'?'特长自评未完成':'特长教师评价未完成'});
     }
   }
   if(blockingMaterials.length) missingItems.push({field:'materials',reason:'仍有材料等待评分或审核'});
   return {missingItems,sectionProgress,narrativeReady:!narrativeMissing.length,selfProgress:{total:selfTotal,complete:selfComplete}};
 }
 async function resolveTermRoster({connection,schoolId,termId,teacherId,studentId}) {
-  let sql='SELECT e.* FROM student_term_evaluation e WHERE e.school_id=? AND e.term_id=?';const params=[schoolId,termId];
+  let sql='SELECT e.*,u.username student_number FROM student_term_evaluation e JOIN users u ON u.school_id=e.school_id AND u.id=e.student_id WHERE e.school_id=? AND e.term_id=?';const params=[schoolId,termId];
   if(teacherId){sql+=' AND EXISTS(SELECT 1 FROM teacher_teaching_assignment a WHERE a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot AND a.teacher_id=? AND a.enabled=1)';params.push(teacherId);}
   if(studentId){sql+=' AND e.student_id=?';params.push(studentId);}
   const [rows]=await connection.query(sql+' ORDER BY e.student_id',params);
@@ -84,11 +84,12 @@ async function getWorkspace(args) {
       classes.get(key).studentCount++;
       for(const m of completion.missingItems){
         if(m.field==='materials')continue;
-        const subject=subjectFor(m.field), self=byColumn.get(m.field)?.sourceType==='SELF'||narratives.includes(m.field)&&m.field!=='teacher_comment';
-        const responsible=self?[{teacher_id:sid,real_name:e.student_name_snapshot}]:related.filter(a=>m.field==='teacher_comment'||narratives.includes(m.field)?a.is_head_teacher===1:a.subject_code===subject||subject==='CONDUCT'&&a.is_head_teacher===1);
+        const specialty=['sports_specialties','art_specialties'].includes(m.field);
+        const subject=subjectFor(m.field), self=specialty?m.property==='self_star':byColumn.get(m.field)?.sourceType==='SELF'||narratives.includes(m.field)&&m.field!=='teacher_comment';
+        const responsible=self?[{teacher_id:sid,real_name:e.student_name_snapshot}]:related.filter(a=>specialty?a.is_head_teacher===1||(m.field==='sports_specialties'?a.subject_code==='PE':['MUSIC','FINE_ART'].includes(a.subject_code)):m.field==='teacher_comment'||narratives.includes(m.field)?a.is_head_teacher===1:a.subject_code===subject||subject==='CONDUCT'&&a.is_head_teacher===1);
         const canHandle=actor.role==='student'?self:actor.role==='teacher'&&!self&&responsible.some(a=>String(a.teacher_id)===actor.id);
         if(actor.role==='student'&&!self || actor.role==='teacher'&&!canHandle)continue;
-        tasks.push({taskId:`student:${sid}:${m.field}${m.itemId?':'+m.itemId:''}`,type:'MISSING_FIELD',studentId:sid,fieldKey:m.field,reason:m.reason,canHandle,responsible:responsible.length?responsible.map(a=>({id:String(a.teacher_id),name:a.real_name})).filter((r,i,a)=>a.findIndex(v=>v.id===r.id)===i):[],responsibilityStatus:responsible.length?'ASSIGNED':'UNCONFIGURED',route:{page:self?'self':'drafts',studentId:sid,termId:String(termId)}});
+        tasks.push({taskId:`student:${sid}:${m.field}${m.itemId?':'+m.itemId+':'+m.property:''}`,type:'MISSING_FIELD',studentId:sid,fieldKey:m.field,...(m.itemId?{itemId:m.itemId,property:m.property}:{}),reason:m.reason,canHandle,responsible:responsible.length?responsible.map(a=>({id:String(a.teacher_id),name:a.real_name})).filter((r,i,a)=>a.findIndex(v=>v.id===r.id)===i):[],responsibilityStatus:responsible.length?'ASSIGNED':'UNCONFIGURED',route:{page:self?'self':'drafts',studentId:sid,termId:String(termId)}});
       }
       for(const material of byStudent.get(sid)||[]){
         const canHandle=actor.role==='teacher'&&(material.source_type==='STORY'?own.some(a=>a.is_head_teacher===1||a.subject_code==='STORY'):require('./authorizationService').canManageCertificate({head:own.some(a=>a.is_head_teacher===1),assignments:own}));

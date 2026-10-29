@@ -83,7 +83,7 @@ function createCoreRouter() {
         );
       } else {
         const a = await assignments(req.actor, termId, pool);
-        if (!a.length) fail(403, "没有任教职责");
+        if (!a.length) return ok(res, []);
         [rows] = await pool.query(
           "SELECT DISTINCT e.student_id,e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,e.revision,e.status FROM student_term_evaluation e JOIN teacher_teaching_assignment a ON a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot WHERE a.teacher_id=? AND a.enabled=1 AND e.school_id=? AND e.term_id=? ORDER BY e.student_id LIMIT 100 OFFSET ?",
           [req.actor.id, req.actor.schoolId, termId, offset],

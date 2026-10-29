@@ -65,3 +65,5 @@ npm --prefix frontend run test:report-core-preview
 `docker build -f backend/Dockerfile .`使用仓库根上下文，将前端构建产物放到Express实际托管的`/app/frontend/dist`，同时包含核心SQL/schema校验资料和中文打印字体。镜像启动不自动迁移、seed或切换数据库；生产变量与私有材料卷仍按切换指引配置。本轮本地Express静态包验证与容器构建验证分别记录，不互相代替。
 
 来源表台账覆盖索引升级：`node backend/scripts/upgradeCoreLedgerIndex.js`默认只检查指定REPORT_DB_NAME；明确`--apply`才执行可重入DDL。仅在备份及维护窗口内运行，不能把默认check当升级。旧库未升级时台账保持精确回退，性能较慢。
+
+新增输入边界验收：`npm --prefix frontend run test:report-core-inputs`。特长教师评价在“评价录入→采集结算”；按已认定项目分别填写，学生自评另行保存。全校发布最后需核对学期、人数和版本。

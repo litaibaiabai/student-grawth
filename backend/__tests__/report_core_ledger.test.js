@@ -124,3 +124,11 @@ test('current SQL aggregate keeps direct counts, mixed event ordering and pagina
  const [[source]]=await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='DIRECT' LIMIT 1");await cards.reverseSource({pool:db.pool,actor:teacher,sourceId:String(source.id),reason:'更正',command:command()});
  const later=new Date(Date.now()+1000);assert.deepEqual(await ledger.listLedgerUsage({...args,now:later}),await ledger.listLedgerUsage({...args,asOf:later.toISOString()}));
 });
+test('normal class/student/indicator filters and a single reversal keep exact counts and SQL-sized reads',async t=>{
+ const db=await setup(t,2,3);for(let i=0;i<31;i++)await cards.directScore({pool:db.pool,actor:teacher,termId:'1',studentIds:[String(3+i%2)],categoryCode:i%2?'MORAL_PROCESS_STAR':'CONDUCT_POLITENESS_OTHER_STAR',now:new Date('2026-10-15T00:00:00Z'),command:command()});
+ const [[s]]=await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='DIRECT' ORDER BY id LIMIT 1");await cards.reverseSource({pool:db.pool,actor:teacher,sourceId:String(s.id),reason:'单次纠正',command:command()});
+ const statements=[],get=db.pool.getConnection.bind(db.pool);db.pool.getConnection=async()=>{const c=await get(),query=c.connection.query.bind(c.connection);c.connection.query=(...args)=>{if(typeof args[0]==='string')statements.push(args[0]);return query(...args);};return c;};
+ for(const filter of [{grade:4,classNo:1},{studentId:'3'},{categoryCode:'CONDUCT_POLITENESS_OTHER_STAR'},{keyword:'student'}]){
+  const now=new Date(Date.now()+1000),args={pool:db.pool,actor:teacher,filters:{...db.filters,...filter},now,limit:25};statements.length=0;const fast=await ledger.listLedgerUsage(args);assert.ok(statements.some(s=>s.includes('idx_source_ledger_direct')&&s.includes('GROUP BY')),'ordinary filtered list must use grouped SQL');assert.deepEqual(fast,await ledger.listLedgerUsage({...args,asOf:now.toISOString()}));for(const groupBy of ['student','indicator'])assert.deepEqual(await ledger.listLedgerUsage({...args,groupBy}),await ledger.listLedgerUsage({...args,groupBy,asOf:now.toISOString()}));
+ }
+});

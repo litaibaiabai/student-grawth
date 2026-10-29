@@ -68,3 +68,12 @@ test('workspace material filters apply before pagination and retain real academi
  const next=await read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'CERTIFICATE',subjectCode:'MATH',limit:25,cursor:result.nextCursor});assert.equal(next.tasks.length,1);
  await assert.rejects(read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'STORY',subjectCode:'MATH',cursor:result.nextCursor}),{statusCode:422});
 });
+test('specialty missing tasks name each property and route student, arts teacher and head to existing authorized editors',async t=>{
+ const db=await createCoreTestDb(t);await db.seedBase();const {getWorkspace,evaluateCompletion}=require('../services/reportCoreReadModels');
+ await db.pool.query('UPDATE student_term_evaluation SET art_specialties=?,sports_specialties=? WHERE student_id=3',[JSON.stringify([{id:'art-1',name:'绘画',self_star:null,teacher_star:null}]),JSON.stringify([{id:'sport-1',name:'跳绳',self_star:3,teacher_star:null}])]);
+ const [[u]]=await db.pool.query('SELECT password FROM users WHERE id=2');await db.pool.query("INSERT INTO users(id,school_id,username,password,real_name,role) VALUES(5,1,'arts',?,'艺术老师','teacher')",[u.password]);await db.pool.query("INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code) VALUES(1,1,5,4,1,'FINE_ART')");
+ const actor=(id,role='teacher')=>({id,schoolId:'1',role,tokenVersion:1});
+ const student=await getWorkspace({pool:db.pool,actor:actor('3','student'),termId:'1',limit:100}),self=student.tasks.find(t=>t.fieldKey==='art_specialties');assert.equal(self.property,'self_star');assert.equal(self.itemId,'art-1');assert.equal(self.canHandle,true);
+ for(const id of ['2','5']){const work=await getWorkspace({pool:db.pool,actor:actor(id),termId:'1',limit:100}),art=work.tasks.find(t=>t.fieldKey==='art_specialties');assert.equal(art?.property,'teacher_star');assert.equal(art.itemId,'art-1');assert.equal(art.canHandle,true);assert.equal(art.responsibilityStatus,'ASSIGNED');}
+ const [[row]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');const missing=evaluateCompletion({evaluation:row}).missingItems.filter(m=>m.field==='art_specialties');assert.deepEqual(missing.map(m=>m.property).sort(),['self_star','teacher_star']);
+});
