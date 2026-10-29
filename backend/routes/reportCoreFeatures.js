@@ -334,6 +334,8 @@ function mountFeatures(r, { asyncRoute, ok }) {
       ok(res, await admin.updateTerm({ ...args(req), termId: req.params.id })),
     ),
   );
+  post('/admin/report-core/term-settings/preview',req=>require('../services/reportCoreTermSettings').previewTermSettings(args(req)));
+  post('/admin/report-core/term-settings/previews/:id/commit',req=>require('../services/reportCoreTermSettings').commitTermSettingsPreview({...args(req),previewId:req.params.id}));
   post("/admin/report-core/assignments", (req) =>
     admin.saveAssignment(args(req)),
   );

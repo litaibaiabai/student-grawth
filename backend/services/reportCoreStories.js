@@ -98,7 +98,7 @@ async function saveStoryDraft({
         payload: {
           monthKey,
           articles: normalized,
-          ruleVersion: term.rule_version,
+          ruleVersion: String(term.evaluation_config.storyScoringVersion||'1'),
         },
       });
       return { result: { batchId, revision: "1", version } };
@@ -181,7 +181,7 @@ async function submitStoryBatch({
           payload: {
             ...a,
             grade: e.grade_snapshot,
-            scoringRuleVersion: term.rule_version,
+            scoringRuleVersion: String(term.evaluation_config.storyScoringVersion||'1'),
           },
         });
       }
@@ -190,7 +190,7 @@ async function submitStoryBatch({
         [
           JSON.stringify({
             monthKey: row.month_key,
-            ruleVersion: term.rule_version,
+            ruleVersion: String(term.evaluation_config.storyScoringVersion||'1'),
             requiredCategories: categories,
             submissionHash: stableHash(articles),
           }),
@@ -252,13 +252,13 @@ async function applyStoryResult({
         parent.status !== "SUBMITTED"
       )
         return { result: { applied: false } };
-      if (term.rule_version !== ruleVersion) {
+      if (String(term.evaluation_config.storyScoringVersion||'1') !== ruleVersion) {
         await c.query(
           "UPDATE evaluation_source_record SET status='QUEUED',attempts=0,next_attempt_at=NULL,lease_token=NULL,locked_until=NULL,revision=revision+1,payload_json=? WHERE id=?",
           [
             JSON.stringify({
               ...p,
-              scoringRuleVersion: term.rule_version,
+              scoringRuleVersion: String(term.evaluation_config.storyScoringVersion||'1'),
               lastError: "评分规则已更新，正在按新规则重试",
             }),
             row.id,

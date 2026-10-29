@@ -6,6 +6,7 @@ import DirectScore from "./DirectScore";
 import AcademicImport from "./AcademicImport";
 import CardLedger from "./CardLedger";
 import ClassReports from "./ClassReports";
+import AdminTermSettings from './AdminTermSettings';
 import AdminRoster from './AdminRoster';
 import AdminHealth from './AdminHealth';
 import AdminQuota from './AdminQuota';
@@ -330,7 +331,7 @@ export default function ReportCoreApp() {
             {tab === "settlements" && <Settlements ctx={ctx} />}{" "}
             {tab === "cards-manage" && actor.role === "teacher" && <CardLedger ctx={ctx} />}
             {tab === "quota" && <AdminQuota ctx={ctx} />}{" "}
-            {tab === "config" && <Configuration ctx={ctx} />}{" "}
+            {tab === "config" && <AdminTermSettings ctx={ctx} />}{" "}
             {tab === "releases" && <ManagerWorkspace ctx={ctx} />}
             {sourceNext !== null &&
               ["stories", "awards", "reviews", "direct"].includes(tab) && (

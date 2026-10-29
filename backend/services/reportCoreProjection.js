@@ -64,7 +64,6 @@ async function rebuildEvaluation({ connection, studentKey, targets, config }) {
       value = cardStars({
         points: raw,
         target:
-          config.cardTargets?.[e.grade_snapshot]?.[target] ||
           config.cardTarget ||
           10,
         settled: !!fieldSources[target]?.settled,
