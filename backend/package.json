@@ -1,12 +1,12 @@
 {
   "name": "express-template",
   "version": "1.0.0",
-  "description": "Express 后端模板 — 含 JWT 鉴权、MySQL 连接、三层架构示例",
+  "description": "学校期末六育报告核心：六类输入、评价宽表与全校统一发布",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "migrate": "node scripts/runMigrations.js",
+    "migrate": "node scripts/runCoreMigrations.js",
     "test": "NODE_ENV=test node --test __tests__/report_core_*.test.js __tests__/health.test.js",
     "migrate:core": "node scripts/runCoreMigrations.js"
   },

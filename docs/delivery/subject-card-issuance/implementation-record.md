@@ -1,3 +1,5 @@
+> 历史交付存档：本页描述旧系统与当时演示。旧执行脚本已退役，当前运行/验收方式以仓库README及role-ux交付记录为准；历史链接与证据不代表当前可执行命令。
+
 # SDD ledger — plan: docs/superpowers/plans/2026-10-26-subject-card-issuance.md
 
 Spec: docs/superpowers/specs/2026-10-26-subject-card-issuance-design.md

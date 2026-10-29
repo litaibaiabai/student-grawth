@@ -280,3 +280,11 @@
 ### 任务14前端批次
 
 按逐路径清单移除 77 个退役前端文件；同页剥离Teacher.jsx内旧DirectScore/ImportData/ReportDrafts/StudentPicker及Materials.jsx旧EvaluationForm导出，替代组件已接实际流程。现有core、ErrorBoundary、TermReport、storyMonths保留。
+
+### 任务14后端批次
+
+按清单移除 112 个旧控制器/路由/service/middleware/util/迁移与退役测试文件。app.js仍仅挂载report-core，旧URL仍返回410；initReportCore、migrateReportCore、runCoreMigrations和迁移fixture保留。
+
+### 任务14旧执行入口批次
+
+按清单移除 44 个旧演示、远程自动部署入口和已追踪Python缓存。默认migrate与migrate:core都指向同一安全check脚本，显式--apply才初始化指定新库。旧交付说明标历史，README只列当前支持命令；未执行远程部署或写入任何业务库。

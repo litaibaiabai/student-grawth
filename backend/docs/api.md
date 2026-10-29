@@ -1,3 +1,5 @@
+> 历史接口资料：旧业务URL已返回410。当前接口见backend/routes/reportCore*.js及仓库README；本文保留作旧库迁移映射参考。
+
 # API 文档
 
 ## 通用约定

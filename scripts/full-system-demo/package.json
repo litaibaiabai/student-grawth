@@ -1,8 +1,0 @@
-{
-  "name": "liuyu-full-system-demo",
-  "private": true,
-  "version": "1.0.0",
-  "engines": {"node": ">=20"},
-  "scripts": {"check":"node run.cjs --check","demo":"node run.cjs","test":"node --test *.test.cjs"},
-  "devDependencies": {"playwright":"1.62.1"}
-}
