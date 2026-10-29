@@ -311,11 +311,11 @@
 
 **Interfaces:** `ClassReports({ctx,route,onNavigate})`；`TermReport({html,documentKey,printScope,onLayout,onReady})`，printScope=`DETAIL_ONLY|FULL`，回调`onLayout({documentKey,overflow,sections})`及`onReady({documentKey,print:()=>void})`。ClassReports用documentKey绑定Task10响应的revision/fingerprint/templateVersion，再构造原确认载荷；旧文档回调忽略，不能操作残留iframe。
 
-- [ ] **Step 1 — 写失败浏览器测试：** 默认所有负责班级及6名以上真实测试学生、按班/姓名/状态过滤；点学生开独立路由；返回恢复条件/页码/滚动；慢A请求后快B返回时不得把A报告挂到B名下。
-- [ ] **Step 2 — 跑红：** `cd frontend && node tests/report-core-reports.cjs`。
-- [ ] **Step 3 — 实现列表与详情：** 侧班级+学生摘要，六板块filled/applicable而非总分；默认有发布版本选published，否则current；明细默认一页，班主任可切完整两页。published只读，编辑需显式切current；保存后保持current、拉新草稿与FULL两面布局再确认。任课没有正面选项/寄语编辑/确认；DETAIL_ONLY通过不等于完整报告确认通过。
-- [ ] **Step 4 — 实现打印与边界验证：** 两按钮明确“导出PDF”需打印面板另存；打印当前iframe获准范围，草稿标识印入内容。按D01将合法超长文本/多特长完整排到带姓名/页码续页，主页面标续页指引，显示实际页数；隔离探针检查每页真实溢出，不裁切/假造layoutReview。验证6表/109位置、表头合并、原始值、续页完整无重漏；390/1440、快速切人/版本、登录过期清旧DOM，以及published不能确认、DETAIL测量不能批准FULL均通过。
-- [ ] **Step 5 — 提交：** `feat: render class report summaries and printable student detail pages`。
+- [x] **Step 1 — 写失败浏览器测试：** 默认所有负责班级及6名以上真实测试学生、按班/姓名/状态过滤；点学生开独立路由；返回恢复条件/页码/滚动；慢A请求后快B返回时不得把A报告挂到B名下。
+- [x] **Step 2 — 跑红：** `cd frontend && node tests/report-core-reports.cjs`。
+- [x] **Step 3 — 实现列表与详情：** 侧班级+学生摘要，六板块filled/applicable而非总分；默认有发布版本选published，否则current；明细默认一页，班主任可切完整两页。published只读，编辑需显式切current；保存后保持current、拉新草稿与FULL两面布局再确认。任课没有正面选项/寄语编辑/确认；DETAIL_ONLY通过不等于完整报告确认通过。
+- [x] **Step 4 — 实现打印与边界验证：** 两按钮明确“导出PDF”需打印面板另存；打印当前iframe获准范围，草稿标识印入内容。按D01将合法超长文本/多特长完整排到带姓名/页码续页，主页面标续页指引，显示实际页数；隔离探针检查每页真实溢出，不裁切/假造layoutReview。验证6表/109位置、表头合并、原始值、续页完整无重漏；390/1440、快速切人/版本、登录过期清旧DOM，以及published不能确认、DETAIL测量不能批准FULL均通过。
+- [x] **Step 5 — 提交：** `feat: render class report summaries and printable student detail pages`。
 
 ## Task 12: 教师待办与管理员发布中心
 
@@ -323,11 +323,11 @@
 
 **Interfaces:** 消费Task9的workspace及教师目录；复用既有terms/assignments/config/import/release命令，后端仍决定can*和状态机。
 
-- [ ] **Step 1 — 写失败UI流程：** 教师首页待办能定位具体奖状/故事异常/缺项；管理员默认发布中心，少一人缺确认不能准备/发布；重新加载恢复PREPARING，全部prepare完成后一次activate才对学生可见。
-- [ ] **Step 2 — 实现教师工作台：** 合法班级/学科范围和三摘要，快速操作入口，材料同屏核对/保存下一条；只显本人任务，失败保留表单，系统评分失败不补默认分。
-- [ ] **Step 3 — 实现管理员外壳：** 五个独立导航；发布中心显示缺项与责任人，三个数据菜单接Task12A、学期配置接Task12B。健康无六育终测导入；任教维护不输数据库ID。
-- [ ] **Step 4 — 验证：** 沿现有prepare/batch/activate/recover/cancel接口状态，按服务端允许动作呈现；刷新/网络中断恢复，无按班提前发布、管理员无私有正文。`test:report-core`与backend release/auth/read-model tests PASS。
-- [ ] **Step 5 — 提交：** `feat: prioritize teacher tasks and school-wide report publication`。
+- [x] **Step 1 — 写失败UI流程：** 教师首页待办能定位具体奖状/故事异常/缺项；管理员默认发布中心，少一人缺确认不能准备/发布；重新加载恢复PREPARING，全部prepare完成后一次activate才对学生可见。
+- [x] **Step 2 — 实现教师工作台：** 合法班级/学科范围和三摘要，快速操作入口，材料同屏核对/保存下一条；只显本人任务，失败保留表单，系统评分失败不补默认分。
+- [x] **Step 3 — 实现管理员外壳：** 五个独立导航；发布中心显示缺项与责任人，三个数据菜单接Task12A、学期配置接Task12B。健康无六育终测导入；任教维护不输数据库ID。
+- [x] **Step 4 — 验证：** 沿现有prepare/batch/activate/recover/cancel接口状态，按服务端允许动作呈现；刷新/网络中断恢复，无按班提前发布、管理员无私有正文。`test:report-core`与backend release/auth/read-model tests PASS。
+- [x] **Step 5 — 提交：** `feat: prioritize teacher tasks and school-wide report publication`。
 
 ## Task 12A: 三个独立管理菜单与真实批量额度
 
@@ -335,11 +335,11 @@
 
 **Interfaces:** accounts/health/import-history/teacher-quotas GET契约按管理员三菜单设计第5节；模板由前端现有xlsx产生。`previewQuotaBatch({pool,actor,termId,monthKey,entries,command})` → `{batchId,revision,diffs,counts,errors}`；`commitQuotaBatch({pool,actor,batchId,expectedRevision,command})`一次事务；`saveQuotaInTransaction(connection,args)`供单笔和批量共用，不嵌套withMutation。AUDIT/PREVIEW存批量快照，无新表、无CARD/BATCH类型。
 
-- [ ] **Step 1 — 写失败后端回归：** 教师ROSTER无班级可导入且不建学生学籍；已有账号角色冲突拒绝、密码不被重置、明文/hash不返响应。健康预览返回全部行/格错误及旧→新、空白不覆盖/显式clearFields/合法0正确、预览后revision冲突整批拒绝。两名教师额度预览后有一人计划改变，确认409且两人均不更新；重复提交不重复加额，未选教师不变，超过200人拒绝。R1.3学期名单/历史班级保护和安全commitDiffs持久化须有回归。
-- [ ] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_admin_menus.test.js __tests__/report_core_quota_batch.test.js`。新增浏览器流程确认原来只有“数据与额度”时失败，不能删除原ROSTER/HEALTH/单人quota回归来换绿。
-- [ ] **Step 3 — 实现服务：** 名册/体测预览聚合错误，错误422/details无可提交batchId，成功仅安全diff；提交复验现值/角色/修订。管理员健康GET仅五原值。额度预览最多200启用本校教师、按绝对月总额度0–10000并校验max(P,G)；确认校验批次owner/修订，稳定顺序锁行，一次withMutation写所有QUOTA及逐人/批次AUDIT，一错全回滚。
-- [ ] **Step 4 — 实现三个页面并跑绿：** 学籍与账号按学生/教师列表和模板→错误/差异预览→结果/记录；体测按班五原值→逐格差异→确认/记录；月度额度按教师勾选、统一设值/逐行编辑/模板→前后额预览→批量确认/结果。新总额与本次增量分列，未选不清零；同页保留输入与范围，真实成功才刷新。后端测试及`node tests/report-core-admin.cjs` PASS，390/1440可操作、三条地址可刷新进入。
-- [ ] **Step 5 — 提交：** `feat: split admin data menus and atomically grant teacher quotas`。
+- [x] **Step 1 — 写失败后端回归：** 教师ROSTER无班级可导入且不建学生学籍；已有账号角色冲突拒绝、密码不被重置、明文/hash不返响应。健康预览返回全部行/格错误及旧→新、空白不覆盖/显式clearFields/合法0正确、预览后revision冲突整批拒绝。两名教师额度预览后有一人计划改变，确认409且两人均不更新；重复提交不重复加额，未选教师不变，超过200人拒绝。R1.3学期名单/历史班级保护和安全commitDiffs持久化须有回归。
+- [x] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_admin_menus.test.js __tests__/report_core_quota_batch.test.js`。新增浏览器流程确认原来只有“数据与额度”时失败，不能删除原ROSTER/HEALTH/单人quota回归来换绿。
+- [x] **Step 3 — 实现服务：** 名册/体测预览聚合错误，错误422/details无可提交batchId，成功仅安全diff；提交复验现值/角色/修订。管理员健康GET仅五原值。额度预览最多200启用本校教师、按绝对月总额度0–10000并校验max(P,G)；确认校验批次owner/修订，稳定顺序锁行，一次withMutation写所有QUOTA及逐人/批次AUDIT，一错全回滚。
+- [x] **Step 4 — 实现三个页面并跑绿：** 学籍与账号按学生/教师列表和模板→错误/差异预览→结果/记录；体测按班五原值→逐格差异→确认/记录；月度额度按教师勾选、统一设值/逐行编辑/模板→前后额预览→批量确认/结果。新总额与本次增量分列，未选不清零；同页保留输入与范围，真实成功才刷新。后端测试及`node tests/report-core-admin.cjs` PASS，390/1440可操作、三条地址可刷新进入。
+- [x] **Step 5 — 提交：** `feat: split admin data menus and atomically grant teacher quotas`。
 
 ## Task 12B: 学期配置四页签与有影响提示的原子保存
 
@@ -347,11 +347,11 @@
 
 **Interfaces:** 按学期配置设计第7节定义 `getTermSettings`, `previewTermSettings`, `commitTermSettingsPreview`, `listTermSettingHistory`，参数统一`{pool,actor,termId,...,command}`；preview产生`{previewId,revision,diffs,impact,versions}`，消费配置双版本、职责指纹和服务端影响学生集合指纹。前端`buildTermSettingChanges(section,draft,current)`只产生该页签白名单，`getCardStarPreview(points,target,settled)`沿既有公式；历史/预览用现有AUDIT，不新增表。
 
-- [ ] **Step 1 — 写失败回归：** 日期无变化不推进版本/确认；合法日期保存、显式清空、期末前日期拒绝；T=2/3/10边界、未结算为null、期外/重复/零月份拒绝。预览后学生修订或确认变化、配置版本变化、职责变化任一409且无部分修改；同key异内容拒绝，同内容重试返回原结果。跨校/非管理员拒绝，规则保存只重算CARD/STORY当前投影且冻结发布快照不变。R1.5隐藏cardTargets处置、日期/T变化不重新调用provider、实际截止日可见并一致均需失败反例。
-- [ ] **Step 2 — 验证红测：** `cd backend && node --test __tests__/report_core_term_settings.test.js`、前端`node --test src/app/reportCore/termSettingsModel.test.js`在旧实现业务断言失败；补两管理员交接竞争、重复任教跳过、多学科班主任一致和最后职责停用必须明确继任/暂缺的失败测试。
-- [ ] **Step 3 — 实现事务服务：** 提取现有updateTerm/saveAssignment的同事务核心，严格section白名单并保留其他配置键；预览AUDIT存旧新值、预期配置/规则版本、受影响学生修订/确认集合指纹。提交学期锁内复验，任教最多100项、稳定顺序锁行、每班最多一个有效班主任；变更仅失效实际受影响班级确认，日期/规则沿全学期失效行为。发布非IDLE全部写入拒绝，旧PATCH/单笔职责端点不能绕过CAS/唯一/确认失效；幂等重试不二次重算。
-- [ ] **Step 4 — 实现四页签并跑绿：** 只读已有学期信息/可编辑报到日期、按班任教与姓名搜索/中文学科、T与月份可视选择/试算、只读口径与分页历史。独立草稿→同页差异/影响→确认→真实结果，409保留输入，非IDLE只读；切页签不丢，切学期/退出保护。后端和模型测试PASS，admin浏览器覆盖四页签、预览后改输入失效、真实保存/重载、并发冲突、发布锁和手机键盘；不以静态示例记录冒充后台审计。
-- [ ] **Step 5 — 提交：** `feat: add term settings with scoped assignments and reviewed rule changes`；记录实际全学期重算耗时，不为配置默认另建队列表；用户设计评审通过后才实现本任务。
+- [x] **Step 1 — 写失败回归：** 日期无变化不推进版本/确认；合法日期保存、显式清空、期末前日期拒绝；T=2/3/10边界、未结算为null、期外/重复/零月份拒绝。预览后学生修订或确认变化、配置版本变化、职责变化任一409且无部分修改；同key异内容拒绝，同内容重试返回原结果。跨校/非管理员拒绝，规则保存只重算CARD/STORY当前投影且冻结发布快照不变。R1.5隐藏cardTargets处置、日期/T变化不重新调用provider、实际截止日可见并一致均需失败反例。
+- [x] **Step 2 — 验证红测：** `cd backend && node --test __tests__/report_core_term_settings.test.js`、前端`node --test src/app/reportCore/termSettingsModel.test.js`在旧实现业务断言失败；补两管理员交接竞争、重复任教跳过、多学科班主任一致和最后职责停用必须明确继任/暂缺的失败测试。
+- [x] **Step 3 — 实现事务服务：** 提取现有updateTerm/saveAssignment的同事务核心，严格section白名单并保留其他配置键；预览AUDIT存旧新值、预期配置/规则版本、受影响学生修订/确认集合指纹。提交学期锁内复验，任教最多100项、稳定顺序锁行、每班最多一个有效班主任；变更仅失效实际受影响班级确认，日期/规则沿全学期失效行为。发布非IDLE全部写入拒绝，旧PATCH/单笔职责端点不能绕过CAS/唯一/确认失效；幂等重试不二次重算。
+- [x] **Step 4 — 实现四页签并跑绿：** 只读已有学期信息/可编辑报到日期、按班任教与姓名搜索/中文学科、T与月份可视选择/试算、只读口径与分页历史。独立草稿→同页差异/影响→确认→真实结果，409保留输入，非IDLE只读；切页签不丢，切学期/退出保护。后端和模型测试PASS，admin浏览器覆盖四页签、预览后改输入失效、真实保存/重载、并发冲突、发布锁和手机键盘；不以静态示例记录冒充后台审计。
+- [x] **Step 5 — 提交：** `feat: add term settings with scoped assignments and reviewed rule changes`；记录实际全学期重算耗时，不为配置默认另建队列表；用户设计评审通过后才实现本任务。
 
 ## Task 13: 形成精确清理清单与断言迁移
 
@@ -359,11 +359,11 @@
 
 **Interfaces:** 清理清单逐路径记录`action,reason,activeReferences,replacement,verification,protected`；不存在“直接删除整个services目录”的条目。
 
-- [ ] **Step 1 — 枚举入口：** 运行入口、package全部脚本、测试、核心迁移/init、样式/字体/运行时资源、README命令及相对链接一起查引用。`rg`/编译输出与人工核对足够，不新建通用依赖分析框架。动态require无法证实无用时保留并标注。
-- [ ] **Step 2 — 登记候选：** 旧student/teacher/admin/login/dashboard/kiosk/family等页面及Sidebar/Nav/StudentLayout/ExampleTable；旧controllers/routes、旧业务service/middleware/util；legacy测试/旧演示入口/缓存。每个文件在删除前排除核心运行、脚本和迁移测试的引用。
-- [ ] **Step 3 — 保住核心契约：** initReportCore/migrateReportCore/runCoreMigrations、sql/05、policy JSON、docs/database schema JSON、真实打印中文字体与许可证、core tests和所需fixtures全部保护；用户未追踪需求/报告原型文档保护；private/env/output本地证据不参与删除。
-- [ ] **Step 4 — 迁移有效断言：** 保留`frontend/src/util/reportCoreImport.test.js`业务断言并迁到`src/app/reportCore/importRows.test.js`，原旧学生主题/商城/兑换断言若已退役不伪造成新需求。package.test改`node --test src/app/reportCore/*.test.js`且实际覆盖新纯模型；先跑绿后删旧命令。所有新core浏览器流程仍有可执行入口。
-- [ ] **Step 5 — 提交清单：** 测试与文档变更PASS后`docs: inventory retired files and preserve core verification`，此提交不先删未经确认依赖的文件。
+- [x] **Step 1 — 枚举入口：** 运行入口、package全部脚本、测试、核心迁移/init、样式/字体/运行时资源、README命令及相对链接一起查引用。`rg`/编译输出与人工核对足够，不新建通用依赖分析框架。动态require无法证实无用时保留并标注。
+- [x] **Step 2 — 登记候选：** 旧student/teacher/admin/login/dashboard/kiosk/family等页面及Sidebar/Nav/StudentLayout/ExampleTable；旧controllers/routes、旧业务service/middleware/util；legacy测试/旧演示入口/缓存。每个文件在删除前排除核心运行、脚本和迁移测试的引用。
+- [x] **Step 3 — 保住核心契约：** initReportCore/migrateReportCore/runCoreMigrations、sql/05、policy JSON、docs/database schema JSON、真实打印中文字体与许可证、core tests和所需fixtures全部保护；用户未追踪需求/报告原型文档保护；private/env/output本地证据不参与删除。
+- [x] **Step 4 — 迁移有效断言：** 保留`frontend/src/util/reportCoreImport.test.js`业务断言并迁到`src/app/reportCore/importRows.test.js`，原旧学生主题/商城/兑换断言若已退役不伪造成新需求。package.test改`node --test src/app/reportCore/*.test.js`且实际覆盖新纯模型；先跑绿后删旧命令。所有新core浏览器流程仍有可执行入口。
+- [x] **Step 5 — 提交清单：** 测试与文档变更PASS后`docs: inventory retired files and preserve core verification`，此提交不先删未经确认依赖的文件。
 
 ## Task 14: 分批删除退役代码与旧执行入口
 
@@ -371,11 +371,11 @@
 
 **Interfaces:** 消费Task13逐路径清单与已迁移回归；产出保留核心入口、六表check/apply和旧库audit的精简目录。`npm run migrate`与`npm run migrate:core`均默认check，显式`-- --apply`才初始化安全新库。
 
-- [ ] **Step 1 — 前端批次：** 按清单删未挂载旧页面/组件/常量/工具与对应已退役测试；每批`npm run build`与当前纯函数测试PASS，查找404资源。保留related docs及正在评审的prototype，不以untracked认定垃圾。
-- [ ] **Step 2 — 后端批次：** 仅删旧API闭包（已由app返回410）；保留report-core、authorization、cardCredentials、privateFiles和被核心调用的通用代码。运行`npm test`确认PASS后继续，不按命名前缀猜用途。
-- [ ] **Step 3 — 旧迁移/演示退役：** 默认`migrate`改指`runCoreMigrations.js`且默认只check，建新库必须显式`--apply`。旧runMigrations/seed/init_db_data、full-system-demo与.command仅在核心迁移/测试不依赖时删；更新README所有命令/链接，历史交付文档标历史，不给已删除脚本留“当前支持”承诺。
-- [ ] **Step 4 — 缓存与对账：** 删除已追踪`__pycache__/materials.cpython-314.pyc`等缓存，补忽略规则。清单写实际删除量/保留理由；确认未删除.env、上传、源数据库或核心字体。核心新库初始化check/apply及旧库只读audit回归仍PASS。
-- [ ] **Step 5 — 提交：** 前后端/执行入口可各独立提交，均带对应清单与验证证据；禁止一次无差别清空目录或真实数据。
+- [x] **Step 1 — 前端批次：** 按清单删未挂载旧页面/组件/常量/工具与对应已退役测试；每批`npm run build`与当前纯函数测试PASS，查找404资源。保留related docs及正在评审的prototype，不以untracked认定垃圾。
+- [x] **Step 2 — 后端批次：** 仅删旧API闭包（已由app返回410）；保留report-core、authorization、cardCredentials、privateFiles和被核心调用的通用代码。运行`npm test`确认PASS后继续，不按命名前缀猜用途。
+- [x] **Step 3 — 旧迁移/演示退役：** 默认`migrate`改指`runCoreMigrations.js`且默认只check，建新库必须显式`--apply`。旧runMigrations/seed/init_db_data、full-system-demo与.command仅在核心迁移/测试不依赖时删；更新README所有命令/链接，历史交付文档标历史，不给已删除脚本留“当前支持”承诺。
+- [x] **Step 4 — 缓存与对账：** 删除已追踪`__pycache__/materials.cpython-314.pyc`等缓存，补忽略规则。清单写实际删除量/保留理由；确认未删除.env、上传、源数据库或核心字体。核心新库初始化check/apply及旧库只读audit回归仍PASS。
+- [x] **Step 5 — 提交：** 前后端/执行入口可各独立提交，均带对应清单与验证证据；禁止一次无差别清空目录或真实数据。
 
 ## Task 15: 依赖、样式与构建收敛
 
@@ -383,11 +383,11 @@
 
 **Interfaces:** 消费Task4共享tokens和Task14已清理入口；产出可`npm ci`重建的锁文件、前端test/lint/build命令和可被Express直接托管的dist，业务API契约不变。
 
-- [ ] **Step 1 — 样式迁移：** 确认reset/字体/布局已由tokens/style承担，再移除main的index.less/var.less导入及Vite less配置；视觉核对无回退后删除文件。核心页面不再依赖旧全局class碰运气生效。
-- [ ] **Step 2 — 精简依赖：** 全量引用清零后才移除antd、icons、axios、classnames、jotai、react-router-dom、less等候选；xlsx/PDFKit/qrcode/yazl/中文字体及核心后端依赖保留。由包管理器同步lock，不删锁文件或手改虚假依赖树；无使用证据的后端包同样先审后删。
-- [ ] **Step 3 — 构建验证：** 独立临时工作目录按锁定依赖`npm ci`，前端test/build/lint PASS，后端test PASS；用构建dist启动Express确认真实页面及资源可读。不得先删除当前提供服务的dist再让用户遇到空站。
-- [ ] **Step 4 — 量化结果：** 记录构建体积/依赖变化、实际保留源文件和命令，不以“少了N行”代替正确性；文档本身不列入垃圾目标。
-- [ ] **Step 5 — 提交：** `chore: remove unused legacy dependencies and consolidate core styles`。
+- [x] **Step 1 — 样式迁移：** 确认reset/字体/布局已由tokens/style承担，再移除main的index.less/var.less导入及Vite less配置；视觉核对无回退后删除文件。核心页面不再依赖旧全局class碰运气生效。
+- [x] **Step 2 — 精简依赖：** 全量引用清零后才移除antd、icons、axios、classnames、jotai、react-router-dom、less等候选；xlsx/PDFKit/qrcode/yazl/中文字体及核心后端依赖保留。由包管理器同步lock，不删锁文件或手改虚假依赖树；无使用证据的后端包同样先审后删。
+- [x] **Step 3 — 构建验证：** 独立临时工作目录按锁定依赖`npm ci`，前端test/build/lint PASS，后端test PASS；用构建dist启动Express确认真实页面及资源可读。不得先删除当前提供服务的dist再让用户遇到空站。
+- [x] **Step 4 — 量化结果：** 记录构建体积/依赖变化、实际保留源文件和命令，不以“少了N行”代替正确性；文档本身不列入垃圾目标。
+- [x] **Step 5 — 提交：** `chore: remove unused legacy dependencies and consolidate core styles`。
 
 ## Task 16: 三角色全链路与交付
 
@@ -395,11 +395,11 @@
 
 **Interfaces:** 消费Task1–15的真实服务和角色界面；产出可重复的独立测试库流程、校验断言、实际删除清单及Git回退范围。测试夹具仅在隔离测试环境，不进入业务默认行为。
 
-- [ ] **Step 1 — 执行真实闭环：** 独立测试库中两班、班主任/普通任课/管理员/学生：模板账号/学籍导入→多教师原子额度→分班制卡→原卡扫码；空说明多选直评；教师学业导入/管理员健康逐格差异导入；奖状→认定；自评13+动态特长+7文本；三类月故事→真实worker评分或明确失败处理；寄语/结算→确认→全校准备→activate→学生读取冻结报告。使用批准的可控provider夹具测试，不调用付费线上模型充当自动化依赖。
-- [ ] **Step 2 — 执行负向/恢复：** 幂等超时重试、409保留草稿、跨账号退出、跨班/跨校猜ID、任课请求full/确认、扫码/作废竞争、调额/生成竞争、101+分页、跨月冲正、导出超限/中断、发布中断恢复；所有失败不产生半成品积分或提前暴露学生报告。
-- [ ] **Step 3 — 执行视觉/打印：** 390/768/1440、200%缩放、键盘、焦点和对比度；检查PDF基准6板块109位置与合并表头，学生身份/版本一致，明细1页/完整2页，长文本/多特长溢出拦截不截字；台账重复表头、CSV全量、按班二维码PDF原码复打；保留截图/下载哈希/布局结果于ignored output而非代码目录。
-- [ ] **Step 4 — 终检：** 后端`npm test`；前端`npm test && npm run lint && npm run build`；core-flow/ledger/reports/admin四个浏览器测试和preview测试全部PASS。按R1.7测新增聚合/导出/报告列表、配置重算与队列排空风险，沿用原发布基线，不无理由反复跑全量压力。D01、真实provider与UTC切换演练分别记录放行/未完成，不能用本地夹具代替。确认库仍六张业务表、没有伪造LLM成功、没有密钥进入代码/日志/示例。
-- [ ] **Step 5 — 交付与提交：** 记录真实可用项、已知限制（每教师月计划生成后不可增补、扫码依赖链接/粘贴、打印面板另存PDF、历史未知留痕不补造）、文件删除清单、回退提交范围；最终独立审阅只处理真实可复现问题，不自动部署/合并/重建业务库。
+- [x] **Step 1 — 执行真实闭环：** 独立测试库中两班、班主任/普通任课/管理员/学生：模板账号/学籍导入→多教师原子额度→分班制卡→原卡扫码；空说明多选直评；教师学业导入/管理员健康逐格差异导入；奖状→认定；自评13+动态特长+7文本；三类月故事→真实worker评分或明确失败处理；寄语/结算→确认→全校准备→activate→学生读取冻结报告。使用批准的可控provider夹具测试，不调用付费线上模型充当自动化依赖。
+- [x] **Step 2 — 执行负向/恢复：** 幂等超时重试、409保留草稿、跨账号退出、跨班/跨校猜ID、任课请求full/确认、扫码/作废竞争、调额/生成竞争、101+分页、跨月冲正、导出超限/中断、发布中断恢复；所有失败不产生半成品积分或提前暴露学生报告。
+- [x] **Step 3 — 执行视觉/打印：** 390/768/1440、200%缩放、键盘、焦点和对比度；检查PDF基准6板块109位置与合并表头，学生身份/版本一致，明细1页/完整2页，长文本/多特长溢出拦截不截字；台账重复表头、CSV全量、按班二维码PDF原码复打；保留截图/下载哈希/布局结果于ignored output而非代码目录。
+- [x] **Step 4 — 终检：** 后端`npm test`；前端`npm test && npm run lint && npm run build`；core-flow/ledger/reports/admin四个浏览器测试和preview测试全部PASS。按R1.7测新增聚合/导出/报告列表、配置重算与队列排空风险，沿用原发布基线，不无理由反复跑全量压力。D01、真实provider与UTC切换演练分别记录放行/未完成，不能用本地夹具代替。确认库仍六张业务表、没有伪造LLM成功、没有密钥进入代码/日志/示例。
+- [x] **Step 5 — 交付与提交：** 记录真实可用项、已知限制（每教师月计划生成后不可增补、扫码依赖链接/粘贴、打印面板另存PDF、历史未知留痕不补造）、文件删除清单、回退提交范围；最终独立审阅只处理真实可复现问题，不自动部署/合并/重建业务库。
 
 ## 最终完成标准
 
@@ -414,3 +414,5 @@
 - 五类Review Focus均有对应失败/负向测试；没有以颜色测试代替保存、权限、分页和打印边界。
 - 计划没有额外业务表、通用表单/库存/报表引擎、服务端PDF依赖或微服务；旧SQL/字体/相关文档按真实依赖保护。
 - 本文件只是实施步骤与验收门槛，未执行产品代码修改、删除、依赖安装或数据库变更。学期配置已完成页面展示，用户回复继续；本轮全面审查新增R1工程合同及D01开放裁定。仍为18个主任务、90项主任务步骤，覆盖五份设计；此前“nothing important left”的局部设计审阅不等于跨模块完整闭环保证。实施方式保持当前会话逐任务执行，不另行要求选择。
+
+实施记录：2026-10-30，任务1–16（含12A/12B）代码及自动化验收完成，详细证据见docs/delivery/role-ux/验收记录.md。最终独立审阅在完成实施测试后单独执行。真实provider、学校UTC切换、原生辅助设备及容器部署保持独立待放行，不由勾选实施步骤推断通过。
