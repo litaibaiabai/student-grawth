@@ -178,19 +178,20 @@ const {
       .click();
     const cardToken = await page.getByLabel("生成卡片凭证").inputValue();
     await nav("无卡直评");
-    await page
-      .getByLabel("直评方向")
-      .selectOption("CONDUCT_POLITENESS_OTHER_STAR");
-    await page
-      .locator(".student-checks label")
-      .filter({ hasText: "学生3" })
-      .locator("input")
-      .check();
-    await page.getByLabel("直评说明").fill("主动问好");
-    await page
-      .getByRole("button", { name: "为选中学生记 1 分", exact: true })
-      .click();
-    await toast("直评已记分");
+    for (const name of ['学生3','学生4']) await page.locator('.student-checks label').filter({hasText:name}).locator('input').check();
+    await page.getByRole('button',{name:'德美少年',exact:true}).click();
+    await page.getByRole('button',{name:'日常行为',exact:true}).click();
+    await page.getByRole('button',{name:'有礼貌',exact:true}).click();
+    await page.getByRole('button',{name:'为选中学生记 1 分',exact:true}).click();
+    await toast('已为2名学生各记1分');
+    for (const name of ['学生3','学生4']) await page.locator('.student-checks label').filter({hasText:name}).locator('input').check();
+    await page.getByRole('button',{name:'德美少年',exact:true}).click();
+    await page.getByRole('button',{name:'日常行为',exact:true}).click();
+    await page.getByRole('button',{name:'有礼貌',exact:true}).click();
+    await page.getByRole('button',{name:'为选中学生记 1 分',exact:true}).click();
+    await page.waitForFunction(()=>!document.querySelector('.direct-board input[type="checkbox"]:checked'));
+    const [intentCounts]=await db.pool.query("SELECT student_id,COUNT(*) n FROM evaluation_source_record WHERE record_kind='DIRECT' GROUP BY student_id");
+    assert.deepEqual(intentCounts.map(r=>[String(r.student_id),Number(r.n)]),[['3',2],['4',2]]);
     await page
       .getByRole("button", { name: "加载更多材料与记录", exact: true })
       .waitFor();
@@ -338,19 +339,9 @@ const {
           "jump_rope_1min",
         ].includes(f.column),
     );
-    for (const student of students) {
-      await page
-        .getByLabel("选择学生", { exact: true })
-        .selectOption(student.id);
-      for (const f of academic)
-        await page
-          .getByLabel(f.label, { exact: true })
-          .selectOption(f.valueType === "star" ? "3" : "A");
-      await page.getByRole("button", { name: "预览导入", exact: true }).click();
-      await toast("预览完成");
-      await page.getByRole("button", { name: "确认导入", exact: true }).click();
-      await toast("导入已提交");
-    }
+    for (const student of students) for(const f of academic) await page.getByLabel(`${student.id} · ${f.label}`,{exact:true}).fill(f.valueType==='star'?'3':'A');
+    await page.getByRole('button',{name:'预览导入',exact:true}).click();await toast('预览完成');
+    await page.getByRole('button',{name:'确认导入',exact:true}).click();await toast('导入已提交');
     await login("admin");
     await nav("体测原始值");
     for (const student of students) {

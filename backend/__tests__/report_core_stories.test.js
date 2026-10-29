@@ -129,3 +129,12 @@ test("monthly READ LISTEN TELL each need 1–3 texts, scores aggregate and obsol
     { statusCode: 422 },
   );
 });
+test('inactive story batches do not expose retry or recognition actions',async t=>{
+ const db=await createCoreTestDb(t);await db.seedBase();const {addSource}=require('../services/reportCoreStore');
+ const base={schoolId:'1',termId:'1',studentId:'3',sourceType:'STORY',actorId:'3',monthKey:'2026-10'};
+ const parentId=await addSource(db.pool,{...base,kind:'BATCH',status:'SUPERSEDED',key:['inactive-parent']});
+ const itemId=await addSource(db.pool,{...base,kind:'ITEM',parentId,status:'FAILED',key:['inactive-item'],payload:{text:'旧故事',category:'READ'}});
+ const actor={id:'2',schoolId:'1',role:'teacher',tokenVersion:1};const rows=await require('../services/reportCoreSources').listSources({pool:db.pool,actor,termId:'1'});
+ const item=rows.rows.find(r=>String(r.id)===itemId);assert.equal(item.canRetry,false);assert.equal(item.canRecognize,false);
+ await assert.rejects(require('../services/reportCoreStories').retryStoryItem({pool:db.pool,actor,itemId,command:{requestKey:'inactive-retry',payloadHash:'a'.repeat(64)}}),{statusCode:409});
+});

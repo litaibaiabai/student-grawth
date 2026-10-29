@@ -5,7 +5,7 @@ const {
   validateValue,
   stableHash,
 } = require("./reportCorePolicy");
-const { assertScope } = require("./authorizationService");
+const { assertScope, canManageCertificate } = require("./authorizationService");
 const { savePrivateFile, removePrivateFile } = require("../utils/privateFiles");
 async function submitCertificate({ pool, actor, termId, file, command }) {
   if (actor.role !== "student") fail(403, "仅学生本人上传");
@@ -100,7 +100,7 @@ async function decideCertificate({
         fail(409, "奖状版本已变化");
       const p = parse(row.payload_json);
       if (reject) {
-        await assertScope(
+        const rejectScope=await assertScope(
           {
             actor,
             studentKey: {
@@ -112,6 +112,7 @@ async function decideCertificate({
           },
           c,
         );
+        if(!canManageCertificate(rejectScope))fail(403,'无奖状审核职责');
         await c.query(
           "UPDATE evaluation_source_record SET status='REJECTED',revision=revision+1,payload_json=? WHERE id=?",
           [
@@ -220,29 +221,21 @@ async function revokeCertificate({ pool, actor, sourceId, reason, command }) {
       action: "award-revoke",
     },
     async (c) => {
-      await assertScope(
-        {
-          actor,
-          studentKey: {
-            schoolId: actor.schoolId,
-            termId: s.term_id,
-            studentId: s.student_id,
-          },
-          action: actor.role === "student" ? "material" : "award",
-          fields: Object.keys(parse(s.payload_json).outputs || {}),
-        },
-        c,
-      );
-      const [[row]] = await c.query(
-        "SELECT * FROM evaluation_source_record WHERE id=? FOR UPDATE",
-        [sourceId],
-      );
-      if (row.status === "REVOKED") fail(409, "已撤回");
+      if (!['student','teacher'].includes(actor.role)) fail(403,'无奖状撤回权限');
+      const [[row]] = await c.query('SELECT * FROM evaluation_source_record WHERE school_id=? AND id=? FOR UPDATE',[actor.schoolId,sourceId]);
+      const scope=await assertScope({actor,studentKey:{schoolId:actor.schoolId,termId:s.term_id,studentId:s.student_id},action:actor.role==='student'?'material':'award',fields:Object.keys(parse(row.payload_json).outputs||{})},c);
+      if(actor.role==='teacher'&&!canManageCertificate(scope))fail(403,'无奖状审核职责');
+      if(row.status==='REVOKED')fail(409,'已撤回');
       const p = parse(row.payload_json);
       await c.query(
         "UPDATE evaluation_source_record SET status='REVOKED',revision=revision+1,payload_json=? WHERE id=?",
         [JSON.stringify({ ...p, revokeReason: reason }), sourceId],
       );
+      if (Object.keys(p.outputs || {}).length) await addSource(c, {
+        schoolId:actor.schoolId,termId:s.term_id,studentId:s.student_id,parentId:sourceId,actorId:actor.id,
+        sourceType:actor.role==='student'?'SELF':'TEACHER',kind:'FORM',status:'CONFIRMED',
+        key:['REVOKE_NO_AWARD',sourceId,command.requestKey],payload:{action:'INVALIDATE_NO_AWARD',targetKeys:Object.keys(p.outputs)},
+      });
       return {
         result: { revoked: true },
         changedTargetsByStudent: {

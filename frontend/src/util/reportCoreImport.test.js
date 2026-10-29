@@ -28,3 +28,6 @@ test("invalid numeric spreadsheet cells fail before JSON can silently replace Na
     /height_cm/,
   );
 });
+test('whitespace spreadsheet cells keep old numeric and grade values',()=>{
+ assert.deepEqual(normalizeImportRows([{studentId:'3',height_cm:'  ',math_basic_knowledge_grade:'   '}],[{column:'height_cm',valueType:'number'},{column:'math_basic_knowledge_grade',valueType:'grade'}]),[{studentId:'3',values:{}}]);
+});

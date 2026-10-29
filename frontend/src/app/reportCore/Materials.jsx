@@ -125,7 +125,7 @@ export function StoryForm({ ctx }) {
    if(!stored?.dirty){const existing=result.draftBatch?.articles||result.articles;setArticles(existing?.length?Object.keys(labels).flatMap(c=>existing.some(a=>a.category===c)?existing.filter(a=>a.category===c):[{category:c,text:''}]):blank());setDirty(false);}
   }).catch(e=>{if(e.name!=='AbortError')ctx.error(e);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
   return()=>controller.abort();
- },[month,ctx.termId]);
+ },[month,ctx.termId,ctx.refreshKey]);
  useEffect(()=>{ctx.setLeaveGuard?.(()=>!live.current.dirty&&![...cache.current.values()].some(v=>v.dirty)||window.confirm('故事还有未保存内容，离开会放弃本次填写。是否离开？'));return()=>ctx.setLeaveGuard?.(null);},[]);
  const update=next=>{setArticles(next);setDirty(true);cache.current.set(month,{articles:next,dirty:true});};
  const valid=articles.every(a=>[...a.text].length<=20000),formal=Object.keys(labels).every(c=>articles.filter(a=>a.category===c&&a.text.trim()).length>=1);
@@ -335,7 +335,7 @@ export function SourceList({ ctx, types }) {
               <strong>
                 {s.source_type === "STORY"
                   ? s.payload.category || "整月故事"
-                  : s.source_type === "SELF" ? "自评保存记录" : s.payload.facts?.title || "奖状材料"}{" "}
+                  : s.source_type === "SELF" ? (s.payload.action === "INVALIDATE_NO_AWARD" ? "奖状撤回记录" : "自评保存记录") : s.payload.facts?.title || "奖状材料"}{" "}
                 <small>#{s.id}</small>
               </strong>
               <p>

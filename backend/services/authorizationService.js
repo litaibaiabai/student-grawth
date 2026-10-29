@@ -74,4 +74,9 @@ async function assertScope(
   if (allowedFields.length !== fields.length) fail(403, "不在学科字段范围");
   return { allowedFields, evaluation: e, head, assignments: rows };
 }
-module.exports = { resolveActorContext, assertScope, assignments };
+function canManageCertificate(scope) {
+  if(scope.head)return true;
+  const subjects=new Set((scope.assignments||[]).map(a=>a.subject_code));
+  return ['PE','MUSIC','FINE_ART'].some(s=>subjects.has(s)) || require('./reportCorePolicy').fixedFields.some(f=>f.sourceType==='CERTIFICATE'&&subjects.has(subjectFor(f.column)));
+}
+module.exports = { canManageCertificate, resolveActorContext, assertScope, assignments };

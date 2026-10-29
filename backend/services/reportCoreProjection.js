@@ -35,7 +35,7 @@ async function rebuildEvaluation({ connection, studentKey, targets, config }) {
         noAward:
           s.payload.action === "DECLARE_NO_AWARDS"
             ? true
-            : fieldSources[target]?.noAward,
+            : s.payload.action === "INVALIDATE_NO_AWARD" ? false : fieldSources[target]?.noAward,
       };
     }
   }

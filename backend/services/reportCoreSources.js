@@ -1,6 +1,6 @@
 const { parse } = require("./reportCoreStore");
 const { assertScope, assignments } = require("./authorizationService");
-const { subjectFor, fail } = require("./reportCorePolicy");
+const { subjectFor, fail, fixedFields } = require("./reportCorePolicy");
 function mayReadField(scope, field) {
   return (
     scope.head ||
@@ -45,7 +45,7 @@ async function listSources({
   if (recordKind) { if(!['QUOTA','CARD','DIRECT','BATCH','ITEM','FORM','REVERSAL'].includes(recordKind))fail(422,'记录类型不合法');filter+=' AND s.record_kind=?';params.push(recordKind); }
   if(latest === true || latest === 'true')filter+=" AND NOT EXISTS(SELECT 1 FROM evaluation_source_record newer WHERE newer.school_id=s.school_id AND newer.term_id=s.term_id AND newer.student_id=s.student_id AND newer.source_type=s.source_type AND newer.record_kind=s.record_kind AND newer.month_key<=>s.month_key AND newer.version>s.version)";
   const [rows] = await pool.query(
-    `SELECT s.* FROM evaluation_source_record s WHERE s.school_id=? AND s.term_id=? ${filter} ORDER BY s.id DESC LIMIT ? OFFSET ?`,
+    `SELECT s.*,b.status parent_status FROM evaluation_source_record s LEFT JOIN evaluation_source_record b ON b.school_id=s.school_id AND b.id=s.parent_id WHERE s.school_id=? AND s.term_id=? ${filter} ORDER BY s.id DESC LIMIT ? OFFSET ?`,
     [...params, limit, offset],
   );
   const out = [];
@@ -117,7 +117,12 @@ async function listSources({
           mayReadField(scope, field),
         );
     }
-    out.push({ ...summary, payload });
+    const pending=['QUEUED','PROCESSING','SUBMITTED','FAILED'].includes(s.status);
+    const isTeacher=actor.role==='teacher', own=actor.role==='student'&&String(s.student_id)===actor.id;
+    const allowedTargets=isTeacher&&s.source_type==='CERTIFICATE'?[...fixedFields.filter(f=>f.sourceType==='CERTIFICATE').map(f=>f.column),'sports_specialties','art_specialties'].filter((key,i,a)=>a.indexOf(key)===i&&mayReadField(scope,key)):[];
+    const storyTeacher=isTeacher&&['SUBMITTED','SCORED'].includes(s.parent_status)&&(scope?.head||scope?.assignments?.some(a=>a.subject_code==='STORY'));
+    const canRecognize=s.source_type==='CERTIFICATE'?isTeacher&&allowedTargets.length>0&&pending:s.source_type==='STORY'&&storyTeacher&&['QUEUED','PROCESSING','SUBMITTED','FAILED','SCORED'].includes(s.status);
+    out.push({ ...summary, payload, allowedTargets, canRecognize, canRetry:s.status==='FAILED'&&(s.source_type==='STORY'?storyTeacher:isTeacher&&allowedTargets.length>0), canReject:s.source_type==='CERTIFICATE'&&canRecognize, canRevoke:s.source_type==='CERTIFICATE'&&s.status!=='REVOKED'&&(own||isTeacher&&allowedTargets.length>0), canResubmit:own&&['REJECTED','FAILED','REVOKED'].includes(s.status) });
   }
   return {
     rows: out,

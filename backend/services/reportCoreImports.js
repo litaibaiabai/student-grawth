@@ -76,7 +76,7 @@ async function validateRows(c, actor, term, kind, rows) {
     seen.add(String(studentId));
     const values = {};
     for (const [key, v] of Object.entries(input.values || {})) {
-      if (v === "" || v === undefined) continue;
+      if (v === null || v === undefined || typeof v === "string" && !v.trim()) continue;
       const f = byColumn.get(key);
       if (
         !f ||
@@ -113,11 +113,40 @@ async function validateRows(c, actor, term, kind, rows) {
   }
   return out;
 }
+async function validateAcademicRows(c,actor,term,rows) {
+  if(!Array.isArray(rows)||!rows.length||rows.length>1000)fail(422,'导入类型或行数不合法');
+  if(actor.role==='student'||actor.role==='manager'&&!term.evaluation_config.allowManagerAcademicImport)fail(403,'无此导入权限');
+  const normalized=[],errors=[],seen=new Set();let skipped=0;
+  for(let index=0;index<rows.length;index++) {
+    const input=rows[index],rowNo=index+1,start=errors.length,values={};
+    if(!input||typeof input!=='object'||Array.isArray(input)){errors.push({rowNo,field:'row',reason:'非法行'});continue;}
+    for(const [field,value] of Object.entries(input.values||{})) {
+      if(value===null||value===undefined||typeof value==='string'&&!value.trim())continue;
+      try {const f=byColumn.get(field);if(!f||f.sourceType!=='IMPORT'||health.includes(field))fail(422,'字段与来源不符');values[field]=validateValue(field,value,term.evaluation_config);}
+      catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field,reason:error.message});}
+    }
+    if(input.clearFields!==undefined&&!Array.isArray(input.clearFields))errors.push({rowNo,field:'clearFields',reason:'清空字段需为数组'});
+    else for(const field of input.clearFields||[])try{if(!byColumn.has(field)||byColumn.get(field).sourceType!=='IMPORT'||health.includes(field))fail(422,'不能清空此字段');values[field]=null;}catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field,reason:error.message});}
+    let studentId=input.studentId;
+    if(!studentId&&input.username){const [[u]]=await c.query("SELECT id FROM users WHERE school_id=? AND username=? AND role='student'",[actor.schoolId,input.username]);studentId=u?.id;}
+    if(!studentId){errors.push({rowNo,field:'studentId',reason:'学生不存在'});continue;}
+    const id=String(studentId);if(seen.has(id)){errors.push({rowNo,field:'studentId',reason:'学生重复'});continue;}seen.add(id);
+    try {
+      const scope=await assertScope({actor,studentKey:{schoolId:actor.schoolId,termId:term.id,studentId:id},action:'import',fields:Object.keys(values)},c);
+      if(errors.length>start)continue;
+      if(!Object.keys(values).length){skipped++;continue;}
+      normalized.push({studentId:id,values,expectedRevision:String(scope.evaluation.revision)});
+    }catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field:'studentId',reason:error.message});}
+  }
+  return {normalized,errors,counts:{created:0,updated:normalized.length,skipped,errors:errors.length}};
+}
 async function previewImport({ pool, actor, termId, kind, rows, command }) {
   return withMutation(
     { pool, actor, termId, command, action: "import-preview" },
     async (c, term) => {
-      const normalized = await validateRows(c, actor, term, kind, rows);
+      const validated = kind === 'ACADEMIC' ? await validateAcademicRows(c,actor,term,rows) : {normalized:await validateRows(c,actor,term,kind,rows),errors:[],counts:null};
+      const {normalized,errors}=validated;
+      if(errors.length || !normalized.length)return {result:{batchId:null,revision:null,validCount:normalized.length,errors,diffs:[],counts:validated.counts}};
       const batchId = await addSource(c, {
         schoolId: actor.schoolId,
         termId,
@@ -133,6 +162,7 @@ async function previewImport({ pool, actor, termId, kind, rows, command }) {
           batchId,
           revision: "1",
           validCount: normalized.length,
+          counts: validated.counts || {created:0,updated:normalized.length,skipped:0,errors:0},
           errors: [],
           diffs: normalized.map((r) => ({
             studentId: r.studentId,

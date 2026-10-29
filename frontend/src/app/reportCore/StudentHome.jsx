@@ -19,6 +19,6 @@ export function StudentArchive({ctx}) {
  const [group,setGroup]=useState('materials'),[rows,setRows]=useState([]),[offset,setOffset]=useState(null),[busy,setBusy]=useState(false);
  const sequence=useRef(0);
  const load=async(start=0)=>{const request=++sequence.current;setBusy(true);try{const query=new URLSearchParams({termId:ctx.termId,page:'1',offset:String(start),sourceType:group==='stories'?'STORY':group==='self'?'SELF':'CERTIFICATE'});const result=await api('/report-core/sources?'+query);if(request!==sequence.current)return;setRows(old=>start?[...old,...result.rows]:result.rows);setOffset(result.nextOffset);}catch(e){ctx.error(e);}finally{if(request===sequence.current)setBusy(false);}};
- useEffect(()=>{setRows([]);load();return()=>{sequence.current++;};},[group,ctx.termId]);
+ useEffect(()=>{setRows([]);load();return()=>{sequence.current++;};},[group,ctx.termId,ctx.refreshKey]);
  return <><section className="panel"><h2>我的成长档案</h2><div className="self-steps">{[['materials','奖状材料'],['stories','故事历史'],['self','自评记录']].map(([key,label])=><button key={key} className={group===key?'primary':''} onClick={()=>setGroup(key)}>{label}</button>)}<button onClick={()=>ctx.navigate('report')}>已发布报告</button></div><p>保留原材料与历史版本，期末报告以学校已发布版本为准。</p></section><SourceList ctx={{...ctx,sources:rows}} types={group==='stories'?['STORY']:group==='self'?['SELF']:['CERTIFICATE']}/>{offset!==null&&<button disabled={busy} onClick={()=>load(offset)}>加载更多档案</button>}</>;
 }

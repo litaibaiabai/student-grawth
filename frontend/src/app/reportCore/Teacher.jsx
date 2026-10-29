@@ -328,7 +328,7 @@ export function ImportData({ ctx, initialKind }) {
         </button>
         <button
           className="primary"
-          disabled={!preview}
+          disabled={!preview?.batchId||!!preview?.errors?.length}
           onClick={() =>
             ctx.run(async () => {
               await api(`/report-core/imports/${preview.batchId}/commit`, {
@@ -366,11 +366,18 @@ export function ImportData({ ctx, initialKind }) {
   );
 }
 export function ReviewMaterials({ ctx }) {
+  const [imageUrl,setImageUrl] = useState(null);
   const [selected, setSelected] = useState(null),
     [target, setTarget] = useState(""),
     [output, setOutput] = useState(""),
     [reason, setReason] = useState(""),
     [dimensions, setDimensions] = useState([0, 0, 0, 0]);
+  useEffect(() => {
+    const controller=new AbortController();let objectUrl;
+    setImageUrl(null);
+    if(selected?.source_type==='CERTIFICATE')fetch('/api/v1/report-core/files/'+selected.id,{signal:controller.signal,headers:{Authorization:'Bearer '+localStorage.getItem('REPORT_CORE_TOKEN')}}).then(r=>{if(!r.ok)throw Error('无法读取材料');return r.blob();}).then(blob=>{if(controller.signal.aborted)return;objectUrl=URL.createObjectURL(blob);setImageUrl(objectUrl);}).catch(e=>{if(e.name!=='AbortError')ctx.error(e);});
+    return()=>{controller.abort();if(objectUrl)URL.revokeObjectURL(objectUrl);};
+  },[selected?.id]);
   const rows = ctx.sources.filter(
     (s) =>
       s.record_kind === "ITEM" &&
@@ -457,6 +464,7 @@ export function ReviewMaterials({ ctx }) {
             </>
           ) : (
             <>
+              {imageUrl&&<img className="review-original" src={imageUrl} alt="待认定奖状原图"/>}
               <button onClick={() => ctx.run(() => image(selected))}>
                 查看奖状原图
               </button>
@@ -474,13 +482,13 @@ export function ReviewMaterials({ ctx }) {
                   onChange={(e) => setTarget(e.target.value)}
                 >
                   <option value="">选择成果字段</option>
-                  {fields.map((f) => (
+                  {fields.filter(f=>selected.allowedTargets?.includes(f.column)).map((f) => (
                     <option key={f.column} value={f.column}>
                       {f.label}
                     </option>
                   ))}
-                  <option value="sports_specialties">体育特长</option>
-                  <option value="art_specialties">艺术特长</option>
+                  {selected.allowedTargets?.includes('sports_specialties')&&<option value="sports_specialties">体育特长</option>}
+                  {selected.allowedTargets?.includes('art_specialties')&&<option value="art_specialties">艺术特长</option>}
                 </select>
               </label>
               <label>
@@ -534,7 +542,7 @@ export function ReviewMaterials({ ctx }) {
           <div className="actions">
             <button
               className="primary"
-              disabled={!reason}
+              disabled={!reason||!selected.canRecognize}
               onClick={() =>
                 ctx.run(async () => {
                   if (selected.source_type === "STORY")
@@ -574,11 +582,12 @@ export function ReviewMaterials({ ctx }) {
             >
               保存认定
             </button>
-            {selected.status === "FAILED" && (
+            {selected.canReject&&<button disabled={!reason} onClick={()=>ctx.run(async()=>{await api(`/report-core/certificates/${selected.id}/decision`,{expectedRevision:selected.revision,reject:true,reason});setSelected(null);ctx.refresh();ctx.notify('材料已拒绝，学生可重新上传');})}>拒绝认定</button>}
+            {selected.canRetry && (
               <button
                 onClick={() =>
                   ctx.run(async () => {
-                    await api(`/report-core/sources/${selected.id}/retry`, {});
+                    await api(`/report-core/sources/${selected.id}/retry`, {expectedRevision:selected.revision});
                     setSelected(null);
                     ctx.refresh();
                     ctx.notify("已重新排队");

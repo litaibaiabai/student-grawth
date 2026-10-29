@@ -6,7 +6,7 @@ const {
 } = require("./reportCoreStore");
 const { fail, stableHash } = require("./reportCorePolicy");
 const { validateScore } = require("./reportCoreProvider");
-const { assertScope } = require("./authorizationService");
+const { assertScope, canManageCertificate } = require("./authorizationService");
 const categories = ["READ", "LISTEN", "TELL"];
 const targets = [
   "story_read_star",
@@ -337,7 +337,7 @@ async function reviewStoryItem({
       );
       if (
         String(row.revision) !== String(expectedRevision) ||
-        !["SUBMITTED", "SCORED"].includes(parent.status)
+        !parent || !["SUBMITTED", "SCORED"].includes(parent.status)
       )
         fail(409, "故事版本已变化");
       const result = {
@@ -370,7 +370,7 @@ async function reviewStoryItem({
     },
   );
 }
-async function retryStoryItem({ pool, actor, itemId, command }) {
+async function retryStoryItem({ pool, actor, itemId, expectedRevision, command }) {
   const [[s]] = await pool.query(
     "SELECT * FROM evaluation_source_record WHERE school_id=? AND id=? AND record_kind='ITEM' AND source_type IN ('STORY','CERTIFICATE')",
     [actor.schoolId, itemId],
@@ -387,7 +387,7 @@ async function retryStoryItem({ pool, actor, itemId, command }) {
     },
     async (c) => {
       if (actor.role !== "teacher") fail(403, "仅教师重试");
-      await assertScope(
+      const scope=await assertScope(
         {
           actor,
           studentKey: {
@@ -400,7 +400,10 @@ async function retryStoryItem({ pool, actor, itemId, command }) {
         },
         c,
       );
-      if (s.status !== "FAILED") fail(409, "仅失败材料可重试");
+      if(s.source_type==='CERTIFICATE'&&!canManageCertificate(scope))fail(403,'无奖状审核职责');
+      const [[current]] = await c.query('SELECT status,revision FROM evaluation_source_record WHERE school_id=? AND id=? FOR UPDATE',[actor.schoolId,itemId]);
+      if(s.source_type==='STORY'){const [[parent]]=await c.query('SELECT status FROM evaluation_source_record WHERE school_id=? AND id=?',[actor.schoolId,s.parent_id]);if(!parent||!['SUBMITTED','SCORED'].includes(parent.status))fail(409,'故事批次已被替换，不能重试');}
+      if (current.status !== 'FAILED' || expectedRevision !== undefined && String(current.revision) !== String(expectedRevision)) fail(409, '材料状态已变化，仅失败材料可重试');
       await c.query(
         "UPDATE evaluation_source_record SET status='QUEUED',attempts=0,next_attempt_at=NULL,revision=revision+1 WHERE id=?",
         [itemId],

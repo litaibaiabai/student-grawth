@@ -4,7 +4,7 @@ export function normalizeImportRows(rows, fields) {
     const values = {};
     for (const field of fields) {
       const cell = row[field.column];
-      if (cell === undefined || cell === null || cell === "") continue;
+      if (cell === undefined || cell === null || typeof cell === "string" && !cell.trim()) continue;
       if (["height_cm", "weight_kg", "jump_rope_1min"].includes(field.column)) {
         const number = Number(cell);
         if (!Number.isFinite(number))

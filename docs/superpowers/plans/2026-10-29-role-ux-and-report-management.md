@@ -255,11 +255,11 @@
 
 **Interfaces:** `eligibleCardCodes({catalog,assignments,studentRows,selectedStudentIds})`、`buildCardTree(catalog,allowedCodes)`，返回六育→一级→二级及原categoryCode；`DirectScore({ctx})`使用Task1原直评POST。
 
-- [ ] **Step 1 — 写失败模型测试：** 37叶节点唯一；德美一级日常行为、智美5科×4、健康3、艺术2科×3；劳美故事不可直评；多学生取权限交集，无学生没有可选项；重复点击相同父值不清空叶节点，真实上级/学生变化清下级。
-- [ ] **Step 2 — 跑红：** `cd frontend && node --test src/app/reportCore/cardModel.test.js`。
-- [ ] **Step 3 — 实现：** 单页学生名单/六育/一级/二级/选填说明/摘要和按钮全部存在，桌面左右列手机纵向；无上一步/下一步/分步弹窗。不自动按页头学科替用户选路径。成功清学生/路径/说明，失败保留；重复提交沿原幂等。
-- [ ] **Step 4 — 优化真实录入与审核：** 既有ImportData改班级学生×适用分项格、粘贴/Excel→预览→确认；R1.3的ACADEMIC全错误/空白保留测试PASS。ReviewMaterials按R1.4的允许动作同屏原图/原文，拒绝/撤回/重试竞争测试PASS。Settlements按R1.2补零卡、无奖及晚到来源测试PASS。直评独立验证多选2学生空说明各+1、第二次有意同内容再各+1、越权事务全部拒绝；上述子流程各自留验证记录，不以一个toast代替全通过。
-- [ ] **Step 5 — 提交：** `feat: make teacher direct evaluation a single-page cascade`。
+- [x] **Step 1 — 写失败模型测试：** 37叶节点唯一；德美一级日常行为、智美5科×4、健康3、艺术2科×3；劳美故事不可直评；多学生取权限交集，无学生没有可选项；重复点击相同父值不清空叶节点，真实上级/学生变化清下级。
+- [x] **Step 2 — 跑红：** `cd frontend && node --test src/app/reportCore/cardModel.test.js`。
+- [x] **Step 3 — 实现：** 单页学生名单/六育/一级/二级/选填说明/摘要和按钮全部存在，桌面左右列手机纵向；无上一步/下一步/分步弹窗。不自动按页头学科替用户选路径。成功清学生/路径/说明，失败保留；重复提交沿原幂等。
+- [x] **Step 4 — 优化真实录入与审核：** 既有ImportData改班级学生×适用分项格、粘贴/Excel→预览→确认；R1.3的ACADEMIC全错误/空白保留测试PASS。ReviewMaterials按R1.4的允许动作同屏原图/原文，拒绝/撤回/重试竞争测试PASS。Settlements按R1.2补零卡、无奖及晚到来源测试PASS。直评独立验证多选2学生空说明各+1、第二次有意同内容再各+1、越权事务全部拒绝；上述子流程各自留验证记录，不以一个toast代替全通过。
+- [x] **Step 5 — 提交：** `feat: make teacher direct evaluation a single-page cascade`。
 
 ## Task 8: 教师卡台账和按班制卡页面
 

@@ -2,11 +2,12 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { api, allStudents, resetApiSession } from "./api";
 import RoleShell from "./RoleShell";
 import SelfEvaluation from "./SelfEvaluation";
+import DirectScore from "./DirectScore";
+import AcademicImport from "./AcademicImport";
 import StudentHome, { StudentArchive } from "./StudentHome";
 import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm } from "./Materials";
 import {
-  DirectScore,
   ImportData,
   ReviewMaterials,
   ReportDrafts,
@@ -290,7 +291,8 @@ export default function ReportCoreApp() {
             {tab === "self" && <SelfEvaluation ctx={ctx} />}{" "}
             {tab === "report" && <Published ctx={ctx} />}{" "}
             {tab === "direct" && <DirectScore ctx={ctx} />}{" "}
-            {["imports", "roster", "health"].includes(tab) && <ImportData key={tab} ctx={ctx} initialKind={tab === "roster" ? "ROSTER" : tab === "health" ? "HEALTH" : "ACADEMIC"} />}{" "}
+            {tab === "imports" && actor.role === "teacher" && <AcademicImport ctx={ctx} />}
+            {["imports", "roster", "health"].includes(tab) && actor.role !== "teacher" && <ImportData key={tab} ctx={ctx} initialKind={tab === "roster" ? "ROSTER" : tab === "health" ? "HEALTH" : "ACADEMIC"} />}{" "}
             {tab === "reviews" && <ReviewMaterials ctx={ctx} />}{" "}
             {tab === "drafts" && <ReportDrafts ctx={ctx} />}{" "}
             {tab === "settlements" && <Settlements ctx={ctx} />}{" "}
