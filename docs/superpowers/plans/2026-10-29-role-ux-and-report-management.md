@@ -172,11 +172,11 @@
 
 `createDbPool`保证每个新连接在业务查询前已设置`time_zone='+00:00'`。现有迁移脚本增加显式`--record-utc-cutover`操作，只向原来源表写一次`SOURCE_CLOCK_BASELINE` AUDIT（学校/切换前最大来源ID/原会话offset/是否已核实历史offset），不新增表或改写旧时间；执行时短暂停止写入，审计完成后统一启用新连接。默认check无此写副作用。未核实历史来源保留未知标志，不能静默当UTC。
 
-- [ ] **Step 1 — 写失败回归：** 空说明四种输入各成功+1；对象说明422；同requestKey重试不重复；越权学生批次全部回滚；冲正空原因仍拒绝。另测多个新池连接session均为UTC、`NOW()`与UTC_TIMESTAMP一致，显式时钟审计重跑不重复，默认迁移check不写审计或历史值。加入R1.1锁模式及R1.2的月界/生成前失权反例，不能只测数据库时区。
-- [ ] **Step 2 — 跑失败：** `cd backend && node --test __tests__/report_core_cards.test.js __tests__/report_core_card_quota_limits.test.js`，期望新断言在旧代码失败，不能因为连接错误当作红测。
-- [ ] **Step 3 — 实现：** 在同一QUOTA行事务锁下读取Q/P/G，调减要求`Qnew >= max(P,G)`，生成再次校验`P<=Q`；不剪裁计划。额度新发/真实变更追加`QUOTA_CHANGE` AUDIT（quotaId/monthKey/oldTotal/newTotal/delta/操作者），保存计划和生成卡追加`PLAN_SAVE/CARD_GENERATE` AUDIT（版本/班级张数），不以原created_at补造旧历史。作废仅所属教师、未领取卡、有效revision，写VOID及AUDIT，不返额度。继续原学生锁/幂等/冲正唯一约束。
-- [ ] **Step 4 — 补并发验证：** 保存80计划后降50应拒绝；调额与生成竞争不能超额；作废/扫码同时执行仅一方成功，已用卡不能作废。上述命令PASS，再跑`report_core_store.test.js`与`report_core_timezone.test.js`。时区切换先在独立测试库演练，真实库切换步骤留在交付/部署说明，不能在改页面时擅自改历史数据。
-- [ ] **Step 5 — 提交：** 仅上述文件，`fix: enforce card quota bounds and optional direct-score notes`。
+- [x] **Step 1 — 写失败回归：** 空说明四种输入各成功+1；对象说明422；同requestKey重试不重复；越权学生批次全部回滚；冲正空原因仍拒绝。另测多个新池连接session均为UTC、`NOW()`与UTC_TIMESTAMP一致，显式时钟审计重跑不重复，默认迁移check不写审计或历史值。加入R1.1锁模式及R1.2的月界/生成前失权反例，不能只测数据库时区。
+- [x] **Step 2 — 跑失败：** `cd backend && node --test __tests__/report_core_cards.test.js __tests__/report_core_card_quota_limits.test.js`，期望新断言在旧代码失败，不能因为连接错误当作红测。
+- [x] **Step 3 — 实现：** 在同一QUOTA行事务锁下读取Q/P/G，调减要求`Qnew >= max(P,G)`，生成再次校验`P<=Q`；不剪裁计划。额度新发/真实变更追加`QUOTA_CHANGE` AUDIT（quotaId/monthKey/oldTotal/newTotal/delta/操作者），保存计划和生成卡追加`PLAN_SAVE/CARD_GENERATE` AUDIT（版本/班级张数），不以原created_at补造旧历史。作废仅所属教师、未领取卡、有效revision，写VOID及AUDIT，不返额度。继续原学生锁/幂等/冲正唯一约束。
+- [x] **Step 4 — 补并发验证：** 保存80计划后降50应拒绝；调额与生成竞争不能超额；作废/扫码同时执行仅一方成功，已用卡不能作废。上述命令PASS，再跑`report_core_store.test.js`与`report_core_timezone.test.js`。时区切换先在独立测试库演练，真实库切换步骤留在交付/部署说明，不能在改页面时擅自改历史数据。
+- [x] **Step 5 — 提交：** 仅上述文件，`fix: enforce card quota bounds and optional direct-score notes`。
 
 ## Task 2: 可对账的卡台账查询
 

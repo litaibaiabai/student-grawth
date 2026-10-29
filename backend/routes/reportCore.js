@@ -108,6 +108,7 @@ function createCoreRouter() {
     ),
   );
   require("./reportCoreFeatures").mountFeatures(r, { asyncRoute, ok });
+  require('./reportCoreViews').mountViews(r, { asyncRoute, ok });
   return r;
 }
 module.exports = { createCoreRouter, asyncRoute, ok };
