@@ -12,11 +12,12 @@
 - `docs/superpowers/specs/2026-10-28-three-role-ux-and-cleanup-design.md`
 - `docs/superpowers/specs/2026-10-28-teacher-card-ledger-design.md`
 - `docs/superpowers/specs/2026-10-29-class-report-browser-design.md`
+- `docs/superpowers/specs/2026-10-29-admin-three-menus-design.md`
 - 可点击视觉参考：`docs/ui-prototype/three-role-design/index.html`，仅作布局参考，禁止把虚构数据、内存保存或toast代入正式业务。
 
 ## Global Constraints
 
-- 学生三个主导航“首页 / 月度故事 / 我的档案”；教师四个“工作台 / 评价录入 / 卡片管理 / 班级报告”；管理员三个“发布中心 / 数据与额度 / 学期配置”。
+- 学生三个主导航“首页 / 月度故事 / 我的档案”；教师四个“工作台 / 评价录入 / 卡片管理 / 班级报告”；管理员五个“发布中心 / 学籍与账号 / 体测原始值 / 月度卡额度 / 学期配置”。
 - 教师快速直评单页展示全部区域：先学生多选，再六育→一级→二级，评价说明选填；每人每次1分。
 - 劳美/故事不参与卡式直评；37种现有卡指标不增不减；音乐美术各三个教师卡指标分别记分。
 - 13个固定星级自评 + 已认定特长逐项自评 + 七项学生文字；家长寄语可选，自评他评不能互改。
@@ -58,7 +59,7 @@
 
 `Task 4/9 → Task 12 → Task 13 → Task 14 → Task 15 → Task 16`
 
-实际执行次序为 **1→2→3→4→9→5→6→7→8→10→11→12→13→14→15→16**；编号是稳定引用标识。Task9先为学生首页与后续工作台提供真实聚合，不用静态数字占位。依赖图不要求启动并行代理。每任务完成一个可单独核对的提交。任务16前不切换正式部署、不销毁旧运行资料。
+实际执行次序为 **1→2→3→4→9→5→6→7→8→10→11→12→12A→13→14→15→16**；编号是稳定引用标识，12A为用户新增的管理员三菜单。Task9先为学生首页与后续工作台提供真实聚合，不用静态数字占位。依赖图不要求启动并行代理。每任务完成一个可单独核对的提交。任务16前不切换正式部署、不销毁旧运行资料。
 
 实施方式延续此前的executing-plans：当前会话逐任务实现，结束后独立审阅；不自行改成每任务实现代理。先审阅本计划，再开始产品修改。
 
@@ -80,6 +81,7 @@
 | `frontend/src/app/reportCore/cardModel.js`、`selfEvaluationModel.js` | 新增：分类树/权限交集、自评字段分组/冲突合并，纯函数供单测 |
 | `StudentHome.jsx`、`SelfEvaluation.jsx`、`TeacherWorkspace.jsx`、`DirectScore.jsx` | 新增于同目录：对应角色页面 |
 | `CardLedger.jsx`、`CardPlan.jsx`、`ClassReports.jsx`、`ManagerWorkspace.jsx` | 新增于同目录：台账、制卡、报告、发布工作区 |
+| `AdminRoster.jsx`、`AdminHealth.jsx`、`AdminQuota.jsx` | 新增于同目录：三个独立管理菜单，不用一个弹窗拼装全部业务 |
 | `index.jsx`、`Materials.jsx`、`Teacher.jsx`、`Administration.jsx`、`api.js` | 修改：接入新页面，保留真实业务适配，逐步移除已替代的组件 |
 | `frontend/src/component/TermReport/index.jsx` | 修改：可靠加载/高度/打印和溢出事件，仅接获准HTML |
 | `docs/delivery/role-ux/` | 新增：基线、接口/验证说明、精确清理清单与验收证据索引 |
@@ -254,9 +256,21 @@
 
 - [ ] **Step 1 — 写失败UI流程：** 教师首页待办能定位具体奖状/故事异常/缺项；管理员默认发布中心，少一人缺确认不能准备/发布；重新加载恢复PREPARING，全部prepare完成后一次activate才对学生可见。
 - [ ] **Step 2 — 实现教师工作台：** 合法班级/学科范围和三摘要，快速操作入口，材料同屏核对/保存下一条；只显本人任务，失败保留表单，系统评分失败不补默认分。
-- [ ] **Step 3 — 实现管理员三区：** 发布中心缺项与责任人、数据与额度的学籍/健康原值/教师获配、学期配置教师姓名搜索与中文学科。健康仅5原值、无六育终测导入；规则更改提示确认失效。任教维护不输数据库ID。
+- [ ] **Step 3 — 实现管理员外壳：** 五个独立导航；发布中心缺项与责任人、学期配置教师姓名搜索与中文学科，其余三个菜单接Task12A。健康无六育终测导入；规则更改提示确认失效。任教维护不输数据库ID。
 - [ ] **Step 4 — 验证：** 沿现有prepare/batch/activate/recover/cancel接口状态，按服务端允许动作呈现；刷新/网络中断恢复，无按班提前发布、管理员无私有正文。`test:report-core`与backend release/auth/read-model tests PASS。
 - [ ] **Step 5 — 提交：** `feat: prioritize teacher tasks and school-wide report publication`。
+
+## Task 12A: 三个独立管理菜单与真实批量额度
+
+**Files:** Create `frontend/src/app/reportCore/AdminRoster.jsx`, `AdminHealth.jsx`, `AdminQuota.jsx`；Modify `Administration.jsx`, `navigation.js`, `index.jsx`, `backend/services/reportCoreImports.js`, `reportCoreCards.js`, `reportCoreReadModels.js`, `reportCoreViews.js`及`backend/middleware/errorHandler.js`安全details支持；Create `backend/__tests__/report_core_admin_menus.test.js`, `report_core_quota_batch.test.js`, `frontend/tests/report-core-admin.cjs`。
+
+**Interfaces:** accounts/health/import-history/teacher-quotas GET契约按管理员三菜单设计第5节；模板由前端现有xlsx产生。`previewQuotaBatch({pool,actor,termId,monthKey,entries,command})` → `{batchId,revision,diffs,counts,errors}`；`commitQuotaBatch({pool,actor,batchId,expectedRevision,command})`一次事务；`saveQuotaInTransaction(connection,args)`供单笔和批量共用，不嵌套withMutation。AUDIT/PREVIEW存批量快照，无新表、无CARD/BATCH类型。
+
+- [ ] **Step 1 — 写失败后端回归：** 教师ROSTER无班级可导入且不建学生学籍；已有账号角色冲突拒绝、密码不被重置、明文/hash不返响应。健康预览返回全部行/格错误及旧→新、空白不覆盖/显式clearFields/合法0正确、预览后revision冲突整批拒绝。两名教师额度预览后有一人计划改变，确认409且两人均不更新；重复提交不重复加额，未选教师不变，超过200人拒绝。
+- [ ] **Step 2 — 跑红：** `cd backend && node --test __tests__/report_core_admin_menus.test.js __tests__/report_core_quota_batch.test.js`。新增浏览器流程确认原来只有“数据与额度”时失败，不能删除原ROSTER/HEALTH/单人quota回归来换绿。
+- [ ] **Step 3 — 实现服务：** 名册/体测预览聚合错误，错误422/details无可提交batchId，成功仅安全diff；提交复验现值/角色/修订。管理员健康GET仅五原值。额度预览最多200启用本校教师、按绝对月总额度0–10000并校验max(P,G)；确认校验批次owner/修订，稳定顺序锁行，一次withMutation写所有QUOTA及逐人/批次AUDIT，一错全回滚。
+- [ ] **Step 4 — 实现三个页面并跑绿：** 学籍与账号按学生/教师列表和模板→错误/差异预览→结果/记录；体测按班五原值→逐格差异→确认/记录；月度额度按教师勾选、统一设值/逐行编辑/模板→前后额预览→批量确认/结果。新总额与本次增量分列，未选不清零；同页保留输入与范围，真实成功才刷新。后端测试及`node tests/report-core-admin.cjs` PASS，390/1440可操作、三条地址可刷新进入。
+- [ ] **Step 5 — 提交：** `feat: split admin data menus and atomically grant teacher quotas`。
 
 ## Task 13: 形成精确清理清单与断言迁移
 
@@ -300,10 +314,10 @@
 
 **Interfaces:** 消费Task1–15的真实服务和角色界面；产出可重复的独立测试库流程、校验断言、实际删除清单及Git回退范围。测试夹具仅在隔离测试环境，不进入业务默认行为。
 
-- [ ] **Step 1 — 执行真实闭环：** 独立测试库中两班、班主任/普通任课/管理员/学生：额度→分班制卡→原卡扫码；空说明多选直评；教师学业导入/管理员健康导入；奖状→认定；自评13+动态特长+7文本；三类月故事→真实worker评分或明确失败处理；寄语/结算→确认→全校准备→activate→学生读取冻结报告。使用批准的可控provider夹具测试，不调用付费线上模型充当自动化依赖。
+- [ ] **Step 1 — 执行真实闭环：** 独立测试库中两班、班主任/普通任课/管理员/学生：模板账号/学籍导入→多教师原子额度→分班制卡→原卡扫码；空说明多选直评；教师学业导入/管理员健康逐格差异导入；奖状→认定；自评13+动态特长+7文本；三类月故事→真实worker评分或明确失败处理；寄语/结算→确认→全校准备→activate→学生读取冻结报告。使用批准的可控provider夹具测试，不调用付费线上模型充当自动化依赖。
 - [ ] **Step 2 — 执行负向/恢复：** 幂等超时重试、409保留草稿、跨账号退出、跨班/跨校猜ID、任课请求full/确认、扫码/作废竞争、调额/生成竞争、101+分页、跨月冲正、导出超限/中断、发布中断恢复；所有失败不产生半成品积分或提前暴露学生报告。
 - [ ] **Step 3 — 执行视觉/打印：** 390/768/1440、200%缩放、键盘、焦点和对比度；检查PDF基准6板块109位置与合并表头，学生身份/版本一致，明细1页/完整2页，长文本/多特长溢出拦截不截字；台账重复表头、CSV全量、按班二维码PDF原码复打；保留截图/下载哈希/布局结果于ignored output而非代码目录。
-- [ ] **Step 4 — 终检：** 后端`npm test`；前端`npm test && npm run lint && npm run build`；三个core浏览器测试和preview测试全部PASS。性能只对新增聚合/导出/报告列表测本次新增风险，沿用原发布基线，不无理由反复跑全量压力。确认库仍六张业务表、没有伪造LLM成功、没有密钥进入代码/日志/示例。
+- [ ] **Step 4 — 终检：** 后端`npm test`；前端`npm test && npm run lint && npm run build`；core-flow/ledger/reports/admin四个浏览器测试和preview测试全部PASS。性能只对新增聚合/导出/报告列表测本次新增风险，沿用原发布基线，不无理由反复跑全量压力。确认库仍六张业务表、没有伪造LLM成功、没有密钥进入代码/日志/示例。
 - [ ] **Step 5 — 交付与提交：** 记录真实可用项、已知限制（每教师月计划生成后不可增补、扫码依赖链接/粘贴、打印面板另存PDF、历史未知留痕不补造）、文件删除清单、回退提交范围；最终独立审阅只处理真实可复现问题，不自动部署/合并/重建业务库。
 
 ## 最终完成标准
@@ -312,8 +326,8 @@
 
 ## 计划自审记录
 
-- 范围覆盖：总设计→Task4–7/9/12；卡台账→Task1–3/8；班级报告→Task9–11；清理→Task13–15；跨模块验收→Task16。
+- 范围覆盖：总设计→Task4–7/9/12；卡台账→Task1–3/8；班级报告→Task9–11；管理员三菜单与原子批量额度→Task12A；清理→Task13–15；跨模块验收→Task16。
 - 接口一致：归属月/实际事件时间及asOf由Task2定义，导出与页面消费同一口径；Task9纯完整度供readiness、workspace与Task10复用；Task10权限产生Task11动作，不由UI推断。
 - 五类Review Focus均有对应失败/负向测试；没有以颜色测试代替保存、权限、分页和打印边界。
 - 计划没有额外业务表、通用表单/库存/报表引擎、服务端PDF依赖或微服务；旧SQL/字体/相关文档按真实依赖保护。
-- 本文件只是实施步骤与验收门槛，未执行产品代码修改、删除、依赖安装或数据库变更。方案已确认，实施计划待审阅后进入执行。
+- 本文件只是实施步骤与验收门槛，未执行产品代码修改、删除、依赖安装或数据库变更。既有方案已收敛，管理员新增三菜单待本轮页面评审；实施计划同步更新，审阅后进入执行。
