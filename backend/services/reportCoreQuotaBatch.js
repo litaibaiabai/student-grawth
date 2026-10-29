@@ -1,6 +1,7 @@
 const {withMutation,addSource,parse}=require('./reportCoreStore');
 const {fail}=require('./reportCorePolicy');
-function validate(actor,entries,monthKey){if(actor.role!=='manager')fail(403,'仅管理员批量下发额度');if(!Array.isArray(entries)||!entries.length||entries.length>200||!/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey))fail(422,'每批1–200名教师，月份需合法');const seen=new Set();for(const e of entries){if(!/^[1-9]\d*$/.test(String(e.teacherId))||seen.has(String(e.teacherId))||!Number.isInteger(e.total)||e.total<0||e.total>10000)fail(422,'教师重复或额度不合法');seen.add(String(e.teacherId));}return [...entries].map(e=>({...e,teacherId:String(e.teacherId)})).sort((a,b)=>BigInt(a.teacherId)<BigInt(b.teacherId)?-1:1);}
+function validate(actor,entries,monthKey){if(actor.role!=='manager')fail(403,'仅管理员批量下发额度');if(!Array.isArray(entries)||!entries.length||entries.length>200||!/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey))fail(422,'每批1–200名教师，月份需合法');}
+function invalidRows(errors){const {AppError}=require('../middleware/errorHandler');const error=new AppError(422,'请修正全部教师额度错误',422);error.safeDetails=true;error.details={errors};throw error;}
 async function quotaState(c,{actor,termId,monthKey,teacherId}){
  const [[u]]=await c.query("SELECT id,real_name FROM users WHERE school_id=? AND id=? AND role='teacher' AND status=0 FOR UPDATE",[actor.schoolId,teacherId]);if(!u)fail(422,'教师不存在或已停用');
  const [[q]]=await c.query("SELECT id,revision,payload_json FROM evaluation_source_record WHERE school_id=? AND term_id=? AND month_key=? AND owner_teacher_id=? AND record_kind='QUOTA' FOR UPDATE",[actor.schoolId,termId,monthKey,teacherId]);
@@ -8,9 +9,21 @@ async function quotaState(c,{actor,termId,monthKey,teacherId}){
  return {teacherId,name:u.real_name,quotaId:q?String(q.id):null,expectedRevision:q?String(q.revision):null,oldTotal:p.quotaTotal??null,planned:(p.plans||[]).reduce((n,p)=>n+p.classTotal,0),generated:Number(g.n)};
 }
 async function previewQuotaBatch({pool,actor,termId,monthKey,entries,command}){
- const rows=validate(actor,entries,monthKey);
+ validate(actor,entries,monthKey);
  return withMutation({pool,actor,termId,command,action:'quota-batch-preview',termLock:'exclusive'},async c=>{
-  const diffs=[];for(const row of rows){const state=await quotaState(c,{actor,termId,monthKey,teacherId:row.teacherId});if(row.total<Math.max(state.planned,state.generated))fail(422,`${state.name}的新总额少于已分配或已制卡量`);diffs.push({...state,newTotal:row.total,delta:row.total-(state.oldTotal||0)});}
+  const errors=[],rows=[],seen=new Set();
+  for(let i=0;i<entries.length;i++){
+   const entry=entries[i]||{},rowNo=i+1,account=typeof entry.teacherAccount==='string'?entry.teacherAccount.trim():null;
+   const problem=(field,reason)=>errors.push({rowNo,teacherAccount:account||null,teacherId:entry.teacherId?String(entry.teacherId):null,field,reason});
+   if(!Number.isInteger(entry.total)||entry.total<0||entry.total>10000)problem('total','需填写0–10000的整数月总额');
+   let user;
+   if(account){[[user]]=await c.query("SELECT id,status FROM users WHERE school_id=? AND username=? AND role='teacher'",[actor.schoolId,account]);if(entry.teacherId&&String(user?.id)!==String(entry.teacherId))problem('teacherAccount','教师账号与ID不一致');}
+   else if(/^[1-9]\d*$/.test(String(entry.teacherId))){[[user]]=await c.query("SELECT id,status FROM users WHERE school_id=? AND id=? AND role='teacher'",[actor.schoolId,entry.teacherId]);}
+   if(!user)problem('teacherAccount','教师账号不存在');else if(user.status!==0)problem('teacherAccount','教师账号已停用');else if(seen.has(String(user.id)))problem('teacherAccount','本批教师重复（账号与ID指向同一教师也算重复）');else{seen.add(String(user.id));rows.push({teacherId:String(user.id),total:entry.total,rowNo});}
+  }
+  rows.sort((a,b)=>BigInt(a.teacherId)<BigInt(b.teacherId)?-1:1);
+  const diffs=[];for(const row of rows){const state=await quotaState(c,{actor,termId,monthKey,teacherId:row.teacherId});if(Number.isInteger(row.total)&&row.total>=0&&row.total<=10000&&row.total<Math.max(state.planned,state.generated))errors.push({rowNo:row.rowNo,teacherId:row.teacherId,field:'total',reason:`${state.name}的新总额少于已分配${state.planned}或已制卡${state.generated}张`});diffs.push({...state,newTotal:row.total,delta:row.total-(state.oldTotal||0)});}
+  if(errors.length)invalidRows(errors.sort((a,b)=>a.rowNo-b.rowNo));
   const batchId=await addSource(c,{schoolId:actor.schoolId,termId,actorId:actor.id,kind:'AUDIT',status:'PREVIEW',monthKey,key:['QUOTA_BATCH',actor.id,command.requestKey],payload:{action:'QUOTA_BATCH',monthKey,diffs}});
   return {result:{batchId,revision:'1',diffs,errors:[],counts:{teachers:diffs.length,changed:diffs.filter(d=>d.newTotal!==d.oldTotal).length}}};
  });
