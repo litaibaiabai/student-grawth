@@ -95,10 +95,10 @@
 
 ### 开始前基线（计入首个任务提交）
 
-- [ ] 核对AGENTS/工作区、Git状态、用户修改与当前分支；列出受保护的未追踪文档，不重置或替用户提交。
-- [ ] 运行前端现有test/build/lint、后端test与现有report-core浏览器流程，结果写`docs/delivery/role-ux/基线.md`；记录既有失败，不冒称由本次引入。
-- [ ] 确认集成测试只使用`createCoreTestDb`生成并清理`liuyu_report_test_*`，不重建pilot或旧库；记录测试环境但不记录口令。
-- [ ] 重新核查数据库session时区与时间戳约定。本轮只读结果：`liuyu_report_pilot_20261028`的`@@session.time_zone=SYSTEM`、`NOW()-UTC_TIMESTAMP()=08:00:00`，而dbConfig为`timezone:'Z'`；因此Task1必须修正新连接的服务器会话，不能误以为驱动参数已完成此事。旧created_at没有可靠来源证明时不批量改时刻，交付说明单列历史不确定性。
+- [x] 核对AGENTS/工作区、Git状态、用户修改与当前分支；列出受保护的未追踪文档，不重置或替用户提交。
+- [x] 运行前端现有test/build/lint、后端test与现有report-core浏览器流程，结果写`docs/delivery/role-ux/基线.md`；记录既有失败，不冒称由本次引入。
+- [x] 确认集成测试只使用`createCoreTestDb`生成并清理`liuyu_report_test_*`，不重建pilot或旧库；记录测试环境但不记录口令。
+- [x] 重新核查数据库session时区与时间戳约定。本轮只读结果：`liuyu_report_pilot_20261028`的`@@session.time_zone=SYSTEM`、`NOW()-UTC_TIMESTAMP()=08:00:00`，而dbConfig为`timezone:'Z'`；因此Task1必须修正新连接的服务器会话，不能误以为驱动参数已完成此事。旧created_at没有可靠来源证明时不批量改时刻，交付说明单列历史不确定性。
 
 ## R1. 审查后必须遵循的跨模块合同
 
