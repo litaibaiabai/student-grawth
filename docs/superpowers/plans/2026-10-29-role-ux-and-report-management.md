@@ -13,6 +13,7 @@
 - `docs/superpowers/specs/2026-10-28-teacher-card-ledger-design.md`
 - `docs/superpowers/specs/2026-10-29-class-report-browser-design.md`
 - `docs/superpowers/specs/2026-10-29-admin-three-menus-design.md`
+- `docs/superpowers/specs/2026-10-29-admin-term-configuration-design.md`
 - 可点击视觉参考：`docs/ui-prototype/three-role-design/index.html`，仅作布局参考，禁止把虚构数据、内存保存或toast代入正式业务。
 
 ## Global Constraints
@@ -45,7 +46,7 @@
 
 ## 0. 执行上下文、依赖与交付顺序
 
-经核对的源码目录：`/Users/quanta/Downloads/task/六育学生评价系统v2`，设计基线提交`7c22537`。聊天曾附加的`/Users/quanta/.codex/worktrees/term-report-core/六育学生评价系统v2`为空的旧基线，不能拿它当当前源码。执行前按using-git-worktrees核对附件与HEAD，复用合适工作区；若需隔离，只从已核对提交建立允许写入的工作区，不复制/提交密钥。
+经核对的源码目录：`/Users/quanta/Downloads/task/六育学生评价系统v2`，设计基线提交`3b551da`（包含管理员三菜单）。聊天曾附加的`/Users/quanta/.codex/worktrees/term-report-core/六育学生评价系统v2`为空的旧基线，不能拿它当当前源码。执行前按using-git-worktrees核对附件与HEAD，复用合适工作区；若需隔离，只从已核对提交建立允许写入的工作区，不复制/提交密钥。
 
 使用当前Node≥22.12；本机可用二进制为`/Users/quanta/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node`。命令中的`node/npm`必须来自该版本或等价受支持版本，不能使用系统Node18。
 
@@ -59,7 +60,7 @@
 
 `Task 4/9 → Task 12 → Task 13 → Task 14 → Task 15 → Task 16`
 
-实际执行次序为 **1→2→3→4→9→5→6→7→8→10→11→12→12A→13→14→15→16**；编号是稳定引用标识，12A为用户新增的管理员三菜单。Task9先为学生首页与后续工作台提供真实聚合，不用静态数字占位。依赖图不要求启动并行代理。每任务完成一个可单独核对的提交。任务16前不切换正式部署、不销毁旧运行资料。
+实际执行次序为 **1→2→3→4→9→5→6→7→8→10→11→12→12A→12B→13→14→15→16**；编号是稳定引用标识，12A为管理员三菜单，12B为新增详细学期配置设计。Task9先为学生首页与后续工作台提供真实聚合，不用静态数字占位。依赖图不要求启动并行代理。每任务完成一个可单独核对的提交。任务16前不切换正式部署、不销毁旧运行资料。
 
 实施方式延续此前的executing-plans：当前会话逐任务实现，结束后独立审阅；不自行改成每任务实现代理。先审阅本计划，再开始产品修改。
 
@@ -82,6 +83,8 @@
 | `StudentHome.jsx`、`SelfEvaluation.jsx`、`TeacherWorkspace.jsx`、`DirectScore.jsx` | 新增于同目录：对应角色页面 |
 | `CardLedger.jsx`、`CardPlan.jsx`、`ClassReports.jsx`、`ManagerWorkspace.jsx` | 新增于同目录：台账、制卡、报告、发布工作区 |
 | `AdminRoster.jsx`、`AdminHealth.jsx`、`AdminQuota.jsx` | 新增于同目录：三个独立管理菜单，不用一个弹窗拼装全部业务 |
+| `AdminTermSettings.jsx`、`termSettingsModel.js` | 新增于同目录：学期配置四页签、字段白名单、差异预览与规则试算 |
+| `backend/services/reportCoreTermSettings.js` | 新增：配置/职责预览、版本和影响指纹、事务提交与审计；复用现有保存核心 |
 | `index.jsx`、`Materials.jsx`、`Teacher.jsx`、`Administration.jsx`、`api.js` | 修改：接入新页面，保留真实业务适配，逐步移除已替代的组件 |
 | `frontend/src/component/TermReport/index.jsx` | 修改：可靠加载/高度/打印和溢出事件，仅接获准HTML |
 | `docs/delivery/role-ux/` | 新增：基线、接口/验证说明、精确清理清单与验收证据索引 |
@@ -256,7 +259,7 @@
 
 - [ ] **Step 1 — 写失败UI流程：** 教师首页待办能定位具体奖状/故事异常/缺项；管理员默认发布中心，少一人缺确认不能准备/发布；重新加载恢复PREPARING，全部prepare完成后一次activate才对学生可见。
 - [ ] **Step 2 — 实现教师工作台：** 合法班级/学科范围和三摘要，快速操作入口，材料同屏核对/保存下一条；只显本人任务，失败保留表单，系统评分失败不补默认分。
-- [ ] **Step 3 — 实现管理员外壳：** 五个独立导航；发布中心缺项与责任人、学期配置教师姓名搜索与中文学科，其余三个菜单接Task12A。健康无六育终测导入；规则更改提示确认失效。任教维护不输数据库ID。
+- [ ] **Step 3 — 实现管理员外壳：** 五个独立导航；发布中心显示缺项与责任人，三个数据菜单接Task12A、学期配置接Task12B。健康无六育终测导入；任教维护不输数据库ID。
 - [ ] **Step 4 — 验证：** 沿现有prepare/batch/activate/recover/cancel接口状态，按服务端允许动作呈现；刷新/网络中断恢复，无按班提前发布、管理员无私有正文。`test:report-core`与backend release/auth/read-model tests PASS。
 - [ ] **Step 5 — 提交：** `feat: prioritize teacher tasks and school-wide report publication`。
 
@@ -271,6 +274,18 @@
 - [ ] **Step 3 — 实现服务：** 名册/体测预览聚合错误，错误422/details无可提交batchId，成功仅安全diff；提交复验现值/角色/修订。管理员健康GET仅五原值。额度预览最多200启用本校教师、按绝对月总额度0–10000并校验max(P,G)；确认校验批次owner/修订，稳定顺序锁行，一次withMutation写所有QUOTA及逐人/批次AUDIT，一错全回滚。
 - [ ] **Step 4 — 实现三个页面并跑绿：** 学籍与账号按学生/教师列表和模板→错误/差异预览→结果/记录；体测按班五原值→逐格差异→确认/记录；月度额度按教师勾选、统一设值/逐行编辑/模板→前后额预览→批量确认/结果。新总额与本次增量分列，未选不清零；同页保留输入与范围，真实成功才刷新。后端测试及`node tests/report-core-admin.cjs` PASS，390/1440可操作、三条地址可刷新进入。
 - [ ] **Step 5 — 提交：** `feat: split admin data menus and atomically grant teacher quotas`。
+
+## Task 12B: 学期配置四页签与有影响提示的原子保存
+
+**Files:** Create `frontend/src/app/reportCore/AdminTermSettings.jsx`, `termSettingsModel.js`, `termSettingsModel.test.js`, `backend/services/reportCoreTermSettings.js`, `backend/__tests__/report_core_term_settings.test.js`; Modify `Administration.jsx`, `index.jsx`, `navigation.js`, `api.js`, `backend/services/reportCoreAdmin.js`, `reportCoreViews.js`, `reportCoreFeatures.js`; Extend `frontend/tests/report-core-admin.cjs`。
+
+**Interfaces:** 按学期配置设计第7节定义 `getTermSettings`, `previewTermSettings`, `commitTermSettingsPreview`, `listTermSettingHistory`，参数统一`{pool,actor,termId,...,command}`；preview产生`{previewId,revision,diffs,impact,versions}`，消费配置双版本、职责指纹和服务端影响学生集合指纹。前端`buildTermSettingChanges(section,draft,current)`只产生该页签白名单，`getCardStarPreview(points,target,settled)`沿既有公式；历史/预览用现有AUDIT，不新增表。
+
+- [ ] **Step 1 — 写失败回归：** 日期无变化不推进版本/确认；合法日期保存、显式清空、期末前日期拒绝；T=2/3/10边界、未结算为null、期外/重复/零月份拒绝。预览后学生修订或确认变化、配置版本变化、职责变化任一409且无部分修改；同key异内容拒绝，同内容重试返回原结果。跨校/非管理员拒绝，规则保存只重算CARD/STORY当前投影且冻结发布快照不变。
+- [ ] **Step 2 — 验证红测：** `cd backend && node --test __tests__/report_core_term_settings.test.js`、前端`node --test src/app/reportCore/termSettingsModel.test.js`在旧实现业务断言失败；补两管理员交接竞争、重复任教跳过、多学科班主任一致和最后职责停用必须明确继任/暂缺的失败测试。
+- [ ] **Step 3 — 实现事务服务：** 提取现有updateTerm/saveAssignment的同事务核心，严格section白名单并保留其他配置键；预览AUDIT存旧新值、预期配置/规则版本、受影响学生修订/确认集合指纹。提交学期锁内复验，任教最多100项、稳定顺序锁行、每班最多一个有效班主任；变更仅失效实际受影响班级确认，日期/规则沿全学期失效行为。发布非IDLE全部写入拒绝，旧PATCH/单笔职责端点不能绕过CAS/唯一/确认失效；幂等重试不二次重算。
+- [ ] **Step 4 — 实现四页签并跑绿：** 只读已有学期信息/可编辑报到日期、按班任教与姓名搜索/中文学科、T与月份可视选择/试算、只读口径与分页历史。独立草稿→同页差异/影响→确认→真实结果，409保留输入，非IDLE只读；切页签不丢，切学期/退出保护。后端和模型测试PASS，admin浏览器覆盖四页签、预览后改输入失效、真实保存/重载、并发冲突、发布锁和手机键盘；不以静态示例记录冒充后台审计。
+- [ ] **Step 5 — 提交：** `feat: add term settings with scoped assignments and reviewed rule changes`；记录实际全学期重算耗时，不为配置默认另建队列表；用户设计评审通过后才实现本任务。
 
 ## Task 13: 形成精确清理清单与断言迁移
 
@@ -326,8 +341,8 @@
 
 ## 计划自审记录
 
-- 范围覆盖：总设计→Task4–7/9/12；卡台账→Task1–3/8；班级报告→Task9–11；管理员三菜单与原子批量额度→Task12A；清理→Task13–15；跨模块验收→Task16。
+- 范围覆盖：总设计→Task4–7/9/12；卡台账→Task1–3/8；班级报告→Task9–11；管理员三菜单与原子批量额度→Task12A；学期配置→Task12B；清理→Task13–15；跨模块验收→Task16。
 - 接口一致：归属月/实际事件时间及asOf由Task2定义，导出与页面消费同一口径；Task9纯完整度供readiness、workspace与Task10复用；Task10权限产生Task11动作，不由UI推断。
 - 五类Review Focus均有对应失败/负向测试；没有以颜色测试代替保存、权限、分页和打印边界。
 - 计划没有额外业务表、通用表单/库存/报表引擎、服务端PDF依赖或微服务；旧SQL/字体/相关文档按真实依赖保护。
-- 本文件只是实施步骤与验收门槛，未执行产品代码修改、删除、依赖安装或数据库变更。既有方案已收敛，管理员新增三菜单待本轮页面评审；实施计划同步更新，审阅后进入执行。
+- 本文件只是实施步骤与验收门槛，未执行产品代码修改、删除、依赖安装或数据库变更。管理员三个独立菜单已完成原型展示与独立设计审阅；新增学期配置设计待用户页面评审。任务扩为18个、90项任务步骤，覆盖五份设计。实施方式保持当前会话逐任务执行，不另行要求选择。
