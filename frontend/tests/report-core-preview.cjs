@@ -114,16 +114,14 @@ const policy = require("../../backend/config/reportCorePolicy.json");
     model.narratives.self_conduct_text = "长文本".repeat(650);
     await page.setContent(renderPrintableA4({ reportData: model }));
     await page.emulateMedia({ media: "print" });
-    assert.equal(
-      await page.evaluate(() => {
-        const p = document.querySelector("[data-print-page]");
-        return p.scrollHeight > p.clientHeight;
-      }),
-      true,
-      "long text must be detected rather than clipped",
-    );
+    assert.equal(await page.locator('[data-print-page]').evaluateAll(pages=>pages.filter(p=>p.scrollHeight>Math.ceil(p.getBoundingClientRect().height)+2).length),0,'legal long text must use complete continuation pages');
+    assert.ok(await page.locator('.report-continuation').count()>0);
+    assert.equal((await page.locator('[data-content-id="narrative:self_conduct_text"]').allTextContents()).join(''),model.narratives.self_conduct_text);
+    const count=await page.locator('[data-print-page]').count(),longPdf=path.join(dir,'long-layout-sample.pdf');await page.pdf({path:longPdf,preferCSSPageSize:true,printBackground:true});assert.equal(Number(execFileSync('pdfinfo',[longPdf],{encoding:'utf8'}).match(/Pages:\s+(\d+)/)[1]),count);
+    await page.locator('[data-print-page]').first().evaluate(p=>{p.style.height='10px';});
+    assert.equal(await page.locator('[data-print-page]').first().evaluate(p=>p.scrollHeight>p.clientHeight+2),true,'an actual malformed page must still fail overflow checks');
     console.log(
-      "PASS 109 positions, mobile widths, two A4 faces and long-text overflow detection",
+      "PASS 109 positions, mobile widths, two A4 faces, complete continuations and true overflow detection",
     );
   } finally {
     await b.close();

@@ -5,13 +5,14 @@ import SelfEvaluation from "./SelfEvaluation";
 import DirectScore from "./DirectScore";
 import AcademicImport from "./AcademicImport";
 import CardLedger from "./CardLedger";
+import ClassReports from "./ClassReports";
+import TeacherWorkspace from "./TeacherWorkspace";
 import StudentHome, { StudentArchive } from "./StudentHome";
 import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm } from "./Materials";
 import {
   ImportData,
   ReviewMaterials,
-  ReportDrafts,
   Settlements,
 } from "./Teacher";
 import { CardManagement, Configuration, Releases } from "./Administration";
@@ -23,7 +24,8 @@ function Published({ ctx }) {
     api(`/report-core/reports/current?termId=${ctx.termId}`)
       .then(setReport)
       .catch(ctx.error);
-  }, [ctx.termId, ctx.refreshKey]);
+  }, [ctx.termId, ctx.refreshKey, ctx.sessionActive]);
+  if(ctx.sessionActive===false)return <section className="panel">请重新登录后读取报告。</section>;
   return report ? (
     <TermReport html={report.html} />
   ) : (
@@ -47,6 +49,9 @@ export default function ReportCoreApp() {
     [sources, setSources] = useState([]),
     [sourceNext, setSourceNext] = useState(null),
     [assignments, setAssignments] = useState([]),
+    [scopeReady,setScopeReady] = useState(false),
+    [teacherScope,setTeacherScope] = useState(null),
+    [focusTask,setFocusTask] = useState(null),
     [refreshKey, setRefresh] = useState(0),
     [notice, setNotice] = useState(""),
     [error, setError] = useState(""),
@@ -106,7 +111,7 @@ export default function ReportCoreApp() {
     if (!actor || !termId) return;
     const controller = new AbortController();
     const scopeKey = `${actor.id}:${termId}`;
-    if (loadedScope.current !== scopeKey) { setStudents([]); setSources([]); setAssignments([]); loadedScope.current = scopeKey; }
+    if (loadedScope.current !== scopeKey) { setScopeReady(false);setTeacherScope(null);setStudents([]); setSources([]); setAssignments([]); loadedScope.current = scopeKey; }
     Promise.all([
       allStudents(termId, { signal: controller.signal }),
       api(`/report-core/sources?termId=${termId}&page=1`, undefined, undefined, { signal: controller.signal }),
@@ -118,6 +123,7 @@ export default function ReportCoreApp() {
         setSources(r.rows);
         setSourceNext(r.nextOffset);
         setAssignments(a);
+        setScopeReady(true);
       })
       .catch(e => { if (e.name !== "AbortError") reportError(e); });
     return () => controller.abort();
@@ -126,7 +132,7 @@ export default function ReportCoreApp() {
     if (!actor || !termId) return;
     const update = () => {
       const route = routeForRole(parseCoreLocation(location.hash), actor.role);
-      if ((route.page !== tab || route.termId && route.termId !== termId) && !mayLeave()) { location.hash = formatCoreLocation({role:actor.role,page:tab,termId}); return; }
+      if ((route.page !== tab && !(['entry','direct'].includes(route.page)&&['entry','direct'].includes(tab)) || route.termId && route.termId !== termId) && !mayLeave()) { location.hash = formatCoreLocation({role:actor.role,page:tab,termId}); return; }
       setTab(route.page);
       if (route.termId && terms.some(t => String(t.id) === route.termId)) setTermId(route.termId);
     };
@@ -134,13 +140,26 @@ export default function ReportCoreApp() {
     return () => window.removeEventListener('hashchange', update);
   }, [actor, termId, terms, tab]);
   const navigate = page => {
-    if (page !== tab) { if (!mayLeave()) return; leaveGuard.current = null; }
+    if (page !== tab && !(['entry','direct'].includes(page)&&['entry','direct'].includes(tab))) { if (!mayLeave()) return; leaveGuard.current = null; }
     setTab(page); setError(''); setNotice('');
     location.hash = formatCoreLocation({ role: actor.role, page, termId });
+  };
+  useEffect(()=>{
+    if(actor?.role!=='teacher'||!scopeReady)return;
+    const key=`REPORT_SCOPE:${actor.schoolId}:${actor.id}:${termId}`;let stored;
+    try{stored=JSON.parse(localStorage.getItem(key)||'null');}catch{}
+    const current=teacherScope||stored,chosen=assignments.find(a=>`${a.grade}:${a.class_no}`===current?.classKey&&a.subject_code===current?.subjectCode)||assignments[0];
+    const next=chosen?{classKey:`${chosen.grade}:${chosen.class_no}`,subjectCode:chosen.subject_code}:null;
+    if(next){if(next.classKey!==teacherScope?.classKey||next.subjectCode!==teacherScope?.subjectCode)setTeacherScope(next);localStorage.setItem(key,JSON.stringify(next));}
+  },[actor?.id,termId,assignments,scopeReady,teacherScope]);
+  const changeScope=(classKey,subjectCode)=>{
+    if(!mayLeave())return;
+    const available=assignments.filter(a=>`${a.grade}:${a.class_no}`===classKey),chosen=available.find(a=>a.subject_code===subjectCode)||available[0];if(chosen)setTeacherScope({classKey,subjectCode:chosen.subject_code});
   };
   const ctx = {
     actor,
     termId,
+    sessionActive: !expired,
     navigate,
     term: terms.find(t => String(t.id) === termId),
     setLeaveGuard: fn => { leaveGuard.current = fn; },
@@ -148,6 +167,9 @@ export default function ReportCoreApp() {
     students,
     sources,
     assignments,
+    teacherScope,
+    selectedTask: focusTask,
+    focusTask: setFocusTask,
     sourceNext,
     loadMoreSources: () =>
       run(async () => {
@@ -277,13 +299,17 @@ export default function ReportCoreApp() {
             正在处理，请稍候…
           </div>
         )}
-        {!catalog || !termId ? (
+        {!catalog ? <section className="panel" role="status">正在读取学期配置…</section> : !termId ? (
           <section className="panel">
             <h2>尚未配置学期</h2>
             <p>请先运行学校初始化脚本配置首个学期。</p>
           </section>
-        ) : (
+        ) : !scopeReady ? <section className="panel" role="status">正在读取学生、班级与任教范围…</section> : (
           <div className="content" key={`${actor.id}:${termId}`} aria-busy={busy}>
+            {actor.role==='teacher'&&teacherScope&&<div className="context-bar"><div className="context-controls"><span className="context-label">当前工作范围</span><select aria-label="选择班级" value={teacherScope.classKey} onChange={e=>changeScope(e.target.value,teacherScope.subjectCode)}>{[...new Set(assignments.map(a=>`${a.grade}:${a.class_no}`))].map(c=><option key={c} value={c}>{c.replace(':','年级')}班</option>)}</select><select aria-label="选择任教学科" value={teacherScope.subjectCode} onChange={e=>changeScope(teacherScope.classKey,e.target.value)}>{[...new Set(assignments.filter(a=>`${a.grade}:${a.class_no}`===teacherScope.classKey).map(a=>a.subject_code))].map(code=><option key={code} value={code}>{({MORAL:'道德与法治',CHINESE:'语文',MATH:'数学',SCIENCE:'科学',ENGLISH:'英语',PE:'体育与健康',MUSIC:'音乐',FINE_ART:'美术',INFORMATION_TECHNOLOGY:'信息科技',LABOR:'劳动',INTEGRATED_PRACTICE:'综合实践活动',LOCAL_COURSE:'地方课程',STORY:'故事'})[code]||code}</option>)}</select></div><small>{tab==='drafts'?'班级报告可浏览全部负责班级':'下次打开会记住当前范围'}</small></div>}
+            {tab==='workspace'&&<TeacherWorkspace ctx={ctx}/>}
+            {actor.role==='teacher'&&['entry','direct','imports','reviews','settlements'].includes(tab)&&<nav className="evaluation-tabs" aria-label="评价录入分类">{[['direct','快速直评'],['imports','学业水平'],['reviews','材料认定'],['settlements','采集结算']].map(([id,label])=><button key={id} className={(tab==='entry'?'direct':tab)===id?'active':''} onClick={()=>navigate(id)}>{label}</button>)}</nav>}
+            {actor.role==='student'&&['cards','awards','self','report'].includes(tab)&&<button className="text-action student-back" onClick={()=>navigate(['self','report'].includes(tab)?'archive':'home')}>← 返回{['self','report'].includes(tab)?'我的档案':'首页'}</button>}
             {tab === "home" && <StudentHome ctx={ctx} />}
             {tab === "archive" && <StudentArchive ctx={ctx} />}
             {tab === "cards" && <Cards ctx={ctx} />}{" "}
@@ -291,11 +317,11 @@ export default function ReportCoreApp() {
             {tab === "stories" && <StoryForm ctx={ctx} />}{" "}
             {tab === "self" && <SelfEvaluation ctx={ctx} />}{" "}
             {tab === "report" && <Published ctx={ctx} />}{" "}
-            {tab === "direct" && <DirectScore ctx={ctx} />}{" "}
+            {["entry","direct"].includes(tab) && <DirectScore ctx={ctx} />}{" "}
             {tab === "imports" && actor.role === "teacher" && <AcademicImport ctx={ctx} />}
             {["imports", "roster", "health"].includes(tab) && actor.role !== "teacher" && <ImportData key={tab} ctx={ctx} initialKind={tab === "roster" ? "ROSTER" : tab === "health" ? "HEALTH" : "ACADEMIC"} />}{" "}
             {tab === "reviews" && <ReviewMaterials ctx={ctx} />}{" "}
-            {tab === "drafts" && <ReportDrafts ctx={ctx} />}{" "}
+            {tab === "drafts" && <ClassReports ctx={ctx} />}{" "}
             {tab === "settlements" && <Settlements ctx={ctx} />}{" "}
             {tab === "cards-manage" && actor.role === "teacher" && <CardLedger ctx={ctx} />}
             {tab === "quota" && <CardManagement ctx={ctx} />}{" "}

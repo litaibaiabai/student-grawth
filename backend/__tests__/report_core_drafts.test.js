@@ -38,6 +38,8 @@ test("draft renders every field, escapes user text and manager cannot read it; c
     expectedFingerprint: d.fingerprint,
     layoutReview: {
       fingerprint: d.fingerprint,
+      renderScope: 'FULL',
+      documentKey: d.documentKey,
       templateVersion: "CORE_V1",
       overflow: false,
     },
@@ -63,6 +65,8 @@ test("draft renders every field, escapes user text and manager cannot read it; c
       expectedFingerprint: d.fingerprint,
       layoutReview: {
         fingerprint: d.fingerprint,
+        renderScope: 'FULL',
+        documentKey: d.documentKey,
         templateVersion: "CORE_V1",
         overflow: false,
       },

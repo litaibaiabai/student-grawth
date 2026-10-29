@@ -278,6 +278,7 @@ function buildReportModel({ evaluation: e, config, studentSnapshot }) {
   );
   return {
     schemaVersion: "CORE_V1",
+    renderVersion: require("./reportRenderService").RENDER_VERSION,
     student: studentSnapshot || {
       id: String(e.student_id),
       name: e.student_name_snapshot,
@@ -315,6 +316,9 @@ async function missingItems(c, e, term) {
   return evaluateCompletion({evaluation:e,config:term.evaluation_config,blockingMaterials}).missingItems;
 }
 
+function reportDocumentKey({studentKey,viewVersion,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion,releaseVersion}) {
+  return require('./reportCorePolicy').stableHash([String(studentKey.schoolId),String(studentKey.termId),String(studentKey.studentId),viewVersion,scope,String(revision),fingerprint,templateVersion,String(ruleVersion),configVersion===null?null:String(configVersion),releaseVersion??null]);
+}
 async function buildReportDraft({ pool, actor, studentKey }) {
   if (actor.role !== "teacher") fail(403, "报告草稿仅班主任可查看");
   const scope = await assertScope(
@@ -342,6 +346,7 @@ async function buildReportDraft({ pool, actor, studentKey }) {
     model,
     html,
     revision: String(scope.evaluation.revision),
+    documentKey: reportDocumentKey({studentKey,viewVersion:'current',scope:'full',revision:scope.evaluation.revision,fingerprint,templateVersion:term.template_version,ruleVersion:term.rule_version,configVersion:term.config_version,releaseVersion:null}),
     fingerprint,
     missingItems: await missingItems(pool, scope.evaluation, term),
   };
@@ -380,7 +385,9 @@ async function confirmReport({
         !layoutReview ||
         layoutReview.overflow !== false ||
         layoutReview.fingerprint !== fingerprint ||
-        layoutReview.templateVersion !== term.template_version
+        layoutReview.templateVersion !== term.template_version ||
+        layoutReview.renderScope !== 'FULL' ||
+        layoutReview.documentKey !== reportDocumentKey({studentKey,viewVersion:'current',scope:'full',revision:e.revision,fingerprint,templateVersion:term.template_version,ruleVersion:term.rule_version,configVersion:term.config_version,releaseVersion:null})
       )
         fail(422, "请完成打印版面复核");
       const missing = await missingItems(c, e, term);
@@ -423,6 +430,7 @@ async function confirmReports({ pool, actor, termId, items, command }) {
 }
 Object.assign(module.exports, {
   buildReportModel,
+  reportDocumentKey,
   buildReportDraft,
   reportFingerprint,
   missingItems,

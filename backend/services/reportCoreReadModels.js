@@ -66,10 +66,14 @@ async function getWorkspace(args) {
     const byStudent=new Map();for(const r of blocking){const id=String(r.student_id);if(!byStudent.has(id))byStudent.set(id,[]);byStudent.get(id).push(r);}
     const [published]=await c.query("SELECT student_id FROM term_report WHERE school_id=? AND term_id=? AND release_version=? AND status='PUBLISHED'",[actor.schoolId,termId,term.active_release_version||0]);
     const publishedIds=new Set(published.map(r=>String(r.student_id))), tasks=[], classes=new Map();
-    const counts={total:roster.length,missingStudents:0,confirmed:0,published:0,pendingMaterials:blocking.length,failedStories:blocking.filter(r=>r.source_type==='STORY'&&r.status==='FAILED').length};
+    const counts={academicExpected:0,academicComplete:0,total:roster.length,missingStudents:0,confirmed:0,published:0,pendingMaterials:blocking.length,failedStories:blocking.filter(r=>r.source_type==='STORY'&&r.status==='FAILED').length};
     const fingerprint=require('./reportCoreEvaluation').reportFingerprint;
     for(const e of roster){
       const sid=String(e.student_id), related=assignments.filter(a=>a.grade===e.grade_snapshot&&a.class_no===e.class_no_snapshot), own=related.filter(a=>String(a.teacher_id)===actor.id);
+      for(const field of fixedFields.filter(f=>f.sourceType==='IMPORT'&&(!args.subjectCode||subjectFor(f.column)===args.subjectCode)&&(term.evaluation_config.applicableFields||fixedFields.map(f=>f.column)).includes(f.column))) {
+        if(actor.role==='teacher'&&!own.some(a=>a.subject_code===subjectFor(field.column)))continue;
+        counts.academicExpected++;if(e[field.column]!==null&&e[field.column]!==undefined&&e[field.column]!=='')counts.academicComplete++;
+      }
       const completion=evaluateCompletion({evaluation:e,config:term.evaluation_config,blockingMaterials:byStudent.get(sid)||[]});
       if(completion.missingItems.length)counts.missingStudents++;
       const confirmed=e.status==='CONFIRMED'&&String(e.confirmed_revision)===String(e.revision)&&e.approval_fingerprint===fingerprint(e,term);
@@ -86,7 +90,8 @@ async function getWorkspace(args) {
         tasks.push({taskId:`student:${sid}:${m.field}${m.itemId?':'+m.itemId:''}`,type:'MISSING_FIELD',studentId:sid,fieldKey:m.field,reason:m.reason,canHandle,responsible:responsible.length?responsible.map(a=>({id:String(a.teacher_id),name:a.real_name})).filter((r,i,a)=>a.findIndex(v=>v.id===r.id)===i):[],responsibilityStatus:responsible.length?'ASSIGNED':'UNCONFIGURED',route:{page:self?'self':'drafts',studentId:sid,termId:String(termId)}});
       }
       for(const material of byStudent.get(sid)||[]){
-        const canHandle=actor.role==='teacher'&&own.some(a=>a.is_head_teacher===1||a.subject_code===subjectFor(material.target_key||'story_read_star'));
+        const canHandle=actor.role==='teacher'&&(material.source_type==='STORY'?own.some(a=>a.is_head_teacher===1||a.subject_code==='STORY'):require('./authorizationService').canManageCertificate({head:own.some(a=>a.is_head_teacher===1),assignments:own}));
+        if(actor.role==='teacher'&&!canHandle)continue;
         tasks.push({taskId:`source:${material.id}`,type:material.source_type,studentId:sid,sourceId:String(material.id),monthKey:material.month_key,reason:material.status==='FAILED'?'自动处理失败':'材料待处理',canHandle,route:{page:actor.role==='student'?(material.source_type==='STORY'?'stories':'awards'):'reviews',termId:String(termId)}});
       }
     }

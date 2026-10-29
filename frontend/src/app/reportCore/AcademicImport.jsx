@@ -1,10 +1,13 @@
-import React,{useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import * as XLSX from 'xlsx';
 import {api,resultOf} from './api';
 import {normalizeImportRows} from './importRows';
 const subject=column=>({moral:'MORAL',chinese:'CHINESE',math:'MATH',science:'SCIENCE',english:'ENGLISH',pe:'PE',music:'MUSIC',fine:'FINE_ART',information:'INFORMATION_TECHNOLOGY',labor:'LABOR',integrated:'INTEGRATED_PRACTICE',local:'LOCAL_COURSE'})[column.split('_')[0]];
 export default function AcademicImport({ctx}) {
- const [cls,setCls]=useState(''),[code,setCode]=useState(''),[cells,setCells]=useState({}),[fileRows,setFileRows]=useState(null),[preview,setPreview]=useState(null),[busy,setBusy]=useState(false);
+ const [cls,setCls]=useState(ctx.teacherScope?.classKey||''),[code,setCode]=useState(ctx.teacherScope?.subjectCode||''),[cells,setCells]=useState({}),[fileRows,setFileRows]=useState(null),[preview,setPreview]=useState(null),[busy,setBusy]=useState(false);
+ const live=useRef(null);live.current={cells,fileRows};
+ useEffect(()=>{ctx.setLeaveGuard?.(()=>!Object.keys(live.current.cells).length&&!live.current.fileRows||window.confirm('学业录入尚未提交，离开会放弃本次填写。是否离开？'));return()=>ctx.setLeaveGuard?.(null);},[]);
+ useEffect(()=>{setCls(ctx.teacherScope?.classKey||'');setCode(ctx.teacherScope?.subjectCode||'');setCells({});setFileRows(null);setPreview(null);},[ctx.teacherScope?.classKey,ctx.teacherScope?.subjectCode]);
  const fields=ctx.catalog.fields.filter(f=>!f.jsonPath&&f.sourceType==='IMPORT'&&subject(f.column)&&ctx.assignments.some(a=>a.subject_code===subject(f.column))),visibleFields=fields.filter(f=>!code||subject(f.column)===code);
  const students=ctx.students.filter(s=>!cls||`${s.grade_snapshot}:${s.class_no_snapshot}`===cls),classes=[...new Set(ctx.students.map(s=>`${s.grade_snapshot}:${s.class_no_snapshot}`))];
  const allowed=(s,f)=>ctx.assignments.some(a=>a.grade===s.grade_snapshot&&a.class_no===s.class_no_snapshot&&a.subject_code===subject(f.column));

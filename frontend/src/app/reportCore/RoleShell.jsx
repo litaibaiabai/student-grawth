@@ -1,18 +1,12 @@
 import React from 'react';
-import { navigation, roleNames } from './navigation';
+import {navigation,roleNames,mainPage,pageTitles} from './navigation';
+import {UIIcon} from './illustrations';
 import './tokens.css';
-export default function RoleShell({ actor, term, route, onNavigate, onLogout, children, header }) {
-  const links = navigation[actor.role] || [];
-  return <div className={`core-app role-${actor.role}`}>
-    <a className="skip-link" href="#core-content">跳到主要内容</a>
-    <aside className="core-sidebar"><div className="brand-mark">云美<span>学期评价工作台</span></div>
-      <div className="role-label">{roleNames[actor.role]}工作区</div>
-      <nav aria-label="核心业务导航">{links.map(([id,label], i) => <button key={id} aria-label={label} aria-current={route.page === id ? 'page' : undefined} className={route.page === id ? 'active' : ''} onClick={() => onNavigate(id)}><span aria-hidden="true">{String(i+1).padStart(2,'0')}</span>{label}</button>)}</nav>
-      <div className="sidebar-note">有故事的学校<br/>有温度的教育<br/>有精彩的童年</div><button className="logout" onClick={onLogout}>退出登录</button>
-    </aside>
-    <main className="core-main" id="core-content" tabIndex={-1}>
-      <header className="core-header"><div><p className="kicker">云美少年 · 综合素质发展</p><h1>{links.find(([id]) => id === route.page)?.[1]}</h1></div><div className="identity"><span>{actor.real_name || roleNames[actor.role]} · {roleNames[actor.role]}</span>{header || <span>{term?.term_name}</span>}</div></header>
-      {children}<footer className="core-footer">每一个孩子，都有自己的成长轨迹。</footer>
-    </main>
-  </div>;
+const icons={home:'home',stories:'book',archive:'report',workspace:'home',entry:'edit','cards-manage':'cards',drafts:'report',releases:'check',roster:'people',health:'report',quota:'cards',config:'settings'};
+function Brand({student=false}){return <div className="core-brand"><UIIcon name="cloud"/><div><strong>云美</strong><small>{student?'成长手账 · 学期评价':'综合素质发展评价'}</small></div></div>;}
+export default function RoleShell({actor,term,route,onNavigate,onLogout,children,header}) {
+ const selected=mainPage(actor.role,route.page),links=navigation[actor.role]||[],label=roleNames[actor.role];
+ const nav=kind=><nav className={kind} aria-label="核心业务导航">{links.map(([id,text])=><button aria-label={text} aria-current={selected===id?'page':undefined} className={selected===id?'active':''} onClick={()=>onNavigate(id)} key={id}><UIIcon name={icons[id]}/><span>{text}</span></button>)}</nav>;
+ if(actor.role==='student')return <div className="core-app role-student"><a className="skip-link" href="#core-content">跳到主要内容</a><header className="student-header"><Brand student/>{nav('student-topnav')}<details className="student-account"><summary><span className="avatar-dot">{(actor.real_name||'同').slice(0,1)}</span><span>{actor.real_name||'同学'}</span></summary><div className="account-menu"><p>{term?.term_name}</p>{header}<button onClick={onLogout}><UIIcon name="logout"/>退出登录</button></div></details></header><main id="core-content" className="student-content" tabIndex={-1}>{children}<footer className="student-footer">每一个小小的进步，都值得被看见</footer></main>{nav('student-bottomnav')}</div>;
+ return <div className={`core-app role-${actor.role} adult-shell`}><a className="skip-link" href="#core-content">跳到主要内容</a><aside className="core-sidebar"><Brand/><p className="side-caption">{label}工作空间</p>{nav('adult-navigation')}<div className="sidebar-note">有故事的学校<br/>有温度的教育<br/>有精彩的童年</div><div className="side-account"><span className="avatar-dot">{(actor.real_name||label).slice(0,1)}</span><div><strong>{actor.real_name||label}</strong><small>{label}账号</small></div><button aria-label="退出登录" title="退出登录" onClick={onLogout}><UIIcon name="logout"/></button></div></aside><main className="core-main" id="core-content" tabIndex={-1}><header className="core-header"><div><p className="kicker">云美少年 · 学期评价</p><h1>{pageTitles[route.page]||'学期评价'}</h1></div><div className="identity">{header}</div></header>{children}<footer className="core-footer">有故事的学校 · 有温度的教育 · 有精彩的童年</footer></main></div>;
 }

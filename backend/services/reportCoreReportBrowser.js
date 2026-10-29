@@ -2,7 +2,7 @@ const {fail,fixedFields,byColumn,stableHash}=require('./reportCorePolicy');
 const {getTerm,parse}=require('./reportCoreStore');
 const {assignments,assertScope}=require('./authorizationService');
 const {resolveTermRoster,getBlockingMaterials,evaluateCompletion,pagination}=require('./reportCoreReadModels');
-const {buildReportModel,reportFingerprint}=require('./reportCoreEvaluation');
+const {buildReportModel,reportFingerprint,reportDocumentKey}=require('./reportCoreEvaluation');
 function teacherOnly(actor){if(actor.role!=='teacher')fail(403,'仅任课教师查看班级报告');}
 async function readSnapshot(pool,fn){const c=await pool.getConnection();try{await c.beginTransaction();const result=await fn(c);await c.commit();return result;}catch(error){await c.rollback();throw error;}finally{c.release();}}
 async function dataset(c,actor,termId){
@@ -28,11 +28,11 @@ async function listReportClasses({pool,actor,termId}){
  return {rows:[...classes.values()].sort((a,b)=>a.grade-b.grade||a.classNo-b.classNo),counts:countsOf(rows),asOf:new Date().toISOString()};});
 }
 async function listReportStudents(args){
- const {pool,actor,termId}=args;teacherOnly(actor);const grade=Number(args.grade),classNo=Number(args.classNo);if(!Number.isInteger(grade)||grade<1||!Number.isInteger(classNo)||classNo<1)fail(422,'请选择班级');
+ const {pool,actor,termId}=args;teacherOnly(actor);const hasClass=args.grade!==undefined||args.classNo!==undefined,grade=hasClass?Number(args.grade):null,classNo=hasClass?Number(args.classNo):null;if(hasClass&&(!Number.isInteger(grade)||grade<1||!Number.isInteger(classNo)||classNo<1))fail(422,'请选择完整班级');
  const keyword=String(args.keyword||'');if(keyword.length>100)fail(422,'搜索文字过长');const status=args.status||'all';if(!['all','missing','confirmed','published','ready','draft'].includes(status))fail(422,'报告状态不合法');
  const page=pagination(args,{actor,termId,grade,classNo,keyword,status});
- return readSnapshot(pool,async c=>{const data=await dataset(c,actor,termId);if(!data.teaching.some(a=>a.grade===grade&&a.class_no===classNo))fail(403,'不在任教班级范围');
- const all=data.roster.filter(e=>e.grade_snapshot===grade&&e.class_no_snapshot===classNo).map(e=>summarize(e,data));
+ return readSnapshot(pool,async c=>{const data=await dataset(c,actor,termId);if(hasClass&&!data.teaching.some(a=>a.grade===grade&&a.class_no===classNo))fail(403,'不在任教班级范围');
+ const all=data.roster.filter(e=>!hasClass||e.grade_snapshot===grade&&e.class_no_snapshot===classNo).map(e=>summarize(e,data));
  const rows=all.filter(r=>(!keyword||r.name.includes(keyword)||r.studentId.includes(keyword))&&(status==='all'||status==='missing'&&r.hasMissing||status==='confirmed'&&r.isConfirmed||status==='published'&&r.isPublished||status==='ready'&&!r.hasMissing||status==='draft'&&!r.isConfirmed));
  return {rows:rows.slice(page.offset,page.offset+page.limit),total:rows.length,counts:countsOf(all),nextCursor:page.next(rows.length),asOf:new Date().toISOString()};});
 }
@@ -40,7 +40,7 @@ function validateFrozenSnapshot(snapshot,row){
  if(!snapshot.renderedDetailHtml||!snapshot.renderedDetailHash)fail(422,'此历史报告尚无安全冻结明细，请由班主任查看完整版');
  if(stableHash(snapshot.renderedDetailHtml)!==snapshot.renderedDetailHash||stableHash(snapshot)!==row.snapshot_hash)fail(409,'报告快照校验失败，请联系管理员核对');
 }
-function detailModel(model){return {schemaVersion:model.schemaVersion,student:model.student,term:model.term,values:model.values,sportsSpecialties:model.sportsSpecialties||[],artSpecialties:model.artSpecialties||[],templateVersion:model.templateVersion,ruleVersion:model.ruleVersion,configVersion:model.configVersion,fingerprint:model.fingerprint};}
+function detailModel(model){return {renderVersion:model.renderVersion,schemaVersion:model.schemaVersion,student:model.student,term:model.term,values:model.values,sportsSpecialties:model.sportsSpecialties||[],artSpecialties:model.artSpecialties||[],templateVersion:model.templateVersion,ruleVersion:model.ruleVersion,configVersion:model.configVersion,fingerprint:model.fingerprint};}
 async function getReportDetail({pool,actor,studentKey,version='current',scope='detail'}){
  teacherOnly(actor);if(!studentKey||!['termId','studentId'].every(key=>/^[1-9]\d*$/.test(String(studentKey[key]))))fail(422,'学生或学期编号不合法');if(!['current','published'].includes(version)||!['detail','full'].includes(scope))fail(422,'报告版本或范围不合法');
  return readSnapshot(pool,async c=>{
@@ -62,7 +62,7 @@ async function getReportDetail({pool,actor,studentKey,version='current',scope='d
    if(scope==='detail')model=detailModel(model);
    html=require('./reportRenderService').renderPrintableA4({reportData:model,renderScope:scope==='full'?'FULL':'DETAIL_ONLY',draftLabel:'当前草稿'});
   }
-  return {model,html,viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion:configVersion===null?null:String(configVersion),releaseVersion,publishedVersion,missingItems,permissions:{canPrint:true,canReadFull:permission.head,canConfirm:version==='current'&&permission.head&&term.release_status==='IDLE'&&!missingItems.length,canEditComment:version==='current'&&permission.head&&term.release_status==='IDLE'}};
+  return {model,html,documentKey:reportDocumentKey({studentKey,viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion,releaseVersion}),viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion:configVersion===null?null:String(configVersion),releaseVersion,publishedVersion,missingItems,permissions:{canPrint:true,canReadFull:permission.head,canConfirm:version==='current'&&permission.head&&term.release_status==='IDLE'&&!missingItems.length,canEditComment:version==='current'&&permission.head&&term.release_status==='IDLE'}};
  });
 }
 module.exports={listReportClasses,listReportStudents,getReportDetail,validateFrozenSnapshot};

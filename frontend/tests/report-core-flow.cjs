@@ -12,6 +12,7 @@ const {
 } = require("../../backend/__tests__/helpers/reportCoreDb");
 (async () => {
   const cleanups = [];
+  const uploadDir=await fs.mkdtemp('/tmp/report-ui-uploads-');process.env.REPORT_FILES_DIR=uploadDir;cleanups.push(()=>fs.rm(uploadDir,{recursive:true,force:true}));
   const db = await createCoreTestDb({ after: (fn) => cleanups.push(fn) });
   let vite, server, browser;
   try {
@@ -61,6 +62,7 @@ const {
     browser = await chromium.launch({ headless: true, channel: "chrome" });
     const page = await browser.newPage();
     const errors = [];
+
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("http://127.0.0.1:19372");
     await page
@@ -69,7 +71,7 @@ const {
     await page.getByLabel("账号").fill("student");
     await page.getByLabel("密码", { exact: true }).fill("Test-pass-2026");
     await page.getByRole("button", { name: "登录", exact: true }).click();
-    await page.getByRole("button", { name: "自我评价", exact: true }).click();
+    await page.getByRole("button", { name: "开始自我评价 →", exact: true }).click();
     try { await page.getByRole("radio", { name: "有礼貌·自评 2星", exact: true }).waitFor({timeout:8000}); } catch(e) { console.error('SELF_DIAGNOSTIC', await page.locator('body').innerText(), errors); throw e; }
     await page.getByRole("radio", { name: "有礼貌·自评 2星", exact: true }).check();
     await page.route('**/api/v1/report-core/forms/3', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message:'登录已过期' }) }), { times: 1 });
@@ -104,8 +106,15 @@ const {
     const screenshotDir = path.join(root, "output/report-core");
     await fs.mkdir(screenshotDir, { recursive: true });
     const nav = async (name) => {
-      await page.getByRole("button", { name, exact: true }).click();
-      await page.locator(".panel").first().waitFor();
+      if(['自我评价','扫码领取','上传奖状','我的期末报告'].includes(name)){
+        await page.locator('.student-topnav').getByRole('button',{name:['自我评价','我的期末报告'].includes(name)?'我的档案':'首页',exact:true}).click();
+        const target={'自我评价':'学期自我评价','扫码领取':'领取积分卡','我的期末报告':'查看期末报告','上传奖状':'上传奖状'}[name];
+        await page.getByRole('button',{name:new RegExp(target)}).click();
+      }else if(['无卡直评','学业导入','材料认定','采集结算'].includes(name)){
+        if(!await page.locator('.evaluation-tabs').count())await page.getByRole('button',{name:'评价录入',exact:true}).click();
+        await page.locator('.evaluation-tabs').getByRole('button',{name:{'无卡直评':'快速直评','学业导入':'学业水平'}[name]||name,exact:true}).click();
+      }else await page.locator('.adult-navigation,.student-topnav').getByRole('button',{name:name==='全校发布'?'发布中心':name,exact:true}).click();
+      await page.locator('.panel').first().waitFor();
     };
     const toast = async (text) =>
       page
@@ -113,6 +122,7 @@ const {
         .filter({ hasText: text })
         .waitFor({ timeout: 15000 });
     const login = async (user) => {
+      if(await page.locator('.student-account').count())await page.locator('.student-account > summary').click();
       if (
         await page
           .getByRole("button", { name: "退出登录", exact: true })
@@ -124,7 +134,7 @@ const {
       await page.getByLabel("账号", { exact: true }).fill(user);
       await page.getByLabel("密码", { exact: true }).fill("Test-pass-2026");
       await page.getByRole("button", { name: "登录", exact: true }).click();
-      await page.getByRole("navigation", { name: "核心业务导航" }).waitFor();
+      await page.locator(".adult-navigation,.student-topnav").waitFor();
       await page.waitForTimeout(200);
     };
     const students = Array.from({ length: 8 }, (_, i) => ({
@@ -132,7 +142,11 @@ const {
       username: i ? "student" + (i + 1) : "student",
     }));
     const catalog = require("../../backend/config/reportCorePolicy.json");
+    await page.locator('body').click({position:{x:2,y:2}});await page.screenshot({path:path.join(screenshotDir,'student-self-new-ui.png'),fullPage:true});
+    await nav('首页');await page.screenshot({path:path.join(screenshotDir,'student-home-new-ui.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('.core-app').count(),1);await page.screenshot({path:path.join(screenshotDir,'student-home-new-ui-mobile.png'),fullPage:false,animations:'disabled'});await page.setViewportSize({width:1440,height:1000});
     await login("admin");
+    await page.screenshot({path:path.join(screenshotDir,'admin-new-ui.png'),fullPage:true});
     await nav("月度卡额度");
     await page.getByLabel("额度教师").selectOption("2");
     await page.getByLabel("额度月份").fill("2026-10");
@@ -149,9 +163,8 @@ const {
     await page.getByLabel("计划张数0-0", { exact: true }).fill("100");
     await page.getByLabel("班级总量0",{exact:true}).fill("100");
     await page.getByLabel("计划方向0-0",{exact:true}).selectOption("CONDUCT_POLITENESS_OTHER_STAR");
-    await page
-      .getByRole("button", { name: "保存分班计划", exact: true })
-      .click();
+    if(await page.getByRole('button',{name:'保存分班计划',exact:true}).isDisabled())console.error('CARD_PLAN_DIAGNOSTIC',await page.locator('.card-plan').innerText(),await page.locator('.card-plan input,.card-plan select').evaluateAll(es=>es.map(e=>({label:e.ariaLabel,value:e.value,options:e.options?[...e.options].map(o=>o.value):null}))));
+    await page.getByRole("button", { name: "保存分班计划", exact: true }).click();
     await toast("分班计划已保存");
 
     await page
@@ -177,13 +190,14 @@ const {
     await page.getByRole('button',{name:'德美少年',exact:true}).click();
     await page.getByRole('button',{name:'日常行为',exact:true}).click();
     await page.getByRole('button',{name:'有礼貌',exact:true}).click();
-    await page.getByRole('button',{name:'为选中学生记 1 分',exact:true}).click();
+    await page.screenshot({path:path.join(screenshotDir,'teacher-direct-new-ui.png'),fullPage:true});
+    await page.getByRole('button',{name:'为2名学生各记1分',exact:true}).click();
     await toast('已为2名学生各记1分');
     for (const name of ['学生3','学生4']) await page.locator('.student-checks label').filter({hasText:name}).locator('input').check();
     await page.getByRole('button',{name:'德美少年',exact:true}).click();
     await page.getByRole('button',{name:'日常行为',exact:true}).click();
     await page.getByRole('button',{name:'有礼貌',exact:true}).click();
-    await page.getByRole('button',{name:'为选中学生记 1 分',exact:true}).click();
+    await page.getByRole('button',{name:'为2名学生各记1分',exact:true}).click();
     await page.waitForFunction(()=>!document.querySelector('.direct-board input[type="checkbox"]:checked'));
     const [intentCounts]=await db.pool.query("SELECT student_id,COUNT(*) n FROM evaluation_source_record WHERE record_kind='DIRECT' GROUP BY student_id");
     assert.deepEqual(intentCounts.map(r=>[String(r.student_id),Number(r.n)]),[['3',2],['4',2]]);
@@ -221,10 +235,13 @@ const {
         "劳动美自述",
         "本学期最大收获与活动",
         "下学期努力目标",
-      ])
+      ]) {
+        const panel=page.locator('.self-text-panel').filter({has:page.getByLabel(name,{exact:true})});
+        if(await panel.count()&&!await panel.evaluate(e=>e.open))await panel.locator('summary').click();
         await page
           .getByLabel(name, { exact: true })
           .fill("本学期认真参与，下一学期继续努力。");
+      }
       await page.getByRole("button", { name: "保存评价", exact: true }).click();
       await toast("评价已保存");
       await nav("月度故事");
@@ -260,6 +277,7 @@ const {
         await page.getByText('服务器已有新版本，本次文字已保留。核对后可保存为新草稿。',{exact:true}).waitFor();
         assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original+'我的新填写。');
       }
+      if(student.id==='3')await page.screenshot({path:path.join(screenshotDir,'student-story-new-ui.png'),fullPage:true});
       await page
         .getByRole("button", { name: "提交本月三类故事", exact: true })
         .click();
@@ -274,6 +292,8 @@ const {
             "base64",
           ),
         });
+        await page.getByAltText('待提交奖状预览').waitFor();
+        await page.screenshot({path:path.join(screenshotDir,'student-award-new-ui.png'),fullPage:true});
         await page
           .getByRole("button", { name: "提交奖状", exact: true })
           .click();
@@ -322,6 +342,8 @@ const {
       await page.waitForTimeout(100);
     }
     await nav("学业导入");
+    await page.getByLabel("学业录入班级").selectOption('');
+    await page.getByLabel("学业录入科目").selectOption('');
     const academic = catalog.fields.filter(
       (f) =>
         !f.jsonPath &&
@@ -370,30 +392,16 @@ const {
       }
     }
     console.log("UI all six sources collected/settled");
-    await nav("班级报告确认");
+    await nav("班级报告");
     for (const student of students) {
       console.log("UI confirm student", student.id);
-      await page
-        .getByLabel("选择学生", { exact: true })
-        .selectOption(student.id);
-      await page
-        .getByLabel("学期寄语", { exact: true })
-        .fill("认真学习，勇于尝试，继续保持。");
-      await page.getByRole("button", { name: "保存评价", exact: true }).click();
-      await toast("评价已保存");
-      await page
-        .getByRole("button", { name: "生成报告草稿", exact: true })
-        .click();
-      await page
-        .getByText("所有必需数据已齐全。", { exact: true })
-        .waitFor({ timeout: 15000 });
-      await page
-        .getByText("打印布局检查通过", { exact: true })
-        .waitFor({ timeout: 15000 });
-      await page
-        .getByRole("button", { name: "确认本份报告", exact: true })
-        .click();
-      await toast("班主任确认已保存");
+      await page.getByRole('button',{name:`学生${student.id} · 查看报告`,exact:true}).click();
+      await page.getByRole('button',{name:'完整报告',exact:true}).click();
+      await page.getByLabel('学期寄语',{exact:true}).fill('认真学习，勇于尝试，继续保持。');
+      await page.getByRole('button',{name:'保存学期寄语',exact:true}).click();await toast('学期寄语已保存');
+      await page.waitForFunction(()=>[...document.querySelectorAll('button')].some(b=>b.textContent==='确认本份报告'&&!b.disabled));
+      await page.getByRole('button',{name:'确认本份报告',exact:true}).click();await toast('班主任确认已保存');
+      await page.getByRole('button',{name:'返回班级列表',exact:true}).click();
     }
     await login("admin");
     await nav("全校发布");
@@ -480,7 +488,7 @@ const {
       "PASS actual browser six-source / three-role / two-class / eight-student whole-school report flow",
     );
   } finally {
-    if (browser) await browser.close();
+    if(browser){const p=browser.contexts()[0]?.pages()[0];if(p&&await p.locator('.card-plan').count())console.error('FINAL_CARD_PLAN_STATE',await p.locator('.card-plan').innerText(),await p.locator('.card-plan input,.card-plan select').evaluateAll(es=>es.map(e=>({label:e.ariaLabel,value:e.value,disabled:e.disabled}))));await browser.close();}
     if (vite) vite.kill();
     if (server) await new Promise((r) => server.close(r));
     for (const f of cleanups.reverse()) await f();

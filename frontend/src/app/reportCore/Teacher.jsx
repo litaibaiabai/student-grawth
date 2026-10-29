@@ -366,7 +366,7 @@ export function ImportData({ ctx, initialKind }) {
   );
 }
 export function ReviewMaterials({ ctx }) {
-  const [imageUrl,setImageUrl] = useState(null);
+  const [imageUrl,setImageUrl] = useState(null),[materialKind,setMaterialKind]=useState('all');
   const [selected, setSelected] = useState(null),
     [target, setTarget] = useState(""),
     [output, setOutput] = useState(""),
@@ -382,8 +382,10 @@ export function ReviewMaterials({ ctx }) {
     (s) =>
       s.record_kind === "ITEM" &&
       ["CERTIFICATE", "STORY"].includes(s.source_type) &&
-      !["SUPERSEDED", "REVOKED", "REJECTED"].includes(s.status),
+      !["SUPERSEDED", "REVOKED", "REJECTED"].includes(s.status) && (materialKind==='all'||s.source_type===materialKind),
   );
+  const selectMaterial=s=>{setSelected(s);setTarget('');setOutput('');setReason('');setDimensions([0,0,0,0]);};
+  useEffect(()=>{const id=ctx.selectedTask?.sourceId;if(id){const row=ctx.sources.find(s=>String(s.id)===String(id));if(row){selectMaterial(row);setMaterialKind(row.source_type);ctx.focusTask?.(null);}}},[ctx.selectedTask,ctx.sources]);
   const fields = ctx.catalog.fields.filter(
     (f) => f.sourceType === "CERTIFICATE" && !f.jsonPath,
   );
@@ -404,7 +406,8 @@ export function ReviewMaterials({ ctx }) {
       <p>
         系统自动评分失败时，教师按同一量规复核；奖状成果需依据实际材料认定。
       </p>
-      {rows.map((s) => (
+      <div className="evaluation-tabs" aria-label="材料类型">{[['all','全部材料'],['CERTIFICATE','奖状认定'],['STORY','故事复核']].map(([id,label])=><button key={id} className={materialKind===id?'active':''} onClick={()=>setMaterialKind(id)}>{label}</button>)}</div>
+      <div className="material-review-layout"><div className="material-review-list">{rows.map((s) => (
         <div className="source-row" key={s.id}>
           <div>
             <strong>
@@ -422,17 +425,14 @@ export function ReviewMaterials({ ctx }) {
           </div>
           <button
             onClick={() => {
-              setSelected(s);
-              setTarget("");
-              setOutput("");
-              setReason("");
+              selectMaterial(s);
             }}
           >
             查看与处理
           </button>
         </div>
       ))}
-      {selected && (
+      </div>{selected ? (
         <div className="review-box">
           <h3>材料 #{selected.id}</h3>
           {selected.source_type === "STORY" ? (
@@ -599,7 +599,7 @@ export function ReviewMaterials({ ctx }) {
             )}
           </div>
         </div>
-      )}
+      ) : <div className="review-empty"><h3>选择一份材料开始核对</h3><p>先看原文或原图，再填写认定内容；保存成功后可继续处理下一份。</p></div>}</div>
     </section>
   );
 }
@@ -668,6 +668,8 @@ export function ReportDrafts({ ctx }) {
                     expectedFingerprint: draft.fingerprint,
                     layoutReview: {
                       fingerprint: draft.fingerprint,
+                      renderScope: 'FULL',
+                      documentKey: draft.documentKey,
                       templateVersion: draft.model.templateVersion,
                       overflow: false,
                     },
@@ -680,7 +682,7 @@ export function ReportDrafts({ ctx }) {
               确认本份报告
             </button>
           </section>
-          <TermReport html={draft.html} onLayout={setLayout} />
+          <TermReport html={draft.html} documentKey={draft.documentKey} printScope="FULL" onLayout={r=>setLayout(!r.overflow)} />
         </>
       )}
     </>

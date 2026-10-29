@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import { StarPicker } from './ui';
+import { CloudMascot } from './illustrations';
 import { buildSelfGroups,getSelfProgress,mergeSelfDraft } from './selfEvaluationModel';
 export default function SelfEvaluation({ctx}) {
  const [view,setView]=useState(null),[step,setStep]=useState(0),[dirty,setDirty]=useState({}),[special,setSpecial]=useState([]),[saving,setSaving]=useState(false),[conflicts,setConflicts]=useState([]),[message,setMessage]=useState('');
@@ -35,14 +36,14 @@ export default function SelfEvaluation({ctx}) {
   setConflicts(old=>old.filter(x=>x.field!==conflict.field));
  };
  return <section className="panel self-book">
-  <div className="self-welcome"><span className="self-mascot" aria-hidden="true">☀</span><div><p className="kicker">我的成长手册</p><h2>给自己点星星</h2><p>想一想自己的表现，选出最像自己的星星吧。</p></div><span className="core-badge">已完成 {progress.complete} / {progress.total}</span></div>
+  <div className="self-welcome"><CloudMascot/><div><p className="kicker">我的成长手册</p><h2>给自己点星星</h2><p>想一想自己的表现，选出最像自己的星星吧。</p></div><span className="core-badge">已完成 {progress.complete} / {progress.total}</span></div>
   <nav className="self-steps" aria-label="自评内容">{groups.map((g,i)=><button key={g.key} aria-current={step===i?'step':undefined} className={step===i?'primary':''} onClick={()=>setStep(i)}>{i+1} · {g.description}</button>)}</nav>
   {!view.editable&&<p role="status">{view.lockReason}</p>}
   <h3>{groups[step].title}</h3><div className="self-fields">
-  {groups[step].fields.map(f=>f.valueType==='text'?<label key={f.column}>{f.label}<textarea aria-label={f.label} rows={4} disabled={!view.editable} value={values[f.column]||''} onChange={e=>setValue(f.column,e.target.value)}/><small>{[...(values[f.column]||'')].length} / 2000 字</small></label>:<div className="self-star-card" key={f.column}><StarPicker label={f.label} value={values[f.column]} disabled={!view.editable} onChange={v=>setValue(f.column,v)}/><button disabled={!view.editable||values[f.column]==null} onClick={()=>setValue(f.column,null)} aria-label={`清除${f.label}`}>清除</button></div>)}
+  {groups[step].fields.map((f,i)=>f.valueType==='text'?<details className="self-text-panel" key={f.column} open={i>=5||undefined}><summary><span>{f.label}</span><small>{values[f.column]?.trim()?'已填写':'想一想，写下来'}</small></summary><label><span className="sr-only">{f.label}</span><textarea aria-label={f.label} rows={5} disabled={!view.editable} value={values[f.column]||''} onChange={e=>setValue(f.column,e.target.value)} placeholder="记录一件你做过的事，或一次让你开心的进步…"/><small>{[...(values[f.column]||'')].length} / 2000 字</small></label></details>:<div className="self-star-card" key={f.column}><StarPicker label={f.label} value={values[f.column]} disabled={!view.editable} onChange={v=>setValue(f.column,v)}/><button className="star-clear" disabled={!view.editable||values[f.column]==null} onClick={()=>setValue(f.column,null)} aria-label={`清除${f.label}`}>重新想想</button></div>)}
   </div>
   {['health','art'].includes(groups[step].key)&&<section><h3>我的{step===1?'体育':'艺术'}特长</h3>{(step===1?overlay(view.sportsSpecialties,'sports'):overlay(view.artSpecialties,'art')).length===0?<p>还没有已认定的特长项目，有了以后再来点星星。</p>:(step===1?overlay(view.sportsSpecialties,'sports'):overlay(view.artSpecialties,'art')).map(x=><div className="self-star-card" key={x.id}><StarPicker label={`${x.name} · 自评`} value={x.self_star} disabled={!view.editable} onChange={v=>setStar(step===1?'sports':'art',x.id,v)}/><button disabled={!view.editable||x.self_star==null} onClick={()=>setStar(step===1?'sports':'art',x.id,null)}>清除</button></div>)}</section>}
-  {step===3&&<label>家长寄语（可选）<textarea aria-label="家长寄语（家长协助填写，可选）" value={values.family_message||''} disabled={!view.editable} onChange={e=>setValue('family_message',e.target.value)}/><small>{[...(values.family_message||'')].length} / 1000 字，不计入完成进度</small></label>}
+  {step===3&&<details className="self-text-panel"><summary>家长寄语 <small>请家长协助 · 选填</small></summary><label>家长寄语（可选）<textarea aria-label="家长寄语（家长协助填写，可选）" value={values.family_message||''} disabled={!view.editable} onChange={e=>setValue('family_message',e.target.value)}/><small>{[...(values.family_message||'')].length} / 1000 字，不计入完成进度</small></label></details>}
   {conflicts.map(c=><div className="feedback error" key={c.field}><p>{ctx.catalog.fields.find(f=>f.column===c.field)?.label||'特长自评'}发生变化：本次 {String(c.local??'清除')}，已保存 {String(c.remote??'清除')}</p><button onClick={()=>resolve(c,true)}>保留我的填写</button><button onClick={()=>resolve(c,false)}>采用已保存内容</button></div>)}
   {tooLong&&<p role="alert">文字超出上限，请按每段提示调整后保存。</p>}{message&&<p role="status">{message}</p>}<div className="self-save"><p>可先保存一部分，再回来继续填写。</p><button className="primary" disabled={tooLong||saving||!view.editable||conflicts.length>0||(!Object.keys(dirty).length&&!special.length)} onClick={save}>{saving?'正在保存…':'保存评价'}</button></div>
  </section>;

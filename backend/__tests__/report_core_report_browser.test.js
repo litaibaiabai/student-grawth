@@ -40,3 +40,12 @@ test('report browser HTTP routes enforce scope and avoid private response cachin
  const detail=await call('report-detail/3?termId=1&scope=detail&version=current');assert.equal(detail.status,200);assert.ok(!JSON.stringify(await detail.json()).includes('PRIVATE_'));assert.match(detail.headers.get('cache-control')||'',/no-store/);
  assert.equal((await call('report-detail/3?termId=1&scope=full&version=current')).status,403);assert.equal((await call('report-students?termId=1&grade=4&classNo=3')).status,403);
 });
+test('DETAIL_ONLY layout approval cannot confirm the full current report',async t=>{
+ const db=await fixture(t),key={...studentKey,studentId:'4'},args={pool:db.pool,actor:teacher,studentKey:key,version:'current'};
+ const detail=await browser.getReportDetail({...args,scope:'detail'}),full=await browser.getReportDetail({...args,scope:'full'});assert.ok(detail.documentKey);assert.notEqual(detail.documentKey,full.documentKey);
+ const confirm=require('../services/reportCoreEvaluation').confirmReport;let n=0;const command=()=>({requestKey:'layout-scope-'+ ++n,payloadHash:String(n).padStart(64,'0')});
+ const common={pool:db.pool,actor:teacher,studentKey:key,expectedRevision:full.revision,expectedFingerprint:full.fingerprint};
+ await assert.rejects(confirm({...common,layoutReview:{fingerprint:full.fingerprint,templateVersion:full.templateVersion,overflow:false,documentKey:detail.documentKey,renderScope:'FULL'},command:command()}),{statusCode:422});
+ await assert.rejects(confirm({...common,layoutReview:{fingerprint:full.fingerprint,templateVersion:full.templateVersion,overflow:false,documentKey:full.documentKey,renderScope:'DETAIL_ONLY'},command:command()}),{statusCode:422});
+ await confirm({...common,layoutReview:{fingerprint:full.fingerprint,templateVersion:full.templateVersion,overflow:false,documentKey:full.documentKey,renderScope:'FULL'},command:command()});
+});
