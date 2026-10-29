@@ -10,7 +10,7 @@ export const roleNames = { student:'学生',teacher:'教师',manager:'管理员'
 export function parseCoreLocation(hash = '') {
   const [path, query = ''] = hash.replace(/^#/, '').split('?'), parts = path.split('/').filter(Boolean), p = new URLSearchParams(query);
   const out = { role: parts[0], page: parts[1] === 'materials' ? 'cards' : parts[1] };
-  for (const key of ['termId','classKey','studentId','reportKeyword','reportStatus','reportCursor','reportVersion','reportScope']) if (p.get(key)) out[key] = p.get(key);
+  for (const key of ['termId','classKey','studentId','reportKeyword','reportStatus','reportCursor','reportVersion','reportScope','reportLimit','reportSection']) if (p.get(key)) out[key] = p.get(key);
   if (p.get('card')) out.cardToken = p.get('card');
   return out;
 }
@@ -20,6 +20,6 @@ export function routeForRole(route, role) {
 }
 export function formatCoreLocation(route) {
   const p = new URLSearchParams();
-  for (const key of ['termId','classKey','studentId','reportKeyword','reportStatus','reportCursor','reportVersion','reportScope']) if (route[key]) p.set(key, route[key]);
+  for (const key of ['termId','classKey','studentId','reportKeyword','reportStatus','reportCursor','reportVersion','reportScope','reportLimit','reportSection']) if (route[key]) p.set(key, route[key]);
   return `#/${route.role}/${route.page}${p.size ? '?' + p : ''}`;
 }
