@@ -2,7 +2,7 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 export default function TermReport({html,documentKey,printScope='FULL',onLayout,onReady}) {
  const frame=useRef(null),callbacks=useRef({onLayout,onReady}),latest=useRef(null);
  callbacks.current={onLayout,onReady};
- const token=useMemo(()=>({id:crypto.randomUUID(),key:documentKey||crypto.randomUUID(),active:true,probe:null,observer:null}),[html,documentKey,printScope]);latest.current=token;
+ const token=useMemo(()=>({id:crypto.randomUUID(),source:html,scope:printScope,key:documentKey||crypto.randomUUID(),active:true,probe:null,observer:null}),[html,documentKey,printScope]);latest.current=token;
  const [height,setHeight]=useState(1000),[ready,setReady]=useState(null),[hint,setHint]=useState('');
  useEffect(()=>{token.active=true;setReady(null);setHint('');return()=>{token.active=false;token.probe?.remove();token.observer?.disconnect();};},[token]);
  const current=(t,f)=>t.active&&latest.current===t&&frame.current===f;

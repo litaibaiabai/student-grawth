@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import { StarPicker } from './ui';
 import { CloudMascot } from './illustrations';
 import { buildSelfGroups,getSelfProgress,mergeSelfDraft } from './selfEvaluationModel';
 export default function SelfEvaluation({ctx}) {
+ const {setLeaveGuard,error:onError,termId}=ctx;const actorId=ctx.actor.id;
  const [view,setView]=useState(null),[step,setStep]=useState(0),[dirty,setDirty]=useState({}),[special,setSpecial]=useState([]),[saving,setSaving]=useState(false),[conflicts,setConflicts]=useState([]),[message,setMessage]=useState('');
  const current=useRef({dirty,special});current.current={dirty,special};
- useEffect(()=>{ctx.setLeaveGuard?.(()=>!Object.keys(current.current.dirty).length&&!current.current.special.length||window.confirm('还有未保存的评价，离开会放弃本次填写。是否离开？'));return()=>ctx.setLeaveGuard?.(null);},[]);
- const read=()=>api(`/report-core/evaluations/${ctx.actor.id}?termId=${ctx.termId}`);
- useEffect(()=>{let active=true;read().then(v=>{if(active)setView(v);}).catch(ctx.error);return()=>{active=false;};},[ctx.actor.id,ctx.termId]);
+ useEffect(()=>{setLeaveGuard?.(()=>!Object.keys(current.current.dirty).length&&!current.current.special.length||window.confirm('还有未保存的评价，离开会放弃本次填写。是否离开？'));return()=>setLeaveGuard?.(null);},[setLeaveGuard]);
+ const read=useCallback(()=>api(`/report-core/evaluations/${actorId}?termId=${termId}`),[actorId,termId]);
+ useEffect(()=>{let active=true;read().then(v=>{if(active)setView(v);}).catch(onError);return()=>{active=false;};},[read,onError]);
  useEffect(()=>{const handler=e=>{if(Object.keys(current.current.dirty).length||current.current.special.length){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',handler);return()=>window.removeEventListener('beforeunload',handler);},[]);
  if(!view)return <section className="panel" role="status">正在打开我的成长手册…</section>;
  const groups=buildSelfGroups(view,ctx.catalog),values={...view.values,...dirty};
@@ -20,15 +21,15 @@ export default function SelfEvaluation({ctx}) {
  const save=async()=>{
   const sent=current.current,base=view;setSaving(true);setMessage('');
   try{
-   await api(`/report-core/forms/${ctx.actor.id}`,{termId:ctx.termId,expectedRevision:view.revision,values:sent.dirty,specialtyChanges:sent.special},'PATCH');
+   await api(`/report-core/forms/${actorId}`,{termId:termId,expectedRevision:view.revision,values:sent.dirty,specialtyChanges:sent.special},'PATCH');
    const fresh=await read();
    setDirty(now=>Object.fromEntries(Object.entries(now).filter(([k,v])=>!Object.hasOwn(sent.dirty,k)||sent.dirty[k]!==v)));
    setSpecial(now=>now.filter(x=>!sent.special.some(y=>y.id===x.id&&y.collection===x.collection&&y.changes.self_star===x.changes.self_star)));
    setView(fresh);setMessage('');ctx.notify('评价已保存');
   }catch(error){
    if(error.status===409){
-    try{const fresh=await read();const merged=mergeSelfDraft({base,local:current.current.dirty,remote:fresh,specialtyChanges:current.current.special});setView(fresh);setDirty(merged.merged);setSpecial(merged.specialtyChanges);setConflicts(merged.conflicts);setMessage(merged.removedSpecialtyIds.length?'特长项目已撤回，相关修改已移除；其他输入保留。':'内容有更新，请核对冲突后再次保存。');}catch(e){ctx.error(e);}
-   }else ctx.error(error);
+    try{const fresh=await read();const merged=mergeSelfDraft({base,local:current.current.dirty,remote:fresh,specialtyChanges:current.current.special});setView(fresh);setDirty(merged.merged);setSpecial(merged.specialtyChanges);setConflicts(merged.conflicts);setMessage(merged.removedSpecialtyIds.length?'特长项目已撤回，相关修改已移除；其他输入保留。':'内容有更新，请核对冲突后再次保存。');}catch(e){onError(e);}
+   }else onError(error);
   }finally{setSaving(false);}
  };
  const resolve=(conflict,useLocal)=>{

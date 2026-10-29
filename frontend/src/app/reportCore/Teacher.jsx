@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { api, allStudents } from "./api";
-import { statusName } from "./Materials";
-export const subjectFor = (column) =>
+import { statusName } from "./materialStatus";
+const subjectFor = (column) =>
   ({
     conduct: "CONDUCT",
     moral: "MORAL",
@@ -20,6 +20,7 @@ export const subjectFor = (column) =>
     story: "STORY",
   })[column.split("_")[0]];
 export function ReviewMaterials({ ctx }) {
+  const {error:onError,selectedTask,sources,focusTask}=ctx;
   const [imageUrl,setImageUrl] = useState(null),[materialKind,setMaterialKind]=useState('all');
   const [selected, setSelected] = useState(null),
     [target, setTarget] = useState(""),
@@ -29,17 +30,17 @@ export function ReviewMaterials({ ctx }) {
   useEffect(() => {
     const controller=new AbortController();let objectUrl;
     setImageUrl(null);
-    if(selected?.source_type==='CERTIFICATE')fetch('/api/v1/report-core/files/'+selected.id,{signal:controller.signal,headers:{Authorization:'Bearer '+localStorage.getItem('REPORT_CORE_TOKEN')}}).then(r=>{if(!r.ok)throw Error('无法读取材料');return r.blob();}).then(blob=>{if(controller.signal.aborted)return;objectUrl=URL.createObjectURL(blob);setImageUrl(objectUrl);}).catch(e=>{if(e.name!=='AbortError')ctx.error(e);});
+    if(selected?.source_type==='CERTIFICATE')fetch('/api/v1/report-core/files/'+selected.id,{signal:controller.signal,headers:{Authorization:'Bearer '+localStorage.getItem('REPORT_CORE_TOKEN')}}).then(r=>{if(!r.ok)throw Error('无法读取材料');return r.blob();}).then(blob=>{if(controller.signal.aborted)return;objectUrl=URL.createObjectURL(blob);setImageUrl(objectUrl);}).catch(e=>{if(e.name!=='AbortError')onError(e);});
     return()=>{controller.abort();if(objectUrl)URL.revokeObjectURL(objectUrl);};
-  },[selected?.id]);
-  const rows = ctx.sources.filter(
+  },[selected?.id,selected?.source_type,onError]);
+  const rows = sources.filter(
     (s) =>
       s.record_kind === "ITEM" &&
       ["CERTIFICATE", "STORY"].includes(s.source_type) &&
       !["SUPERSEDED", "REVOKED", "REJECTED"].includes(s.status) && (materialKind==='all'||s.source_type===materialKind),
   );
-  const selectMaterial=s=>{setSelected(s);setTarget('');setOutput('');setReason('');setDimensions([0,0,0,0]);};
-  useEffect(()=>{const id=ctx.selectedTask?.sourceId;if(id){const row=ctx.sources.find(s=>String(s.id)===String(id));if(row){selectMaterial(row);setMaterialKind(row.source_type);ctx.focusTask?.(null);}}},[ctx.selectedTask,ctx.sources]);
+  const selectMaterial=useCallback(s=>{setSelected(s);setTarget('');setOutput('');setReason('');setDimensions([0,0,0,0]);},[]);
+  useEffect(()=>{const id=selectedTask?.sourceId;if(id){const row=sources.find(s=>String(s.id)===String(id));if(row){selectMaterial(row);setMaterialKind(row.source_type);focusTask?.(null);}}},[selectedTask,sources,focusTask,selectMaterial]);
   const fields = ctx.catalog.fields.filter(
     (f) => f.sourceType === "CERTIFICATE" && !f.jsonPath,
   );

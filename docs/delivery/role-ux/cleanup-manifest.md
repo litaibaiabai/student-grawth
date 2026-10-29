@@ -288,3 +288,7 @@
 ### 任务14旧执行入口批次
 
 按清单移除 44 个旧演示、远程自动部署入口和已追踪Python缓存。默认migrate与migrate:core都指向同一安全check脚本，显式--apply才初始化指定新库。旧交付说明标历史，README只列当前支持命令；未执行远程部署或写入任何业务库。
+
+### 任务15样式/资产批次
+
+实际移除main的旧less引用、Vite less配置及清单3个旧less/favicon文件。核心CSS承担reset/字体与布局，favicon改为本地云朵SVG；页面语言zh-CN、标题明确。前端生产依赖收敛为React/ReactDOM/XLSX，表格库按需加载。

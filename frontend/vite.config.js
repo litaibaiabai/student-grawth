@@ -21,19 +21,6 @@ export default defineConfig({
     }
   },
   plugins: [react()],
-  css: {
-    modules: {
-      localsConvention: "camelCaseOnly"
-    },
-    preprocessorOptions: {
-      less: {
-        javascriptEnabled: true,
-        modifyVars: {
-          "@primary-color": "#1890ff" // 自定义主题色
-        }
-      }
-    }
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

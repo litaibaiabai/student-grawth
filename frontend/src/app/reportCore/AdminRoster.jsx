@@ -1,5 +1,6 @@
 import React,{useState} from 'react';
-import {useAdminRows,Pager,ImportHistory,ImportReview,readRows,writeTemplate,useDraftGuard} from './AdminDataImport';
+import {Pager,ImportHistory,ImportReview} from './AdminDataImport';
+import {useAdminRows,readRows,writeTemplate,useDraftGuard} from './adminData';
 const subjects={MORAL:'道法',CHINESE:'语文',MATH:'数学',SCIENCE:'科学',ENGLISH:'英语',PE:'体育',MUSIC:'音乐',FINE_ART:'美术',LABOR:'劳动',STORY:'故事'};
 export default function AdminRoster({ctx}){
  const [role,setRole]=useState('student'),[q,setQ]=useState(''),[grade,setGrade]=useState(''),[classNo,setClass]=useState(''),[status,setStatus]=useState(''),[filters,setFilters]=useState({role:'student'}),[rows,setRows]=useState([]),[fileName,setFileName]=useState(''),[error,setError]=useState('');const view=useAdminRows(ctx,'accounts',filters);useDraftGuard(ctx,rows.length>0);

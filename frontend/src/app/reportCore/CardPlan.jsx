@@ -1,19 +1,22 @@
-import React,{useEffect,useRef,useState} from 'react';
+import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {api,resultOf,download} from './api';
 import {cardSubject} from './cardModel';
 export default function CardPlan({ctx,quotaId,onSaved}) {
+ const {termId,error:onError}=ctx;
  const [quota,setQuota]=useState(null),[plans,setPlans]=useState([]),[generated,setGenerated]=useState(0),[dirty,setDirty]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[printClass,setPrintClass]=useState('');
  const sequence=useRef(0);
  const classes=[...new Map(ctx.assignments.map(a=>[`${a.grade}:${a.class_no}`,{grade:a.grade,classNo:a.class_no}])).values()];
- const read=async()=>{
+ const classList=useRef(classes);classList.current=classes;
+ const invalidate=useCallback(()=>{sequence.current++;},[]);
+ const read=useCallback(async()=>{
   const request=++sequence.current;
-  const qs=await api(`/report-core/card-quotas?termId=${ctx.termId}&kind=QUOTA`),q=qs.find(q=>String(q.id)===String(quotaId));if(!q)throw Error('计划不存在或无权限');
-  const summary=await api(`/report-core/card-ledger/summary?termId=${ctx.termId}&monthFrom=${q.month_key}&monthTo=${q.month_key}`);
+  const qs=await api(`/report-core/card-quotas?termId=${termId}&kind=QUOTA`),q=qs.find(q=>String(q.id)===String(quotaId));if(!q)throw Error('计划不存在或无权限');
+  const summary=await api(`/report-core/card-ledger/summary?termId=${termId}&monthFrom=${q.month_key}&monthTo=${q.month_key}`);
   if(request!==sequence.current)return;
-  setQuota(q);setGenerated(summary.generatedRecords);setPlans(q.payload.plans?.length?q.payload.plans:[{...(classes[0]||{}),classTotal:0,items:[{categoryCode:'',count:0}]}]);setDirty(false);
- };
- useEffect(()=>{read().catch(e=>{setError(e.message);if(e.status===401)ctx.error(e);});return()=>{sequence.current++;};},[quotaId,ctx.termId]);
- const run=async fn=>{setBusy(true);setError('');try{await fn();}catch(e){setError(e.message);if(e.status===401)ctx.error(e);}finally{setBusy(false);}};
+  setQuota(q);setGenerated(summary.generatedRecords);setPlans(q.payload.plans?.length?q.payload.plans:[{...(classList.current[0]||{}),classTotal:0,items:[{categoryCode:'',count:0}]}]);setDirty(false);
+ },[termId,quotaId]);
+ useEffect(()=>{read().catch(e=>{setError(e.message);if(e.status===401)onError(e);});return invalidate;},[read,onError,invalidate]);
+ const run=async fn=>{setBusy(true);setError('');try{await fn();}catch(e){setError(e.message);if(e.status===401)onError(e);}finally{setBusy(false);}};
  const updateItem=(i,j,changes)=>{setPlans(old=>old.map((p,k)=>k===i?{...p,items:p.items.map((item,n)=>n===j?{...item,...changes}:item)}:p));setDirty(true);};
  const update=(i,changes)=>{setPlans(old=>old.map((p,j)=>i===j?{...p,...changes}:p));setDirty(true);};
  if(!quota)return <section className="panel"><p role={error?'alert':'status'}>{error||'正在读取分班计划…'}</p></section>;

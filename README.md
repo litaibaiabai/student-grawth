@@ -59,3 +59,7 @@ npm --prefix frontend run test:report-core-preview
 - 其他SQL与旧交付说明作为迁移参考/历史存档保留；旧商城、设备/家长端、自动配卡策略和旧演示脚本已退役，不属于当前运行入口。
 
 本分支改造不自动部署、不合并、不删除旧库或用户上传。完整放行以本轮验收记录与学校切换演练为准。
+
+## 容器构建
+
+`docker build -f backend/Dockerfile .`使用仓库根上下文，将前端构建产物放到Express实际托管的`/app/frontend/dist`，同时包含核心SQL/schema校验资料和中文打印字体。镜像启动不自动迁移、seed或切换数据库；生产变量与私有材料卷仍按切换指引配置。本轮本地Express静态包验证与容器构建验证分别记录，不互相代替。

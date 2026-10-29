@@ -13,7 +13,7 @@ import AdminQuota from './AdminQuota';
 import ManagerWorkspace from './ManagerWorkspace';
 import TeacherWorkspace from "./TeacherWorkspace";
 import StudentHome, { StudentArchive } from "./StudentHome";
-import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
+import { navigation as nav, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm } from "./Materials";
 import {
   ReviewMaterials,
@@ -27,7 +27,7 @@ function Published({ ctx }) {
     api(`/report-core/reports/current?termId=${ctx.termId}`)
       .then(setReport)
       .catch(ctx.error);
-  }, [ctx.termId, ctx.refreshKey, ctx.sessionActive]);
+  }, [ctx.termId, ctx.refreshKey, ctx.sessionActive,ctx.error]);
   if(ctx.sessionActive===false)return <section className="panel">请重新登录后读取报告。</section>;
   return report ? (
     <TermReport html={report.html} />
@@ -61,12 +61,13 @@ export default function ReportCoreApp() {
     [busy, setBusy] = useState(false);
   const leaveGuard = useRef(null);
   const loadedScope = useRef(null);
-  const mayLeave = () => !leaveGuard.current || leaveGuard.current();
-  const refresh = () => setRefresh((n) => n + 1);
-  const notify = (message) => {
+  const mayLeave = useCallback(() => !leaveGuard.current || leaveGuard.current(),[]);
+  const registerLeaveGuard=useCallback(fn=>{leaveGuard.current=fn;},[]);
+  const refresh = useCallback(() => setRefresh((n) => n + 1),[]);
+  const notify = useCallback((message) => {
     setNotice(message);
     setError("");
-  };
+  },[]);
   const reportError = useCallback((e) => {
     setError(e.message);
     if (e.status === 401) {
@@ -109,7 +110,7 @@ export default function ReportCoreApp() {
         setTermId(String(t.find(x => String(x.id) === incoming.termId)?.id || t.find((x) => x.is_current)?.id || t[0]?.id || ""));
       })
       .catch(reportError);
-  }, [actor]);
+  }, [actor,reportError]);
   useEffect(() => {
     if (!actor || !termId) return;
     const controller = new AbortController();
@@ -130,7 +131,7 @@ export default function ReportCoreApp() {
       })
       .catch(e => { if (e.name !== "AbortError") reportError(e); });
     return () => controller.abort();
-  }, [actor, termId, refreshKey]);
+  }, [actor, termId, refreshKey,reportError]);
   useEffect(() => {
     if (!actor || !termId) return;
     const update = () => {
@@ -141,20 +142,20 @@ export default function ReportCoreApp() {
     };
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
-  }, [actor, termId, terms, tab]);
-  const navigate = page => {
+  }, [actor, termId, terms, tab,mayLeave]);
+  const navigate = useCallback(page => {
     if (page !== tab && !(['entry','direct'].includes(page)&&['entry','direct'].includes(tab))) { if (!mayLeave()) return; leaveGuard.current = null; }
     setTab(page); setError(''); setNotice('');
     location.hash = formatCoreLocation({ role: actor.role, page, termId });
-  };
+  },[tab,actor?.role,termId,mayLeave]);
   useEffect(()=>{
     if(actor?.role!=='teacher'||!scopeReady)return;
     const key=`REPORT_SCOPE:${actor.schoolId}:${actor.id}:${termId}`;let stored;
-    try{stored=JSON.parse(localStorage.getItem(key)||'null');}catch{}
+    try{stored=JSON.parse(localStorage.getItem(key)||'null');}catch{stored=null;}
     const current=teacherScope||stored,chosen=assignments.find(a=>`${a.grade}:${a.class_no}`===current?.classKey&&a.subject_code===current?.subjectCode)||assignments[0];
     const next=chosen?{classKey:`${chosen.grade}:${chosen.class_no}`,subjectCode:chosen.subject_code}:null;
     if(next){if(next.classKey!==teacherScope?.classKey||next.subjectCode!==teacherScope?.subjectCode)setTeacherScope(next);localStorage.setItem(key,JSON.stringify(next));}
-  },[actor?.id,termId,assignments,scopeReady,teacherScope]);
+  },[actor?.id,actor?.role,actor?.schoolId,termId,assignments,scopeReady,teacherScope]);
   const changeScope=(classKey,subjectCode)=>{
     if(!mayLeave())return;
     const available=assignments.filter(a=>`${a.grade}:${a.class_no}`===classKey),chosen=available.find(a=>a.subject_code===subjectCode)||available[0];if(chosen)setTeacherScope({classKey,subjectCode:chosen.subject_code});
@@ -166,7 +167,7 @@ export default function ReportCoreApp() {
     sessionActive: !expired,
     navigate,
     term: terms.find(t => String(t.id) === termId),
-    setLeaveGuard: fn => { leaveGuard.current = fn; },
+    setLeaveGuard: registerLeaveGuard,
     catalog,
     students,
     sources,

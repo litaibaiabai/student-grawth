@@ -1,6 +1,7 @@
 import React,{useState} from 'react';
 import {api} from './api';
-import {healthFields,useAdminRows,Pager,ImportReview,ImportHistory,readRows,writeTemplate,useDraftGuard} from './AdminDataImport';
+import {Pager,ImportReview,ImportHistory} from './AdminDataImport';
+import {healthFields,useAdminRows,readRows,writeTemplate,useDraftGuard} from './adminData';
 export default function AdminHealth({ctx}){
  const [cls,setCls]=useState(''),[q,setQ]=useState(''),[completeness,setCompleteness]=useState('all'),[filters,setFilters]=useState({}),[cells,setCells]=useState({}),[clears,setClears]=useState({}),[fileRows,setFileRows]=useState(null),[error,setError]=useState('');const view=useAdminRows(ctx,'health',filters),classes=[...new Set(ctx.students.map(s=>`${s.grade_snapshot}:${s.class_no_snapshot}`))];
  const ids=new Set([...Object.keys(cells),...Object.keys(clears)]),convert=(k,v)=>['height_cm','weight_kg','jump_rope_1min'].includes(k)&&v.trim()!==''&&Number.isFinite(Number(v))?Number(v):v;

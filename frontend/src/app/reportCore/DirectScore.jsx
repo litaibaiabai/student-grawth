@@ -3,9 +3,11 @@ import {api} from './api';
 import {eligibleCardCodes,buildCardTree,updateCardPath} from './cardModel';
 const empty=()=>({studentIds:[],section:'',primary:'',categoryCode:''});
 export default function DirectScore({ctx}) {
+ const {setLeaveGuard}=ctx;const scopeClass=ctx.teacherScope?.classKey;
  const [path,setPath]=useState(empty),[keyword,setKeyword]=useState(''),[cls,setCls]=useState(ctx.teacherScope?.classKey||''),[reason,setReason]=useState(''),[busy,setBusy]=useState(false),state=useRef(null);state.current={path,reason};
- useEffect(()=>{ctx.setLeaveGuard?.(()=>!state.current.path.studentIds.length&&!state.current.reason.trim()||window.confirm('本次直评尚未提交，离开会放弃所选学生和评价方向。是否离开？'));return()=>ctx.setLeaveGuard?.(null);},[]);
- useEffect(()=>{if(ctx.teacherScope?.classKey&&ctx.teacherScope.classKey!==cls){setCls(ctx.teacherScope.classKey);setPath(empty());}},[ctx.teacherScope?.classKey]);
+ useEffect(()=>{setLeaveGuard?.(()=>!state.current.path.studentIds.length&&!state.current.reason.trim()||window.confirm('本次直评尚未提交，离开会放弃所选学生和评价方向。是否离开？'));return()=>setLeaveGuard?.(null);},[setLeaveGuard]);
+ const classRef=useRef(cls);classRef.current=cls;
+ useEffect(()=>{if(scopeClass&&scopeClass!==classRef.current){setCls(scopeClass);setPath(empty());}},[scopeClass]);
  const students=ctx.students.filter(s=>(!cls||`${s.grade_snapshot}:${s.class_no_snapshot}`===cls)&&(!keyword||s.student_name_snapshot.includes(keyword)||String(s.student_id).includes(keyword))),classes=[...new Set(ctx.students.map(s=>`${s.grade_snapshot}:${s.class_no_snapshot}`))];
  const allowed=new Set(eligibleCardCodes({catalog:ctx.catalog,assignments:ctx.assignments,studentRows:ctx.students,selectedStudentIds:path.studentIds}));
  const tree=buildCardTree(ctx.catalog,ctx.catalog.cardCatalog.map(c=>c.code)),section=tree.find(s=>s.id===path.section),primary=section?.children.find(p=>p.id===path.primary),leaf=primary?.children.find(c=>c.id===path.categoryCode);

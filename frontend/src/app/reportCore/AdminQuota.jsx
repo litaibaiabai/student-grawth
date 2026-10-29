@@ -1,7 +1,8 @@
 import React,{useState} from 'react';
 import {api,resultOf} from './api';
 import {defaultStoryMonth} from '../../util/storyMonths';
-import {useAdminRows,Pager,readRows,writeTemplate,useDraftGuard} from './AdminDataImport';
+import {Pager} from './AdminDataImport';
+import {useAdminRows,readRows,writeTemplate,useDraftGuard} from './adminData';
 export default function AdminQuota({ctx}){
  const [month,setMonth]=useState(()=>defaultStoryMonth(ctx.term)),[q,setQ]=useState(''),[status,setStatus]=useState('all'),[filters,setFilters]=useState(()=>({monthKey:defaultStoryMonth(ctx.term)})),[selected,setSelected]=useState({}),[uniform,setUniform]=useState('100'),[preview,setPreview]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[result,setResult]=useState(null);const history=useAdminRows(ctx,'quota-batches',{});const view=useAdminRows(ctx,'teacher-quotas',filters),count=Object.keys(selected).length;useDraftGuard(ctx,count>0);
  const change=(id,total)=>{setSelected(old=>({...old,[id]:total}));setPreview(null);setResult(null);};
