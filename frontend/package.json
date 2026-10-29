@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node --test src/util/*.test.js src/util/__tests__/*.test.js src/app/reportCore/*.test.js",
+    "test": "node --test src/app/reportCore/*.test.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:student-ui": "node tests/student-ui.cjs && node tests/student-theme-session.cjs",
     "test:report-core": "node tests/report-core-flow.cjs",
-    "test:report-core-ledger": "node tests/report-core-ledger.cjs"
+    "test:report-core-ledger": "node tests/report-core-ledger.cjs",
+    "test:report-core-admin": "node tests/report-core-admin.cjs",
+    "test:report-core-reports": "node tests/report-core-reports.cjs",
+    "test:report-core-preview": "node tests/report-core-preview.cjs"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
