@@ -1,0 +1,56 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
+const { execFileSync } = require('node:child_process');
+const cards = require('../services/reportCoreCards');
+const { fixture, teacher, manager, command, bytes } = require('./helpers/ledgerFixtures');
+async function paper(t) {
+  const db = await fixture(t);
+  await db.pool.query("UPDATE users SET real_name='陈老师' WHERE id=2");
+  await db.pool.query('INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) SELECT school_id,term_id,teacher_id,grade,2,subject_code,is_head_teacher FROM teacher_teaching_assignment WHERE class_no=1');
+  const quotaId = (await cards.saveQuota({ pool: db.pool, actor: manager, termId: '1', teacherId: '2', monthKey: '2026-10', total: 4, command: command() })).result.quotaId;
+  await cards.savePlan({ pool: db.pool, actor: teacher, quotaId, expectedRevision: '1', plans: [1, 2].map(classNo => ({ grade: 4, classNo, classTotal: 2, items: [{ categoryCode: 'CONDUCT_POLITENESS_OTHER_STAR', count: 2 }] })), command: command() });
+  await cards.generateCards({ pool: db.pool, actor: teacher, quotaId, expectedRevision: '2', command: command() });
+  const [rows] = await db.pool.query("SELECT id,token_hash,payload_json FROM evaluation_source_record WHERE record_kind='CARD' ORDER BY id");
+  return { ...db, quotaId, rows };
+}
+test('original card print request is auditable and produces Chinese per-class PDFs without changing credentials', async t => {
+  const db = await paper(t), args = { pool: db.pool, actor: teacher, quotaId: db.quotaId, command: command() };
+  const request = (await cards.createCardPrintRequest(args)).result;
+  assert.equal(request.cardCount, 4);
+  assert.equal((await cards.createCardPrintRequest(args)).result.requestId, request.requestId);
+  const file = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId });
+  assert.equal(file.mimeType, 'application/zip');
+  const first = await bytes(file.stream);
+  const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'core-print-'));
+  t.after(() => fs.rm(folder, { recursive: true, force: true }));
+  await fs.writeFile(path.join(folder, 'cards.zip'), first);
+  const names = JSON.parse(execFileSync('python3', ['-c', 'import zipfile,sys,json; z=zipfile.ZipFile(sys.argv[1]); print(json.dumps(z.namelist())); z.extractall(sys.argv[2])', path.join(folder, 'cards.zip'), folder], { encoding: 'utf8' }));
+  assert.deepEqual(names.sort(), ['4年级1班.pdf', '4年级2班.pdf']);
+  const text = execFileSync('pdftotext', [path.join(folder, names[0]), '-'], { encoding: 'utf8' });
+  assert.match(text, /陈老师/); assert.match(text, /有礼貌/);
+  const again = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId });
+  await bytes(again.stream);
+  const [after] = await db.pool.query("SELECT token_hash FROM evaluation_source_record WHERE record_kind='CARD' ORDER BY id");
+  assert.deepEqual(after.map(r => r.token_hash), db.rows.map(r => r.token_hash));
+  const [[count]] = await db.pool.query("SELECT COUNT(*) n FROM evaluation_source_record WHERE record_kind='CARD'");
+  assert.equal(Number(count.n), 4);
+  const [[audit]] = await db.pool.query('SELECT payload_json FROM evaluation_source_record WHERE id=?', [request.requestId]);
+  assert.equal(audit.payload_json.action, 'PRINT_REQUEST'); assert.equal(audit.payload_json.cardIds.length, 4);
+});
+test('class PDF and stale print requests enforce current unused status; old token and ZIP routes share the guard', async t => {
+  const db = await paper(t);
+  const request = (await cards.createCardPrintRequest({ pool: db.pool, actor: teacher, quotaId: db.quotaId, grade: 4, classNo: 1, command: command() })).result;
+  assert.equal(request.cardCount, 2);
+  const file = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId });
+  assert.equal(file.mimeType, 'application/pdf'); assert.equal((await bytes(file.stream)).subarray(0, 4).toString(), '%PDF');
+  const sourceId = String(db.rows[0].id), token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId });
+  await cards.redeemCard({ pool: db.pool, actor: { ...teacher, id: '3', role: 'student' }, token, command: command(), now: new Date('2026-10-29T00:00:00Z') });
+  await assert.rejects(cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId }), { statusCode: 409 });
+  await assert.rejects(cards.cardToken({ pool: db.pool, actor: teacher, sourceId }), { statusCode: 409 });
+  await assert.rejects(cards.createCardPrintRequest({ pool: db.pool, actor: manager, quotaId: db.quotaId, command: command() }), { statusCode: 403 });
+  const expired = await cards.buildClassPrintZip({ pool: db.pool, actor: teacher, quotaId: db.quotaId, now: new Date('2026-11-02T00:00:00Z') }).catch(e => e);
+  assert.equal(expired.statusCode, 422);
+});

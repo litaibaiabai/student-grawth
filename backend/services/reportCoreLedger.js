@@ -276,3 +276,85 @@ async function listLedgerAudits(args) {
   });
 }
 module.exports = { normalizeLedgerQuery, resolveSourceInstant, getLedgerSummary, listLedgerCards, listLedgerUsage, getLedgerCardDetail, listLedgerAudits };
+// Export reads share the same repeatable-read snapshot and filters as the screen.
+function exportView(view = 'events') {
+  if (!['monthly', 'cards', 'students', 'indicators', 'events'].includes(view)) fail(422, '导出视图不合法');
+  return view;
+}
+const exportColumns = {
+  events: [['编号','id',true],['教师','teacherName'],['学生','studentName'],['学号','studentNumber',true],['归属月','attributionMonth'],['指标','categoryName'],['发生时间','occurredAt'],['变动分','delta'],['说明','reason']],
+  cards: [['卡号','id',true],['教师','teacherName'],['学生','studentName'],['学号','studentNumber',true],['归属月','attributionMonth'],['年级','grade'],['班级','classNo'],['指标','categoryName'],['状态','status'],['净分','net']],
+  students: [['学生编号','id',true],['学生','studentName'],['学号','studentNumber',true],['加分','positive'],['撤销','reversals'],['净分','net']],
+  indicators: [['指标','categoryName'],['加分','positive'],['撤销','reversals'],['净分','net']],
+  monthly: [['月份','month'],['教师','teacherName'],['已制卡','generated'],['已领取','redeemed'],['直评','direct'],['净分','net']],
+};
+async function exportRows(ctx, view, max) {
+  let count = 0; const grouped = new Map();
+  async function* rows() {
+    for await (const row of scan(ctx)) {
+      if (view === 'cards') { if (row.kind === 'CARD' && matches(row, ctx.f)) yield row; continue; }
+      if (view === 'monthly') {
+        if (!matches(row, ctx.f)) continue;
+        const key = row.attributionMonth;
+        if (!grouped.has(key)) grouped.set(key, { month: key, teacherName: ctx.owner.real_name, ...emptyCounts() });
+        addCount(grouped.get(key), row); continue;
+      }
+      for (const event of eventsOf(row, ctx, 'all')) {
+        if (view === 'events') { yield event; continue; }
+        const key = view === 'students' ? event.studentId : event.categoryCode;
+        if (!key) continue;
+        if (!grouped.has(key)) grouped.set(key, { ...event, id: key, positive: 0, reversals: 0, net: 0 });
+        const g = grouped.get(key); g.net += event.delta; g[event.delta > 0 ? 'positive' : 'reversals']++;
+        if (grouped.size > max) fail(422, `最多导出${max}行，请缩小查询范围`);
+      }
+    }
+    yield* grouped.values();
+  }
+  // Preflight counting never retains event/card rows; only bounded grouped views.
+  for await (const row of rows()) { if (++count > max) fail(422, `最多导出${max}行，请缩小查询范围`); }
+  return { count, grouped, iterate: grouped.size ? async function* () { yield* grouped.values(); } : rows };
+}
+function csvCell(value, textId = false) {
+  if (value === null || value === undefined) value = '';
+  if (typeof value !== 'number') {
+    value = String(value);
+    if (value && (textId || /^[\s]*[=+\-@\t\r\n]/.test(value))) value = "'" + value;
+  }
+  return '"' + String(value).replaceAll('"', '""') + '"';
+}
+async function writeResponse(response, chunk) {
+  if (response.destroyed) throw Object.assign(new Error('下载连接已断开'), { code: 'CLIENT_DISCONNECTED' });
+  if (!response.write(chunk)) await new Promise((resolve, reject) => {
+    const clean = () => { response.off('drain', drained); response.off('close', closed); response.off('error', closed); };
+    const drained = () => { clean(); resolve(); };
+    const closed = () => { clean(); reject(new Error('下载连接已断开')); };
+    response.once('drain', drained); response.once('close', closed); response.once('error', closed);
+    if (response.destroyed) closed();
+  });
+}
+async function streamLedgerCsv(args) {
+  const view = exportView(args.view);
+  return snapshot(args, async ctx => {
+    const model = await exportRows(ctx, view, 50000), columns = exportColumns[view], response = args.response;
+    if (response.destroyed) throw new Error('下载连接已断开');
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader('Content-Disposition', 'attachment; filename="card-ledger.csv"');
+    response.setHeader('Cache-Control', 'no-store');
+    await writeResponse(response, '\uFEFF' + ['时区','Asia/Shanghai','截至',ctx.asOf,'筛选',JSON.stringify(ctx.f)].map(v => csvCell(v)).join(',') + '\r\n');
+    await writeResponse(response, columns.map(c => csvCell(c[0])).join(',') + '\r\n');
+    for await (const row of model.iterate()) await writeResponse(response, columns.map(c => csvCell(row[c[1]], c[2])).join(',') + '\r\n');
+    response.end(); return { rowCount: model.count, asOf: ctx.asOf };
+  });
+}
+const htmlText = value => String(value ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+async function getLedgerPrintModel(args) {
+  const view = exportView(args.view);
+  return snapshot(args, async ctx => {
+    const model = await exportRows(ctx, view, 1000), columns = exportColumns[view], body = [];
+    let net = 0;
+    for await (const row of model.iterate()) { body.push('<tr>' + columns.map(c => '<td>' + htmlText(row[c[1]]) + '</td>').join('') + '</tr>'); net += row.delta ?? row.net ?? 0; }
+    return { rowCount: model.count, asOf: ctx.asOf, html: `<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>卡片台账</title><style>@page{size:A4 landscape;margin:12mm}body{font:12px sans-serif;color:#172b38}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aaa;padding:6px;white-space:pre-wrap;overflow-wrap:anywhere}thead{display:table-header-group}tr{break-inside:avoid}</style><h1>卡片台账</h1><p>Asia/Shanghai · 截至 ${htmlText(ctx.asOf)}</p><p>筛选：${htmlText(JSON.stringify(ctx.f))}</p><p>共 ${model.count} 行 · 筛选净分 ${net}</p><table><thead><tr>${columns.map(c => '<th>'+htmlText(c[0])+'</th>').join('')}</tr></thead><tbody>${body.join('')}</tbody></table></html>` };
+  });
+}
+module.exports.streamLedgerCsv = streamLedgerCsv;
+module.exports.getLedgerPrintModel = getLedgerPrintModel;

@@ -92,12 +92,21 @@ function mountFeatures(r, { asyncRoute, ok }) {
   post("/report-core/card-quotas/:id/generate", (req) =>
     cards.generateCards({ ...args(req), quotaId: req.params.id }),
   );
+  post("/report-core/card-quotas/:id/print-requests", req => cards.createCardPrintRequest({ ...args(req), quotaId: req.params.id, now: req.app.locals.clock() }));
+  r.get("/report-core/card-print-requests/:id/file", asyncRoute(async (req, res) => {
+    const file = await cards.buildCardPrintFile({ ...context(req), requestId: req.params.id, now: req.app.locals.clock() });
+    res.set({ "Content-Type": file.mimeType, "Cache-Control": "no-store", "Content-Disposition": `attachment; filename="cards.${file.mimeType === 'application/pdf' ? 'pdf' : 'zip'}"; filename*=UTF-8''${encodeURIComponent(file.filename)}` });
+    file.stream.on('error', () => res.destroy());
+    res.on('close', () => file.stream.destroy());
+    file.stream.pipe(res);
+  }));
   r.get(
     "/report-core/card-quotas/:id/print",
     asyncRoute(async (req, res) => {
       const zip = await cards.buildClassPrintZip({
         ...context(req),
         quotaId: req.params.id,
+        now: req.app.locals.clock(),
       });
       res.set({
         "Content-Type": "application/zip",
@@ -114,6 +123,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
         token: await cards.cardToken({
           ...context(req),
           sourceId: req.params.id,
+          now: req.app.locals.clock(),
         }),
       }),
     ),

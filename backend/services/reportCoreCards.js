@@ -244,10 +244,11 @@ async function listCards({ pool, actor, termId, kind, offset = 0 }) {
     payload_json: undefined,
   }));
 }
-async function cardToken({ pool, actor, sourceId }) {
+async function cardToken({ pool, actor, sourceId, now = new Date() }) {
   const s = await source(pool, actor, sourceId);
   owner(actor, s);
   if (s.record_kind !== "CARD") fail(422, "不是卡片");
+  if (!printable(s, now)) fail(409, "卡片已领取、作废或失效");
   return decryptToken(
     s.token_ciphertext,
     `CORE_V1:${s.school_id}:${s.parent_id}:${s.record_ordinal}`,
@@ -464,54 +465,74 @@ async function reverseSource({ pool, actor, sourceId, reason, command }) {
     },
   );
 }
-async function buildClassPrintZip({ pool, actor, quotaId }) {
-  const q = await source(pool, actor, quotaId);
-  owner(actor, q);
-  const [rows] = await pool.query(
-    "SELECT * FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD' ORDER BY record_ordinal",
-    [quotaId],
-  );
-  const groups = Object.groupBy(
-    rows,
-    (s) => `${parse(s.payload_json).grade}-${parse(s.payload_json).classNo}`,
-  );
-  const zip = new yazl.ZipFile();
-  for (const [cls, cards] of Object.entries(groups))
-    zip.addReadStreamLazy(`${cls}.pdf`, {}, (cb) => {
-      const doc = new PDFDocument({ size: "A4", margin: 25 });
-      cb(null, doc);
-      (async () => {
-        for (let i = 0; i < cards.length; i++) {
-          if (i && i % 8 === 0) doc.addPage();
-          const s = cards[i],
-            p = parse(s.payload_json),
-            y = 25 + (i % 8) * 95;
-          const token = decryptToken(
-            s.token_ciphertext,
-            `CORE_V1:${s.school_id}:${quotaId}:${s.record_ordinal}`,
-          );
-          doc.image(
-            await QRCode.toBuffer(
-              `${process.env.PUBLIC_WEB_URL || "http://localhost:5173"}/#/student/materials?card=${token}`,
-            ),
-            25,
-            y,
-            { width: 80 },
-          );
-          doc
-            .fontSize(11)
-            .text(
-              `Class ${cls} | ${p.categoryCode}\nCard ${p.serial} | +1`,
-              115,
-              y + 12,
-            );
-        }
-        doc.end();
-      })().catch((e) => doc.destroy(e));
-    });
-  zip.end();
-  return zip.outputStream;
+function printable(s, now = new Date()) {
+  return s.record_kind === 'CARD' && s.status === 'UNUSED' && +s.valid_from <= +now && +now < +s.valid_until;
 }
+async function printSelection(c, actor, quotaId, { grade, classNo, cardIds, now = new Date(), strict = false } = {}) {
+  if ((grade === undefined) !== (classNo === undefined)) fail(422, '请选择完整班级');
+  if (grade !== undefined && (!Number.isInteger(Number(grade)) || !Number.isInteger(Number(classNo)) || Number(grade) < 1 || Number(classNo) < 1)) fail(422, '班级不合法');
+  if (cardIds !== undefined && (!Array.isArray(cardIds) || !cardIds.length || cardIds.length > 50000 || cardIds.some(v => !/^[1-9]\d*$/.test(String(v))) || new Set(cardIds.map(String)).size !== cardIds.length)) fail(422, '卡片范围不合法');
+  const [rows] = await c.query("SELECT s.*,u.real_name teacher_name FROM evaluation_source_record s JOIN users u ON u.id=s.owner_teacher_id AND u.school_id=s.school_id WHERE s.school_id=? AND s.parent_id=? AND s.record_kind='CARD' AND s.owner_teacher_id=? ORDER BY s.record_ordinal", [actor.schoolId, quotaId, actor.id]);
+  const selected = rows.filter(s => {
+    const p = parse(s.payload_json);
+    return (grade === undefined || p.grade === Number(grade) && p.classNo === Number(classNo)) && (!cardIds || cardIds.map(String).includes(String(s.id)));
+  });
+  if (cardIds && selected.length !== cardIds.length) fail(409, '卡片范围已变化，请刷新后重试');
+  if ((strict || cardIds) && selected.some(s => !printable(s, now))) fail(409, '卡片已领取、作废或失效，请刷新范围');
+  const eligible = selected.filter(s => printable(s, now));
+  if (!eligible.length) fail(422, '当前范围没有可领取卡片');
+  return eligible;
+}
+async function createCardPrintRequest({ pool, actor, quotaId, grade, classNo, cardIds, command, now = new Date() }) {
+  const q = await source(pool, actor, quotaId); owner(actor, q);
+  if (q.record_kind !== 'QUOTA') fail(422, '不是卡额度');
+  return withMutation({ pool, actor, termId: q.term_id, command, action: 'CARD_PRINT_REQUEST' }, async c => {
+    await c.query('SELECT id FROM evaluation_source_record WHERE school_id=? AND id=? FOR UPDATE', [actor.schoolId, quotaId]);
+    const rows = await printSelection(c, actor, quotaId, { grade, classNo, cardIds, now });
+    const payload = { action: 'PRINT_REQUEST', quotaId: String(quotaId), cardIds: rows.map(s => String(s.id)), format: grade === undefined ? 'ZIP' : 'PDF', grade: grade ?? null, classNo: classNo ?? null, requestedAt: now.toISOString() };
+    const requestId = await addSource(c, { schoolId: actor.schoolId, termId: q.term_id, parentId: quotaId, ownerId: actor.id, actorId: actor.id, kind: 'AUDIT', monthKey: q.month_key, status: 'COMMITTED', key: ['PRINT_REQUEST', actor.id, command.requestKey], payload });
+    return { result: { requestId, downloadUrl: `/api/v1/report-core/card-print-requests/${requestId}/file`, cardCount: rows.length }, changedTargetsByStudent: {} };
+  });
+}
+function cardPdf(rows) {
+  const doc = new PDFDocument({ size: 'A4', margin: 25 });
+  // Start after the caller has attached its error handler / ZIP consumer.
+  setImmediate(async () => {
+    try {
+      doc.font(require('node:path').join(__dirname, '../assets/fonts/NotoSansCJKsc-Regular.otf'));
+      for (let i = 0; i < rows.length; i++) {
+        if (i && i % 8 === 0) doc.addPage();
+        const s = rows[i], p = parse(s.payload_json), y = 25 + (i % 8) * 95;
+        const token = decryptToken(s.token_ciphertext, `CORE_V1:${s.school_id}:${s.parent_id}:${s.record_ordinal}`);
+        const category = catalog.cardCatalog.find(v => v.code === p.categoryCode);
+        doc.image(await QRCode.toBuffer(`${process.env.PUBLIC_WEB_URL || 'http://localhost:5173'}/#/student/materials?card=${token}`), 25, y, { width: 80 });
+        doc.fontSize(11).text(`${p.grade}年级${p.classNo}班 · ${s.teacher_name}\n${category?.group || ''} · ${category?.item || p.categoryCode}\n卡号 ${s.id} · 每卡1分`, 115, y + 8, { width: 440, height: 80 });
+      }
+      doc.end();
+    } catch (error) { doc.destroy(error); }
+  });
+  return doc;
+}
+function zippedCards(rows) {
+  const zip = new yazl.ZipFile();
+  for (const [cls, cards] of Object.entries(Object.groupBy(rows, s => { const p = parse(s.payload_json); return `${p.grade}年级${p.classNo}班`; }))) {
+    zip.addReadStreamLazy(`${cls}.pdf`, {}, cb => cb(null, cardPdf(cards)));
+  }
+  zip.end(); return zip.outputStream;
+}
+async function buildCardPrintFile({ pool, actor, requestId, now = new Date() }) {
+  const request = await source(pool, actor, requestId); owner(actor, request);
+  if (request.record_kind !== 'AUDIT' || request.payload.action !== 'PRINT_REQUEST') fail(404, '打印请求不存在');
+  const rows = await printSelection(pool, actor, request.payload.quotaId, { cardIds: request.payload.cardIds, now, strict: true });
+  const pdf = request.payload.format === 'PDF';
+  return { mimeType: pdf ? 'application/pdf' : 'application/zip', filename: pdf ? '班级积分卡.pdf' : '按班积分卡.zip', stream: pdf ? cardPdf(rows) : zippedCards(rows) };
+}
+async function buildClassPrintZip({ pool, actor, quotaId, now = new Date() }) {
+  const q = await source(pool, actor, quotaId); owner(actor, q);
+  if (q.record_kind !== 'QUOTA') fail(422, '不是卡额度');
+  return zippedCards(await printSelection(pool, actor, quotaId, { now }));
+}
+
 module.exports = {
   saveQuota,
   saveQuotaInTransaction,
@@ -524,5 +545,7 @@ module.exports = {
   cardToken,
   previewCard,
   buildClassPrintZip,
+  createCardPrintRequest,
+  buildCardPrintFile,
   voidCard,
 };
