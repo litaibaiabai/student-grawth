@@ -71,6 +71,18 @@ const {
     await page.getByRole("button", { name: "登录", exact: true }).click();
     await page.getByRole("button", { name: "自我评价", exact: true }).click();
     await page.getByLabel("有礼貌·自评", { exact: true }).selectOption("2");
+    await page.route('**/api/v1/report-core/forms/3', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message:'登录已过期' }) }), { times: 1 });
+    await page.getByRole('button', { name:'保存评价', exact:true }).click();
+    await page.getByRole('dialog', { name:'重新登录' }).waitFor();
+    await page.getByLabel('重新登录密码').fill('Test-pass-2026');
+    await page.getByRole('button', { name:'重新登录', exact:true }).click();
+    await page.getByRole('dialog', { name:'重新登录' }).waitFor({ state:'hidden' });
+    assert.equal(await page.getByLabel('有礼貌·自评', { exact:true }).inputValue(), '2');
+    for (const width of [390,768,1440]) {
+      await page.setViewportSize({ width, height:900 });
+      await page.keyboard.press('Tab');
+      assert.ok(await page.evaluate(() => document.activeElement !== document.body));
+    }
     await page.getByRole("button", { name: "保存评价", exact: true }).click();
     await page.getByText("评价已保存", { exact: true }).waitFor();
     assert.deepEqual(errors, []);
@@ -106,7 +118,7 @@ const {
     }));
     const catalog = require("../../backend/config/reportCorePolicy.json");
     await login("admin");
-    await nav("卡额度下发");
+    await nav("月度卡额度");
     await page.getByLabel("额度教师").selectOption("2");
     await page.getByLabel("额度月份").fill("2026-10");
     await page.getByLabel("额度总张数").fill("100");
@@ -297,7 +309,7 @@ const {
       await toast("导入已提交");
     }
     await login("admin");
-    await nav("数据导入");
+    await nav("体测原始值");
     for (const student of students) {
       await page
         .getByLabel("选择学生", { exact: true })

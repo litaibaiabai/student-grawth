@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { api, allStudents } from "./api";
+import { api, allStudents, resetApiSession } from "./api";
+import RoleShell from "./RoleShell";
+import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm, EvaluationForm } from "./Materials";
 import {
   DirectScore,
@@ -11,30 +13,6 @@ import {
 import { CardManagement, Configuration, Releases } from "./Administration";
 import TermReport from "../../component/TermReport";
 import "./style.css";
-const nav = {
-  student: [
-    ["cards", "扫码领取"],
-    ["stories", "月度故事"],
-    ["awards", "上传奖状"],
-    ["self", "自我评价"],
-    ["report", "我的期末报告"],
-  ],
-  teacher: [
-    ["direct", "无卡直评"],
-    ["cards-manage", "卡片管理"],
-    ["imports", "学业导入"],
-    ["reviews", "材料认定"],
-    ["settlements", "采集结算"],
-    ["drafts", "班级报告确认"],
-  ],
-  manager: [
-    ["config", "学期与任教"],
-    ["imports", "数据导入"],
-    ["cards-manage", "卡额度下发"],
-    ["releases", "全校发布"],
-  ],
-};
-const roles = { student: "学生", teacher: "教师", manager: "管理员" };
 function Published({ ctx }) {
   const [report, setReport] = useState(undefined);
   useEffect(() => {
@@ -54,6 +32,7 @@ function Published({ ctx }) {
 export default function ReportCoreApp() {
   const [actor, setActor] = useState(null),
     [boot, setBoot] = useState(true),
+    [expired, setExpired] = useState(false),
     [username, setUsername] = useState(""),
     [password, setPassword] = useState(""),
     [tab, setTab] = useState(""),
@@ -77,7 +56,7 @@ export default function ReportCoreApp() {
     setError(e.message);
     if (e.status === 401) {
       localStorage.removeItem("REPORT_CORE_TOKEN");
-      setActor(null);
+      setExpired(true);
     }
   }, []);
   const run = async (fn) => {
@@ -105,30 +84,50 @@ export default function ReportCoreApp() {
   }, []);
   useEffect(() => {
     if (!actor) return;
-    setTab(nav[actor.role][0][0]);
+    resetApiSession(actor.id);
+    const incoming = routeForRole(parseCoreLocation(location.hash), actor.role);
+    setTab(incoming.page);
     Promise.all([api("/report-core/config"), api("/report-core/terms")])
       .then(([c, t]) => {
         setCatalog(c);
         setTerms(t);
-        setTermId(String(t.find((x) => x.is_current)?.id || t[0]?.id || ""));
+        setTermId(String(t.find(x => String(x.id) === incoming.termId)?.id || t.find((x) => x.is_current)?.id || t[0]?.id || ""));
       })
       .catch(reportError);
   }, [actor]);
   useEffect(() => {
     if (!actor || !termId) return;
+    const controller = new AbortController();
+    setStudents([]); setSources([]); setAssignments([]);
     Promise.all([
-      allStudents(termId),
-      api(`/report-core/sources?termId=${termId}&page=1`),
-      api(`/report-core/assignments?termId=${termId}`),
+      allStudents(termId, { signal: controller.signal }),
+      api(`/report-core/sources?termId=${termId}&page=1`, undefined, undefined, { signal: controller.signal }),
+      api(`/report-core/assignments?termId=${termId}`, undefined, undefined, { signal: controller.signal }),
     ])
       .then(([s, r, a]) => {
+        if (controller.signal.aborted) return;
         setStudents(s);
         setSources(r.rows);
         setSourceNext(r.nextOffset);
         setAssignments(a);
       })
-      .catch(reportError);
+      .catch(e => { if (e.name !== "AbortError") reportError(e); });
+    return () => controller.abort();
   }, [actor, termId, refreshKey]);
+  useEffect(() => {
+    if (!actor || !termId) return;
+    const update = () => {
+      const route = routeForRole(parseCoreLocation(location.hash), actor.role);
+      setTab(route.page);
+      if (route.termId && terms.some(t => String(t.id) === route.termId)) setTermId(route.termId);
+    };
+    window.addEventListener('hashchange', update);
+    return () => window.removeEventListener('hashchange', update);
+  }, [actor, termId, terms]);
+  const navigate = page => {
+    setTab(page); setError(''); setNotice('');
+    location.hash = formatCoreLocation({ role: actor.role, page, termId });
+  };
   const ctx = {
     actor,
     termId,
@@ -234,76 +233,17 @@ export default function ReportCoreApp() {
         </section>
       </div>
     );
-  return (
-    <div className="core-app">
-      <aside className="core-sidebar">
-        <div className="brand-mark">
-          云美<span>学期评价工作台</span>
-        </div>
-        <div className="role-label">{roles[actor.role]}工作区</div>
-        <nav aria-label="核心业务导航">
-          {nav[actor.role].map(([id, label], i) => (
-            <button
-              key={id}
-              aria-label={label}
-              className={tab === id ? "active" : ""}
-              onClick={() => {
-                setTab(id);
-                setError("");
-                setNotice("");
-              }}
-            >
-              <span>{String(i + 1).padStart(2, "0")}</span>
-              {label}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-note">
-          有故事的学校
-          <br />
-          有温度的教育
-          <br />
-          有精彩的童年
-        </div>
-        <button
-          className="logout"
-          onClick={() =>
-            run(async () => {
-              await api("/auth/logout", {});
-              localStorage.removeItem("REPORT_CORE_TOKEN");
-              setActor(null);
-              setSources([]);
-              setStudents([]);
-            })
-          }
-        >
-          退出登录
-        </button>
-      </aside>
-      <main className="core-main">
-        <header className="core-header">
-          <div>
-            <p className="kicker">云美少年 · 综合素质发展</p>
-            <h1>{nav[actor.role].find(([id]) => id === tab)?.[1]}</h1>
-          </div>
-          <div className="identity">
-            <span>
-              {actor.real_name || roles[actor.role]} · {roles[actor.role]}
-            </span>
-            <select
-              aria-label="当前学期"
-              value={termId}
-              onChange={(e) => setTermId(e.target.value)}
-            >
-              {terms.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.term_name}
-                </option>
-              ))}
-            </select>
-            <button onClick={refresh}>刷新</button>
-          </div>
-        </header>
+  return <>
+    {expired && <section className="reauth-overlay" role="dialog" aria-modal="true" aria-label="重新登录"><form className="panel" onSubmit={e => { e.preventDefault(); run(async () => {
+      const data = await api('/auth/login', { username: username || actor.username, password });
+      localStorage.setItem('REPORT_CORE_TOKEN', data.token); setPassword('');
+      if (String(data.user.id) !== String(actor.id)) { resetApiSession(data.user.id, { clear: true }); setTermId(''); setSources([]); setStudents([]); setAssignments([]); setActor(data.user); }
+      setExpired(false); setError('');
+    }); }}><h2>登录已过期</h2><p>使用原账号登录，继续填写当前内容。</p><label>账号<input aria-label="重新登录账号" value={username || actor.username || ''} onChange={e => setUsername(e.target.value)} required autoComplete="username"/></label><label>密码<input aria-label="重新登录密码" type="password" value={password} onChange={e => setPassword(e.target.value)} required autoComplete="current-password"/></label>{error && <p role="alert">{error}</p>}<button className="primary" disabled={busy}>重新登录</button></form></section>}
+    <div inert={expired ? '' : undefined} aria-hidden={expired || undefined}>
+    <RoleShell actor={actor} route={{ page: tab }} term={terms.find(t => String(t.id) === termId)} onNavigate={navigate} header={<><select aria-label="当前学期" value={termId} onChange={e => { setTermId(e.target.value); location.hash = formatCoreLocation({ role: actor.role, page: tab, termId: e.target.value }); }}>{terms.map(t => <option key={t.id} value={t.id}>{t.term_name}</option>)}</select><button onClick={refresh}>刷新</button></>} onLogout={() => run(async () => {
+      await api('/auth/logout', {}); localStorage.removeItem('REPORT_CORE_TOKEN'); sessionStorage.removeItem('pendingCard'); resetApiSession('anonymous', { clear: true }); setActor(null); setSources([]); setStudents([]); setTermId('');
+    })}>
         {error && (
           <div role="alert" className="feedback error">
             {error}
@@ -330,18 +270,18 @@ export default function ReportCoreApp() {
             <p>请先运行学校初始化脚本配置首个学期。</p>
           </section>
         ) : (
-          <div className="content" aria-busy={busy}>
+          <div className="content" key={`${actor.id}:${termId}`} aria-busy={busy}>
             {tab === "cards" && <Cards ctx={ctx} />}{" "}
             {tab === "awards" && <AwardUpload ctx={ctx} />}{" "}
             {tab === "stories" && <StoryForm ctx={ctx} />}{" "}
             {tab === "self" && <EvaluationForm ctx={ctx} />}{" "}
             {tab === "report" && <Published ctx={ctx} />}{" "}
             {tab === "direct" && <DirectScore ctx={ctx} />}{" "}
-            {tab === "imports" && <ImportData ctx={ctx} />}{" "}
+            {["imports", "roster", "health"].includes(tab) && <ImportData key={tab} ctx={ctx} initialKind={tab === "roster" ? "ROSTER" : tab === "health" ? "HEALTH" : "ACADEMIC"} />}{" "}
             {tab === "reviews" && <ReviewMaterials ctx={ctx} />}{" "}
             {tab === "drafts" && <ReportDrafts ctx={ctx} />}{" "}
             {tab === "settlements" && <Settlements ctx={ctx} />}{" "}
-            {tab === "cards-manage" && <CardManagement ctx={ctx} />}{" "}
+            {["cards-manage", "quota"].includes(tab) && <CardManagement ctx={ctx} />}{" "}
             {tab === "config" && <Configuration ctx={ctx} />}{" "}
             {tab === "releases" && <Releases ctx={ctx} />}
             {sourceNext !== null &&
@@ -352,10 +292,5 @@ export default function ReportCoreApp() {
               )}
           </div>
         )}
-        <footer className="core-footer">
-          每一个孩子，都有自己的成长轨迹。
-        </footer>
-      </main>
-    </div>
-  );
+    </RoleShell></div></>;
 }

@@ -1,0 +1,12 @@
+:root{--core-ink:#183d38;--core-muted:#60746c;--core-primary:#216759;--core-soft:#edf6ef;--core-paper:#fffefb;--core-danger:#a13232;--core-radius:16px;--core-gap:20px;--core-focus:#2463ba}
+.core-app{color:var(--core-ink);font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6}
+.core-app button,.core-app input,.core-app select{min-height:44px}.role-student button{min-height:48px}
+.core-app :focus-visible{outline:3px solid var(--core-focus);outline-offset:3px}
+.skip-link{position:fixed;top:-80px;left:16px;z-index:99;background:white;padding:12px}.skip-link:focus{top:12px}
+.role-student{--core-primary:#326f84;--core-soft:#fff4d7;--core-radius:24px;background:#fff9ea}
+.core-stars{display:flex;gap:8px;flex-wrap:wrap}.core-stars label{cursor:pointer;border:1px solid #bccfc5;padding:8px 12px;border-radius:12px}.core-stars label:has(input:checked){background:#fff0ba;border-color:#94721d}.core-stars input{min-height:0}
+.core-badge{display:inline-block;border-radius:99px;background:var(--core-soft);padding:3px 10px;font-size:13px}
+.core-dialog{border:0;border-radius:20px;max-width:min(520px,90vw);padding:28px;color:var(--core-ink)}.core-dialog::backdrop{background:#133a3866}
+@media(prefers-reduced-motion:reduce){.core-app *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:768px){.core-header{align-items:flex-start;gap:16px;flex-direction:column}.identity{flex-wrap:wrap}.core-sidebar nav{display:flex;overflow-x:auto;gap:6px}.core-sidebar nav button{white-space:nowrap;flex-shrink:0}.sidebar-note{display:none}}
+.reauth-overlay{position:fixed;inset:0;z-index:100;background:#173f38b8;display:grid;place-items:center;padding:24px}.reauth-overlay .panel{width:min(420px,100%)}

@@ -154,9 +154,9 @@ export function DirectScore({ ctx }) {
     </section>
   );
 }
-export function ImportData({ ctx }) {
+export function ImportData({ ctx, initialKind }) {
   const isManager = ctx.actor.role === "manager";
-  const [kind, setKind] = useState(isManager ? "HEALTH" : "ACADEMIC"),
+  const [kind, setKind] = useState(initialKind || (isManager ? "HEALTH" : "ACADEMIC")),
     [student, setStudent] = useState(ctx.students[0]?.student_id || ""),
     [values, setValues] = useState({}),
     [rows, setRows] = useState(null),

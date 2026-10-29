@@ -12,7 +12,8 @@
  */
 
 import React from "react";
-import { Result, Button } from "antd";
+function Result({ title, subTitle, extra }) { return <main role="alert" style={{ padding: '48px', maxWidth: 720, margin: 'auto' }}><h1>{title}</h1><p>{subTitle}</p>{extra}</main>; }
+const Button = ({ children, onClick }) => <button style={{ minHeight:44, padding:'8px 20px' }} onClick={onClick}>{children}</button>;
 
 /**
  * 错误边界组件
