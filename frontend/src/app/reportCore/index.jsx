@@ -16,11 +16,9 @@ import StudentHome, { StudentArchive } from "./StudentHome";
 import { navigation as nav, roleNames as roles, parseCoreLocation, formatCoreLocation, routeForRole } from "./navigation";
 import { Cards, AwardUpload, StoryForm } from "./Materials";
 import {
-  ImportData,
   ReviewMaterials,
   Settlements,
 } from "./Teacher";
-import { CardManagement, Configuration, Releases } from "./Administration";
 import TermReport from "../../component/TermReport";
 import "./style.css";
 function Published({ ctx }) {

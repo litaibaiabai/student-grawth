@@ -276,3 +276,7 @@
 ## 执行记录
 
 待任务14/15分批填入实际删除数量、提交和验证。未在本清单中的动态依赖或用户文件默认保留。
+
+### 任务14前端批次
+
+按逐路径清单移除 77 个退役前端文件；同页剥离Teacher.jsx内旧DirectScore/ImportData/ReportDrafts/StudentPicker及Materials.jsx旧EvaluationForm导出，替代组件已接实际流程。现有core、ErrorBoundary、TermReport、storyMonths保留。
