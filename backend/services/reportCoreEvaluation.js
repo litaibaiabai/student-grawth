@@ -13,7 +13,8 @@ const {
   subjectFor,
 } = require("./reportCorePolicy");
 const { assertScope } = require("./authorizationService");
-function editable(actor, scope) {
+function editable(actor, scope, config) {
+  if(require("./reportCoreV2Policy").isV2(config))return actor.role==='student'?require("./reportCoreV2Policy").fixedFields.filter(f=>f.sourceType==='SELF').map(f=>f.column):actor.role==='teacher'&&scope.head?['teacher_comment']:[];
   if (actor.role === "student")
     return [
       ...fixedFields
@@ -27,9 +28,10 @@ function editable(actor, scope) {
 async function getEvaluationView({ pool, actor, studentKey }) {
   if (actor.role === "manager") fail(403, "管理员只查看完成统计");
   const scope = await assertScope({ actor, studentKey }, pool);
-  const allowedFields = editable(actor, scope);
   const e = scope.evaluation;
   const term = await getTerm(pool, actor.schoolId, studentKey.termId);
+  const fixedFields=require("./reportCoreV2Policy").policyFor(term.evaluation_config).fields.filter(f=>!f.jsonPath);
+  const allowedFields = editable(actor, scope, term.evaluation_config);
   const applicable = new Set(term.evaluation_config.applicableFields || fixedFields.map(f => f.column));
   const applicableSelfFields = fixedFields.filter(f => f.sourceType === "SELF" && applicable.has(f.column)).map(f => f.column);
   let visible = allowedFields;
@@ -49,7 +51,8 @@ async function getEvaluationView({ pool, actor, studentKey }) {
   return {
     revision: String(e.revision),
     applicableSelfFields,
-    editable: term.release_status === "IDLE",
+    schemaVersion: term.evaluation_config.schemaVersion || "CORE_V1",
+    editable: term.release_status === "IDLE" && (!require("./reportCoreV2Policy").isV2(term.evaluation_config) || term.business_phase==='COLLECTING' || actor.role==='teacher'&&term.business_phase==='RECONCILING'),
     lockReason: term.release_status === "IDLE" ? null : "全校报告发布准备中，暂时只读",
     status: e.status,
     allowedFields,
@@ -100,7 +103,7 @@ async function submitForm({
       const scope = await assertScope({ actor, studentKey, action: "form" }, c);
       if (String(scope.evaluation.revision) !== String(expectedRevision))
         fail(409, "数据已变化，请刷新并保留本次输入");
-      const allowed = editable(actor, scope),
+      const allowed = editable(actor, scope,term.evaluation_config),
         normalized = {};
       for (const [k, v] of Object.entries(values)) {
         if (!allowed.includes(k)) fail(403, "不能修改此字段");

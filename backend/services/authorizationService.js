@@ -56,11 +56,13 @@ async function assertScope(
   );
   if (!rows.length) fail(403, "不在任教范围");
   const head = rows.some((a) => a.is_head_teacher === 1);
+  const term=await require('./reportCoreStore').getTerm(connection,actor.schoolId,studentKey.termId);
+  const v2=require('./reportCoreV2Policy').isV2(term.evaluation_config);
   if (["report", "report-front-read", "confirm"].includes(action) && !head)
     fail(403, "仅班主任可查看完整报告");
   const allowedFields = fields.filter(
     (f) =>
-      (head &&
+      (v2 && head && action==='import') || (head &&
         ["read", "report", "confirm", "material", "award"].includes(action)) ||
       (head &&
         action === "score" &&
@@ -68,7 +70,7 @@ async function assertScope(
           subjectFor(f) === "STORY")) ||
       (f === "art_specialties" &&
         rows.some((a) => ["MUSIC", "FINE_ART"].includes(a.subject_code))) ||
-      subjectFor(f) === "CONDUCT" ||
+      (subjectFor(f) === "CONDUCT" && !(v2 && action==='import' && !head)) ||
       rows.some((a) => a.subject_code === subjectFor(f)),
   );
   if (allowedFields.length !== fields.length) fail(403, "不在学科字段范围");

@@ -125,6 +125,8 @@ function storyMean(months) {
   );
 }
 function validateValue(column, value, config = {}) {
+  const v2=require('./reportCoreV2Policy');
+  if(v2.isV2(config) && v2.byColumn.has(column))return v2.validateV2Value(column,value,config);
   const f = byColumn.get(column);
   if (!f && !narratives.includes(column)) fail(422, "未知评价字段");
   if (value === null) return null;
@@ -161,6 +163,11 @@ function validateValue(column, value, config = {}) {
   return value;
 }
 function validateConfig(config) {
+  const v2=require('./reportCoreV2Policy');
+  if(v2.isV2(config)) {
+    if(!Array.isArray(config.applicableFields) || config.applicableFields.some(c=>!v2.byColumn.has(c)))fail(422,'适用字段不合法');
+    return config;
+  }
   if (
     !config ||
     !Array.isArray(config.requiredMonths) ||

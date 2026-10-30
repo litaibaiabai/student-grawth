@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { requireAuth, requireRole, signToken } = require("../middleware/auth");
-const { fail, catalog, stableHash } = require("../services/reportCorePolicy");
+const { fail, stableHash } = require("../services/reportCorePolicy");
 const { assignments } = require("../services/authorizationService");
 const asyncRoute = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res)).catch(next);
@@ -52,7 +52,11 @@ function createCoreRouter() {
   );
   r.get(
     "/report-core/config",
-    asyncRoute(async (req, res) => ok(res, catalog)),
+    asyncRoute(async (req, res) => {
+      const pool=req.app.locals.pool;
+      const [terms]=await pool.query(`SELECT evaluation_config FROM academic_year WHERE school_id=? AND ${req.query.termId?'id=?':'is_current=1'} LIMIT 1`,[req.actor.schoolId,...(req.query.termId?[req.query.termId]:[])]);
+      ok(res,require('../services/reportCoreV2Policy').policyFor(terms[0]?require('../services/reportCoreStore').parse(terms[0].evaluation_config):{}));
+    }),
   );
   r.get(
     "/report-core/terms",

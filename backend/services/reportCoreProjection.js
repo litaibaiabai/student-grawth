@@ -8,6 +8,7 @@ const {
 } = require("./reportCorePolicy");
 const { parse } = require("./reportCoreStore");
 async function rebuildEvaluation({ connection, studentKey, targets, config }) {
+  const activeByColumn=require('./reportCoreV2Policy').isV2(config)?require('./reportCoreV2Policy').byColumn:byColumn;
   const { schoolId, termId, studentId } = studentKey;
   const [[e]] = await connection.query(
     "SELECT * FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id=?",
@@ -40,7 +41,7 @@ async function rebuildEvaluation({ connection, studentKey, targets, config }) {
     }
   }
   for (const target of new Set(targets)) {
-    const f = byColumn.get(target);
+    const f = activeByColumn.get(target);
     if (
       !f &&
       !narratives.includes(target) &&

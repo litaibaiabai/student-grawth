@@ -12,7 +12,8 @@ async function getTerm(connection, schoolId, termId, lock = false) {
   return term;
 }
 async function addSource(c, s) {
-  const payload = s.payload || {};
+  const v2=(s.schemaVersion || c.reportCoreSchemaVersion)==='SIX_EDU_V2';
+  const payload = {...(s.payload || {}),...(v2?{schemaVersion:'SIX_EDU_V2'}:{})};
   const [r] = await c.query(
     `INSERT INTO evaluation_source_record(school_id,term_id,student_id,source_type,record_kind,parent_id,original_id,owner_teacher_id,actor_id,month_key,target_key,group_key,record_ordinal,version,business_key,payload_hash,status,delta,payload_json,token_hash,token_ciphertext,valid_from,valid_until,next_attempt_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
@@ -42,9 +43,12 @@ async function addSource(c, s) {
       s.nextAttempt || null,
     ],
   );
+  if(v2)await c.query(`UPDATE evaluation_source_record SET schema_version='SIX_EDU_V2',event_type=?,dimension_code=?,subject_code=?,effect_key=?,submitted_at=?,effective_at=?,numeric_value=?,story_content_id=?,current_version_id=? WHERE school_id=? AND id=?`,[
+    s.eventType || `${s.sourceType || 'SYSTEM'}_${s.kind}`,s.dimensionCode || null,s.subjectCode || null,s.effectKey || null,s.submittedAt || (['ITEM','FORM','DIRECT'].includes(s.kind)?new Date():null),s.effectiveAt || null,s.numericValue??null,s.storyContentId || null,s.currentVersionId || null,s.schoolId,r.insertId,
+  ]);
   return String(r.insertId);
 }
-async function withMutation(
+async function executeMutation(
   { pool, actor, termId, studentIds = [], command, action, termLock = 'shared' },
   mutate,
 ) {
@@ -86,7 +90,10 @@ async function withMutation(
   const c = await pool.getConnection();
   try {
     await c.beginTransaction();
-    const term = await getTerm(c, actor.schoolId, termId, termLock);
+    const observed=await getTerm(c,actor.schoolId,termId);
+    const v2=require('./reportCoreV2Policy').isV2(observed.evaluation_config);
+    const term = await getTerm(c, actor.schoolId, termId, v2?'exclusive':termLock);
+    c.reportCoreSchemaVersion=v2?'SIX_EDU_V2':null;
     await resolveActorContext(
       {
         userId: actor.id,
@@ -96,6 +103,7 @@ async function withMutation(
       c,
     );
     if (term.release_status !== "IDLE") fail(423, "全校发布期间暂停修改");
+    require('./reportCoreV2Lifecycle').assertV2Phase(term,{action,actor});
     for (const id of [...new Set(studentIds.map(String))].sort((a, b) =>
       BigInt(a) < BigInt(b) ? -1 : 1,
     ))
@@ -145,6 +153,7 @@ async function withMutation(
       );
       revisions[studentId] = String(e.revision);
     }
+    if(v2 && Object.keys(changed.changedTargetsByStudent || {}).length)await c.query('UPDATE academic_year SET data_revision=data_revision+1 WHERE school_id=? AND id=?',[actor.schoolId,termId]);
     const response = { result: changed.result, replayed: false, revisions };
     await c.query(
       "INSERT INTO evaluation_source_record(school_id,term_id,actor_id,record_kind,business_key,payload_hash,status,payload_json,response_json) VALUES(?,?,?,'AUDIT',?,?,'COMMITTED',?,?)",
@@ -169,6 +178,11 @@ async function withMutation(
     throw e;
   } finally {
     c.release();
+  }
+}
+async function withMutation(args,mutate) {
+  for(let attempt=0;attempt<3;attempt++) {
+    try{return await executeMutation(args,mutate);}catch(error){if(!['ER_LOCK_DEADLOCK','ER_LOCK_WAIT_TIMEOUT'].includes(error.code)||attempt===2)throw error;}
   }
 }
 module.exports = { parse, getTerm, addSource, withMutation };
