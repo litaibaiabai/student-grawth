@@ -9,3 +9,14 @@ test('legal long narratives and extra specialties retain the double-sided main r
 });
 
 test('continuation chunks preserve every Unicode character and newline exactly',()=>{const {splitText,normalize}=require('../services/reportPagination');const text=('😀文\t字\n'.repeat(600))+'终点';const parts=splitText(text);assert.equal(parts.map(p=>p.text).join(''),normalize(text));assert.ok(parts.every(p=>p.lines<=24));for(let i=1;i<parts.length;i++)assert.equal(parts[i].start,parts[i-1].start+parts[i-1].text.length);});
+
+
+test('full report starts with six-board detail, then summary, then continuations; frozen reports retain their published layout',()=>{
+ const m=model(),html=renderPrintableA4({reportData:m});
+ const pages=[...html.matchAll(/<article[^>]*class="paper ([^"]+)"[^>]*data-print-page/g)].map(x=>x[1]);
+ assert.deepEqual(pages.slice(0,2),['report-detail','report-front']);
+ assert.ok(pages.slice(2).every(type=>type==='report-continuation'));
+ const detail=renderPrintableA4({reportData:m,renderScope:'DETAIL_ONLY'});
+ assert.ok(!detail.includes('<article class="paper report-front"'));
+ assert.equal(renderPrintableA4({reportData:{...m,renderedHtml:'FROZEN_PUBLISHED_LAYOUT'}}),'FROZEN_PUBLISHED_LAYOUT');
+});

@@ -57,6 +57,7 @@ const policy = require("../../backend/config/reportCorePolicy.json");
       ),
     };
     await page.setContent(renderPrintableA4({ reportData: model }));
+    assert.deepEqual(await page.locator('[data-print-page]').evaluateAll(pages=>pages.slice(0,2).map(p=>p.className)),['paper report-detail','paper report-front']);
     assert.equal(
       await page
         .locator('section[data-section="conduct"] table thead th')
@@ -113,6 +114,7 @@ const policy = require("../../backend/config/reportCorePolicy.json");
     );
     model.narratives.self_conduct_text = "长文本".repeat(650);
     await page.setContent(renderPrintableA4({ reportData: model }));
+    assert.deepEqual(await page.locator('[data-print-page]').evaluateAll(pages=>pages.slice(0,2).map(p=>p.className)),['paper report-detail','paper report-front']);
     await page.emulateMedia({ media: "print" });
     assert.equal(await page.locator('[data-print-page]').evaluateAll(pages=>pages.filter(p=>p.scrollHeight>Math.ceil(p.getBoundingClientRect().height)+2).length),0,'legal long text must use complete continuation pages');
     assert.ok(await page.locator('.report-continuation').count()>0);
