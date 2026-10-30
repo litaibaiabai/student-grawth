@@ -57,9 +57,11 @@ function createApp({
 }
 if (require.main === module) {
   const { createDbPool } = require("./db");
-  if (!process.env.REPORT_DB_NAME?.startsWith("liuyu_report_"))
+  if (process.env.REPORT_DB_NAME !== "student_growth" && !process.env.REPORT_DB_NAME?.startsWith("liuyu_report_"))
     throw Error("Set dedicated REPORT_DB_NAME before starting report core");
   const pool = createDbPool({ database: process.env.REPORT_DB_NAME });
+  (async () => {
+  await require("./scripts/runCoreMigrations").runCoreMigrations({ connection: pool, targetDb: process.env.REPORT_DB_NAME, mode: "check" });
   const provider = require("./services/reportCoreProvider").createProvider();
   const app = createApp({ pool, provider });
   const worker = require("./services/reportCoreWorker").startCoreWorker({
@@ -74,5 +76,6 @@ if (require.main === module) {
   app.listen(Number(process.env.PORT || 3000), () =>
     console.log("Report core listening"),
   );
+  })().catch(async error => { console.error(error.message); await pool.end(); process.exitCode = 1; });
 }
 module.exports = { createApp };

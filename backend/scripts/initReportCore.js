@@ -92,7 +92,7 @@ if (require.main === module) {
   (async () => {
     const target = process.env.REPORT_DB_NAME;
     if (
-      !/^liuyu_report_(pilot|prod)(_[a-z0-9_]+)?$/.test(target || "") ||
+      (target !== "student_growth" && !/^liuyu_report_(pilot|prod)(_[a-z0-9_]+)?$/.test(target || "")) ||
       target === process.env.LEGACY_DB_NAME
     )
       throw Error("Dedicated REPORT_DB_NAME required");

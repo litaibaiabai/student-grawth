@@ -13,7 +13,7 @@ const tables = [
 ];
 async function runCoreMigrations({ connection, targetDb, mode = "check" }) {
   if (
-    !/^liuyu_report_(test|pilot|prod)(_[a-z0-9_]+)?$/.test(targetDb) ||
+    (targetDb !== "student_growth" && !/^liuyu_report_(test|pilot|prod)(_[a-z0-9_]+)?$/.test(targetDb)) ||
     targetDb === process.env.LEGACY_DB_NAME
   )
     throw Error("Unsafe target database");

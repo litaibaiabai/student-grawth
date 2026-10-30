@@ -21,7 +21,7 @@ async function migrateReportCore({
   );
   if (from.db === to.db && from.host === to.host && from.port === to.port)
     throw Error("Source and target must be different databases");
-  if (!/^liuyu_report_(test|pilot|prod)(_[a-z0-9_]+)?$/.test(to.db))
+  if (to.db !== "student_growth" && !/^liuyu_report_(test|pilot|prod)(_[a-z0-9_]+)?$/.test(to.db))
     throw Error("Unsafe target");
   if (
     !["audit", "apply"].includes(mode) ||

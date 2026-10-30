@@ -2,7 +2,7 @@
 
 本次开发不自动部署生产，不删除旧库。新入口只读写REPORT_DB_NAME，不再启动旧scheduler/旧迁移。
 
-1. 备份旧库、私有材料和打印密钥；新建独立liuyu_report_prod库及最小权限账号，使用Node22.12+。
+1. 备份旧库、私有材料和打印密钥；准备新版六表student_growth库（旧同名库须先备份并迁移，不得覆盖）及最小权限账号，使用Node22.12+。
 2. 设置REPORT_DB_NAME、LEGACY_DB_NAME、SCHOOL_ID等；空库执行`node backend/scripts/runCoreMigrations.js --apply`。全新学校可用`node backend/scripts/initReportCore.js`创建管理员；禁止在已有学校执行初始化覆盖用户。
 3. 旧校先设置MIGRATE_TERM_IDS，执行`node backend/scripts/migrateReportCore.js`只读审计。迁移不等于自动分类：旧卡/旧故事/维度总分无法明确映射时保留私有原始归档及unmapped，不填新分项。
 4. 审查审计结果，确认目标库备份后才执行`--apply`。核对账号、任教、报告快照哈希与原始材料数。文件资产与原卡解密/重加密尚需按学校旧环境另行演练，当前脚本不会伪造已恢复的卡。
@@ -11,3 +11,5 @@
 7. 原库和旧包继续封存。开放新写入前可回原库/旧包；开放后先冻结新写入并备份，默认前向修复。确需回旧系统，必须先处理新材料增量，不能直接切回而丢记录。
 
 发布准备失败可用发布中心“恢复准备”或“取消本次准备”，学生一直只能读最后已激活批次。取消批次的PREPARED报告不会因后续发布而可见。
+
+用户本地已要求将新版六表库统一命名为student_growth，并清理liuyu_report*临时库。该命名不表示恢复旧44表结构。REPORT_DB_NAME与LEGACY_DB_NAME必须不同；本地新库更名后将旧来源配置留空，禁止将同名库当迁移来源。启动会只读检查六表schema，不自动初始化或恢复旧库。

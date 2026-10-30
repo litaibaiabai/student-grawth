@@ -41,3 +41,17 @@ test("six-table bootstrap refuses legacy/partial databases and enforces stars an
   await c.end();
   assert.equal((await pool.query("SHOW TABLES"))[0].length, 6);
 });
+
+test('canonical student_growth name requires the same six-table schema and rejects a restored legacy schema',async t=>{
+ const previous=process.env.LEGACY_DB_NAME;process.env.LEGACY_DB_NAME='student_growth_legacy';t.after(()=>{if(previous===undefined)delete process.env.LEGACY_DB_NAME;else process.env.LEGACY_DB_NAME=previous;});
+ const {runCoreMigrations,tables}=require('../scripts/runCoreMigrations');
+ const fields=require('../../docs/database/term-report-core-v1.schema.json').fixedFields;
+ const make=names=>({query:async sql=>{
+  if(sql==='SELECT DATABASE() db')return [[{db:'student_growth'}]];
+  if(sql==='SHOW TABLES')return [names.map(name=>({name}))];
+  if(sql==='SHOW COLUMNS FROM student_term_evaluation')return [fields.map(f=>({Field:f.column,Type:f.sqlType}))];
+  throw Error('Unexpected query');
+ }});
+ assert.equal((await runCoreMigrations({connection:make(tables),targetDb:'student_growth'})).unchanged,true);
+ await assert.rejects(runCoreMigrations({connection:make([...tables,'reward_card']),targetDb:'student_growth'}),/Partial or legacy/);
+});
