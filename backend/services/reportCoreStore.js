@@ -153,7 +153,14 @@ async function executeMutation(
       );
       revisions[studentId] = String(e.revision);
     }
-    if(v2 && Object.keys(changed.changedTargetsByStudent || {}).length)await c.query('UPDATE academic_year SET data_revision=data_revision+1 WHERE school_id=? AND id=?',[actor.schoolId,termId]);
+    if(v2 && Object.keys(changed.changedTargetsByStudent || {}).length) {
+      await c.query('UPDATE academic_year SET data_revision=data_revision+1 WHERE school_id=? AND id=?',[actor.schoolId,termId]);
+      await require('./reportCoreV2Statistics').rebuildV2Scope(c,term,changed.changedTargetsByStudent);
+      for(const studentId of Object.keys(revisions)) {
+        const [[row]]=await c.query('SELECT revision FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id=?',[actor.schoolId,termId,studentId]);
+        revisions[studentId]=String(row.revision);
+      }
+    }
     const response = { result: changed.result, replayed: false, revisions };
     await c.query(
       "INSERT INTO evaluation_source_record(school_id,term_id,actor_id,record_kind,business_key,payload_hash,status,payload_json,response_json) VALUES(?,?,?,'AUDIT',?,?,'COMMITTED',?,?)",

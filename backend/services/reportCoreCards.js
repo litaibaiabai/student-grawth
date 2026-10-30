@@ -4,8 +4,8 @@ const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
 const yazl = require("yazl");
 const { encryptToken, decryptToken, tokenHash } = require("./cardCredentials");
-const { withMutation, addSource, parse } = require("./reportCoreStore");
-const { fail, catalog, subjectFor, getSchoolMonthBounds, schoolDayStart, collectionCutoff } = require("./reportCorePolicy");
+const { withMutation, addSource, parse, getTerm } = require("./reportCoreStore");
+const { fail, subjectFor, getSchoolMonthBounds, schoolDayStart, collectionCutoff } = require("./reportCorePolicy");
 const { assertScope, assignments } = require("./authorizationService");
 async function source(pool, actor, id) {
   const [[s]] = await pool.query(
@@ -20,7 +20,8 @@ function owner(actor, s) {
   if (actor.role !== "teacher" || String(s.owner_teacher_id) !== actor.id)
     fail(403, "仅本人可管理卡计划");
 }
-function validatePlans(plans, teaching, quotaTotal) {
+function validatePlans(plans, teaching, quotaTotal, config={}) {
+  const catalog=require("./reportCoreV2Policy").policyFor(config);
   if (!Array.isArray(plans)) fail(422, '班级计划格式不合法');
   let total = 0;
   const classes = new Set();
@@ -100,7 +101,7 @@ async function savePlan({
   if (q.record_kind !== 'QUOTA' || q.source_type !== 'CARD') fail(422, '需要教师月度额度记录');
   return withMutation(
     { pool, actor, termId: q.term_id, command, action: "card-plan" },
-    async (c) => {
+    async (c, term) => {
       const [[row]] = await c.query(
         "SELECT * FROM evaluation_source_record WHERE id=? FOR UPDATE",
         [quotaId],
@@ -108,7 +109,7 @@ async function savePlan({
       if (String(row.revision) !== String(expectedRevision))
         fail(409, "额度已变化");
       const a = await assignments(actor, q.term_id, c);
-      validatePlans(plans, a, parse(row.payload_json).quotaTotal);
+      validatePlans(plans, a, parse(row.payload_json).quotaTotal,term.evaluation_config);
       const [[generated]] = await c.query(
         "SELECT COUNT(*) n FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD'",
         [quotaId],
@@ -153,7 +154,7 @@ async function generateCards({
       const p = parse(row.payload_json);
       if (row.status !== "CONFIRMED" || !p.plans.length)
         fail(422, "先确认分班计划");
-      validatePlans(p.plans, await assignments(actor, q.term_id, c), p.quotaTotal);
+      validatePlans(p.plans, await assignments(actor, q.term_id, c), p.quotaTotal,term.evaluation_config);
       const [[old]] = await c.query(
         "SELECT COUNT(*) n FROM evaluation_source_record WHERE parent_id=? AND record_kind='CARD'",
         [quotaId],
@@ -167,7 +168,7 @@ async function generateCards({
       if (start >= end) fail(422, "卡有效期不合法");
       for (const plan of p.plans)
         for (const item of plan.items) {
-          const category = catalog.cardCatalog.find(
+          const category = require("./reportCoreV2Policy").policyFor(term.evaluation_config).cardCatalog.find(
             (x) => x.code === item.categoryCode,
           );
           for (let i = 0; i < item.count; i++) {
@@ -342,7 +343,8 @@ async function directScore({
   command,
   now = new Date(),
 }) {
-  const category = catalog.cardCatalog.find((x) => x.code === categoryCode);
+  const configTerm=await getTerm(pool,actor.schoolId,termId);
+  const category = require("./reportCoreV2Policy").policyFor(configTerm.evaluation_config).cardCatalog.find((x) => x.code === categoryCode);
   if (reason !== undefined && reason !== null && typeof reason !== 'string') fail(422, '评价说明需为文字');
   reason = reason?.trim() || '';
   if (
@@ -353,6 +355,8 @@ async function directScore({
   )
     fail(422, "评价信息不完整");
   if (actor.role !== "teacher") fail(403, "仅教师直评");
+  if(studentIds.some(id=>!/^[1-9]\d*$/.test(String(id))))fail(422,'学生标识不合法');
+  studentIds=[...new Set(studentIds.map(String))];
   return withMutation(
     { pool, actor, termId, studentIds, command, action: "direct-score" },
     async (c, term) => {
@@ -406,7 +410,7 @@ async function voidCard({ pool, actor, sourceId, expectedRevision, reason, comma
   });
 }
 async function reverseSource({ pool, actor, sourceId, reason, command }) {
-  if (actor.role !== "teacher" || !reason?.trim())
+  if (actor.role !== "teacher" || typeof reason!=='string' || !reason.trim())
     fail(403, "需教师填写更正原因");
   const s = await source(pool, actor, sourceId);
   if (
@@ -425,8 +429,8 @@ async function reverseSource({ pool, actor, sourceId, reason, command }) {
       command,
       action: "reverse",
     },
-    async (c) => {
-      await assertScope(
+    async (c, term) => {
+      const scope=await assertScope(
         {
           actor,
           studentKey: {
@@ -434,11 +438,12 @@ async function reverseSource({ pool, actor, sourceId, reason, command }) {
             termId: s.term_id,
             studentId: s.student_id,
           },
-          action: "score",
+          action: require('./reportCoreV2Policy').isV2(term.evaluation_config)?'reverse':'score',
           fields: [s.target_key],
         },
         c,
       );
+      if(require('./reportCoreV2Policy').isV2(term.evaluation_config) && !scope.head && String(s.owner_teacher_id || s.actor_id)!==actor.id)fail(403,'仅原评价教师或本班班主任可更正');
       const [[old]] = await c.query(
         "SELECT id FROM evaluation_source_record WHERE original_id=? AND record_kind='REVERSAL'",
         [sourceId],
@@ -504,7 +509,7 @@ function cardPdf(rows) {
         if (i && i % 8 === 0) doc.addPage();
         const s = rows[i], p = parse(s.payload_json), y = 25 + (i % 8) * 95;
         const token = decryptToken(s.token_ciphertext, `CORE_V1:${s.school_id}:${s.parent_id}:${s.record_ordinal}`);
-        const category = catalog.cardCatalog.find(v => v.code === p.categoryCode);
+        const category = [...require("../config/reportCorePolicy.json").cardCatalog,...require("./reportCoreV2Policy").catalog.cardCatalog].find(v => v.code === p.categoryCode);
         doc.image(await QRCode.toBuffer(`${process.env.PUBLIC_WEB_URL || 'http://localhost:5173'}/#/student/materials?card=${token}`), 25, y, { width: 80 });
         doc.fontSize(11).text(`${p.grade}年级${p.classNo}班 · ${s.teacher_name}\n${category?.group || ''} · ${category?.item || p.categoryCode}\n卡号 ${s.id} · 每卡1分`, 115, y + 8, { width: 440, height: 80 });
       }

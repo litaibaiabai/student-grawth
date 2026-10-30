@@ -207,7 +207,8 @@ async function settleSources({
       command,
       action: "settle",
     },
-    async (c) => {
+    async (c, term) => {
+      const byColumn=require('./reportCoreV2Policy').isV2(term.evaluation_config)?require('./reportCoreV2Policy').byColumn:require('./reportCorePolicy').byColumn;
       const changed = {};
       for (const e of students) {
         const scope = await assertScope(

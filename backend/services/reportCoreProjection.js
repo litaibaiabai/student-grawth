@@ -8,6 +8,7 @@ const {
 } = require("./reportCorePolicy");
 const { parse } = require("./reportCoreStore");
 async function rebuildEvaluation({ connection, studentKey, targets, config }) {
+  if(require('./reportCoreV2Policy').isV2(config))return require('./reportCoreV2Projection').rebuildV2Evaluation({connection,studentKey,targets,config});
   const activeByColumn=require('./reportCoreV2Policy').isV2(config)?require('./reportCoreV2Policy').byColumn:byColumn;
   const { schoolId, termId, studentId } = studentKey;
   const [[e]] = await connection.query(

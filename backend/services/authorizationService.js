@@ -63,7 +63,7 @@ async function assertScope(
   const allowedFields = fields.filter(
     (f) =>
       (v2 && head && action==='import') || (head &&
-        ["read", "report", "confirm", "material", "award"].includes(action)) ||
+        ["read", "report", "confirm", "material", "award",...(v2?["reverse"]:[])].includes(action)) ||
       (head &&
         action === "score" &&
         (["sports_specialties", "art_specialties"].includes(f) ||
