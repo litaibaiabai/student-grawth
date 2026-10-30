@@ -1,0 +1,24 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),http=require('node:http');
+const {createRequire}=require('node:module');
+const frontend=path.resolve(__dirname,'..');
+const localRequire=createRequire(path.join(frontend,'package.json'));
+test('Vite reads the configured .env backend and returns a JSON service error if it disconnects',async t=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'report-vite-proxy-'));
+ let vite,backend=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify({code:200,data:{service:'configured-backend'}}));});
+ await new Promise(r=>backend.listen(0,'127.0.0.1',r));
+ const port=backend.address().port;
+ t.after(async()=>{await vite?.close();if(backend.listening)await new Promise(r=>backend.close(r));await fs.rm(root,{recursive:true,force:true});});
+ await fs.copyFile(path.join(frontend,'vite.config.js'),path.join(root,'vite.config.mjs'));
+ await fs.symlink(path.join(frontend,'node_modules'),path.join(root,'node_modules'));
+ await fs.writeFile(path.join(root,'.env'),`VITE_API_TARGET=http://127.0.0.1:${port}\n`);
+ const {createServer}=await import(require('node:url').pathToFileURL(path.join(path.dirname(localRequire.resolve('vite/package.json')),'dist/node/index.js')).href);
+ vite=await createServer({root,configFile:path.join(root,'vite.config.mjs'),server:{host:'127.0.0.1',port:0},logLevel:'silent'});
+ await vite.listen();const base='http://127.0.0.1:'+vite.httpServer.address().port;
+ const ok=await fetch(base+'/api/health');assert.equal(ok.status,200);assert.equal((await ok.json()).data.service,'configured-backend');
+ await new Promise(r=>backend.close(r));
+ const failed=await fetch(base+'/api/v1/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+ assert.equal(failed.status,502);assert.match(failed.headers.get('content-type'),/application\/json/);
+ const error=await failed.json();assert.equal(error.code,'BACKEND_UNAVAILABLE');assert.match(error.message,/后端服务/);
+});

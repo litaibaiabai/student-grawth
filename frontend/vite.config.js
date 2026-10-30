@@ -1,20 +1,36 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+const configureProxy = proxy => {
+  proxy.on("error", (_error, _request, response) => {
+    if (response.headersSent || response.destroyed) return;
+    response.writeHead(502, { "Content-Type": "application/json; charset=utf-8" });
+    response.end(JSON.stringify({
+      code: "BACKEND_UNAVAILABLE",
+      message: "无法连接后端服务，请检查后端是否启动，以及 VITE_API_TARGET 的端口配置。",
+    }));
+  });
+};
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, __dirname, "VITE_");
+  const target = process.env.VITE_API_TARGET || env.VITE_API_TARGET || "http://127.0.0.1:3000";
+  return {
   server: {
     sourcemap: true, // 确保此项为 true（Vite 4.0+，这也是默认值）
     proxy: {
       "/api": {
-        target: process.env.VITE_API_TARGET || "http://localhost:3000",
+        target,
+        configure: configureProxy,
         changeOrigin: true
       },
       "/dev-api": {
-        target: process.env.VITE_API_TARGET || "http://localhost:3000",
+        target,
+        configure: configureProxy,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/dev-api/, "")
       }
@@ -64,4 +80,5 @@ export default defineConfig({
       }
     }
   }
+  };
 });

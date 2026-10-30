@@ -15,7 +15,8 @@
     "test:report-core-reports": "node tests/report-core-reports.cjs",
     "test:report-core-preview": "node tests/report-core-preview.cjs",
     "test:report-core-inputs": "node tests/report-core-inputs.cjs",
-    "test:report-core-followups": "node tests/report-core-followups.cjs"
+    "test:report-core-followups": "node tests/report-core-followups.cjs",
+    "test:dev-proxy": "node --test tests/vite-proxy.cjs"
   },
   "dependencies": {
     "react": "18",
