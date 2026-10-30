@@ -98,6 +98,7 @@ module.exports = {
   schoolDayEnd,
   getSchoolMonthBounds,
   collectionCutoff,
+  policyFor: require('./reportCoreV2Policy').policyFor,
 };
 function cardStars({ points, target = 10, settled }) {
   if (

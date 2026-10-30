@@ -1,0 +1,1047 @@
+{
+  "schemaVersion": "SIX_EDU_V2",
+  "displayFieldCount": 94,
+  "fixedValueColumns": 88,
+  "fields": [
+    {
+      "viewCode": "CONDUCT_POLITENESS_SELF_STAR",
+      "column": "conduct_politeness_self_star",
+      "label": "有礼貌·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_POLITENESS_OTHER_STAR",
+      "column": "conduct_politeness_other_star",
+      "label": "有礼貌·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_INTEGRITY_SELF_STAR",
+      "column": "conduct_integrity_self_star",
+      "label": "讲信用·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_INTEGRITY_OTHER_STAR",
+      "column": "conduct_integrity_other_star",
+      "label": "讲信用·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_KINDNESS_SELF_STAR",
+      "column": "conduct_kindness_self_star",
+      "label": "有爱心·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_KINDNESS_OTHER_STAR",
+      "column": "conduct_kindness_other_star",
+      "label": "有爱心·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_COMMUNICATION_SELF_STAR",
+      "column": "conduct_communication_self_star",
+      "label": "善交流·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_COMMUNICATION_OTHER_STAR",
+      "column": "conduct_communication_other_star",
+      "label": "善交流·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_CIVILITY_SELF_STAR",
+      "column": "conduct_civility_self_star",
+      "label": "讲文明·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_CIVILITY_OTHER_STAR",
+      "column": "conduct_civility_other_star",
+      "label": "讲文明·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_RESPONSIBILITY_SELF_STAR",
+      "column": "conduct_responsibility_self_star",
+      "label": "负责任·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_RESPONSIBILITY_OTHER_STAR",
+      "column": "conduct_responsibility_other_star",
+      "label": "负责任·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_RULES_SELF_STAR",
+      "column": "conduct_rules_self_star",
+      "label": "守规则·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_RULES_OTHER_STAR",
+      "column": "conduct_rules_other_star",
+      "label": "守规则·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_COOPERATION_SELF_STAR",
+      "column": "conduct_cooperation_self_star",
+      "label": "会合作·自评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_COOPERATION_OTHER_STAR",
+      "column": "conduct_cooperation_other_star",
+      "label": "会合作·他评",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CONDUCT_PROCESS_STAR",
+      "column": "conduct_process_star",
+      "label": "过程表现",
+      "section": "conduct",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_INTEREST_STAR",
+      "column": "moral_interest_star",
+      "label": "道德与法治·学习兴趣",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_HABIT_STAR",
+      "column": "moral_habit_star",
+      "label": "道德与法治·学习习惯",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_METHOD_STAR",
+      "column": "moral_method_star",
+      "label": "道德与法治·学习方法",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_REGULAR_GRADE",
+      "column": "moral_regular_grade",
+      "label": "道德与法治·平时",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_FINAL_GRADE",
+      "column": "moral_final_grade",
+      "label": "道德与法治·期末",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_OVERALL_GRADE",
+      "column": "moral_overall_grade",
+      "label": "道德与法治·总评",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MORAL_PROCESS_STAR",
+      "column": "moral_process_star",
+      "label": "过程表现",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_INTEREST_STAR",
+      "column": "chinese_interest_star",
+      "label": "语文·学习兴趣",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_HABIT_STAR",
+      "column": "chinese_habit_star",
+      "label": "语文·学习习惯",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_METHOD_STAR",
+      "column": "chinese_method_star",
+      "label": "语文·学习方法",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_REGULAR_GRADE",
+      "column": "chinese_regular_grade",
+      "label": "语文·平时",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_FINAL_GRADE",
+      "column": "chinese_final_grade",
+      "label": "语文·期末",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_OVERALL_GRADE",
+      "column": "chinese_overall_grade",
+      "label": "语文·总评",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "CHINESE_PROCESS_STAR",
+      "column": "chinese_process_star",
+      "label": "过程表现",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_INTEREST_STAR",
+      "column": "math_interest_star",
+      "label": "数学·学习兴趣",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_HABIT_STAR",
+      "column": "math_habit_star",
+      "label": "数学·学习习惯",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_METHOD_STAR",
+      "column": "math_method_star",
+      "label": "数学·学习方法",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_REGULAR_GRADE",
+      "column": "math_regular_grade",
+      "label": "数学·平时",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_FINAL_GRADE",
+      "column": "math_final_grade",
+      "label": "数学·期末",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_OVERALL_GRADE",
+      "column": "math_overall_grade",
+      "label": "数学·总评",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MATH_PROCESS_STAR",
+      "column": "math_process_star",
+      "label": "过程表现",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_INTEREST_STAR",
+      "column": "science_interest_star",
+      "label": "科学·学习兴趣",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_HABIT_STAR",
+      "column": "science_habit_star",
+      "label": "科学·学习习惯",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_METHOD_STAR",
+      "column": "science_method_star",
+      "label": "科学·学习方法",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_REGULAR_GRADE",
+      "column": "science_regular_grade",
+      "label": "科学·平时",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_FINAL_GRADE",
+      "column": "science_final_grade",
+      "label": "科学·期末",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_OVERALL_GRADE",
+      "column": "science_overall_grade",
+      "label": "科学·总评",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "SCIENCE_PROCESS_STAR",
+      "column": "science_process_star",
+      "label": "过程表现",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_INTEREST_STAR",
+      "column": "english_interest_star",
+      "label": "英语·学习兴趣",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_HABIT_STAR",
+      "column": "english_habit_star",
+      "label": "英语·学习习惯",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_METHOD_STAR",
+      "column": "english_method_star",
+      "label": "英语·学习方法",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_REGULAR_GRADE",
+      "column": "english_regular_grade",
+      "label": "英语·平时",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_FINAL_GRADE",
+      "column": "english_final_grade",
+      "label": "英语·期末",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_OVERALL_GRADE",
+      "column": "english_overall_grade",
+      "label": "英语·总评",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "ENGLISH_PROCESS_STAR",
+      "column": "english_process_star",
+      "label": "过程表现",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_INTEREST_STAR",
+      "column": "information_technology_interest_star",
+      "label": "信息科技·学习兴趣",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_HABIT_STAR",
+      "column": "information_technology_habit_star",
+      "label": "信息科技·学习习惯",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_METHOD_STAR",
+      "column": "information_technology_method_star",
+      "label": "信息科技·学习方法",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_REGULAR_GRADE",
+      "column": "information_technology_regular_grade",
+      "label": "信息科技·平时",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_FINAL_GRADE",
+      "column": "information_technology_final_grade",
+      "label": "信息科技·期末",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_OVERALL_GRADE",
+      "column": "information_technology_overall_grade",
+      "label": "信息科技·总评",
+      "section": "wisdom",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INFORMATION_TECHNOLOGY_PROCESS_STAR",
+      "column": "information_technology_process_star",
+      "label": "过程表现",
+      "section": "wisdom",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "HEIGHT_CM",
+      "column": "height_cm",
+      "label": "身高(cm)",
+      "section": "health",
+      "valueType": "number",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "WEIGHT_KG",
+      "column": "weight_kg",
+      "label": "体重(kg)",
+      "section": "health",
+      "valueType": "number",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "VISION_LEFT",
+      "column": "vision_left",
+      "label": "视力左",
+      "section": "health",
+      "valueType": "text",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "VISION_RIGHT",
+      "column": "vision_right",
+      "label": "视力右",
+      "section": "health",
+      "valueType": "text",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "JUMP_ROPE_1MIN",
+      "column": "jump_rope_1min",
+      "label": "1分钟跳绳",
+      "section": "health",
+      "valueType": "number",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "PE_ACADEMIC_GRADE",
+      "column": "pe_academic_grade",
+      "label": "体育与健康·学业水平",
+      "section": "health",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "PE_PROCESS_STAR",
+      "column": "pe_process_star",
+      "label": "过程表现",
+      "section": "health",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FITNESS_SELF_STAR",
+      "column": "fitness_self_star",
+      "label": "体测·自评",
+      "section": "health",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FITNESS_LEVEL_STAR",
+      "column": "fitness_level_star",
+      "label": "体测水平",
+      "section": "health",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FITNESS_PROCESS_STAR",
+      "column": "fitness_process_star",
+      "label": "过程表现",
+      "section": "health",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MUSIC_LEARNING_SELF_STAR",
+      "column": "music_learning_self_star",
+      "label": "音乐·自评",
+      "section": "art",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MUSIC_LEARNING_TEACHER_STAR",
+      "column": "music_learning_teacher_star",
+      "label": "音乐·教师评价",
+      "section": "art",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MUSIC_REGULAR_GRADE",
+      "column": "music_regular_grade",
+      "label": "音乐·平时",
+      "section": "art",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MUSIC_OVERALL_GRADE",
+      "column": "music_overall_grade",
+      "label": "音乐·总评",
+      "section": "art",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "MUSIC_PROCESS_STAR",
+      "column": "music_process_star",
+      "label": "过程表现",
+      "section": "art",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FINE_ART_LEARNING_SELF_STAR",
+      "column": "fine_art_learning_self_star",
+      "label": "美术·自评",
+      "section": "art",
+      "valueType": "star",
+      "sourceType": "SELF",
+      "owner": "student",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FINE_ART_LEARNING_TEACHER_STAR",
+      "column": "fine_art_learning_teacher_star",
+      "label": "美术·教师评价",
+      "section": "art",
+      "valueType": "star",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FINE_ART_REGULAR_GRADE",
+      "column": "fine_art_regular_grade",
+      "label": "美术·平时",
+      "section": "art",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FINE_ART_OVERALL_GRADE",
+      "column": "fine_art_overall_grade",
+      "label": "美术·总评",
+      "section": "art",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "FINE_ART_PROCESS_STAR",
+      "column": "fine_art_process_star",
+      "label": "过程表现",
+      "section": "art",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "LABOR_LITERACY_GRADE",
+      "column": "labor_literacy_grade",
+      "label": "劳动·学科素养",
+      "section": "labor",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "LABOR_PROCESS_STAR",
+      "column": "labor_process_star",
+      "label": "过程表现",
+      "section": "labor",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INTEGRATED_PRACTICE_LITERACY_GRADE",
+      "column": "integrated_practice_literacy_grade",
+      "label": "综合实践活动·学科素养",
+      "section": "labor",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "INTEGRATED_PRACTICE_PROCESS_STAR",
+      "column": "integrated_practice_process_star",
+      "label": "过程表现",
+      "section": "labor",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "LOCAL_COURSE_LITERACY_GRADE",
+      "column": "local_course_literacy_grade",
+      "label": "地方课程·学科素养",
+      "section": "labor",
+      "valueType": "grade",
+      "sourceType": "IMPORT",
+      "owner": "teacher",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "LOCAL_COURSE_PROCESS_STAR",
+      "column": "local_course_process_star",
+      "label": "过程表现",
+      "section": "labor",
+      "valueType": "star",
+      "sourceType": "CARD",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "STORY_WRITE_STAR",
+      "column": "story_write_star",
+      "label": "写故事·成果表现",
+      "section": "story",
+      "valueType": "star",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "STORY_SUMMARY_WRITE_RANK",
+      "column": "story_summary",
+      "label": "写故事·全校排名",
+      "section": "story",
+      "valueType": "number",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": "WRITE.rank"
+    },
+    {
+      "viewCode": "STORY_SUMMARY_WRITE_VALUE",
+      "column": "story_summary",
+      "label": "写故事·数量/分数",
+      "section": "story",
+      "valueType": "number",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": "WRITE.value"
+    },
+    {
+      "viewCode": "STORY_LISTEN_STAR",
+      "column": "story_listen_star",
+      "label": "听故事·成果表现",
+      "section": "story",
+      "valueType": "star",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "STORY_SUMMARY_LISTEN_RANK",
+      "column": "story_summary",
+      "label": "听故事·全校排名",
+      "section": "story",
+      "valueType": "number",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": "LISTEN.rank"
+    },
+    {
+      "viewCode": "STORY_SUMMARY_LISTEN_VALUE",
+      "column": "story_summary",
+      "label": "听故事·数量/分数",
+      "section": "story",
+      "valueType": "number",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": "LISTEN.value"
+    },
+    {
+      "viewCode": "STORY_TELL_STAR",
+      "column": "story_tell_star",
+      "label": "讲故事·成果表现",
+      "section": "story",
+      "valueType": "star",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": null
+    },
+    {
+      "viewCode": "STORY_SUMMARY_TELL_RANK",
+      "column": "story_summary",
+      "label": "讲故事·全校排名",
+      "section": "story",
+      "valueType": "number",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": "TELL.rank"
+    },
+    {
+      "viewCode": "STORY_SUMMARY_TELL_VALUE",
+      "column": "story_summary",
+      "label": "讲故事·数量/分数",
+      "section": "story",
+      "valueType": "number",
+      "sourceType": "STORY",
+      "owner": "system",
+      "jsonPath": "TELL.value"
+    }
+  ],
+  "cardCatalog": [
+    {
+      "code": "MORAL_PROCESS",
+      "group": "德美",
+      "item": "过程表现",
+      "targetColumn": "conduct_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "MORAL_SUBJECT_PROCESS",
+      "group": "智美",
+      "item": "道德与法治·过程表现",
+      "targetColumn": "moral_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "CHINESE_PROCESS",
+      "group": "智美",
+      "item": "语文·过程表现",
+      "targetColumn": "chinese_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "MATH_PROCESS",
+      "group": "智美",
+      "item": "数学·过程表现",
+      "targetColumn": "math_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "SCIENCE_PROCESS",
+      "group": "智美",
+      "item": "科学·过程表现",
+      "targetColumn": "science_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "ENGLISH_PROCESS",
+      "group": "智美",
+      "item": "英语·过程表现",
+      "targetColumn": "english_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "INFORMATION_TECHNOLOGY_PROCESS",
+      "group": "智美",
+      "item": "信息科技·过程表现",
+      "targetColumn": "information_technology_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "PE_PROCESS",
+      "group": "健美",
+      "item": "体育与健康·过程表现",
+      "targetColumn": "pe_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "FITNESS_PROCESS",
+      "group": "健美",
+      "item": "体测·过程表现",
+      "targetColumn": "fitness_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "MUSIC_PROCESS",
+      "group": "艺美",
+      "item": "音乐·过程表现",
+      "targetColumn": "music_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "FINE_ART_PROCESS",
+      "group": "艺美",
+      "item": "美术·过程表现",
+      "targetColumn": "fine_art_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "LABOR_PROCESS",
+      "group": "劳美",
+      "item": "劳动·过程表现",
+      "targetColumn": "labor_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "INTEGRATED_PRACTICE_PROCESS",
+      "group": "劳美",
+      "item": "综合实践活动·过程表现",
+      "targetColumn": "integrated_practice_process_star",
+      "pointsPerEvent": 1
+    },
+    {
+      "code": "LOCAL_COURSE_PROCESS",
+      "group": "劳美",
+      "item": "地方课程·过程表现",
+      "targetColumn": "local_course_process_star",
+      "pointsPerEvent": 1
+    }
+  ]
+}
