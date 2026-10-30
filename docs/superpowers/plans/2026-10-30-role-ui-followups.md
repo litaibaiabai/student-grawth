@@ -18,20 +18,20 @@
 ## Task 1: 额度模板及完整错误
 
 Files: backend/services/reportCoreQuotaBatch.js、reportCoreAdminData.js；frontend/src/app/reportCore/AdminQuota.jsx；backend/__tests__/report_core_quota_batch.test.js、frontend/tests/report-core-followups.cjs。
-- [ ] RED：账号匹配与ID混用重复、未知/停用/非法额度、多行同时报错；前导零模板及职责摘要浏览器断言。
-- [ ] GREEN：entries可用teacherAccount，解析成内部ID再确定顺序加锁；返回422安全errors数组，任一错误不创建预览；UI展示全部错误并保留输入。模板按教师账号，兼容旧ID模板；目录增加安全任教摘要。绑定预览输入版本。
-- [ ] 验证后端quota及admin数据测试、浏览器对应场景并提交。
+- [x] RED：账号匹配与ID混用重复、未知/停用/非法额度、多行同时报错；前导零模板及职责摘要浏览器断言。
+- [x] GREEN：entries可用teacherAccount，解析成内部ID再确定顺序加锁；返回422安全errors数组，任一错误不创建预览；UI展示全部错误并保留输入。模板按教师账号，兼容旧ID模板；目录增加安全任教摘要。绑定预览输入版本。
+- [x] 验证后端quota及admin数据测试、浏览器对应场景并提交。
 
 ## Task 2: 班级报告搜索与定位
 
 Files: ClassReports.jsx、navigation.js、TermReport/index.jsx、reportCoreReportBrowser.js；报告与followups测试。
-- [ ] RED：班级搜索/各班就绪缺项确认发布数、25/50/100清游标、摘要板块直达报告、往返保持筛选。
-- [ ] GREEN：班级列表本地搜索与现有counts，DTO补ready；URL绑定reportLimit/reportSection，服务分页hash含limit；TermReport仅scrollIntoView屏幕section，不改冻结HTML/打印。
-- [ ] 验证报告权限/版本竞态、打印与前端test/lint/build并提交。
+- [x] RED：班级搜索/各班就绪缺项确认发布数、25/50/100清游标、摘要板块直达报告、往返保持筛选。
+- [x] GREEN：班级列表本地搜索与现有counts，DTO补ready；URL绑定reportLimit/reportSection，服务分页hash含limit；TermReport仅scrollIntoView屏幕section，不改冻结HTML/打印。
+- [x] 验证报告权限/版本竞态、打印与前端test/lint/build并提交。
 
 ## Task 3: 台账筛选、下钻与完整性
 
 Files: CardLedger.jsx、必要style.css；frontend/tests/report-core-followups.cjs、ledger测试。
-- [ ] RED：六育/一级联动过滤、指标重置；数字进入对应使用明细，方向计划展开；UNKNOWN历史标记。
-- [ ] GREEN：使用现有section/primary filters；统计卡下钻到有明确范围的视图（额度/余额到制卡计划，制卡/领取/待领到对应纸卡状态）；原教师总盘统计保持原名。班级行展开已有indicatorPlans；展示summary历史完整性和未知时间/状态数量。
-- [ ] 运行followups、backend、frontend test/lint/build及受影响浏览器；一次新上下文最终审阅，仅修复真实问题；写交付增量说明并提交。保留分支/预览，不部署。
+- [x] RED：六育/一级联动过滤、指标重置；数字进入对应使用明细，方向计划展开；UNKNOWN历史标记。
+- [x] GREEN：使用现有section/primary filters；统计卡下钻到有明确范围的视图（额度/余额到制卡计划，制卡/领取/待领到对应纸卡状态）；原教师总盘统计保持原名。班级行展开已有indicatorPlans；展示summary历史完整性和未知时间/状态数量。
+- [x] 运行followups、backend、frontend test/lint/build及受影响浏览器；一次新上下文最终审阅，仅修复真实问题；写交付增量说明并提交。保留分支/预览，不部署。

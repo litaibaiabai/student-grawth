@@ -29,6 +29,9 @@ test('ledger reconciles generated/redeemed/void/reversed counts and never expose
   }
   for (const row of db.rawCards.slice(0, 2)) await cards.reverseSource({ pool: db.pool, actor: teacher, sourceId: String(row.id), reason: '更正', command: command() });
   for (const row of db.rawCards.slice(78)) await cards.voidCard({ pool: db.pool, actor: teacher, sourceId: String(row.id), expectedRevision: '1', reason: '作废', command: command() });
+  // Both corrections must precede this fixture's fixed historical snapshot.
+  await db.pool.query("UPDATE evaluation_source_record SET created_at='2026-10-20 00:00:00' WHERE record_kind='REVERSAL'");
+  await db.pool.query("UPDATE evaluation_source_record SET payload_json=JSON_SET(payload_json,'$.voidedAt','2026-10-20T01:00:00.000Z') WHERE status='VOID'");
   const summary = await ledger.getLedgerSummary({ pool: db.pool, actor: teacher, filters: db.filters, asOf: '2026-10-30T00:00:00Z' });
   assert.equal(summary.quota, 100); assert.equal(summary.planned, 80); assert.equal(summary.generated, 80);
   assert.equal(summary.redeemed, 52); assert.equal(summary.pending, 26); assert.equal(summary.voided, 2);
