@@ -13,7 +13,7 @@ const tables = [
 ];
 async function runCoreMigrations({ connection, targetDb, mode = "check" }) {
   if (
-    (targetDb !== "student_growth" && !/^liuyu_report_(test|pilot|prod)(_[a-z0-9_]+)?$/.test(targetDb)) ||
+    (targetDb !== "student_growth" && targetDb !== 'student_growth_v2' && !/^liuyu_report_(test|pilot|prod)(_[a-z0-9_]+)?$/.test(targetDb)) ||
     targetDb === process.env.LEGACY_DB_NAME
   )
     throw Error("Unsafe target database");
@@ -22,6 +22,11 @@ async function runCoreMigrations({ connection, targetDb, mode = "check" }) {
   const [rows] = await connection.query("SHOW TABLES");
   const names = rows.map((r) => Object.values(r)[0]);
   if (names.length) {
+    if(names.length===7 && names.includes('story_content')) {
+      const result=await require('./migrateSixEducationV2').migrateSixEducationV2({connection,targetDb});
+      if(!result.ready)throw Error('V2 schema fingerprint mismatch: run explicit clone upgrade');
+      return {tables:names,unchanged:true,version:result.version};
+    }
     if (names.length !== 6 || tables.some((t) => !names.includes(t)))
       throw Error("Partial or legacy schema: stop");
     const [columns] = await connection.query(

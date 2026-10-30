@@ -56,10 +56,10 @@
 
 **Interfaces:** `policyFor(config) -> catalog`; `rankProcess(rows) -> [{studentId,points,rank,star,population}]`; `storySummary({listenCount,writeCount,tellScore})`; `honorLevel(value) -> {level,points}`. catalog 固定包括 fields、cardCatalog、displayFieldCount、selfFields。
 
-- [ ] 写失败测试：14 目标唯一、94 格、11 自评、18+18 智美导入列；导入来源不混卡，劳美有卡，信息科技归智美。
-- [ ] 写边界测试：N=0/1/10、并列、全零／全正同分、非法负分；讲有效 0 分与未参与分开。
-- [ ] 执行 `node --test backend/__tests__/report_core_v2_policy.test.js`，确认失败后实现最小契约，保留 V1 导出兼容。
-- [ ] 重跑 V1 policy 和新测试，更新字段映射计数；提交 `feat: define six education v2 policy`。
+- [x] 写失败测试：14 目标唯一、94 格、11 自评、18+18 智美导入列；导入来源不混卡，劳美有卡，信息科技归智美。
+- [x] 写边界测试：N=0/1/10、并列、全零／全正同分、非法负分；讲有效 0 分与未参与分开。
+- [x] 执行 `node --test backend/__tests__/report_core_v2_policy.test.js`，确认失败后实现最小契约，保留 V1 导出兼容。
+- [x] 重跑 V1 policy 和新测试，更新字段映射计数；提交 `feat: define six education v2 policy`。
 
 ### Task 2：七表 schema 与安全、可重入升级（阶段一）
 
@@ -67,10 +67,10 @@
 
 **Interfaces:** `migrateSixEducationV2({connection,targetDb,mode:'check'|'apply'}) -> {version,steps,conflicts}`；默认 check 不写；V1 初始化保持可用，V2 启动校验识别七表和完整约束。
 
-- [ ] 失败测试：六表升级后七表；重入无重复；check 不发 DDL；异库／旧44表／部分结构拒绝；主作品指针同校 FK、效果键唯一、星级范围与同班班主任唯一。
-- [ ] 逐步补列、索引、约束、CORE_V2 enum 和 story_content；每步预检，不使用假事务包裹全部 ALTER。
-- [ ] 以隔离库演练中断重跑；记录未映射旧来源，不将旧故事文本／卡派生评价冒充 V2 新来源。
-- [ ] 增只读资产 manifest／来源对账输出与切换说明；测试通过后提交 `feat: add resumable v2 schema migration`。
+- [x] 失败测试：六表升级后七表；重入无重复；check 不发 DDL；异库／旧44表／部分结构拒绝；主作品指针同校 FK、效果键唯一、星级范围与同班班主任唯一。
+- [x] 逐步补列、索引、约束、CORE_V2 enum 和 story_content；每步预检，不使用假事务包裹全部 ALTER。
+- [x] 以隔离库演练中断重跑；记录未映射旧来源，不将旧故事文本／卡派生评价冒充 V2 新来源。
+- [x] 增只读资产 manifest／来源对账输出与切换说明；测试通过后提交 `feat: add resumable v2 schema migration`。
 
 ### Task 3：V2 策略选择、事务阶段和权限（阶段二）
 

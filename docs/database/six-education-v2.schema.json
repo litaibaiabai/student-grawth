@@ -1,0 +1,501 @@
+{
+  "version": "SIX_EDU_V2",
+  "tables": [
+    "users",
+    "academic_year",
+    "teacher_teaching_assignment",
+    "student_term_evaluation",
+    "evaluation_source_record",
+    "term_report",
+    "story_content"
+  ],
+  "operations": [
+    {
+      "key": "column:academic_year.business_phase",
+      "kind": "column",
+      "table": "academic_year",
+      "name": "business_phase",
+      "definition": "VARCHAR(16) NOT NULL DEFAULT 'COLLECTING'",
+      "sql": "ALTER TABLE `academic_year` ADD COLUMN `business_phase` VARCHAR(16) NOT NULL DEFAULT 'COLLECTING'"
+    },
+    {
+      "key": "column:academic_year.data_revision",
+      "kind": "column",
+      "table": "academic_year",
+      "name": "data_revision",
+      "definition": "BIGINT UNSIGNED NOT NULL DEFAULT 1",
+      "sql": "ALTER TABLE `academic_year` ADD COLUMN `data_revision` BIGINT UNSIGNED NOT NULL DEFAULT 1"
+    },
+    {
+      "key": "column:academic_year.roster_revision",
+      "kind": "column",
+      "table": "academic_year",
+      "name": "roster_revision",
+      "definition": "BIGINT UNSIGNED NOT NULL DEFAULT 1",
+      "sql": "ALTER TABLE `academic_year` ADD COLUMN `roster_revision` BIGINT UNSIGNED NOT NULL DEFAULT 1"
+    },
+    {
+      "key": "column:student_term_evaluation.conduct_process_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "conduct_process_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `conduct_process_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.moral_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "moral_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `moral_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.moral_final_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "moral_final_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `moral_final_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.moral_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "moral_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `moral_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.chinese_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "chinese_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `chinese_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.chinese_final_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "chinese_final_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `chinese_final_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.chinese_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "chinese_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `chinese_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.math_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "math_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `math_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.math_final_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "math_final_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `math_final_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.math_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "math_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `math_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.science_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "science_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `science_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.science_final_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "science_final_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `science_final_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.science_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "science_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `science_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.english_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "english_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `english_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.english_final_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "english_final_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `english_final_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.english_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "english_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `english_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_interest_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_interest_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_interest_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_habit_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_habit_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_habit_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_method_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_method_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_method_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_final_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_final_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_final_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.information_technology_process_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "information_technology_process_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `information_technology_process_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.music_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "music_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `music_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.music_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "music_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `music_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.fine_art_regular_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "fine_art_regular_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `fine_art_regular_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.fine_art_overall_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "fine_art_overall_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `fine_art_overall_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.labor_literacy_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "labor_literacy_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `labor_literacy_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.labor_process_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "labor_process_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `labor_process_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.integrated_practice_literacy_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "integrated_practice_literacy_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `integrated_practice_literacy_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.integrated_practice_process_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "integrated_practice_process_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `integrated_practice_process_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.local_course_literacy_grade",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "local_course_literacy_grade",
+      "definition": "VARCHAR(8) NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `local_course_literacy_grade` VARCHAR(8) NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.local_course_process_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "local_course_process_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `local_course_process_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.story_write_star",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "story_write_star",
+      "definition": "TINYINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `story_write_star` TINYINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.story_summary",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "story_summary",
+      "definition": "JSON NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `story_summary` JSON NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.process_summary",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "process_summary",
+      "definition": "JSON NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `process_summary` JSON NULL"
+    },
+    {
+      "key": "column:student_term_evaluation.honor_summary",
+      "kind": "column",
+      "table": "student_term_evaluation",
+      "name": "honor_summary",
+      "definition": "JSON NULL",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD COLUMN `honor_summary` JSON NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.schema_version",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "schema_version",
+      "definition": "VARCHAR(16) NOT NULL DEFAULT 'CORE_V1'",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `schema_version` VARCHAR(16) NOT NULL DEFAULT 'CORE_V1'"
+    },
+    {
+      "key": "column:evaluation_source_record.event_type",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "event_type",
+      "definition": "VARCHAR(32) NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `event_type` VARCHAR(32) NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.dimension_code",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "dimension_code",
+      "definition": "VARCHAR(16) NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `dimension_code` VARCHAR(16) NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.subject_code",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "subject_code",
+      "definition": "VARCHAR(32) NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `subject_code` VARCHAR(32) NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.effect_key",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "effect_key",
+      "definition": "CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `effect_key` CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.submitted_at",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "submitted_at",
+      "definition": "DATETIME(6) NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `submitted_at` DATETIME(6) NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.effective_at",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "effective_at",
+      "definition": "DATETIME(6) NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `effective_at` DATETIME(6) NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.numeric_value",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "numeric_value",
+      "definition": "DECIMAL(8,2) NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `numeric_value` DECIMAL(8,2) NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.story_content_id",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "story_content_id",
+      "definition": "BIGINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `story_content_id` BIGINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:evaluation_source_record.current_version_id",
+      "kind": "column",
+      "table": "evaluation_source_record",
+      "name": "current_version_id",
+      "definition": "BIGINT UNSIGNED NULL",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD COLUMN `current_version_id` BIGINT UNSIGNED NULL"
+    },
+    {
+      "key": "column:teacher_teaching_assignment.active_head_class",
+      "kind": "column",
+      "table": "teacher_teaching_assignment",
+      "name": "active_head_class",
+      "definition": "VARCHAR(32) GENERATED ALWAYS AS (CASE WHEN enabled=1 AND is_head_teacher=1 THEN CONCAT(grade,':',class_no) ELSE NULL END) STORED",
+      "sql": "ALTER TABLE `teacher_teaching_assignment` ADD COLUMN `active_head_class` VARCHAR(32) GENERATED ALWAYS AS (CASE WHEN enabled=1 AND is_head_teacher=1 THEN CONCAT(grade,':',class_no) ELSE NULL END) STORED"
+    },
+    {
+      "key": "index:uk_v2_head",
+      "kind": "index",
+      "table": "teacher_teaching_assignment",
+      "name": "uk_v2_head",
+      "sql": "ALTER TABLE `teacher_teaching_assignment` ADD UNIQUE INDEX `uk_v2_head` (school_id,term_id,active_head_class)"
+    },
+    {
+      "key": "index:uk_v2_effect",
+      "kind": "index",
+      "table": "evaluation_source_record",
+      "name": "uk_v2_effect",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD UNIQUE INDEX `uk_v2_effect` (school_id,effect_key)"
+    },
+    {
+      "key": "index:idx_v2_event",
+      "kind": "index",
+      "table": "evaluation_source_record",
+      "name": "idx_v2_event",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD INDEX `idx_v2_event` (school_id,term_id,event_type,status,student_id,effective_at)"
+    },
+    {
+      "key": "index:idx_v2_process",
+      "kind": "index",
+      "table": "evaluation_source_record",
+      "name": "idx_v2_process",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD INDEX `idx_v2_process` (school_id,term_id,dimension_code,subject_code,student_id,status)"
+    },
+    {
+      "key": "constraint:fk_v2_current",
+      "kind": "constraint",
+      "table": "evaluation_source_record",
+      "name": "fk_v2_current",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD CONSTRAINT `fk_v2_current` FOREIGN KEY (school_id,current_version_id) REFERENCES evaluation_source_record(school_id,id) ON DELETE RESTRICT"
+    },
+    {
+      "key": "constraint:ck_v2_stars",
+      "kind": "constraint",
+      "table": "student_term_evaluation",
+      "name": "ck_v2_stars",
+      "sql": "ALTER TABLE `student_term_evaluation` ADD CONSTRAINT `ck_v2_stars` CHECK ((`conduct_process_star` IS NULL OR `conduct_process_star` BETWEEN 1 AND 3) AND (`information_technology_interest_star` IS NULL OR `information_technology_interest_star` BETWEEN 1 AND 3) AND (`information_technology_habit_star` IS NULL OR `information_technology_habit_star` BETWEEN 1 AND 3) AND (`information_technology_method_star` IS NULL OR `information_technology_method_star` BETWEEN 1 AND 3) AND (`information_technology_process_star` IS NULL OR `information_technology_process_star` BETWEEN 1 AND 3) AND (`labor_process_star` IS NULL OR `labor_process_star` BETWEEN 1 AND 3) AND (`integrated_practice_process_star` IS NULL OR `integrated_practice_process_star` BETWEEN 1 AND 3) AND (`local_course_process_star` IS NULL OR `local_course_process_star` BETWEEN 1 AND 3) AND (`story_write_star` IS NULL OR `story_write_star` BETWEEN 1 AND 3))"
+    },
+    {
+      "key": "constraint:ck_v2_phase",
+      "kind": "constraint",
+      "table": "academic_year",
+      "name": "ck_v2_phase",
+      "sql": "ALTER TABLE `academic_year` ADD CONSTRAINT `ck_v2_phase` CHECK (business_phase IN ('COLLECTING','RECONCILING','FROZEN','ARCHIVED'))"
+    },
+    {
+      "key": "table:story_content",
+      "kind": "table",
+      "table": "story_content",
+      "name": "story_content",
+      "sql": "CREATE TABLE story_content (\n id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,\n school_id BIGINT UNSIGNED NOT NULL,\n kind ENUM('BUILTIN','CLASSIC') NOT NULL,\n stable_code VARCHAR(96) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,\n version INT UNSIGNED NOT NULL DEFAULT 1,\n title VARCHAR(200) NOT NULL,\n text_ref VARCHAR(512) NULL,\n text_content MEDIUMTEXT NULL,\n audio_ref VARCHAR(512) NULL,\n audio_duration_ms INT UNSIGNED NULL,\n asset_hashes JSON NOT NULL,\n suitable_grades JSON NULL,\n origin_record_id BIGINT UNSIGNED NULL,\n origin_version INT UNSIGNED NULL,\n display_author VARCHAR(100) NULL,\n display_class VARCHAR(100) NULL,\n authorization_ref VARCHAR(255) NULL,\n status ENUM('DRAFT','REVIEWED','PUBLISHED','WITHDRAWN') NOT NULL DEFAULT 'DRAFT',\n featured_term_id BIGINT UNSIGNED NULL,\n published_at DATETIME(6) NULL,\n withdrawn_at DATETIME(6) NULL,\n revision BIGINT UNSIGNED NOT NULL DEFAULT 1,\n created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),\n updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),\n PRIMARY KEY(id),\n UNIQUE KEY uk_story_school(school_id,id),\n UNIQUE KEY uk_story_version(school_id,kind,stable_code,version),\n UNIQUE KEY uk_story_origin(school_id,origin_record_id,origin_version),\n KEY idx_story_display(school_id,kind,status,featured_term_id),\n CONSTRAINT fk_story_origin FOREIGN KEY(school_id,origin_record_id) REFERENCES evaluation_source_record(school_id,id) ON DELETE RESTRICT,\n CONSTRAINT fk_story_featured FOREIGN KEY(school_id,featured_term_id) REFERENCES academic_year(school_id,id) ON DELETE RESTRICT,\n CONSTRAINT ck_story_assets CHECK(JSON_TYPE(asset_hashes)='OBJECT'),\n CONSTRAINT ck_story_builtin CHECK(kind<>'BUILTIN' OR (audio_ref IS NOT NULL AND audio_duration_ms>0 AND (text_ref IS NOT NULL OR text_content IS NOT NULL))),\n CONSTRAINT ck_story_classic CHECK(kind<>'CLASSIC' OR (origin_record_id IS NOT NULL AND origin_version IS NOT NULL)),\n CONSTRAINT ck_story_public CHECK(status<>'PUBLISHED' OR (published_at IS NOT NULL AND (kind='BUILTIN' OR authorization_ref IS NOT NULL)))\n) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci"
+    },
+    {
+      "key": "constraint:fk_v2_story",
+      "kind": "constraint",
+      "table": "evaluation_source_record",
+      "name": "fk_v2_story",
+      "sql": "ALTER TABLE `evaluation_source_record` ADD CONSTRAINT `fk_v2_story` FOREIGN KEY (school_id,story_content_id) REFERENCES story_content(school_id,id) ON DELETE RESTRICT"
+    },
+    {
+      "key": "enum:report_v2",
+      "kind": "enum",
+      "table": "term_report",
+      "name": "schema_version",
+      "contains": "CORE_V2",
+      "sql": "ALTER TABLE term_report MODIFY schema_version ENUM('LEGACY_V1','CORE_V1','CORE_V2') NOT NULL"
+    },
+    {
+      "key": "check:source_status_v2",
+      "kind": "check",
+      "table": "evaluation_source_record",
+      "name": "ck_source_status",
+      "contains": "REVIEW_REQUIRED",
+      "sql": "ALTER TABLE evaluation_source_record DROP CHECK ck_source_status, ADD CONSTRAINT ck_source_status CHECK (status IN ('DRAFT','PREVIEW','SUBMITTED','UNUSED','USED','QUEUED','PROCESSING','SCORED','CONFIRMED','APPROVED','REJECTED','FAILED','REVOKED','SUPERSEDED','VOID','EXPIRED','CANCELLED','CLOSED','COMMITTED','OPEN','COMPLETED','REVIEW_REQUIRED'))"
+    }
+  ]
+}

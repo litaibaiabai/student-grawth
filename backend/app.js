@@ -57,7 +57,7 @@ function createApp({
 }
 if (require.main === module) {
   const { createDbPool } = require("./db");
-  if (process.env.REPORT_DB_NAME !== "student_growth" && !process.env.REPORT_DB_NAME?.startsWith("liuyu_report_"))
+  if (process.env.REPORT_DB_NAME !== "student_growth" && process.env.REPORT_DB_NAME !== 'student_growth_v2' && !process.env.REPORT_DB_NAME?.startsWith("liuyu_report_"))
     throw Error("Set dedicated REPORT_DB_NAME before starting report core");
   const pool = createDbPool({ database: process.env.REPORT_DB_NAME });
   (async () => {

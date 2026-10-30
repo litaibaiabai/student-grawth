@@ -1,0 +1,66 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {createCoreTestDb}=require('./helpers/reportCoreDb');
+test('V2 migration is dry by default, rejects ambiguous head teachers, and resumes without altering V1 facts',async t=>{
+  const db=await createCoreTestDb(t);await db.seedBase();
+  const {migrateSixEducationV2}=require('../scripts/migrateSixEducationV2');
+  const preview=await migrateSixEducationV2({connection:db.pool,targetDb:db.name});
+  assert.equal((await db.pool.query('SHOW TABLES'))[0].length,6);
+  assert.ok(preview.conflicts.some(c=>c.kind==='DUPLICATE_HEAD'));
+  await assert.rejects(migrateSixEducationV2({connection:db.pool,targetDb:db.name,mode:'apply'}),/班主任/);
+  await db.pool.query("UPDATE teacher_teaching_assignment SET is_head_teacher=0 WHERE subject_code<>'MORAL'");
+  const result=await migrateSixEducationV2({connection:db.pool,targetDb:db.name,mode:'apply'});
+  assert.equal(result.version,'SIX_EDU_V2');
+  assert.equal((await db.pool.query('SHOW TABLES'))[0].length,7);
+  assert.equal((await migrateSixEducationV2({connection:db.pool,targetDb:db.name,mode:'apply'})).applied.length,0);
+  const [[term]]=await db.pool.query('SELECT evaluation_config,business_phase FROM academic_year');
+  assert.equal(term.business_phase,'COLLECTING');
+  assert.equal(term.evaluation_config.schemaVersion,undefined);
+  await assert.rejects(db.pool.query('UPDATE student_term_evaluation SET conduct_process_star=4'),/check|constraint/i);
+  await assert.rejects(db.pool.query("INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) VALUES(1,1,2,4,1,'HEAD_EXTRA',1)"),/duplicate/i);
+  await assert.rejects(migrateSixEducationV2({connection:db.pool,targetDb:'student_growth_v2',mode:'apply'}),/target/i);
+  const {runCoreMigrations}=require('../scripts/runCoreMigrations');
+  assert.equal((await runCoreMigrations({connection:db.pool,targetDb:db.name})).version,'SIX_EDU_V2');
+});
+test('V2 materials have database-enforced unique effects and same-school version pointers',async t=>{
+  const db=await createCoreTestDb(t);await db.seedBase();
+  await db.pool.query("UPDATE teacher_teaching_assignment SET is_head_teacher=0 WHERE subject_code<>'MORAL'");
+  await require('../scripts/migrateSixEducationV2').migrateSixEducationV2({connection:db.pool,targetDb:db.name,mode:'apply'});
+  const sql="INSERT INTO evaluation_source_record(school_id,term_id,student_id,source_type,record_kind,business_key,payload_hash,status,payload_json,effect_key) VALUES(1,1,3,'STORY','ITEM',?,?,'QUEUED','{}',?)";
+  await db.pool.query(sql,['a'.repeat(64),'f'.repeat(64),'e'.repeat(64)]);
+  await assert.rejects(db.pool.query(sql,['b'.repeat(64),'f'.repeat(64),'e'.repeat(64)]),/duplicate/i);
+  await assert.rejects(db.pool.query('UPDATE evaluation_source_record SET current_version_id=999999'),/foreign key/i);
+});
+test('interrupted DDL resumes and existing wrong column definitions cannot masquerade as ready',async t=>{
+  const db=await createCoreTestDb(t);await db.seedBase();
+  await db.pool.query("UPDATE teacher_teaching_assignment SET is_head_teacher=0 WHERE subject_code<>'MORAL'");
+  const {migrateSixEducationV2}=require('../scripts/migrateSixEducationV2');
+  let altered=0;
+  const interrupted={query:async(sql,args)=>{
+    if(sql.startsWith('ALTER TABLE') && ++altered===3)throw Error('simulated DDL interruption');
+    return db.pool.query(sql,args);
+  }};
+  await assert.rejects(migrateSixEducationV2({connection:interrupted,targetDb:db.name,mode:'apply'}),/interruption/);
+  assert.equal((await db.pool.query("SHOW COLUMNS FROM academic_year LIKE 'business_phase'"))[0].length,1);
+  await migrateSixEducationV2({connection:db.pool,targetDb:db.name,mode:'apply'});
+  await db.pool.query('ALTER TABLE academic_year MODIFY data_revision VARCHAR(32) NOT NULL');
+  const check=await migrateSixEducationV2({connection:db.pool,targetDb:db.name});
+  assert.equal(check.ready,false);
+  assert.ok(check.conflicts.some(c=>c.kind==='COLUMN_DEFINITION'));
+});
+test('source audit hashes private assets and isolates legacy stories without fabricating new activity',async t=>{
+  const db=await createCoreTestDb(t);await db.seedBase();
+  const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
+  const root=await fs.mkdtemp(path.join(require('node:os').tmpdir(),'v2-assets-'));
+  t.after(()=>fs.rm(root,{recursive:true,force:true}));
+  await fs.writeFile(path.join(root,'proof.txt'),'original');
+  const payload={fileRef:'proof.txt',fileHash:crypto.createHash('sha256').update('original').digest('hex'),text:'old monthly story'};
+  await require('../services/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:'3',sourceType:'STORY',kind:'ITEM',status:'SCORED',key:['legacy-asset'],payload});
+  const audit=await require('../scripts/migrateReportCore').auditV2SourceAssets({connection:db.pool,schoolId:'1',termId:'1',filesRoot:root});
+  assert.equal(audit.sourceCount,1);
+  assert.equal(audit.assets[0].status,'VERIFIED');
+  assert.equal(audit.isolated.length,1);
+  await fs.writeFile(path.join(root,'proof.txt'),'changed');
+  assert.equal((await require('../scripts/migrateReportCore').auditV2SourceAssets({connection:db.pool,schoolId:'1',termId:'1',filesRoot:root})).assets[0].status,'HASH_MISMATCH');
+  assert.equal(String((await db.pool.query('SELECT COUNT(*) n FROM evaluation_source_record'))[0][0].n),'1');
+});

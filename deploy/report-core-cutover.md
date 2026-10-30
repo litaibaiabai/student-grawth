@@ -13,3 +13,18 @@
 发布准备失败可用发布中心“恢复准备”或“取消本次准备”，学生一直只能读最后已激活批次。取消批次的PREPARED报告不会因后续发布而可见。
 
 用户本地已要求将新版六表库统一命名为student_growth，并清理liuyu_report*临时库。该命名不表示恢复旧44表结构。REPORT_DB_NAME与LEGACY_DB_NAME必须不同；本地新库更名后将旧来源配置留空，禁止将同名库当迁移来源。启动会只读检查六表schema，不自动初始化或恢复旧库。
+
+## 六育 V2：在目标克隆库显式升级
+
+先恢复经过验证的六表备份到独立 `student_growth_v2` 或 `liuyu_report_pilot_*` 目标，源库保持只读。Node 至少22.12；不要在旧44表库运行V2 ALTER，也不要直接执行06 SQL文件。
+
+```sh
+# 默认只读检查，列出待执行步骤和冲突
+REPORT_DB_NAME=student_growth_v2 node backend/scripts/migrateSixEducationV2.js
+# 在目标克隆库显式执行，逐步骤可重入
+REPORT_DB_NAME=student_growth_v2 node backend/scripts/migrateSixEducationV2.js --apply
+# 单个学期来源/私有资产只读审计；不回填推测成绩
+REPORT_DB_NAME=student_growth_v2 SCHOOL_ID=1 MIGRATE_TERM_IDS=1 node backend/scripts/migrateSixEducationV2.js --audit-sources
+```
+
+班主任职责重复、已存在列定义不符、源目标同名等需先人工核对。升级schema不会把V1学期自动改成V2，也不会重写历史已发布报告。资产清单必须核对摘要；MISSING/HASH_MISMATCH等未解决前不能切换。切换前冻结写入口与worker，完成最终同步、来源对账和恢复演练；开放V2新写入后回退必须先保全新增来源及文件。
