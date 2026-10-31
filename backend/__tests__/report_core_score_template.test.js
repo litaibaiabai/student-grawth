@@ -3,7 +3,6 @@ const assert=require('node:assert/strict');
 const XLSX=require('xlsx');
 const {buildScoreTemplate,parseV2Workbook}=require('../services/reportCoreV2Imports');
 const {createV2Config,policyFor}=require('../services/reportCoreV2Policy');
-const health=['height_cm','weight_kg','vision_left','vision_right','jump_rope_1min'];
 
 for(const [label,config] of [['current',{}],['v2',createV2Config()]]){
  test(`${label} downloadable template includes every supported score field and a parser-compatible example`,()=>{
@@ -11,7 +10,9 @@ for(const [label,config] of [['current',{}],['v2',createV2Config()]]){
   const wb=XLSX.read(buffer,{type:'buffer',cellFormula:true,cellStyles:true});
   assert.deepEqual(wb.SheetNames,['成绩']);
   const sheet=wb.Sheets.成绩,data=XLSX.utils.sheet_to_json(sheet,{header:1,raw:false});
-  const fields=policyFor(config).fields.filter(f=>f.sourceType==='IMPORT'&&(label==='v2'||!health.includes(f.column)));
+  const fields=policyFor(createV2Config()).fields.filter(f=>f.sourceType==='IMPORT');
+  assert.equal(fields.length,60);
+  assert.ok(data[0].every(key=>!key.includes('_self_')&&!key.includes('_process_')&&!key.startsWith('story_')));
   assert.deepEqual(data[0].slice(8),fields.map(f=>f.column));
   assert.equal(new Set(data[0]).size,data[0].length);
   assert.equal(data.length,9);assert.match(data[1][2],/示例/);assert.match(sheet.C2.c[0].t,/替换|删除/);
@@ -24,6 +25,7 @@ for(const [label,config] of [['current',{}],['v2',createV2Config()]]){
   assert.ok(new Set(parsed.map(row=>row.values[gradeColumn])).size>1);
   assert.ok(new Set(parsed.map(row=>row.values[starColumn])).size>1);
   assert.equal(parsed[0].username,'示例学号001');
+  assert.equal(parsed[0].templateVersion,'SIX_EDU_V2');
   assert.equal(parsed[0].values[fields.find(f=>f.valueType==='grade').column],'A');
   for(const cell of Object.values(sheet))if(cell&&typeof cell==='object')assert.ok(!cell.f&&cell.t!=='e');
  });
@@ -56,8 +58,29 @@ test('eight generated sample students can be reviewed without real student accou
  const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
  const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:buildScoreTemplate({termId:'1'}),command:{requestKey:'sample-review',payloadHash:'sample-review'}});
  assert.equal(result.demonstration,true);assert.equal(result.students.length,8);assert.deepEqual(result.errors,[]);assert.equal(result.batchId,null);
+ assert.equal(result.catalog.schemaVersion,'SIX_EDU_V2');
+ assert.equal(result.students[0].values.math_regular_grade,'A');
  assert.equal(result.students[7].student.name,'吴雨桐（示例）');assert.equal(result.students[7].student.id,null);
  assert.equal(Number((await db.pool.query("SELECT COUNT(*) n FROM evaluation_source_record WHERE source_type='IMPORT'"))[0][0].n),0);
+});
+
+test('blue-frame real data cannot be silently written using the old term schema',async t=>{
+ const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
+ const wb=XLSX.read(buildScoreTemplate({termId:'1'})),sheet=wb.Sheets.成绩;sheet.C2.v='student';sheet.D2.v='学生3';
+ const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:{requestKey:'blue-old',payloadHash:'blue-old'}});
+ assert.equal(result.batchId,null);assert.ok(result.errors.some(e=>e.field==='schemaVersion'));
+});
+
+test('all sixty blue-frame fields commit after upgrade without changing self or process fields',async t=>{
+ const {createV2TestDb,command}=require('./helpers/reportCoreV2Db');const db=await createV2TestDb(t);
+ const wb=XLSX.read(buildScoreTemplate({termId:'1'})),sheet=wb.Sheets.成绩;
+ sheet.C2.v='student';sheet.D2.v='学生3';sheet['!ref']=`A1:BP2`;
+ const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:db.actors.teacher,termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:command('sixty-blue')});
+ assert.deepEqual(result.errors,[]);assert.ok(result.batchId);assert.equal(result.students[0].uploadedFields.length,60);
+ await require('../services/reportCoreImports').commitImport({pool:db.pool,actor:db.actors.teacher,batchId:result.batchId,expectedRevision:result.revision,command:command('commit-sixty')});
+ const [[row]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');
+ for(const f of policyFor(createV2Config()).fields.filter(f=>f.sourceType==='IMPORT'))assert.notEqual(row[f.column],null,`${f.column} committed`);
+ assert.equal(row.fitness_self_star,null);assert.equal(row.math_process_star,null);
 });
 
 test('a mixed sample and unknown account file cannot bypass ordinary student scope validation',async t=>{

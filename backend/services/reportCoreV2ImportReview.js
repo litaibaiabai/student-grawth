@@ -8,8 +8,10 @@ const {fail}=require('./reportCorePolicy');
 async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
   if(actor.role!=='teacher')fail(403,'仅教师核对综合成绩');
   const term=await getTerm(pool,actor.schoolId,termId);
-  const v2=isV2(term.evaluation_config),fixedFields=policyFor(term.evaluation_config).fields.filter(f=>!f.jsonPath);
+  const v2=isV2(term.evaluation_config);
   const rows=parseV2Workbook(buffer,{termId,review:true,config:term.evaluation_config});
+  const blue=rows.some(row=>row.templateVersion==='SIX_EDU_V2');
+  const reportCatalog=policyFor(blue?{schemaVersion:'SIX_EDU_V2'}:term.evaluation_config),fixedFields=reportCatalog.fields.filter(f=>!f.jsonPath);
   // Synthetic examples never read real student values or create a writable import batch.
   const demonstration=rows.every(row=>!row.studentId&&/^示例学号00[1-8]$/.test(row.username||'')&&/^.+（示例）$/.test(row.real_name||''));
   const roster=demonstration?[]:await resolveTermRoster({connection:pool,schoolId:actor.schoolId,termId,teacherId:actor.id});
@@ -28,6 +30,7 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
       if(!record.errors.some(err=>err.field===field&&err.reason===reason))record.errors.push({field,reason,rowNo:input.rowNo,sheetName:input.sheetName});
     };
     for(const err of input.inputErrors)error(err.field,err.reason);
+    if(blue&&!v2&&!demonstration)error('schemaVersion','当前学期尚未升级到蓝框成绩字段，请完成数据库升级后重新上传');
     const identity=e?String(e.student_id):input.username||input.studentId,previous=seen.get(identity);
     if(identity&&previous){
       error('username','同一学生在工作簿中重复');
@@ -63,6 +66,6 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
     }
     errors=students.flatMap(s=>s.errors);
   }
-  return {result:{...preview,demonstration,students,totalCount:students.length,errors}};
+  return {result:{...preview,catalog:reportCatalog,demonstration,students,totalCount:students.length,errors}};
 }
 module.exports={reviewV2Workbook};

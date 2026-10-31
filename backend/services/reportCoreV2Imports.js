@@ -34,14 +34,19 @@ function normalizeMeasurement(input,values) {
   return {date,visionStandard:input.visionStandard||null,groupId:require('node:crypto').randomUUID()};
 }
 function parseV2Workbook(buffer,{termId,review=false,config}) {
-  const v2=config===undefined||isV2(config),policy=config===undefined?catalog:policyFor(config);
-  const byColumn=new Map(policy.fields.filter(f=>!f.jsonPath).map(f=>[f.column,f]));
+  let v2=config===undefined||isV2(config),policy=config===undefined?catalog:policyFor(config);
   if(!Buffer.isBuffer(buffer)||buffer.length>10*1024*1024)fail(413,'Excel文件限10MB');
   const zip=buffer.subarray(0,2).toString()==='PK';
   if(zip){const entries=inspectZip(buffer);if(!entries.has('xl/workbook.xml') || [...entries.keys()].some(n=>/vbaproject|externallinks/i.test(n)))fail(415,'Excel格式或宏不合法');}
   else if(!buffer.subarray(0,8).equals(Buffer.from('d0cf11e0a1b11ae1','hex')))fail(415,'仅支持真实Excel文件');
   let wb;try{wb=XLSX.read(buffer,{type:'buffer',bookVBA:true,cellFormula:true});}catch{fail(415,'Excel文件损坏或加密');}
   if(wb.vbaraw)fail(415,'不能导入宏');
+  if(!v2){
+    const first=wb.Sheets[wb.SheetNames[0]],data=first?XLSX.utils.sheet_to_json(first,{header:1,raw:false,defval:''}):[];
+    const versionColumn=(data[0]||[]).findIndex(h=>h==='模板版本'||h==='templateVersion');
+    if(versionColumn>=0&&data[1]?.[versionColumn]==='SIX_EDU_V2'){v2=true;config={...config,schemaVersion:'SIX_EDU_V2'};policy=catalog;}
+  }
+  const byColumn=new Map(policy.fields.filter(f=>!f.jsonPath).map(f=>[f.column,f]));
   const result=[];
   for(const sheetName of wb.SheetNames){
   const ws=wb.Sheets[sheetName];
@@ -95,19 +100,18 @@ function buildV2Workbook({termId,roster=[]}) {
   return XLSX.write(wb,{type:'buffer',bookType:'xlsx'});
 }
 function buildScoreTemplate({termId,config={}}){
-  const v2=isV2(config),health=['height_cm','weight_kg','vision_left','vision_right','jump_rope_1min'];
-  // Current-term raw health measurements use the administrator's separate import.
-  const fields=policyFor(config).fields.filter(f=>f.sourceType==='IMPORT'&&(v2||!health.includes(f.column)));
+  // The teacher workbook contains exactly the sixty blue-frame inputs.
+  const fields=catalog.fields.filter(f=>f.sourceType==='IMPORT');
   const headers=['学期标识','模板版本','学号','姓名','年级','班级','测量日期','视力制式',...fields.map(f=>f.column)];
   const date=new Date().toISOString().slice(0,10),grades=config.allowedGrades||['A','B','C','D'];
   const names=['林知夏','陈予安','张晨','李沐','王梓涵','赵一诺','周明轩','吴雨桐'];
   const rows=names.map((name,i)=>{
     const examples={height_cm:Number((140+i*1.3).toFixed(1)),weight_kg:Number((32+i*1.2).toFixed(1)),vision_left:['5.0','4.9','5.1'][i%3],vision_right:['5.0','5.1','4.9'][i%3],jump_rope_1min:120+i*7};
     const values=fields.map(f=>examples[f.column]??(f.valueType==='star'?3-i%3:f.valueType==='grade'?grades[i%grades.length]:''));
-    return [String(termId),v2?'SIX_EDU_V2':'CORE_V1',`示例学号${String(i+1).padStart(3,'0')}`,`${name}（示例）`,4,1,date,'5_POINT',...values];
+    return [String(termId),'SIX_EDU_V2',`示例学号${String(i+1).padStart(3,'0')}`,`${name}（示例）`,4,1,date,'5_POINT',...values];
   });
   const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
-  const notes=['由系统填入，请勿修改。','由系统填入，请勿修改。','填写学校分配的学生账号 / 学号，保留前导零。','必须与系统学籍姓名一致。','学生所在年级，填写整数。','学生所在班级，填写整数。',v2?'填写 YYYY-MM-DD；填写健康原值时必填。':'填写 YYYY-MM-DD，如示例所示；当前学期不使用此项健康测量信息。',v2?'五分制填 5_POINT；小数制填 DECIMAL。填写视力时必填。':'五分制填 5_POINT；小数制填 DECIMAL。当前学期不使用此项健康测量信息。'];
+  const notes=['由系统填入，请勿修改。','由系统填入，请勿修改。','填写学校分配的学生账号 / 学号，保留前导零。','必须与系统学籍姓名一致。','学生所在年级，填写整数。','学生所在班级，填写整数。','填写 YYYY-MM-DD；填写健康原值时必填。','五分制填 5_POINT；小数制填 DECIMAL。填写视力时必填。'];
   for(const [i,f] of fields.entries())notes[i+8]=`${f.label}。${f.valueType==='star'?'填写 1、2、3 或 ★、★★、★★★。':f.valueType==='grade'?`填写 ${(config.allowedGrades||['A','B','C','D']).join(' / ')}。`:f.column.startsWith('vision_')?'按视力制式填写，如 5.0 或 1.0。':'填写数字；身高厘米、体重千克、跳绳次数。'}仅填写本人负责的成绩，其他科目可删除对应列。空白保留已有成绩，不表示清零。`;
   headers.forEach((_,i)=>{ws[XLSX.utils.encode_cell({r:0,c:i})].c=[{a:'填写说明',t:notes[i]}];});
   for(let r=1;r<=rows.length;r++)for(const c of [2,3])ws[XLSX.utils.encode_cell({r,c})].c=[{a:'填写说明',t:'本行为虚构示例，可原样上传查看只读示例预览，不能写入正式成绩。正式导入前请将全部示例替换为真实学生及成绩，或删除后填写实际数据。'}];
