@@ -12,6 +12,8 @@ const health = [
 function accountSnapshot(u){return u?{id:String(u.id),role:u.role,real_name:u.real_name,grade:u.grade,classNo:u.class_no,status:u.status}:null;}
 function rejectRows(errors,counts){const {AppError}=require('../middleware/errorHandler');throw Object.assign(new AppError(422,'请修正全部导入错误后重新预览',422),{details:{errors,counts},safeDetails:true});}
 async function validateAdminRows(c,actor,term,kind,rows){
+ const v2=require('./reportCoreV2Policy').isV2(term.evaluation_config);
+ if(v2 && rows?.length>500)fail(422,'每批最多500名学生');
  if(actor.role!=='manager')fail(403,'仅管理员导入学籍与体测');
  if(!['ROSTER','HEALTH'].includes(kind)||!Array.isArray(rows)||!rows.length||rows.length>1000)fail(422,'导入类型或行数不合法');
  const normalized=[],errors=[],diffs=[],seen=new Set();const counts={created:0,updated:0,skipped:0,errors:0};
@@ -44,14 +46,18 @@ async function validateAdminRows(c,actor,term,kind,rows){
   if(!id){error('studentId','学生不存在');continue;}id=String(id);if(seen.has(id)){error('studentId','学生重复');continue;}seen.add(id);
   try{const scope=await assertScope({actor,studentKey:{schoolId:actor.schoolId,termId:term.id,studentId:id},action:'import',fields:Object.keys(values)},c);const e=scope.evaluation;
    if(input.real_name&&input.real_name!==e.student_name_snapshot)error('real_name','姓名与学籍不一致');if(input.grade!=null&&Number(input.grade)!==e.grade_snapshot||input.classNo!=null&&Number(input.classNo)!==e.class_no_snapshot)error('classNo','班级与学籍不一致');
+   let measurement=null;if(v2)try{measurement=require('./reportCoreV2Imports').normalizeMeasurement(input.measurement,values);}catch(err){if(!err.statusCode)throw err;error('measurement',err.message);}
    if(errors.length>start)continue;const changed=Object.fromEntries(Object.entries(values).filter(([k,v])=>String(v??'')!==String(e[k]??'')));
    if(!Object.keys(changed).length){counts.skipped++;continue;}
-   const before=Object.fromEntries(Object.keys(changed).map(k=>[k,e[k]]));normalized.push({studentId:id,values:changed,expectedRevision:String(e.revision)});diffs.push({rowNo,studentId:id,name:e.student_name_snapshot,action:'UPDATE',before,after:changed,values:changed});counts.updated++;
+   const before=Object.fromEntries(Object.keys(changed).map(k=>[k,e[k]]));normalized.push({studentId:id,values:changed,expectedRevision:String(e.revision),...(v2?{measurement,providedByTeacherId:input.providedByTeacherId||actor.id}:{})});diffs.push({rowNo,studentId:id,name:e.student_name_snapshot,action:'UPDATE',before,after:changed,values:changed});counts.updated++;
   }catch(e){if(!e.statusCode)throw e;error('studentId',e.message);}
  }
  counts.errors=errors.length;if(errors.length)rejectRows(errors,counts);return {normalized,errors,diffs,counts};
 }
 async function validateAcademicRows(c,actor,term,rows) {
+  const v2=require("./reportCoreV2Policy").isV2(term.evaluation_config);
+  const byColumn=v2?require("./reportCoreV2Policy").byColumn:require("./reportCorePolicy").byColumn;
+  if(v2 && rows?.length>500)fail(422,"每批最多500名学生");
   if(!Array.isArray(rows)||!rows.length||rows.length>1000)fail(422,'导入类型或行数不合法');
   if(actor.role==='student'||actor.role==='manager'&&!term.evaluation_config.allowManagerAcademicImport)fail(403,'无此导入权限');
   const normalized=[],errors=[],seen=new Set();let skipped=0;
@@ -60,20 +66,25 @@ async function validateAcademicRows(c,actor,term,rows) {
     if(!input||typeof input!=='object'||Array.isArray(input)){errors.push({rowNo,field:'row',reason:'非法行'});continue;}
     for(const [field,value] of Object.entries(input.values||{})) {
       if(value===null||value===undefined||typeof value==='string'&&!value.trim())continue;
-      try {const f=byColumn.get(field);if(!f||f.sourceType!=='IMPORT'||health.includes(field))fail(422,'字段与来源不符');values[field]=validateValue(field,value,term.evaluation_config);}
+      try {const f=byColumn.get(field);if(!f||f.sourceType!=='IMPORT'||!v2&&health.includes(field))fail(422,'字段与来源不符');values[field]=validateValue(field,value,term.evaluation_config);}
       catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field,reason:error.message});}
     }
     if(input.clearFields!==undefined&&!Array.isArray(input.clearFields))errors.push({rowNo,field:'clearFields',reason:'清空字段需为数组'});
-    else for(const field of input.clearFields||[])try{if(!byColumn.has(field)||byColumn.get(field).sourceType!=='IMPORT'||health.includes(field))fail(422,'不能清空此字段');values[field]=null;}catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field,reason:error.message});}
+    else for(const field of input.clearFields||[])try{if(!byColumn.has(field)||byColumn.get(field).sourceType!=='IMPORT'||!v2&&health.includes(field))fail(422,'不能清空此字段');values[field]=null;}catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field,reason:error.message});}
     let studentId=input.studentId;
     if(!studentId&&input.username){const [[u]]=await c.query("SELECT id FROM users WHERE school_id=? AND username=? AND role='student'",[actor.schoolId,input.username]);studentId=u?.id;}
     if(!studentId){errors.push({rowNo,field:'studentId',reason:'学生不存在'});continue;}
     const id=String(studentId);if(seen.has(id)){errors.push({rowNo,field:'studentId',reason:'学生重复'});continue;}seen.add(id);
     try {
       const scope=await assertScope({actor,studentKey:{schoolId:actor.schoolId,termId:term.id,studentId:id},action:'import',fields:Object.keys(values)},c);
+      if(v2){
+        if(input.real_name && input.real_name!==scope.evaluation.student_name_snapshot)errors.push({rowNo,field:'real_name',reason:'姓名与学籍不一致'});
+        if(input.grade!=null && Number(input.grade)!==scope.evaluation.grade_snapshot || input.classNo!=null && Number(input.classNo)!==scope.evaluation.class_no_snapshot)errors.push({rowNo,field:'classNo',reason:'班级与学籍不一致'});
+        try{input.measurement=require('./reportCoreV2Imports').normalizeMeasurement(input.measurement,values);}catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field:'measurement',reason:error.message});}
+      }
       if(errors.length>start)continue;
       if(!Object.keys(values).length){skipped++;continue;}
-      normalized.push({studentId:id,values,expectedRevision:String(scope.evaluation.revision)});
+      normalized.push({studentId:id,values,expectedRevision:String(scope.evaluation.revision),...(v2?{measurement:input.measurement,providedByTeacherId:input.providedByTeacherId||actor.id}: {})});
     }catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field:'studentId',reason:error.message});}
   }
   return {normalized,errors,counts:{created:0,updated:normalized.length,skipped,errors:errors.length}};
@@ -93,7 +104,7 @@ async function previewImport({ pool, actor, termId, kind, rows, command }) {
         actorId: actor.id,
         status: "PREVIEW",
         key: ["IMPORT", actor.id, command.requestKey],
-        payload: { kind, rows: normalized,inputRowCount:rows.length,counts:validated.counts,diffs:validated.diffs||[], errors: [] },
+        payload: { kind, ...(require('./reportCoreV2Policy').isV2(term.evaluation_config)?{configVersion:term.config_version,rosterRevision:String(term.roster_revision)}:{}), rows: normalized,inputRowCount:rows.length,counts:validated.counts,diffs:validated.diffs||[], errors: [] },
       });
       return {
         result: {
@@ -148,6 +159,7 @@ async function commitImport({
       )
         fail(409, "导入批次已改变");
       if (!Array.isArray(p.rows)) fail(409, "导入预览已失效，请重新预览");
+      if(require('./reportCoreV2Policy').isV2(term.evaluation_config) && (p.configVersion!==term.config_version || p.rosterRevision!==String(term.roster_revision)))fail(409,'预览后配置或名单已变化');
       const changed = {},
         updatedStudentIds = [];
       for (let i = 0; i < p.rows.length; i++) {
@@ -224,7 +236,7 @@ async function commitImport({
           actorId: actor.id,
           status: "COMMITTED",
           key: ["IMPORT_ROW", batchId, i],
-          payload: { rowNo: i + 1, values: row.values, previousValues },
+          payload: { rowNo: i + 1, values: row.values, previousValues,measurement:row.measurement,providedByTeacherId:row.providedByTeacherId },
         });
         changed[row.studentId] = Object.keys(row.values);
         updatedStudentIds.push(row.studentId);

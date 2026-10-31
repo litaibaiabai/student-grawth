@@ -1,0 +1,36 @@
+.assessment-report{--assessment-line:#dce3d8;--assessment-ink:#244d3b;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 22px;align-items:start;background:#fffef9;border:1px solid #d6ddd0;border-top:4px solid #2c6047;padding:28px 32px 18px;box-shadow:0 7px 30px #193d2807;color:var(--assessment-ink);min-width:0}
+.assessment-report .assessment-report-heading,.assessment-student,.assessment-narratives,.assessment-report-footer{grid-column:1/-1}
+.assessment-report-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.assessment-report-heading>div>span{font-size:9px;letter-spacing:2px;color:#89947e}
+.assessment-report .assessment-report-heading h2{font:600 27px/1.5 'Songti SC','SimSun',serif;letter-spacing:3px;margin:7px 0 0;color:var(--assessment-ink)}
+.assessment-sequence{font:44px/1 Georgia,serif;color:#d9e1d1}
+.assessment-report .assessment-student{display:flex;flex-wrap:wrap;gap:8px 24px;padding:11px 14px;border-top:1px solid #c8d3bf;border-bottom:1px solid #c8d3bf;font-size:11px}
+.assessment-student b{font-size:12px;font-weight:500;margin-left:8px}.assessment-student small{display:block}
+.assessment-section{min-width:0}.assessment-without-story [data-section=labor]{grid-column:1/-1}
+.assessment-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.assessment-report .assessment-section-heading h3{font:600 18px/1.4 'Songti SC','SimSun',serif;letter-spacing:2px;margin:0;color:var(--assessment-ink)}
+.assessment-section-heading h3 i{font:italic 12px Georgia,serif;letter-spacing:0;color:#8d9a80;margin-right:10px}
+.assessment-section-heading>span{font-size:8px;color:#8c967e;letter-spacing:.7px}
+.assessment-table-wrap{width:100%;overflow-x:auto}.assessment-table-wrap+.assessment-table-wrap{margin-top:9px}
+.assessment-report table{border-collapse:collapse;table-layout:fixed;width:100%;margin:0;font-size:11px}
+.assessment-report th,.assessment-report td{border:1px solid var(--assessment-line);padding:9px 4px;text-align:center;vertical-align:middle;overflow-wrap:anywhere;line-height:1.6}
+.assessment-report thead th{font-weight:500;color:#64725d;background:#f5f7ef;font-size:10px}
+.assessment-report tbody th{font-weight:400;background:#f9faf4;color:#4c664d}
+.assessment-report td{font-weight:500;color:#285c40;white-space:pre-wrap}
+.assessment-report td.assessment-grade-details{padding:0}.assessment-grade-details table th,.assessment-grade-details table td{border-width:0 0 1px;padding:4px 2px;font-size:9px}.assessment-grade-details table tr:last-child th,.assessment-grade-details table tr:last-child td{border-bottom:0}
+.assessment-report .assessment-prefill{background:#f0f1ee;color:#747c70;font-weight:400}
+.assessment-report .assessment-invalid{background:#fff1ed;color:#a33e32;box-shadow:inset 0 0 0 1px #d49b8e}
+.assessment-report .assessment-invalid small{display:block;color:#a33e32;font-size:9px;line-height:1.5;margin-top:3px}
+.assessment-report .assessment-measurement{display:flex;gap:5px 15px;flex-wrap:wrap;font-size:9px;margin-top:8px;color:#848f79}
+.assessment-measurement b{font-weight:400;margin-left:5px}.assessment-measurement .assessment-invalid{padding:3px 5px}
+.assessment-report .assessment-specialties h4{font-size:10px;font-weight:500;margin:12px 0 6px;letter-spacing:1px;color:#65755c}
+.assessment-specialties dl{padding:9px 11px;margin:0 0 7px;border:1px solid var(--assessment-line);font-size:10px;display:flex;gap:5px 20px;flex-wrap:wrap}
+.assessment-specialties dl>div{display:flex;gap:8px;min-width:0;max-width:100%}.assessment-specialties dt{white-space:nowrap}.assessment-specialties dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.assessment-report .assessment-specialties p{font-size:10px;color:#7a8372;border:1px solid var(--assessment-line);padding:9px 11px;margin:0}
+.assessment-narratives>div:last-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.assessment-narratives>div:last-child>div{padding:12px 14px;border:1px solid var(--assessment-line)}
+.assessment-report .assessment-narratives h4{margin:0 0 5px;font-size:10px;font-weight:500}
+.assessment-report .assessment-narratives p{font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;color:inherit;margin:0}
+.assessment-report-footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--assessment-line);padding-top:12px;font-size:9px;color:#8a967d}
+@media(max-width:1100px){.assessment-report{padding:24px 20px;gap:22px 16px}.assessment-report th,.assessment-report td{padding:8px 3px;font-size:10px}}
+@media(max-width:800px){.assessment-report{grid-template-columns:minmax(0,1fr);padding:23px 14px;gap:22px}.assessment-report .assessment-report-heading h2{font-size:22px;letter-spacing:2px}.assessment-sequence{font-size:35px}.assessment-narratives>div:last-child{grid-template-columns:1fr}.assessment-report .assessment-student{gap:7px 16px;padding:10px}.assessment-report th,.assessment-report td{font-size:11px}}

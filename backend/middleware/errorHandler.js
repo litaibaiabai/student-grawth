@@ -22,6 +22,7 @@ const errorHandler = (err, req, res, next) => {
       ...(err.safeDetails?{details:err.details}:{})
     });
   }
+  if(err.name==='MulterError')return res.status(err.code==='LIMIT_FILE_SIZE'?413:400).json({code:err.code==='LIMIT_FILE_SIZE'?413:400,message:err.code==='LIMIT_FILE_SIZE'?'上传文件超出大小限制':'上传字段或文件数量不合法'});
 
   // JWT 验证失败
   if (err.name === "UnauthorizedError") {

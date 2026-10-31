@@ -1,0 +1,42 @@
+import React,{useId} from 'react';
+import {fieldPresentation,reportSections} from './model';
+import './style.css';
+
+const narrativeLabels={self_conduct_text:'我的品格成长',self_wisdom_text:'我的学习收获',self_health_text:'我的健康计划',self_art_text:'我的艺术体验',self_labor_text:'我的劳动发现',semester_highlights:'本学期的精彩',next_term_goals:'下学期的目标',teacher_comment:'学期寄语',family_message:'家长寄语'};
+const specialtyLabels={title:'名称',name:'项目',item:'项目',outcome:'成果说明',self_star:'学生自评',teacher_star:'教师评价',level:'荣誉级别',points:'积分',prizeLevel:'奖项',issuer:'颁发机构',date:'获奖日期',subjectCode:'所属学科',sourceId:'记录编号',id:'项目编号'};
+function FieldCell({record,field}){
+ if(!field)return <td className="assessment-prefill">—</td>;
+ const display=fieldPresentation(record,field);
+ return <td tabIndex={display.error?-1:undefined} data-report-field={field.column} data-view={field.viewCode} data-source={display.source} className={`${display.source==='prefill'?'assessment-prefill':''} ${display.error?'assessment-invalid':''}`} title={display.error|| (display.source==='teacher'?'本次教师上传':'系统、学生自评或已有预填数据')}><span>{display.text}</span>{display.error&&<small>{display.error}</small>}</td>;
+}
+function Specialties({items=[],label}){
+ return <div className="assessment-specialties"><h4>{label}</h4>{items.length?items.map((item,i)=><dl className="assessment-prefill" key={item.id||item.sourceId||i}>{Object.entries(item).filter(([,value])=>value!==null&&value!==undefined).map(([key,value])=><div key={key}><dt>{specialtyLabels[key]||key}</dt><dd>{['self_star','teacher_star'].includes(key)&&[1,2,3].includes(Number(value))?'★'.repeat(Number(value)):typeof value==='object'?JSON.stringify(value):String(value)}</dd></div>)}</dl>):<p className="assessment-prefill">暂无已认定项目</p>}</div>;
+}
+
+/** Read-only report template. Uploading, saving and student navigation belong to the caller. */
+export default function StudentAssessmentReport({catalog,record,term,sections,showNarratives=true,sequence}){
+ const titleId=useId(),visible=reportSections(catalog,sections),student=record.student||{},used=new Set(),modern=catalog.schemaVersion==='SIX_EDU_V2';
+ const field=column=>catalog.fields.find(f=>f.column===column&&!f.jsonPath);
+ const cell=(column,key=column)=>{const f=typeof column==='object'?column:field(column);if(f)used.add(f.viewCode);return <FieldCell key={key} record={record} field={f}/>;};
+ const table=(headers,rows)=><div className="assessment-table-wrap"><table><thead><tr>{headers.map(h=><th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{rows}</tbody></table></div>;
+ const row=(name,columns)=><tr key={name}><th scope="row">{name}</th>{columns.map(c=>cell(c))}</tr>;
+ const metadata=(label,value,key)=>{const error=record.errors?.find(e=>e.field===key);return <span key={key} data-report-field={key} className={error?'assessment-invalid':''} title={error?.reason}>{label}<b>{value??'—'}</b>{error&&<small>{error.reason}</small>}</span>;};
+ const content=id=>{
+  if(id==='conduct')return <>{table(['评价项目','学生自评','教师评价'],['politeness','integrity','kindness','communication','civility','responsibility','rules','cooperation'].map(key=>row(field(`conduct_${key}_self_star`)?.label.split('·')[0]||key,[`conduct_${key}_self_star`,`conduct_${key}_other_star`])))}{field('conduct_process_star')&&table(['评价项目','过程表现'],[row('德美过程表现',['conduct_process_star'])])}</>;
+  if(id==='wisdom'&&!modern)return table(['学科','学习兴趣','学习习惯','学习方法','学业水平','过程表现'],['moral','chinese','math','science','english'].map(key=><tr key={key}><th scope="row">{field(`${key}_interest_star`)?.label.split('·')[0]}</th>{['interest_star','habit_star','method_star'].map(suffix=>cell(`${key}_${suffix}`))}<td className="assessment-grade-details"><table><tbody>{catalog.fields.filter(f=>f.section==='wisdom'&&f.column.startsWith(key+'_')&&f.sourceType==='IMPORT').map(f=><tr key={f.viewCode}><th scope="row">{f.label.split('·').slice(1).join('·')}</th>{cell(f,f.viewCode)}</tr>)}</tbody></table></td>{cell(`${key}_process_star`)}</tr>));
+  if(id==='wisdom')return table(['学科','学习兴趣','学习习惯','学习方法','平时','期末','总评','过程表现'],['moral','chinese','math','science','english','information_technology'].map(key=>row(field(`${key}_interest_star`)?.label.split('·')[0]||key,['interest_star','habit_star','method_star','regular_grade','final_grade','overall_grade','process_star'].map(suffix=>`${key}_${suffix}`))));
+  if(id==='health')return <>{table(['身高 / cm','体重 / kg','BMI','视力 · 左','视力 · 右','一分钟跳绳'],[<tr key="measure">{cell('height_cm')}{cell('weight_kg')}<td className="assessment-prefill" data-report-field="bmi">{record.values?.bmi??'—'}</td>{cell('vision_left')}{cell('vision_right')}{cell('jump_rope_1min')}</tr>])}{table(['评价项目','学生自评','教师评价 / 学业水平','过程表现'],[row('体育与健康',[null,'pe_academic_grade','pe_process_star']),row('体测水平',['fitness_self_star','fitness_level_star','fitness_process_star'])])}<div className="assessment-measurement">{metadata('测量日期',record.measurement?.date||'—','measurementDate')}{metadata('视力制式',({DECIMAL:'小数制', '5_POINT':'五分制'})[record.measurement?.visionStandard]||'—','visionStandard')}<span>BMI 由系统计算</span></div><Specialties items={record.sportsSpecialties} label="运动特长与荣誉"/></>;
+  if(id==='art')return <>{table(modern?['学科','学生自评','教师评价','平时','总评','过程表现']:['学科','学习自评','学习他评','学业水平','技能自评','技能他评','过程表现'],['music','fine_art'].map(key=>row(key==='music'?'音乐':'美术',(modern?['learning_self_star','learning_teacher_star','regular_grade','overall_grade','process_star']:['learning_self_star','learning_teacher_star','academic_grade','skill_self_star','skill_teacher_star','process_star']).map(suffix=>`${key}_${suffix}`))))}<Specialties items={record.artSpecialties} label="艺术特长与荣誉"/></>;
+  if(id==='labor'&&!modern)return table(['评价项目','学业水平','成果作品 / 实践经历','成果表现'],[['information_technology','信息科技'],['labor','劳动'],['integrated_practice','综合实践活动'],['local_course','地方课程']].map(([key,label])=>row(label,[`${key}_academic_star`,`${key}_experience`,`${key}_outcome_grade`])));
+  if(id==='labor')return table(['评价项目','学科素养','过程表现'],[['labor','劳动'],['integrated_practice','综合实践活动'],['local_course','地方课程']].map(([key,label])=>row(label,[`${key}_literacy_grade`,`${key}_process_star`])));
+  if(id==='story'&&!modern)return table(['活动','分项评价','实践经历与表现','成果表现'],[['read','读故事'],['listen','听故事'],['tell','讲故事']].map(([key,label])=>row(label,[`story_${key}_star`,`story_${key}_experience`,`story_${key}_outcome_star`])));
+  if(id==='story')return table(['活动','数量 / 分数','全校排名','成果表现'],[['LISTEN','听故事'],['WRITE','写故事'],['TELL','讲故事']].map(([key,label])=><tr key={key}><th scope="row">{label}</th>{['value','rank'].map(prop=>cell(catalog.fields.find(f=>f.jsonPath===`${key}.${prop}`),prop))}{cell(`story_${key.toLowerCase()}_star`)}</tr>));
+ };
+ return <article className={`assessment-report ${visible.some(s=>s.id==='story')?'':'assessment-without-story'}`} aria-labelledby={titleId}>
+  <header className="assessment-report-heading"><div><span>STUDENT ASSESSMENT REPORT</span><h2 id={titleId}>学生综合测评报表</h2></div>{sequence!=null&&<span className="assessment-sequence">{String(sequence).padStart(2,'0')}</span>}</header>
+  <div className="assessment-student assessment-prefill">{metadata('姓名',student.name,'real_name')}{metadata('学号',student.studentNumber||student.id||'—','username')}{metadata('班级',student.grade&&student.classNo?`${student.grade}年级（${student.classNo}）班`:'—','classNo')}{metadata('学期',term?.term_name||term?.name||'—','termId')}</div>
+  {visible.map((section,i)=>{const main=content(section.id),remaining=section.fields.filter(f=>!used.has(f.viewCode));return <section className="assessment-section" data-section={section.id} key={section.id}><div className="assessment-section-heading"><h3><i>{String(i+1).padStart(2,'0')}</i>{section.title}</h3><span>{section.subtitle}</span></div>{main}{remaining.length>0&&table(['评价项目','测评数据'],remaining.map(f=><tr key={f.viewCode}><th scope="row">{f.label}</th>{cell(f,f.viewCode)}</tr>))}</section>;})}
+  {showNarratives&&<section className="assessment-narratives"><div className="assessment-section-heading"><h3><i>＋</i>成长自述与寄语</h3><span>NARRATIVES</span></div><div>{Object.entries(narrativeLabels).map(([key,label])=><div className="assessment-prefill" data-report-field={key} key={key}><h4>{label}</h4><p>{record.narratives?.[key]||'—'}</p></div>)}</div></section>}
+  <footer className="assessment-report-footer"><span>云美少年 · 综合素质发展评价</span><span>核对报表 · 只读</span></footer>
+ </article>;
+}

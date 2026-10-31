@@ -3,7 +3,7 @@ import { api, allStudents, resetApiSession } from "./api";
 import RoleShell from "./RoleShell";
 import SelfEvaluation from "./SelfEvaluation";
 import DirectScore from "./DirectScore";
-import AcademicImport from "./AcademicImport";
+import ComprehensiveImport from "./ComprehensiveImport";
 import CardLedger from "./CardLedger";
 import ClassReports from "./ClassReports";
 import AdminTermSettings from './AdminTermSettings';
@@ -120,9 +120,11 @@ export default function ReportCoreApp() {
       allStudents(termId, { signal: controller.signal }),
       api(`/report-core/sources?termId=${termId}&page=1`, undefined, undefined, { signal: controller.signal }),
       api(`/report-core/assignments?termId=${termId}`, undefined, undefined, { signal: controller.signal }),
+      api(`/report-core/config?termId=${termId}`, undefined, undefined, { signal: controller.signal }),
     ])
-      .then(([s, r, a]) => {
+      .then(([s, r, a, c]) => {
         if (controller.signal.aborted) return;
+        setCatalog(c);
         setStudents(s);
         setSources(r.rows);
         setSourceNext(r.nextOffset);
@@ -313,7 +315,7 @@ export default function ReportCoreApp() {
           <div className="content" key={`${actor.id}:${termId}`} aria-busy={busy}>
             {actor.role==='teacher'&&teacherScope&&<div className="context-bar"><div className="context-controls"><span className="context-label">当前工作范围</span><select aria-label="选择班级" value={teacherScope.classKey} onChange={e=>changeScope(e.target.value,teacherScope.subjectCode)}>{[...new Set(assignments.map(a=>`${a.grade}:${a.class_no}`))].map(c=><option key={c} value={c}>{c.replace(':','年级')}班</option>)}</select><select aria-label="选择任教学科" value={teacherScope.subjectCode} onChange={e=>changeScope(teacherScope.classKey,e.target.value)}>{[...new Set(assignments.filter(a=>`${a.grade}:${a.class_no}`===teacherScope.classKey).map(a=>a.subject_code))].map(code=><option key={code} value={code}>{({MORAL:'道德与法治',CHINESE:'语文',MATH:'数学',SCIENCE:'科学',ENGLISH:'英语',PE:'体育与健康',MUSIC:'音乐',FINE_ART:'美术',INFORMATION_TECHNOLOGY:'信息科技',LABOR:'劳动',INTEGRATED_PRACTICE:'综合实践活动',LOCAL_COURSE:'地方课程',STORY:'故事'})[code]||code}</option>)}</select></div><small>{tab==='drafts'?'班级报告可浏览全部负责班级':'下次打开会记住当前范围'}</small></div>}
             {tab==='workspace'&&<TeacherWorkspace ctx={ctx}/>}
-            {actor.role==='teacher'&&['entry','direct','imports','reviews','settlements'].includes(tab)&&<nav className="evaluation-tabs" aria-label="评价录入分类">{[['direct','快速直评'],['imports','学业水平'],['reviews','材料认定'],['settlements','采集结算']].map(([id,label])=><button key={id} className={(tab==='entry'?'direct':tab)===id?'active':''} onClick={()=>navigate(id)}>{label}</button>)}</nav>}
+            {actor.role==='teacher'&&['entry','direct','reviews','settlements'].includes(tab)&&<nav className="evaluation-tabs" aria-label="评价录入分类">{[['direct','快速直评'],['imports','综合成绩'],['reviews','材料认定'],['settlements','采集结算']].map(([id,label])=><button key={id} className={(tab==='entry'?'direct':tab)===id?'active':''} onClick={()=>navigate(id)}>{label}</button>)}</nav>}
             {actor.role==='student'&&['cards','awards','self','report'].includes(tab)&&<button className="text-action student-back" onClick={()=>navigate(['self','report'].includes(tab)?'archive':'home')}>← 返回{['self','report'].includes(tab)?'我的档案':'首页'}</button>}
             {tab === "home" && <StudentHome ctx={ctx} />}
             {tab === "archive" && <StudentArchive ctx={ctx} />}
@@ -323,7 +325,7 @@ export default function ReportCoreApp() {
             {tab === "self" && <SelfEvaluation ctx={ctx} />}{" "}
             {tab === "report" && <Published ctx={ctx} />}{" "}
             {["entry","direct"].includes(tab) && <DirectScore ctx={ctx} />}{" "}
-            {tab === "imports" && actor.role === "teacher" && <AcademicImport ctx={ctx} />}
+            {tab === "imports" && actor.role === "teacher" && <ComprehensiveImport ctx={ctx} />}
             {tab==='roster'&&<AdminRoster ctx={ctx}/>} {tab==='health'&&<AdminHealth ctx={ctx}/>}{" "}
             {tab === "reviews" && <ReviewMaterials ctx={ctx} />}{" "}
             {tab === "drafts" && <ClassReports ctx={ctx} />}{" "}
