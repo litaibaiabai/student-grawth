@@ -7,12 +7,10 @@ function mountV2(router,{asyncRoute,ok}) {
   const command=req=>({requestKey:req.body.requestKey,payloadHash:stableHash({body:req.body,params:req.params,fileHash:req.file?stableHash(req.file.buffer.toString('base64')):undefined})});
   const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:10*1024*1024,files:1,fields:20}});
   router.get('/report-core/imports/template',asyncRoute(async(req,res)=>{
-    if(req.actor.role==='student')fail(403,'仅教师或管理员下载模板');
+    if(!['teacher','manager'].includes(req.actor.role))fail(403,'仅教师或管理员下载模板');
     const term=await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId);
-    if(!isV2(term.evaluation_config))fail(422,'请选择V2学期');
-    const roster=await require('../services/reportCoreReadModels').resolveTermRoster({connection:req.app.locals.pool,schoolId:req.actor.schoolId,termId:term.id,...(req.actor.role==='teacher'?{teacherId:req.actor.id}:{})});
-    res.set({'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':'attachment; filename="six-education-v2.xlsx"','Cache-Control':'private, no-store'});
-    res.send(require('../services/reportCoreV2Imports').buildV2Workbook({termId:term.id,roster}));
+    res.set({'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':`attachment; filename="comprehensive-scores.xlsx"; filename*=UTF-8''${encodeURIComponent('综合成绩导入模板.xlsx')}`,'Cache-Control':'private, no-store'});
+    res.send(require('../services/reportCoreV2Imports').buildScoreTemplate({termId:term.id,config:term.evaluation_config}));
   }));
   router.post('/report-core/imports/file-preview',upload.single('file'),asyncRoute(async(req,res)=>{
     if(!['teacher','manager'].includes(req.actor.role))fail(403,'无导入权限');

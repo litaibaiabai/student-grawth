@@ -3,6 +3,11 @@
 .role-teacher[data-page=imports] .core-header{margin-bottom:22px}
 .comprehensive-import{min-width:0;color:#244d3b}
 .comprehensive-import .assessment-file-input{display:none!important}
+.assessment-template-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;background:#fffef9;border:1px solid #dce3d8;border-left:3px solid #71906a;border-radius:6px;margin-bottom:18px}
+.assessment-template-bar>div{display:grid;gap:4px}.assessment-template-bar strong{font-size:13px;font-weight:500}.assessment-template-bar span{font-size:11px;color:#75836b}
+.core-app .assessment-template-button{display:flex;align-items:center;gap:8px;border:1px solid #6f8b60;border-radius:5px;background:#edf3e6;color:#315c42;font-size:13px;white-space:nowrap;min-height:40px;padding:9px 16px}
+.core-app .assessment-template-button:hover{background:#e2ecd8}
+@media(max-width:500px){.assessment-template-bar{padding:13px;align-items:flex-start;flex-direction:column}.core-app .assessment-template-button{align-self:flex-end}}
 .assessment-upload-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100svh - 210px)}
 .core-app .assessment-upload-button{font-size:15px;letter-spacing:1px;border-radius:5px;padding:14px 27px;min-height:52px;box-shadow:0 4px 12px #254c3514}
 .assessment-upload-empty p{font-size:12px}

@@ -1,19 +1,36 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
-import {api,resultOf} from './api';
+import {api,download,resultOf} from './api';
 import {UIIcon} from './illustrations';
 import StudentAssessmentReport from '../../component/StudentAssessmentReport';
 import './comprehensiveImport.css';
 
 const uploadSections=['conduct','wisdom','health','art','labor'];
 export default function ComprehensiveImport({ctx}){
- const [batch,setBatch]=useState(null),[index,setIndex]=useState(0),[busy,setBusy]=useState(false),[error,setError]=useState(''),[committed,setCommitted]=useState(false);
- const input=useRef(null),request=useRef(0),controller=useRef(null),report=useRef(null);
+ const [batch,setBatch]=useState(null),[index,setIndex]=useState(0),[busy,setBusy]=useState(false),[error,setError]=useState(''),[downloading,setDownloading]=useState(false),[committed,setCommitted]=useState(false);
+ const input=useRef(null),request=useRef(0),controller=useRef(null),downloadController=useRef(null),report=useRef(null);
  const {termId,actor,sessionActive}=ctx;
- const invalidate=useCallback(()=>{request.current++;controller.current?.abort();},[]);
+ const invalidate=useCallback(()=>{request.current++;controller.current?.abort();downloadController.current?.abort();},[]);
  useEffect(()=>{
-  invalidate();setBatch(null);setIndex(0);setBusy(false);setError('');setCommitted(false);
+  invalidate();setBatch(null);setIndex(0);setBusy(false);setError('');setDownloading(false);setCommitted(false);
   return invalidate;
  },[termId,actor.id,sessionActive,invalidate]);
+  const downloadTemplate = async () => {
+    if (downloading) return;
+    const pending = new AbortController();
+    downloadController.current = pending;
+    setDownloading(true);
+    setError('');
+    try {
+      await download(`/report-core/imports/template?termId=${encodeURIComponent(termId)}`, '综合成绩导入模板.xlsx', { signal: pending.signal });
+    } catch (e) {
+      if (!pending.signal.aborted) {
+        setError(`模板下载失败：${e.message || '请检查网络后重试'}`);
+        if (e.status === 401) ctx.error(e);
+      }
+    } finally {
+      if (!pending.signal.aborted) setDownloading(false);
+    }
+  };
  const upload=async file=>{
   const current=++request.current;controller.current?.abort();controller.current=new AbortController();
   setError('');setBatch(null);setIndex(0);setCommitted(false);
@@ -48,6 +65,12 @@ export default function ComprehensiveImport({ctx}){
  return <section className="comprehensive-import" aria-label="综合成绩核对" aria-busy={busy}>
   <input className="assessment-file-input" ref={input} aria-label="综合成绩文件" type="file" accept=".xlsx,.xls" disabled={busy||sessionActive===false} onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)upload(file);}}/>
   {error&&<p className="assessment-upload-error" role="alert">{error}</p>}
+      <div className="assessment-template-bar">
+        <div><strong>先下载模板，再填写成绩</strong><span>模板含全部可导入字段及示例；上传前请替换或删除示例行。</span></div>
+        <button className="assessment-template-button" disabled={busy || downloading || sessionActive === false || !termId} onClick={downloadTemplate}>
+          <UIIcon name="report" />{downloading ? '正在下载…' : '下载模板'}
+        </button>
+      </div>
   {!batch?<div className="assessment-upload-empty"><button className="primary assessment-upload-button" disabled={busy||sessionActive===false} onClick={pick}><UIIcon name="upload"/>{busy?'正在读取 Excel…':'上传 Excel'}</button>{busy&&<p role="status">正在读取完整学生名单并核对成绩，请稍候…</p>}</div>:<>
    <header className="assessment-batch-bar"><div className="assessment-batch-count"><strong>{batch.totalCount}</strong><div>已上传学生<span title={batch.fileName}>{batch.fileName}</span></div></div><div className="assessment-batch-navigation"><button className="assessment-reupload" disabled={busy} onClick={pick}>重新上传</button><span className="assessment-position" aria-live="polite"><b>{String(index+1).padStart(2,'0')}</b> / {batch.totalCount}</span><button disabled={busy||index===0} onClick={()=>setIndex(n=>n-1)}>← 上一个</button><button disabled={busy||index===batch.students.length-1} onClick={()=>setIndex(n=>n+1)}>下一个 →</button></div></header>
    <div className="assessment-review-status"><span className={record.errors.length?'has-errors':''} role="status">{record.errors.length?`! 该页有错 · ${record.errors.length} 项需要核对`:'✓ 该页核对通过'}</span><div className="assessment-source-legend"><span><i/>教师上传</span><span><i className="prefill"/>系统 / 预填</span><span><i className="invalid"/>需核对</span></div></div>
