@@ -1,4 +1,4 @@
-.assessment-report{--assessment-line:#dce3d8;--assessment-ink:#244d3b;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 22px;align-items:start;background:#fffef9;border:1px solid #d6ddd0;border-top:4px solid #2c6047;padding:28px 32px 18px;box-shadow:0 7px 30px #193d2807;color:var(--assessment-ink);min-width:0}
+.assessment-report{--assessment-line:#dce3d8;--assessment-ink:#244d3b;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:24px 22px;align-items:start;background:#fffef9;border:1px solid #d6ddd0;border-top:4px solid #2c6047;padding:28px 32px 18px;box-shadow:0 7px 30px #193d2807;color:var(--assessment-ink);min-width:0}
 .assessment-report .assessment-report-heading,.assessment-student,.assessment-narratives,.assessment-report-footer{grid-column:1/-1}
 .assessment-report-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .assessment-report-heading>div>span{font-size:9px;letter-spacing:2px;color:#89947e}
@@ -6,7 +6,9 @@
 .assessment-sequence{font:44px/1 Georgia,serif;color:#d9e1d1}
 .assessment-report .assessment-student{display:flex;flex-wrap:wrap;gap:8px 24px;padding:11px 14px;border-top:1px solid #c8d3bf;border-bottom:1px solid #c8d3bf;font-size:11px}
 .assessment-student b{font-size:12px;font-weight:500;margin-left:8px}.assessment-student small{display:block}
-.assessment-section{min-width:0}.assessment-without-story [data-section=labor]{grid-column:1/-1}
+.assessment-section{min-width:0;grid-column:span 3}
+.assessment-section:is([data-section=health],[data-section=art],[data-section=labor]){grid-column:span 2}
+.assessment-section[data-section=story]{grid-column:1/-1}
 .assessment-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
 .assessment-report .assessment-section-heading h3{font:600 18px/1.4 'Songti SC','SimSun',serif;letter-spacing:2px;margin:0;color:var(--assessment-ink)}
 .assessment-section-heading h3 i{font:italic 12px Georgia,serif;letter-spacing:0;color:#8d9a80;margin-right:10px}
@@ -29,4 +31,4 @@
 .assessment-report .assessment-narratives p{font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;color:inherit;margin:0}
 .assessment-report-footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--assessment-line);padding-top:12px;font-size:9px;color:#8a967d}
 @media(max-width:1100px){.assessment-report{padding:24px 20px;gap:22px 16px}.assessment-report th,.assessment-report td{padding:8px 3px;font-size:10px}}
-@media(max-width:800px){.assessment-report{grid-template-columns:minmax(0,1fr);padding:23px 14px;gap:22px}.assessment-report .assessment-report-heading h2{font-size:22px;letter-spacing:2px}.assessment-sequence{font-size:35px}.assessment-narratives>div:last-child{grid-template-columns:1fr}.assessment-report .assessment-student{gap:7px 16px;padding:10px}.assessment-report th,.assessment-report td{font-size:11px}}
+@media(max-width:800px){.assessment-report .assessment-section{grid-column:1/-1}.assessment-report{grid-template-columns:minmax(0,1fr);padding:23px 14px;gap:22px}.assessment-report .assessment-report-heading h2{font-size:22px;letter-spacing:2px}.assessment-sequence{font-size:35px}.assessment-narratives>div:last-child{grid-template-columns:1fr}.assessment-report .assessment-student{gap:7px 16px;padding:10px}.assessment-report th,.assessment-report td{font-size:11px}}

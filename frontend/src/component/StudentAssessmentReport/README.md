@@ -5,7 +5,7 @@
 ```jsx
 import StudentAssessmentReport from '../../component/StudentAssessmentReport';
 
-// 完整模板：德美 / 智美、健美 / 艺美、劳美 / 故事美，以及成长自述与寄语。
+// 完整模板：德美 / 智美，健美 / 艺美 / 劳美，故事美独占一行，以及成长自述与寄语。
 <StudentAssessmentReport catalog={catalog} record={record} term={term} />
 
 // 教师上传模块：仅显示五个板块，隐藏故事美、自述与寄语。
@@ -27,6 +27,6 @@ import StudentAssessmentReport from '../../component/StudentAssessmentReport';
 - `record.narratives`：以字段名为键的自述与寄语，可选。
 - `sections` 默认展示六个板块；`showNarratives` 默认为 `true`；`sequence` 可选。
 
-按用户要求，报表不显示运动特长与荣誉、艺术特长与荣誉、独立的德美过程表现表格；对应字段不会重新进入补充列表。其他可见字段呈现一次。没有成绩不等于零，真实数字 `0` 会保留。
+按用户要求，报表不显示运动特长与荣誉、艺术特长与荣誉、独立的德美过程表现表格，以及健美中的过程表现列；对应字段不会重新进入补充列表。其他可见字段呈现一次。没有成绩不等于零，真实数字 `0` 会保留。
 
 验证完整模板与教师裁剪视图：`node frontend/tests/assessment-report-render.cjs`（仓库根目录，Node 22）。
