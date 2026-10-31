@@ -102,8 +102,8 @@ function buildScoreTemplate({termId,config={}}){
   const date=new Date().toISOString().slice(0,10),grade=(config.allowedGrades||['A','B','C','D'])[0];
   const examples={height_cm:142.5,weight_kg:34.8,vision_left:'5.0',vision_right:'5.0',jump_rope_1min:156};
   const values=fields.map(f=>examples[f.column]??(f.valueType==='star'?3:f.valueType==='grade'?grade:''));
-  const ws=XLSX.utils.aoa_to_sheet([headers,[String(termId),v2?'SIX_EDU_V2':'CORE_V1','示例学号001','示例学生（请替换）',4,1,v2?date:'',v2?'5_POINT':'',...values]]);
-  const notes=['由系统填入，请勿修改。','由系统填入，请勿修改。','填写学校分配的学生账号 / 学号，保留前导零。','必须与系统学籍姓名一致。','学生所在年级，填写整数。','学生所在班级，填写整数。',v2?'填写 YYYY-MM-DD；填写健康原值时必填。':'当前学期不通过教师综合成绩导入健康原值，此列留空。',v2?'五分制填 5_POINT；小数制填 DECIMAL。填写视力时必填。':'当前学期此列留空。'];
+  const ws=XLSX.utils.aoa_to_sheet([headers,[String(termId),v2?'SIX_EDU_V2':'CORE_V1','示例学号001','示例学生（请替换）',4,1,date,'5_POINT',...values]]);
+  const notes=['由系统填入，请勿修改。','由系统填入，请勿修改。','填写学校分配的学生账号 / 学号，保留前导零。','必须与系统学籍姓名一致。','学生所在年级，填写整数。','学生所在班级，填写整数。',v2?'填写 YYYY-MM-DD；填写健康原值时必填。':'填写 YYYY-MM-DD，如示例所示；当前学期不使用此项健康测量信息。',v2?'五分制填 5_POINT；小数制填 DECIMAL。填写视力时必填。':'五分制填 5_POINT；小数制填 DECIMAL。当前学期不使用此项健康测量信息。'];
   for(const [i,f] of fields.entries())notes[i+8]=`${f.label}。${f.valueType==='star'?'填写 1、2、3 或 ★、★★、★★★。':f.valueType==='grade'?`填写 ${(config.allowedGrades||['A','B','C','D']).join(' / ')}。`:f.column.startsWith('vision_')?'按视力制式填写，如 5.0 或 1.0。':'填写数字；身高厘米、体重千克、跳绳次数。'}仅填写本人负责的成绩，其他科目可删除对应列。空白保留已有成绩，不表示清零。`;
   headers.forEach((_,i)=>{ws[XLSX.utils.encode_cell({r:0,c:i})].c=[{a:'填写说明',t:notes[i]}];});
   for(const address of ['C2','D2'])ws[address].c=[{a:'填写说明',t:'本行仅用于示范格式。上传前请替换为真实学生及其成绩，或删除本行后填写实际数据。不得直接上传示例成绩。'}];

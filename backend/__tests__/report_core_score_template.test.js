@@ -15,6 +15,7 @@ for(const [label,config] of [['current',{}],['v2',createV2Config()]]){
   assert.deepEqual(data[0].slice(8),fields.map(f=>f.column));
   assert.equal(new Set(data[0]).size,data[0].length);
   assert.equal(data.length,2);assert.match(data[1][2],/示例/);assert.match(sheet.C2.c[0].t,/替换|删除/);
+  assert.deepEqual(data[0].filter((_,i)=>data[1][i]===undefined||String(data[1][i]).trim()===''),[],'Every example column must contain a concrete value');
   assert.ok(fields.every((_,i)=>data[1][i+8]!==''));
   const parsed=parseV2Workbook(buffer,{termId:'17',config});
   assert.equal(parsed.length,1);assert.equal(Object.keys(parsed[0].values).length,fields.length);
