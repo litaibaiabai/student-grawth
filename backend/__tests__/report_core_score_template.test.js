@@ -14,11 +14,15 @@ for(const [label,config] of [['current',{}],['v2',createV2Config()]]){
   const fields=policyFor(config).fields.filter(f=>f.sourceType==='IMPORT'&&(label==='v2'||!health.includes(f.column)));
   assert.deepEqual(data[0].slice(8),fields.map(f=>f.column));
   assert.equal(new Set(data[0]).size,data[0].length);
-  assert.equal(data.length,2);assert.match(data[1][2],/示例/);assert.match(sheet.C2.c[0].t,/替换|删除/);
-  assert.deepEqual(data[0].filter((_,i)=>data[1][i]===undefined||String(data[1][i]).trim()===''),[],'Every example column must contain a concrete value');
-  assert.ok(fields.every((_,i)=>data[1][i+8]!==''));
+  assert.equal(data.length,9);assert.match(data[1][2],/示例/);assert.match(sheet.C2.c[0].t,/替换|删除/);
+  for(const row of data.slice(1))assert.deepEqual(data[0].filter((_,i)=>row[i]===undefined||String(row[i]).trim()===''),[],'Every student and score column must contain a concrete value');
   const parsed=parseV2Workbook(buffer,{termId:'17',config});
-  assert.equal(parsed.length,1);assert.equal(Object.keys(parsed[0].values).length,fields.length);
+  assert.equal(parsed.length,8);assert.ok(parsed.every(row=>Object.keys(row.values).length===fields.length));
+  assert.equal(new Set(parsed.map(row=>row.username)).size,8);
+  assert.equal(new Set(parsed.map(row=>row.real_name)).size,8);
+  const gradeColumn=fields.find(f=>f.valueType==='grade').column,starColumn=fields.find(f=>f.valueType==='star').column;
+  assert.ok(new Set(parsed.map(row=>row.values[gradeColumn])).size>1);
+  assert.ok(new Set(parsed.map(row=>row.values[starColumn])).size>1);
   assert.equal(parsed[0].username,'示例学号001');
   assert.equal(parsed[0].values[fields.find(f=>f.valueType==='grade').column],'A');
   for(const cell of Object.values(sheet))if(cell&&typeof cell==='object')assert.ok(!cell.f&&cell.t!=='e');
@@ -43,6 +47,7 @@ test('template endpoint downloads an actual workbook for the selected term and r
  const response=await fetch(url,{headers:{Authorization:'Bearer '+signToken(teacher)}});
  assert.equal(response.status,200);assert.match(response.headers.get('content-type'),/spreadsheetml/);assert.match(response.headers.get('content-disposition'),/attachment/);
  const parsed=parseV2Workbook(Buffer.from(await response.arrayBuffer()),{termId:'1',config:{}});
+ assert.equal(parsed.length,8);
  assert.equal(parsed[0].username,'示例学号001');
  assert.equal((await fetch(url,{headers:{Authorization:'Bearer '+signToken(student)}})).status,403);
 });

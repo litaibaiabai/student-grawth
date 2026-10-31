@@ -99,15 +99,19 @@ function buildScoreTemplate({termId,config={}}){
   // Current-term raw health measurements use the administrator's separate import.
   const fields=policyFor(config).fields.filter(f=>f.sourceType==='IMPORT'&&(v2||!health.includes(f.column)));
   const headers=['学期标识','模板版本','学号','姓名','年级','班级','测量日期','视力制式',...fields.map(f=>f.column)];
-  const date=new Date().toISOString().slice(0,10),grade=(config.allowedGrades||['A','B','C','D'])[0];
-  const examples={height_cm:142.5,weight_kg:34.8,vision_left:'5.0',vision_right:'5.0',jump_rope_1min:156};
-  const values=fields.map(f=>examples[f.column]??(f.valueType==='star'?3:f.valueType==='grade'?grade:''));
-  const ws=XLSX.utils.aoa_to_sheet([headers,[String(termId),v2?'SIX_EDU_V2':'CORE_V1','示例学号001','示例学生（请替换）',4,1,date,'5_POINT',...values]]);
+  const date=new Date().toISOString().slice(0,10),grades=config.allowedGrades||['A','B','C','D'];
+  const names=['林知夏','陈予安','张晨','李沐','王梓涵','赵一诺','周明轩','吴雨桐'];
+  const rows=names.map((name,i)=>{
+    const examples={height_cm:Number((140+i*1.3).toFixed(1)),weight_kg:Number((32+i*1.2).toFixed(1)),vision_left:['5.0','4.9','5.1'][i%3],vision_right:['5.0','5.1','4.9'][i%3],jump_rope_1min:120+i*7};
+    const values=fields.map(f=>examples[f.column]??(f.valueType==='star'?3-i%3:f.valueType==='grade'?grades[i%grades.length]:''));
+    return [String(termId),v2?'SIX_EDU_V2':'CORE_V1',`示例学号${String(i+1).padStart(3,'0')}`,`${name}（示例）`,4,1,date,'5_POINT',...values];
+  });
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
   const notes=['由系统填入，请勿修改。','由系统填入，请勿修改。','填写学校分配的学生账号 / 学号，保留前导零。','必须与系统学籍姓名一致。','学生所在年级，填写整数。','学生所在班级，填写整数。',v2?'填写 YYYY-MM-DD；填写健康原值时必填。':'填写 YYYY-MM-DD，如示例所示；当前学期不使用此项健康测量信息。',v2?'五分制填 5_POINT；小数制填 DECIMAL。填写视力时必填。':'五分制填 5_POINT；小数制填 DECIMAL。当前学期不使用此项健康测量信息。'];
   for(const [i,f] of fields.entries())notes[i+8]=`${f.label}。${f.valueType==='star'?'填写 1、2、3 或 ★、★★、★★★。':f.valueType==='grade'?`填写 ${(config.allowedGrades||['A','B','C','D']).join(' / ')}。`:f.column.startsWith('vision_')?'按视力制式填写，如 5.0 或 1.0。':'填写数字；身高厘米、体重千克、跳绳次数。'}仅填写本人负责的成绩，其他科目可删除对应列。空白保留已有成绩，不表示清零。`;
   headers.forEach((_,i)=>{ws[XLSX.utils.encode_cell({r:0,c:i})].c=[{a:'填写说明',t:notes[i]}];});
-  for(const address of ['C2','D2'])ws[address].c=[{a:'填写说明',t:'本行仅用于示范格式。上传前请替换为真实学生及其成绩，或删除本行后填写实际数据。不得直接上传示例成绩。'}];
-  ws['!cols']=headers.map((_,i)=>({wch:i<8?20:25}));ws['!rows']=[{hpt:30},{hpt:24}];
+  for(let r=1;r<=rows.length;r++)for(const c of [2,3])ws[XLSX.utils.encode_cell({r,c})].c=[{a:'填写说明',t:'本行仅用于示范格式。上传前请替换为真实学生及其成绩，或删除本行后填写实际数据。不得直接上传示例成绩。'}];
+  ws['!cols']=headers.map((_,i)=>({wch:i<8?20:25}));ws['!rows']=[{hpt:30},...rows.map(()=>({hpt:24}))];
   ws['!autofilter']={ref:ws['!ref']};
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'成绩');
   wb.Props={Title:'综合成绩导入模板',Subject:'请替换示例行后上传；列名与系统解析一致',Author:'云美六育评价'};
