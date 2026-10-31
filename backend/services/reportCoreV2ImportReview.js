@@ -10,7 +10,9 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
   const term=await getTerm(pool,actor.schoolId,termId);
   const v2=isV2(term.evaluation_config),fixedFields=policyFor(term.evaluation_config).fields.filter(f=>!f.jsonPath);
   const rows=parseV2Workbook(buffer,{termId,review:true,config:term.evaluation_config});
-  const roster=await resolveTermRoster({connection:pool,schoolId:actor.schoolId,termId,teacherId:actor.id});
+  // Synthetic examples never read real student values or create a writable import batch.
+  const demonstration=rows.every(row=>!row.studentId&&/^示例学号00[1-8]$/.test(row.username||'')&&/^.+（示例）$/.test(row.real_name||''));
+  const roster=demonstration?[]:await resolveTermRoster({connection:pool,schoolId:actor.schoolId,termId,teacherId:actor.id});
   const byAccount=new Map(roster.map(e=>[e.student_number,e])),byId=new Map(roster.map(e=>[String(e.student_id),e])),seen=new Map();
   const applicable=new Set(term.evaluation_config.applicableFields||fixedFields.map(f=>f.column));
   const students=[];
@@ -31,8 +33,8 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
       error('username','同一学生在工作簿中重复');
       previous.errors.push({field:'username',reason:'同一学生在工作簿中重复',rowNo:previous.rowNo,sheetName:previous.sheetName});
     }else if(identity)seen.set(identity,record);
-    if(!e)error('username','学生不存在或不在任教范围');
-    else{
+    if(!e&&!demonstration)error('username','学生不存在或不在任教范围');
+    else if(e){
       if(input.real_name&&input.real_name!==e.student_name_snapshot)error('real_name','姓名与学籍不一致');
       if(input.grade!=null&&input.grade!==e.grade_snapshot||input.classNo!=null&&input.classNo!==e.class_no_snapshot)error('classNo','班级与学籍不一致');
       try{await assertScope({actor,studentKey:{schoolId:actor.schoolId,termId,studentId:String(e.student_id)},action:'import',fields:Object.keys(input.values)},pool);}catch(err){if(!err.statusCode)throw err;error('permissions',err.message);}
@@ -42,13 +44,17 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
       }
       if(v2)try{normalizeMeasurement(input.measurement,input.values);}catch(err){if(!err.statusCode)throw err;error(/制式/.test(err.message)?'visionStandard':'measurementDate',err.message);}
     }
+    if(demonstration){
+      for(const column of input.columns)if(input.values[column]===undefined||input.values[column]===null||input.values[column]==='')error(column,'示例成绩为空');
+      if(v2)try{normalizeMeasurement(input.measurement,input.values);}catch(err){if(!err.statusCode)throw err;error(/制式/.test(err.message)?'visionStandard':'measurementDate',err.message);}
+    }
     const h=Number(record.values.height_cm),w=Number(record.values.weight_kg);
     record.values.bmi=h>0&&w>0&&Number.isFinite(h)&&Number.isFinite(w)?computeBMI(h,w):null;
     record.values.sports_specialties=record.sportsSpecialties;record.values.art_specialties=record.artSpecialties;
     students.push(record);
   }
   let errors=students.flatMap(s=>s.errors),preview={batchId:null,revision:null,validCount:0,diffs:[]};
-  if(!errors.length){
+  if(!errors.length&&!demonstration){
     const response=await require('./reportCoreImports').previewImport({pool,actor,termId,kind:'ACADEMIC',rows,command});
     preview=response.result;
     for(const err of preview.errors||[]){
@@ -57,6 +63,6 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
     }
     errors=students.flatMap(s=>s.errors);
   }
-  return {result:{...preview,students,totalCount:students.length,errors}};
+  return {result:{...preview,demonstration,students,totalCount:students.length,errors}};
 }
 module.exports={reviewV2Workbook};

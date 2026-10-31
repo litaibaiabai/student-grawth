@@ -51,3 +51,18 @@ test('template endpoint downloads an actual workbook for the selected term and r
  assert.equal(parsed[0].username,'示例学号001');
  assert.equal((await fetch(url,{headers:{Authorization:'Bearer '+signToken(student)}})).status,403);
 });
+
+test('eight generated sample students can be reviewed without real student accounts or writable import batches',async t=>{
+ const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
+ const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:buildScoreTemplate({termId:'1'}),command:{requestKey:'sample-review',payloadHash:'sample-review'}});
+ assert.equal(result.demonstration,true);assert.equal(result.students.length,8);assert.deepEqual(result.errors,[]);assert.equal(result.batchId,null);
+ assert.equal(result.students[7].student.name,'吴雨桐（示例）');assert.equal(result.students[7].student.id,null);
+ assert.equal(Number((await db.pool.query("SELECT COUNT(*) n FROM evaluation_source_record WHERE source_type='IMPORT'"))[0][0].n),0);
+});
+
+test('a mixed sample and unknown account file cannot bypass ordinary student scope validation',async t=>{
+ const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
+ const wb=XLSX.read(buildScoreTemplate({termId:'1'}));wb.Sheets.成绩.C9.v='unauthorized-student';
+ const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:{requestKey:'mixed-review',payloadHash:'mixed-review'}});
+ assert.equal(result.demonstration,false);assert.equal(result.batchId,null);assert.ok(result.students[7].errors.some(e=>e.field==='username'));
+});
