@@ -22,7 +22,7 @@ React 18 / Vite、Express、MySQL 8。当前流程：统一 Excel 导入学期�
 - `frontend/src/app/student/`、`teacher/`、`manager/`：按角色与业务组织页面和模型；管理员仅保留 roster、quota、statistics。
 - `frontend/src/component/TermReport/`：报告阅读、版面核对与打印。
 - `backend/routes/`、`backend/services/`：API、授权、统一导入、来源事实、评价投影、发布快照及统计。
-- `backend/scripts/`：启动、迁移与验证工具。
+- [backend/scripts/](backend/scripts/README.md)：启动、迁移与验证工具的用途及运行命令。
 - `docs/database/`：迁移仍使用的表结构校验契约；`sql/`：历史迁移脚本。
 
 ## 本地运行
@@ -58,7 +58,7 @@ npm --prefix frontend run build
 - [MCP三角色演示](docs/delivery/admin-simplification/mcp-demo.md)：每步操作与预期结果；已初始化学期只查看结果，不再次初始化。
 - [管理员数据统计](docs/delivery/admin-statistics/README.md)：卡片与奖励、自我评价、荣誉上传、故事参与。
 
-截图、二维码、备份和测试素材保存在Git忽略的 `output/`，不提交凭证或私有材料。已退役设计从docs清理，历史验收、恢复脚本和迁移记录保留供追溯，历史说明不作为当前运行入口。
+截图、二维码、备份和测试素材保存在Git忽略的 `output/`，不提交凭证或私有材料。已退役设计从docs清理，历史验收和迁移记录保留供追溯；失效种子与演示库还原入口已清理，SQL备份恢复能力保留。
 
 ## 容器构建
 

@@ -18,6 +18,8 @@
 
 ## 数据与维护资料
 
+- [后端脚本清单与运行方式](../backend/scripts/README.md)
+
 - [六育 V2 字段映射](data/six-education-v2-field-map.json)
 - [核心表结构校验契约](database/term-report-core-v1.schema.json)、[V2 校验契约](database/six-education-v2.schema.json)、[班级表校验契约](database/admin-closure.schema.json)：迁移脚本仍使用，保留。
 - [错误码](error-codes.md)

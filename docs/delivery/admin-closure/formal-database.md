@@ -25,7 +25,7 @@
 
 ## 还原机制与实际验证
 
-`backend/scripts/restoreAdminDemoIntoFormal.js` 默认只读预检。显式 `--apply` 时先生成新备份，再锁定并复核旧数据；全部DELETE和INSERT在同一事务中完成，不使用TRUNCATE、建库或建表语句。外键检查只在该连接上临时关闭，提交前逐一检查全部22组外键并恢复检查；异常整体回滚。
+当时使用的旧演示库还原工具现已删除，以下仅记录当时机制：显式应用时先生成新备份，再锁定并复核旧数据；全部DELETE和INSERT在同一事务中完成，不使用TRUNCATE、建库或建表语句。外键检查只在该连接上临时关闭，提交前逐一检查全部22组外键并恢复检查；异常整体回滚。
 
 来源比正式表多一个可选生成索引列 `evaluation_source_record.ledger_occurred_utc`。第一次严格整行比较发现此差异并实际回滚；调整后只允许跳过来源额外生成列，任何缺失正式字段或额外存储字段仍拒绝。正式表所有字段逐行一致才提交，微秒日期使用字符串读取，未损失时间精度。
 
@@ -43,9 +43,9 @@
 node backend/scripts/runAdminClosureDemo.js
 ```
 
-默认直接连接现有 `student_growth`，不自动初始化、还原或创建其他库。启动时只检查结构，日常数据操作直接落入正式表。`seedAdminClosureDemo.js` 不再在无明确参数时创建数据库。
+默认直接连接现有 `student_growth`，不自动初始化、还原或创建其他库。启动时只检查结构，日常数据操作直接落入正式表。旧临时库种子脚本已清理。
 
-如以后确实需要重新还原，先确认当前新增数据也已备份，再运行预检与显式apply；不要将apply放入日常启动命令。
+如以后确实需要恢复，先备份当前新增数据，再按[当前SQL备份恢复说明](../admin-simplification/migration.md)选择备份。旧来源演示库已删除，不再依赖它还原。
 
 ## 本机开发密码查看列
 
@@ -58,9 +58,9 @@ SELECT username, real_name, role, password_plain FROM users;
 ```sh
 node backend/scripts/migrateDevelopmentPasswords.js          # 只读检查
 node backend/scripts/migrateDevelopmentPasswords.js --apply  # 备份后建立开发列并补已核验演示值
-node backend/scripts/verifyDevelopmentPasswords.js            # 正式表内事务验证，最终全部回滚
+node --test backend/__tests__/admin_simplification_registry.test.js # 正式表内事务验证，最终全部回滚
 ```
 
-初始化账号、管理员导入和密码重置同步该列。导入预览只保留绑定学校与账号的加密信封，提交时才解密写入用户表；预览响应、登录、/me及审计不返回明文。没有此可选列的旧结构仍能工作。`NODE_ENV=production`禁用明文迁移、预览采集，并在账号密码写入时将该列置NULL。已有明文列与备份仅供本机开发，正式部署前应移除或清空，禁止将其作为生产密码存储方式。
+当前统一导入同步该列；旧管理员密码重置入口已退役。导入预览只保留绑定学校与账号的加密信封，提交时才解密写入用户表；预览响应、登录、/me及审计不返回明文。没有此可选列的旧结构仍能工作。`NODE_ENV=production`禁用明文迁移、预览采集，并在账号密码写入时将该列置NULL。已有明文列与备份仅供本机开发，正式部署前应移除或清空，禁止将其作为生产密码存储方式。
 
 已通过实际初始化、导入、重置、bcrypt登录、/me和审计隐私验证；所有验证数据使用现有正式表的单一事务，最终回滚，未建立任何测试数据库或临时表。

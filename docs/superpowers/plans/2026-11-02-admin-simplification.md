@@ -1,5 +1,7 @@
 # 管理员三模块与师生闭环重构 Implementation Plan
 
+> 后续维护：失效脚本及其专用旧入口已按用户要求清理，当前命令以[后端脚本清单](../../../backend/scripts/README.md)为准。下方保留本轮实施时的文件记录。
+
 > 状态：已完成，整分支审阅问题已修复；最终验证及实际演示见[验收记录](../../delivery/admin-simplification/verification.md)。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

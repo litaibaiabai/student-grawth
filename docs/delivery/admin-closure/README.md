@@ -41,9 +41,9 @@ node backend/scripts/runAdminClosureDemo.js
 
 默认直接连接 `student_growth`、学校1，API为127.0.0.1:19980，网页为http://localhost:19981。端口占用会报错，不结束其他服务；重启不会清空或重新seed数据。旧演示库清单会被明确拒绝。
 
-`seedAdminClosureDemo.js` 不再无参数创建数据库。其显式隔离回归夹具接口属于历史自动化工具，日常开发不调用它。当前配置没有把测试清理/删库逻辑指向正式库；本次验收只读取还原后的正式数据，没有创建测试库或表。
+旧临时库种子入口已在后续脚本整理中删除。当前启动和验收入口见[后端脚本清单](../../../backend/scripts/README.md)；本页仅记录当时的验收背景。
 
-需要再次还原时，先阅读[正式库还原记录](formal-database.md)。`restoreAdminDemoIntoFormal.js` 默认只读预检，只有显式 `--apply` 才在新备份完成后替换数据；它不是日常启动步骤。
+旧演示库来源已删除，对应还原脚本已失效并清理。需要恢复时按[当前SQL备份恢复说明](../admin-simplification/migration.md)处理。
 
 演示寄语仍明确标注固定演示响应并由教师改写审核，奖状由教师人工核对；本次未调用付费模型。
 
