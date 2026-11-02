@@ -56,11 +56,11 @@ test('source audit hashes private assets and isolates legacy stories without fab
   await fs.writeFile(path.join(root,'proof.txt'),'original');
   const payload={fileRef:'proof.txt',fileHash:crypto.createHash('sha256').update('original').digest('hex'),text:'old monthly story'};
   await require('../services/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:'3',sourceType:'STORY',kind:'ITEM',status:'SCORED',key:['legacy-asset'],payload});
-  const audit=await require('../scripts/migrateReportCore').auditV2SourceAssets({connection:db.pool,schoolId:'1',termId:'1',filesRoot:root});
+  const audit=await require('../services/reportCoreSourceAudit').auditV2SourceAssets({connection:db.pool,schoolId:'1',termId:'1',filesRoot:root});
   assert.equal(audit.sourceCount,1);
   assert.equal(audit.assets[0].status,'VERIFIED');
   assert.equal(audit.isolated.length,1);
   await fs.writeFile(path.join(root,'proof.txt'),'changed');
-  assert.equal((await require('../scripts/migrateReportCore').auditV2SourceAssets({connection:db.pool,schoolId:'1',termId:'1',filesRoot:root})).assets[0].status,'HASH_MISMATCH');
+  assert.equal((await require('../services/reportCoreSourceAudit').auditV2SourceAssets({connection:db.pool,schoolId:'1',termId:'1',filesRoot:root})).assets[0].status,'HASH_MISMATCH');
   assert.equal(String((await db.pool.query('SELECT COUNT(*) n FROM evaluation_source_record'))[0][0].n),'1');
 });

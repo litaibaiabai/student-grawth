@@ -1,30 +1,34 @@
-# 六表核心系统切换与回退
+# 当前八表系统的部署检查与回退
 
-本次开发不自动部署生产，不删除旧库。新入口只读写REPORT_DB_NAME，不再启动旧scheduler/旧迁移。
+当前运行基线为现有 `student_growth` 八表和六育V2。管理员三个模块，班主任确认单名学生即发布；不再使用旧六表初始化、旧库搬迁或管理员统一发布流程。
 
-1. 备份旧库、私有材料和打印密钥；准备新版六表student_growth库（旧同名库须先备份并迁移，不得覆盖）及最小权限账号，使用Node22.12+。
-2. 设置REPORT_DB_NAME、LEGACY_DB_NAME、SCHOOL_ID等；空库执行`node backend/scripts/runCoreMigrations.js --apply`。全新学校可用`node backend/scripts/initReportCore.js`创建管理员；禁止在已有学校执行初始化覆盖用户。
-3. 旧校先设置MIGRATE_TERM_IDS，执行`node backend/scripts/migrateReportCore.js`只读审计。迁移不等于自动分类：旧卡/旧故事/维度总分无法明确映射时保留私有原始归档及unmapped，不填新分项。
-4. 审查审计结果，确认目标库备份后才执行`--apply`。核对账号、任教、报告快照哈希与原始材料数。文件资产与原卡解密/重加密尚需按学校旧环境另行演练，当前脚本不会伪造已恢复的卡。
-5. 停止旧入口写入，完成最终审计与增量迁移、补齐未映射项目、校方确认规则/版式，再切换服务及静态包。所有旧JWT失效，用户重新登录。
-6. 首版单应用实例，数据库池10，模型最大在途2；不要在多实例下直接倍增模型并发。
-7. 原库和旧包继续封存。开放新写入前可回原库/旧包；开放后先冻结新写入并备份，默认前向修复。确需回旧系统，必须先处理新材料增量，不能直接切回而丢记录。
+## 部署前检查
 
-发布准备失败可用发布中心“恢复准备”或“取消本次准备”，学生一直只能读最后已激活批次。取消批次的PREPARED报告不会因后续发布而可见。
-
-用户本地已要求将新版六表库统一命名为student_growth，并清理liuyu_report*临时库。该命名不表示恢复旧44表结构。REPORT_DB_NAME与LEGACY_DB_NAME必须不同；本地新库更名后将旧来源配置留空，禁止将同名库当迁移来源。启动会只读检查六表schema，不自动初始化或恢复旧库。
-
-## 六育 V2：在目标克隆库显式升级
-
-先恢复经过验证的六表备份到独立 `student_growth_v2` 或 `liuyu_report_pilot_*` 目标，源库保持只读。Node 至少22.12；不要在旧44表库运行V2 ALTER，也不要直接执行06 SQL文件。
+1. 备份数据库、私有材料目录、现用打印/加密密钥及部署配置，记录SQL备份SHA256。新环境使用已核验的八表SQL备份恢复；旧V1初始化和旧库搬迁脚本已退役，不再用于建立新环境。
+2. 使用Node22.12+，配置 `REPORT_DB_NAME=student_growth`、实际 `SCHOOL_ID`、数据库连接、鉴权及打印密钥、私有材料持久卷。密钥不提交到Git。
+3. 在暂停业务写入的维护窗口内，先只读核对结构和当前配置迁移状态：
 
 ```sh
-# 默认只读检查，列出待执行步骤和冲突
-REPORT_DB_NAME=student_growth_v2 node backend/scripts/migrateSixEducationV2.js
-# 在目标克隆库显式执行，逐步骤可重入
-REPORT_DB_NAME=student_growth_v2 node backend/scripts/migrateSixEducationV2.js --apply
-# 单个学期来源/私有资产只读审计；不回填推测成绩
-REPORT_DB_NAME=student_growth_v2 SCHOOL_ID=1 MIGRATE_TERM_IDS=1 node backend/scripts/migrateSixEducationV2.js --audit-sources
+REPORT_DB_NAME=student_growth node backend/scripts/runCoreMigrations.js
+node backend/scripts/migrateAdminSimplification.js
 ```
 
-班主任职责重复、已存在列定义不符、源目标同名等需先人工核对。升级schema不会把V1学期自动改成V2，也不会重写历史已发布报告。资产清单必须核对摘要；MISSING/HASH_MISMATCH等未解决前不能切换。切换前冻结写入口与worker，完成最终同步、来源对账和恢复演练；开放V2新写入后回退必须先保全新增来源及文件。
+结构检查不等于执行迁移。配置迁移若确有待办，按[迁移说明](../docs/delivery/admin-simplification/migration.md)先备份，再显式应用；不要把apply放入日常启动命令。当前已完成的旧成绩升级和开发密码列补建不再提供重复执行入口。
+
+4. 核对来源事实与私有附件，可逐学期执行只读资产审计：
+
+```sh
+REPORT_DB_NAME=student_growth SCHOOL_ID=1 MIGRATE_TERM_IDS=1 node backend/scripts/migrateSixEducationV2.js --audit-sources
+```
+
+此命令仍然有效，使用独立的来源/附件核验服务。`MIGRATE_TERM_IDS`在该入口填写单个学期ID；文件根目录按实际 `REPORT_FILES_DIR` 配置。缺文件、哈希不符或未经明确映射的旧事实不能推测成新成绩。
+
+5. 构建前端并按现有部署方式启动后端。生产环境不启用本地演示时钟；核对三角色权限、本人报告读取、卡片归属、附件访问及历史发布快照。测试与MCP验收方式见[验证记录](../docs/delivery/admin-simplification/verification.md)。
+
+## 数据保全与回退
+
+停止原实例写入后保留数据库与材料备份。开放新版本写入后，如需回退，应先停止新增写入并保存当前数据库、文件和新增事实，优先前向修复。确需从SQL备份恢复时，按[恢复说明](../docs/delivery/admin-simplification/migration.md)核对备份版本与密钥，并保全备份时点后的数据；不能直接切回旧库丢失新增记录。
+
+源事实、幂等记录、已领卡和已发布报告均需保留。PREPARED快照不得作为已发布报告向学生开放，旧历史报告也不原地重绘。
+
+全部有效脚本及用途见[后端脚本清单](../backend/scripts/README.md)。本说明不执行部署、数据恢复或新库创建。

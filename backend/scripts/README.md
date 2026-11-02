@@ -27,14 +27,12 @@ ADMIN_DEMO_NOW=2027-02-15T00:00:00.000Z node backend/scripts/runAdminClosureDemo
 |---|---|
 | runCoreMigrations.js | 启动器和正式服务使用的核心表结构检查；`REPORT_DB_NAME`指定库，`--apply`仅用于相应结构初始化。含时间契约切换维护选项 |
 | migrateAdminSimplification.js | 当前v4的semesterCards配置迁移，固定正式库student_growth；`node backend/scripts/migrateAdminSimplification.js`只读检查，`--apply`先备份 |
-| migrateSixEducationV2.js | 六育V2结构检查/升级，核心检查器仍调用；另有来源资产审计入口 |
+| migrateSixEducationV2.js | 六育V2结构检查/升级，核心检查器仍调用；另有来源资产审计入口，调用独立的reportCoreSourceAudit服务 |
 | migrateAdminClasses.js | school_class及相关职责数据约束检查，核心检查器仍调用 |
-| migrateDevelopmentPasswords.js | 本机开发密码列检查/迁移；production禁止。不是登录、密码重置或演示入口 |
 | upgradeCoreLedgerIndex.js | 可选台账索引升级；目标库受脚本安全规则限制，不能把旧索引升级当正常启动 |
-| upgradeScoreInputV2.js | 旧学期成绩字段/配置升级，已升级学期跳过；属于维护工具 |
-| migrateReportCore.js | 旧系统数据迁移审计及V2来源资产校验；后者仍被V2迁移入口调用。需明确来源库和目标库，不作为日常运行入口 |
-| initReportCore.js | 空学校的初始建档，历史迁移/初始化仍使用；已有数据会拒绝覆盖。CLI可创建目标库、`--demo`为旧初始化模式，现有v4学校不应再次运行 |
 | buildBuiltinStoryAudio.js | macOS素材制作工具，依赖`say`、ffmpeg、ffprobe；重生成100篇内置故事音频及catalog，会覆盖素材，不是启动前置步骤 |
+
+仍在使用的来源及附件核验已独立保存在 `backend/services/reportCoreSourceAudit.js`，由V2检查器的`--audit-sources`入口调用，不再依赖旧库搬迁脚本。
 
 数据库备份实现保留在 `backend/services/formalDatabaseBackup.js`，当前迁移仍调用。恢复使用SQL备份，见[迁移与恢复说明](../../docs/delivery/admin-simplification/migration.md)，不依赖已删除的旧演示库。
 
@@ -52,5 +50,7 @@ ADMIN_DEMO_NOW=2027-02-15T00:00:00.000Z node backend/scripts/runAdminClosureDemo
 - `restoreAdminDemoIntoFormal.js`：来源库硬编码为已删除的旧演示库，已失效；通用SQL备份恢复能力保留。
 - `verifyDevelopmentPasswords.js`：只是转调当前学籍回归的重复包装，改用上面的定向测试命令。
 - 同步删除四个完全依赖旧种子的专用旧入口：后端`report_core_course_card_fixtures.test.js`，前端`admin-closure.cjs`、`admin-closure-flow.cjs`、`course-cards.cjs`。当前学籍、学期卡、授权、幂等、隐私和发布回归保留在`admin_simplification_*`安全集合。
+
+后续已清理：`initReportCore.js`（旧V1建校/演示初始化）、`migrateReportCore.js`（旧库搬迁）、`upgradeScoreInputV2.js`（已完成的旧成绩升级）、`migrateDevelopmentPasswords.js`（已完成的开发列补建）。同步删除两个专用V1回归文件`report_core_bootstrap.test.js`、`report_core_migration.test.js`及过时的`backend/docs/api.md`。现有八表结构检查、当前配置迁移、可选台账索引、音频素材制作和当前闭环辅助模块仍然使用，保留。
 
 删除仅涉及代码文件，不执行数据库删除、迁移、还原或重新初始化；旧源代码可从Git历史查阅。

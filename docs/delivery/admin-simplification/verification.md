@@ -42,3 +42,7 @@ Node22。使用 `npm --prefix backend run test:admin-simplification`：35/35通�
 - a later page cursor cannot cross into another semester query：列表状态按学期推导，跨学期查询清除游标，保留同学期分页。
 
 定向后端14/14、前端2/2通过，随后重跑全部安全套件。无延期小项，不再重复派发审阅。
+
+## 后续一次性脚本退役验证
+
+用户继续要求删除不会再使用的旧文件后，删除四个已完成任务的一次性工具、两个专用V1回归和过时API文档。旧迁移文件中仍在使用的来源及附件核验抽取为reportCoreSourceAudit服务，V2审计入口和原有效回归更新引用。新增两个真实文件核验/旧事实隔离回归先RED后GREEN；全部后端安全回归37/37、前端37/37通过。正式库只读检查确认所有学期为SIX_EDU_V2、结构待办0、开发列已存在；验收数据在正式表事务中回滚，未执行迁移、还原或建库。

@@ -49,15 +49,13 @@ node backend/scripts/runAdminClosureDemo.js
 
 ## 本机开发密码查看列
 
-按用户追加要求，正式 `users` 表新增可空的 `password_plain VARCHAR(255)`。原 `password` 列继续保存bcrypt哈希，认证不读取明文列。当前四个演示账号已逐一验证哈希后补入已知密码；未知历史密码不能反解，保持NULL。
+当时按用户要求完成开发列补建，补建脚本现已退役；后续账号导入继续由服务维护该列。正式 `users` 表具有可空的 `password_plain VARCHAR(255)`。原 `password` 列继续保存bcrypt哈希，认证不读取明文列。当前四个演示账号已逐一验证哈希后补入已知密码；未知历史密码不能反解，保持NULL。
 
 ```sql
 SELECT username, real_name, role, password_plain FROM users;
 ```
 
 ```sh
-node backend/scripts/migrateDevelopmentPasswords.js          # 只读检查
-node backend/scripts/migrateDevelopmentPasswords.js --apply  # 备份后建立开发列并补已核验演示值
 node --test backend/__tests__/admin_simplification_registry.test.js # 正式表内事务验证，最终全部回滚
 ```
 
