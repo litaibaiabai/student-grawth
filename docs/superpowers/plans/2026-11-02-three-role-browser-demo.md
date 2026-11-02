@@ -54,7 +54,7 @@
 - [x] 新学期通过真实浏览器鼠标操作完成全部闭环；MCP核对关键页面与最终报告，截图及每步PASS/FAIL保存本机output。
 - [x] npm --prefix backend run test:admin-simplification；npm --prefix frontend test；脚本--help及依赖检查。
 - [x] 文档明确运行命令、默认/回放区别、一次性初始化和录像位置。
-- [ ] 提交v4，普通push并报告真实同步结果。
+- [x] 提交v4，普通push并报告真实同步结果。实现提交f34c501已推送，包含前一笔adbe0e3清理提交。
 
 
 验收：新学期term297完整21步骤含两次安全续跑全部PASS，后端47、前端38、lint/build通过；独立审阅的端口归属Important已RED→GREEN并复核关闭。实际原始录像及失败证据保留，合成MP4包含修复续跑过程，不宣称一次未中断执行。MCP再次依次登录管理员、教师、学生，核对统计1+1=2、教师1080/1079张以及学生版本2两页。

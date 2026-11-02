@@ -10,6 +10,7 @@
 - [统一 Excel 字段格式](delivery/admin-simplification/excel-format.md)
 - [正式库迁移、备份与恢复](delivery/admin-simplification/migration.md)
 - [验证与修复记录](delivery/admin-simplification/verification.md)
+- [三角色鼠标演示实施与验收](superpowers/plans/2026-11-02-three-role-browser-demo.md)
 - [MCP 三角色演示脚本](delivery/admin-simplification/mcp-demo.md)
 - [管理员四类数据统计](delivery/admin-statistics/README.md)
 - [教师综合成绩 Excel 范本](templates/README.md)
