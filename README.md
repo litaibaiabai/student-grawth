@@ -55,7 +55,7 @@ npm --prefix frontend run build
 
 - [Excel字段要求](docs/delivery/admin-simplification/excel-format.md)：一份工作簿完成学期、教师、班级、学生、任教关系导入。
 - [教师成绩范本](docs/templates/README.md)：成绩60字段及体测原始值由教师上传。
-- 一键三角色鼠标演示：`npm --prefix backend run demo:browser`（可见Chrome，默认2027–2028第一学期，自带服务、步骤截图和录像）。
+- 一键三角色鼠标演示：`npm --prefix backend run demo:browser`（备份→清空师生与业务数据→可见Chrome三角色完整操作→还原原库，自带截图和录像）。
 - [MCP三角色演示](docs/delivery/admin-simplification/mcp-demo.md)：每步操作与预期结果；已初始化学期只查看结果，不再次初始化。
 - [管理员数据统计](docs/delivery/admin-statistics/README.md)：卡片与奖励、自我评价、荣誉上传、故事参与。
 

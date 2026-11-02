@@ -1,40 +1,49 @@
 # 后端脚本入口
 
-从项目根目录运行，使用Node22。日常开发/演示使用现有 `student_growth`；启动脚本不会seed或还原数据。按用途选入口，不能把迁移、初始化或素材生成当作演示启动。
+从项目根目录运行，使用Node22。日常开发/演示使用现有 `student_growth`。服务启动器不seed；空库演示入口会先备份、清理业务数据，结束后还原。按用途选入口，不能把迁移、初始化或素材生成当作演示启动。
 
 ## 日常启动与验收
 
 | 文件 | 用途 | 项目根目录命令 |
 |---|---|---|
-| runThreeRoleDemo.js | 可见Chrome中执行三角色鼠标闭环，自动启动自有20080/20081服务、截图与录像 | `npm --prefix backend run demo:browser` |
+| runFreshThreeRoleDemo.js | 从空业务数据进行三角色鼠标演示，结束后还原原库 | `npm --prefix backend run demo:browser` |
+| runThreeRoleDemo.js | 内部浏览器步骤运行器，也可显式回放已有结果 | `npm --prefix backend run demo:replay` |
 | runAdminClosureDemo.js | 同时启动本地前后端，页面19981、API19980 | `node backend/scripts/runAdminClosureDemo.js` |
 | verifyAdminSimplification.js | 当前v4完整闭环验收；使用正式表外层事务回滚并检查八表hash，不启动页面 | `node backend/scripts/verifyAdminSimplification.js` |
 
-### 三角色鼠标演示
+### 从空数据演示并还原原库
 
-安装Node22依赖（包含开发依赖）、录像编码器与本机Google Chrome后，从项目根执行：
+项目根目录使用Node22、本机Google Chrome、MySQL客户端（mysql、mysqldump）及ffmpeg。首次安装依赖和录像编码器：
 
 ```sh
 npm --prefix backend ci --include=dev
 npm --prefix frontend ci
 node backend/node_modules/playwright/cli.js install ffmpeg
-npm --prefix backend run demo:browser
 ```
 
-默认目标2027–2028第一学期；未初始化时执行完整闭环，已有发布报告时自动改为**已有结果回放**，不会重发卡或重复日常记录。页面顶部显示当前角色、操作与预期结果，橙色圆圈显示鼠标位置。账号密码从本机`DEMO_PASSWORD`或现有开发密码列读取，只保存在内存中。缺少匹配的虚构账号或密码不正确时，在导入前停止，不改账号密码。
+运行：
 
 ```sh
-# 完整演示：仅限尚未初始化且没有日常事实的学期
-npm --prefix backend run demo:browser -- --mode full --academic-year 2027-2028 --semester 1
-# 同一学期完成后，只查看三角色的现有结果
-npm --prefix backend run demo:browser -- --mode replay --academic-year 2027-2028 --semester 1
-# 无人值守验收，结束即关闭浏览器、服务并完成录像
-npm --prefix backend run demo:browser -- --exit-after
+npm --prefix backend run demo:browser
+# 可调整鼠标步骤停留时间或端口
+npm --prefix backend run demo:browser -- --step-delay 2000 --api-port 21080 --web-port 21081
 ```
 
-每次运行产物在`output/report-core/three-role-browser-demo/<学年>-<学期>/<时间>/`：`report.json`记录每步预期及PASS/FAIL，`screenshots/`保存步骤截图，`video/`保存WebM录像，`inputs/`保存本次五表与两教师成绩工作簿，完整模式先备份八张正式表至`backups/`。二维码截图和PDF属于本机演示资料，不提交Git。默认成功后停在学生报告页，`Ctrl+C`关闭并结束录像；`--exit-after`自动关闭。停止的只是本次启动的Chrome和服务，原19981服务不受影响。端口冲突时可指定`--api-port`和`--web-port`，不自动终止别人的进程。
+该命令每次都执行完整流程，**不会自动改成已有结果回放**。它操作现有正式库student_growth，在维护期间暂停其他业务写入：
 
-完整模式通过页面上传、点击、选星、真实播放故事、教师评审及确认发布写入正式业务表；不通过API或SQL造结果。未完成且已初始化的学期拒绝盲目重跑，保留失败步骤与截图供核对，不重置卡片。仅当所有日常事实步骤已PASS、失败位于寄语审核及后续发布阶段时，可用`--resume <原report.json绝对路径>`继续；脚本核对同一学期与连续PASS记录，跳过已完成日常事实，并检查已有报告版本以避免重复发布。原失败报告与录像保留，新报告以`resumedFrom`及每步`sourceReport`关联；在不同阶段中断需先核对页面状态，不提供任意跳步。未来日期仅使用本机演示时钟并有页面提示，真实学期日期与审计时间不改。
+1. 获取数据库互斥锁，完整SQL备份，记录八表hash，并验证备份期间没有写入变化。
+2. 清空原业务数据，仅保留管理员与100篇内置故事。验证教师、学生、学期、班级、关系、卡片、评价及报告均为0。
+3. 打开可见Chrome，管理员现场核对空态，上传Excel新建师生和学期关系；配置额度并一次初始化1515张卡。
+4. 两教师操作课程卡、直评和成绩；学生点击扫一扫、填自评、完整听故事、写故事、录音上传讲故事、上传奖状；教师评审、寄语、结算及确认发布；学生读取报告并验证更正后的第二版；管理员核对四类统计。
+5. 演示结束自动关闭本次Chrome和服务，**还原原SQL备份并逐表比较八表hash**。失败或Ctrl+C同样还原；不会把演示数据留在原库。
+
+自动演示的摄像头使用教师页面真实二维码的虚拟视频输入，经过系统摄像头画面识别；麦克风使用内置虚构故事音频的虚拟输入，经过页面MediaRecorder录音和保存上传。字幕明确标注虚拟素材，不通过API/SQL伪造扫码或故事结果。只要求本机存在可登录的管理员，不要求原库预先有教师或学生；师生初始密码在内存中随机生成，清理后通过私有Excel的初始密码字段创建师生；密码不写日志或JSON报告，输入文件和二维码只保存本机私有输出。
+
+`output/report-core/fresh-three-role-demo/<时间>/lifecycle.json`记录SQL备份、空态计数、演示报告路径、前后hash与`restored`结果；步骤截图、WebM录像、工作簿在关联的浏览器报告目录。默认完整学期2027–2028第一学期；因每次开始清空、结束还原，相同命令可重复完整演示。互斥锁阻止两个演示同时清库；不建立临时数据库或表。
+
+强制结束进程（SIGKILL）、断电无法执行finally；此时用lifecycle.json中完整SQL备份恢复，恢复方法见迁移说明。普通Ctrl+C由运行器接管，还原子进程隔离终端信号，等待恢复完成后退出。
+
+已有结果回放独立为`npm --prefix backend run demo:replay -- --academic-year 2027-2028 --semester 1 --exit-after`，只用于明确查看历史结果，不是完整闭环验收。原服务启动器只启动服务，不操作浏览器、不清理或还原数据。
 
 全部安全回归：`npm --prefix backend run test:admin-simplification`。只核对账号导入、密码保持及隐私边界时：`node --test backend/__tests__/admin_simplification_registry.test.js`。验收期间暂停其他业务写入，避免真实操作干扰回滚前后的hash比较。历史默认测试集合可能建临时库，不用于当前开发验收。
 

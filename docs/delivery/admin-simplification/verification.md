@@ -61,3 +61,17 @@ Node22。使用 `npm --prefix backend run test:admin-simplification`：35/35通�
 独立代码审阅发现端口归属风险：已有网页HTTP200可能早于本次Vite的占用报错，修复为先检查两个端口可用，再等待本次子进程输出指定地址后才接受HTTP就绪。真实占用端口回归先RED后GREEN，且未请求已有服务；另覆盖子进程启动失败，不将外部HTTP可达视为就绪。审阅复核无剩余Critical/Important。验收中额外恢复App.jsx明确的`./app/index.jsx`入口，避免macOS大小写不敏感时`./app`解析为自身造成白屏。Ctrl+C退出由运行器统一处理，禁用Playwright默认信号退出，保证录像与报告写完。
 
 最终修复后新学期三角色回放6/6通过（2026-11-02T15-04-45-417Z），实测SIGINT退出为0、report.videoFinalized=true且20080/20081均已释放。MCP重新载入后读取版本2两页，最终寄语和荣誉截图为`mcp-proof/student-report-page2.png`，白屏已消失。所有含测试二维码的本机产物位于Git忽略目录；最终报告明文密码扫描通过。
+
+## 当前完整演示：清空开始，结束还原（2026-11-02）
+
+用户明确修正验收要求后，`demo:browser`入口已改为runFreshThreeRoleDemo，原已有结果回放独立为`demo:replay`。不再将历史结果回放作为完整演示交付。
+
+正式库完整SQL备份后，清空师生、学期和业务数据，仅保留管理员及100内置故事；管理员现场五表Excel创建2教师、1学生、3班18任教关系，1515卡初始化；真实摄像头识别路径扫码（明确标注虚拟二维码视频素材）、自评11、真实完整听故事1、写故事1、MediaRecorder录制并上传讲故事1（明确标注内置虚构故事麦克风素材）、上传奖状1；两教师成绩及直评、评审、寄语、过程结算、班主任发布v1，更正后发布v2；管理员四类统计逐格核对，学生读完整两页94字段。
+
+**最终连续23/23步骤PASS，无回放、无续跑；结束后自动恢复演示前SQL备份，原八表逐表hash全部一致。** 生命周期记录：`output/report-core/fresh-three-role-demo/2026-11-02T15-22-25-423Z/lifecycle.json`，`emptyCounts`记录开始仅users1、story_content100，其余六表0；`restored=true`且beforeHashes==afterHashes。浏览器原始报告及截图/录像：`output/report-core/three-role-browser-demo/2027-2028-1/2026-11-02T15-22-26-465Z/`；连续MP4为生命周期目录`fresh-full-demo.mp4`。
+
+首次新流程在录音上传后的排名定位处停止（aside应按complementary定位，已修复），真实失败后SQL自动还原，八表hash一致。新增生命周期7项覆盖正常/异常清理及演示的还原、备份失败不清理、还原失败错误、两连接互斥锁及恢复期间终端SIGINT。独立审阅发现并修复互斥锁与恢复进程信号隔离问题，复核无剩余Critical/Important。普通Ctrl+C触发恢复；SIGKILL/断电需用已保存SQL人工恢复。新运行的附件隔离在私有输出目录，保留原附件存储。
+
+最终入口进一步去掉对原师生的依赖：只校验原管理员，新教师/学生密码在内存随机生成，经Excel页面新建。最终再次连续23/23 PASS（浏览器2026-11-02T15-27-50-501Z），生命周期`fresh-three-role-demo/2026-11-02T15-27-49-609Z/lifecycle.json`中`restored=true`且八表前后hash一致；新录音和奖状共2个附件隔离在该目录private-files，不改原附件目录。最终连续录像为同目录fresh-full-demo.mp4。额外的仅管理员启动回归先RED后GREEN，新增保护测试共8项；清理前检查mysql恢复客户端可用。
+
+最终后端安全回归55/55通过（包含新增8项）；未改动产品前端，本轮不重复旧默认建临时库测试。源码检查及新入口--help通过，录像已定稿。

@@ -14,14 +14,14 @@ async function runThreeRoleBrowserDemo(input={}){
  process.once('SIGINT',stop);process.once('SIGTERM',stop);
  try{
   const pool=require('../db').createDbPool({database:'student_growth'});let state;
-  try{accounts=await loadDemoAccounts(pool);state=await inspectDemoTerm(pool,options);}finally{await pool.end();}
+  try{accounts=input.bootstrapAccounts||await loadDemoAccounts(pool);state=await inspectDemoTerm(pool,options);}finally{await pool.end();}
   secrets=Object.values(accounts).map(a=>a.password);
   const previous=input.resume?JSON.parse(await fs.readFile(path.resolve(input.resume),'utf8')):null;let resumeAt=0;if(previous){resumeAt=resumeDemoFromReport(previous,require('./threeRoleDemo/steps').createDemoSteps({mode:'full'}),state,options);report.mode='full';report.resumedFrom=path.resolve(input.resume);report.steps=previous.steps.filter(r=>r.status==='PASS').map(r=>({...r,sourceReport:r.sourceReport||report.resumedFrom}));}else report.mode=classifyDemoState(state,options.mode);report.termId=state?.termId||null;
   if(report.mode==='full'&&!previous)report.backup=await require('../services/formalDatabaseBackup').backupFormal(path.join(outputDir,'backups'));
   await save();if(stopRequested)throw Error('演示已中止');
   const manifestFile=path.join(outputDir,'runtime-manifest.json');await fs.writeFile(manifestFile,JSON.stringify({database:'student_growth',schoolId:'1'}),{mode:0o600});
   runtime=await require('./runAdminClosureDemo').runAdminClosureDemo({manifestFile,apiPort:options.apiPort,webPort:options.webPort,demoNow:options.demoNow});if(stopRequested)throw Error('演示已中止');
-  const {chromium}=require('playwright');browser=await chromium.launch({channel:'chrome',headless:false,handleSIGINT:false,handleSIGTERM:false,handleSIGHUP:false,slowMo:100,args:['--autoplay-policy=no-user-gesture-required']});
+  const media=input.fresh?await require('./threeRoleDemo/media').prepareMedia(path.join(outputDir,'media')):null;const {chromium}=require('playwright');browser=await chromium.launch({channel:'chrome',headless:false,handleSIGINT:false,handleSIGTERM:false,handleSIGHUP:false,slowMo:100,args:['--autoplay-policy=no-user-gesture-required',...(media?.args||[])]});
   context=await browser.newContext({viewport:{width:1440,height:1000},recordVideo:{dir:path.join(outputDir,'video'),size:{width:1440,height:1000}},acceptDownloads:true});
   page=await context.newPage();page.setDefaultTimeout(20000);
   const pageErrors=[];page.on('pageerror',error=>pageErrors.push(redactDemoText(error.message,secrets)));
@@ -29,8 +29,8 @@ async function runThreeRoleBrowserDemo(input={}){
   const driver=require('./threeRoleDemo/driver').createDemoDriver(page,{outputDir,stepDelay:options.stepDelay});await driver.installPointer();await page.goto(report.url);
   const filesDir=path.join(outputDir,'inputs');await fs.mkdir(filesDir,{recursive:true,mode:0o700});
   const files={registry:path.join(filesDir,'学期初始化.xlsx'),invalid:path.join(filesDir,'错误-缺少教师表.xlsx'),award:path.join(root,'docs/test-file/admin-closure-award.png'),scores:{head:path.join(filesDir,'林老师成绩.xlsx'),other:path.join(filesDir,'徐老师成绩.xlsx')}};
-  const ctx={driver,accounts,files,mode:report.mode,termId:state?.termId,secrets};
-  const build=termId=>require('./adminSimplificationFixtures').buildAdminSimplificationFixtures({academicYear:options.academicYear,semester:options.semester,dates:{start:options.startDate,end:options.endDate,measurement:options.demoNow.slice(0,10)},termId,current:true});
+  const ctx={driver,accounts,files,mode:report.mode,termId:state?.termId,secrets,fresh:input.fresh,media};
+  const build=termId=>require('./adminSimplificationFixtures').buildAdminSimplificationFixtures({academicYear:options.academicYear,semester:options.semester,dates:{start:options.startDate,end:options.endDate,measurement:options.demoNow.slice(0,10)},termId,current:true,credentials:input.fresh?Object.fromEntries(Object.values(accounts).filter(a=>a.username!=='admin').map(a=>[a.username,a.password])):{}});
   const fixture=build(ctx.termId);await fs.writeFile(files.registry,fixture.workbook,{mode:0o600});
   const XLSX=require('xlsx'),invalid=XLSX.read(fixture.workbook,{type:'buffer'});invalid.SheetNames=invalid.SheetNames.filter(n=>n!=='教师');delete invalid.Sheets['教师'];await fs.writeFile(files.invalid,XLSX.write(invalid,{type:'buffer',bookType:'xlsx'}),{mode:0o600});
   ctx.setTerm=async termId=>{ctx.termId=termId;report.termId=termId;const f=build(termId);await fs.writeFile(files.scores.head,f.teacherScoreWorkbook[accounts.head.username],{mode:0o600});await fs.writeFile(files.scores.other,f.teacherScoreWorkbook[accounts.other.username],{mode:0o600});await save();};

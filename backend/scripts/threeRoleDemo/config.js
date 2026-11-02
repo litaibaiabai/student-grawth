@@ -28,13 +28,13 @@ function resumeDemoFromReport(report,steps,state,options){
  return at;
 }
 function redactDemoText(value,secrets=[]){let text=String(value);for(const secret of secrets.filter(Boolean))text=text.split(secret).join('[REDACTED]');return text;}
-async function loadDemoAccounts(pool,{password=process.env.DEMO_PASSWORD}={}){
+async function loadDemoAccounts(pool,{password=process.env.DEMO_PASSWORD,managerOnly=false}={}){
  if(process.env.NODE_ENV==='production')throw Error('三角色演示仅允许本地开发环境');
  const [[column]]=await pool.query("SELECT COUNT(*) n FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='users' AND COLUMN_NAME='password_plain'");
- const usernames=['admin','teacher_lin','teacher_xu','20260401'];
+ const usernames=managerOnly?['admin']:['admin','teacher_lin','teacher_xu','20260401'];
  const [rows]=await pool.query('SELECT id,username,real_name,role,status,password'+(Number(column.n)?',password_plain':'')+' FROM users WHERE school_id=1 AND username IN (?)',[usernames]);
  const expected=[['manager','admin',null],['head','teacher_lin','林知行'],['other','teacher_xu','徐晨'],['student','20260401','林小禾']],accounts={};
- for(const[key,username,name]of expected){const row=rows.find(u=>u.username===username),role=key==='head'||key==='other'?'teacher':key;
+ for(const[key,username,name]of expected.filter(([key])=>!managerOnly||key==='manager')){const row=rows.find(u=>u.username===username),role=key==='head'||key==='other'?'teacher':key;
   if(!row||row.role!==role||row.status!==0||name&&row.real_name!==name)throw Error('缺少匹配的现有虚构演示账号：'+username);
   const credential=password||row.password_plain;
   if(!credential||!await bcrypt.compare(credential,row.password))throw Error('演示凭据不可用，请在本机设置DEMO_PASSWORD；不会修改账号密码');
