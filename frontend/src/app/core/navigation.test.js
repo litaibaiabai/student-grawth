@@ -14,7 +14,7 @@ test('report details and role-safe defaults roundtrip', () => {
   assert.equal(routeForRole({ role: 'student', page: 'config' }, 'student').page, 'cards');
 });
 test('role menus expose the five student and six teacher workflows directly',async()=>{
- const {navigation}=await import('./navigation.js');assert.deepEqual(navigation.student.map(x=>x[1]),['领取积分','云美故事','上传奖状','自我评价','六育报告']);assert.deepEqual(navigation.teacher.map(x=>x[1]),['无卡直评','综合成绩','评审获奖','班主任寄语','打印积分卡','六育综合情况']);assert.deepEqual(navigation.manager.map(x=>x[1]),['发布中心','学籍与账号','班级管理','月度卡额度','数据统计','学期配置','操作记录']);
+ const {navigation}=await import('./navigation.js');assert.deepEqual(navigation.student.map(x=>x[1]),['领取积分','云美故事','上传奖状','自我评价','六育报告']);assert.deepEqual(navigation.teacher.map(x=>x[1]),['无卡直拼','评审获奖','综合成绩','班主任寄语','六域综合情况','积分卡管理']);assert.deepEqual(navigation.manager.map(x=>x[1]),['发布中心','学籍与账号','班级管理','月度卡额度','数据统计','学期配置','操作记录']);
  assert.equal(routeForRole({role:'student',page:'self'},'student').page,'self');assert.equal(routeForRole({role:'teacher',page:'imports'},'teacher').page,'imports');
 });
 

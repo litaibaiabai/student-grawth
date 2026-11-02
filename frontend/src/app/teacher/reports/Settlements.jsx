@@ -64,7 +64,7 @@ export default function Settlements({ ctx }) {
         );
   return (
     <>
-      <div className="actions"><button onClick={() => ctx.navigate("drafts")}>返回六育综合情况</button></div>
+      <div className="actions"><button onClick={() => ctx.navigate("drafts")}>返回六域综合情况</button></div>
       {ctx.catalog.schemaVersion !== "SIX_EDU_V2" && <TeacherSpecialties ctx={ctx} />}
       <section className="panel">
         <h2>采集结算</h2>
