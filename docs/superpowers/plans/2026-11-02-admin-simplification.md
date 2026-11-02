@@ -20,7 +20,7 @@
 - 后续数据更正使当前审核失效，但学生保留可读的上一已发布快照；班主任再次确认后产生新版本，旧快照不原地改写。
 - 已有师生日常操作、教师体测Excel、班主任寄语和既有四类统计保留；教师菜单名称及顺序保持现状。
 - 不运行会创建/删除测试数据库的旧全量后端测试命令。新增验证必须显式选择安全用例及正式表回滚工具，不调用旧setup测试库助手。
-- 代码继续提交到feature-six-education-v3。不得覆盖其他并行改动；使用Node 22路径运行检查，按任务提交，完成分支审阅后普通push。
+- 代码继续提交到feature-six-education-v4。不得覆盖其他并行改动；使用Node 22路径运行检查，按任务提交，完成分支审阅后普通push。
 
 ## Review Focus
 
@@ -233,7 +233,7 @@
 - [ ] **Step 4: 验证绿灯并运行安全验收命令。** `cd backend && node --test __tests__/admin_simplification_*.test.js`及`node scripts/verifyAdminSimplification.js`全部PASS；`cd frontend && npm test && npm run lint && npm run build`全部成功。需要数据库/本地端口权限时按工具申请沙箱升级，不更换测试库。每个失败先定位根因、加对应断言、修复、复跑相关用例；在verification.md逐项记录“问题→修复→验证证据”，不把取消/跳过记为通过。
 - [ ] **Step 5: 用MCP验收实际浏览器。** 使用正式student_growth上的管理员/教师/学生账号操作localhost:19981。先只读核对现有旧学期锁定及历史报告；新导入、初始化和日常行为演示使用同一学校的待初始化学期，只有完整演示数据已准备且该学期确认为待初始化才执行一次初始化，不删除或重置任何旧卡。若演示时间不在采集期，优先复用有效日期的既有演示学期；否则使用带明确演示标识、仅localhost可启用且默认关闭的固定clock运行配置，不修改正式学期真实日期或放开生产截止校验。在演示前备份，完成后保留一套可重复查看的演示结果，不创造第二学校或临时库。
 - [ ] **Step 6: 编写可复演脚本及证据。** mcp-demo.md按管理员→教师→学生顺序列出：登录、下载/上传五表、错误定位和确认、只读关系、额度60/70/75及100默认、取消再确认一次初始化、教师学期卡筛选打印、学生领取/自评/故事/奖状、教师评审/综合成绩及体测/结算/寄语/版面复核确认、学生最新报告与管理员四类统计。每步写路径、输入、MCP点击目标、预期结果及不可重做的初始化提示；为等待班主任确认→确认即发布的依赖，明确安排角色再次切换。演示发起新账号/凭证变更时遵循MCP接管规则；凭证保存在本机忽略文件，不进脚本正文。保存三个角色关键页和确认/报告截图，最终回复嵌入截图。
-- [ ] **Step 7: 交付与提交。** README写模块职责、数据流、API和清理清单；excel-format写五表精确字段/文本账号/日期/重导入/错误示例；migration与verification只记录实际结果。检查`git diff --check`与无敏感文件入库，提交`feat: verify and document simplified administrator closure`。按选定执行方式完成独立整分支审阅，修复实际问题并复验，最后普通push至origin/feature-six-education-v3，记录远端commit。
+- [ ] **Step 7: 交付与提交。** README写模块职责、数据流、API和清理清单；excel-format写五表精确字段/文本账号/日期/重导入/错误示例；migration与verification只记录实际结果。检查`git diff --check`与无敏感文件入库，提交`feat: verify and document simplified administrator closure`。按选定执行方式完成独立整分支审阅，修复实际问题并复验，最后普通push至origin/feature-six-education-v4，记录远端commit。
 
 ## 自查结果与执行顺序
 

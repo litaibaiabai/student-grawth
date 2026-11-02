@@ -118,6 +118,7 @@ function createCoreRouter() {
   require('./reportCoreStatistics').mountStatistics(r, { asyncRoute, ok });
   require('./reportCoreAdminClasses').mountAdminClasses(r, { asyncRoute, ok });
   require('./reportCoreAdminOps').mountAdminOps(r, { asyncRoute, ok });
+  require("./reportCoreRegistry").mountRegistry(r, {asyncRoute,ok});
   return r;
 }
 module.exports = { createCoreRouter, asyncRoute, ok };
