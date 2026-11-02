@@ -1,4 +1,11 @@
-# MCP三角色演示脚本
+# 三角色鼠标演示与MCP操作脚本
+
+**可执行入口：** 项目根运行`npm --prefix backend run demo:browser`。它会打开可见Chrome，以管理员、教师、学生依次登录，通过真实鼠标操作完成下表流程，并显示每步预期。默认使用2027–2028第一学期；完成后相同命令只回放已有结果。首次使用须安装Node22依赖（含开发依赖）和Google Chrome，完整命令及参数见[脚本运行说明](../../../backend/scripts/README.md)。它自带20080/20081服务，原`runAdminClosureDemo.js`仅启动服务，不操作鼠标。
+
+完整模式先备份，再执行五表导入、1515张卡一次初始化、两教师成绩/直评、学生领卡与11项自评/真实听写故事/奖状、教师评审寄语和确认发布、学生读取及更正再确认、管理员四类统计。每次产物：`output/report-core/three-role-browser-demo/<学年>-<学期>/<时间>/report.json`、`screenshots/`与`video/`。每步JSON中均有`expected`和`status`；失败即停，不继续写入。默认停在最后报告页，Ctrl+C关闭并完成录像，`--exit-after`可自动退出。
+
+以下保留原MCP逐步操作说明和2026–2027第二学期的验收记录；新脚本使用新学期与当次生成的卡号。MCP可按同样按钮、文字定位及文件选择器操作，禁止用页面脚本调用API代跑业务。
+
 
 入口 `http://localhost:19981`，正式库 student_growth，学校1。账号：管理员 admin、班主任 teacher_lin、任课教师 teacher_xu、学生20260401。现有凭证只从本机开发配置获取，不写入此脚本、不修改密码。以下通过 MCP 浏览器的角色/文本定位、文件选择器执行；不通过页面 evaluate 发 API 或直接改状态。
 

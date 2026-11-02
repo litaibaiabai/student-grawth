@@ -1,11 +1,12 @@
 import React,{useEffect,useMemo,useState} from 'react';
 import {api} from '../../core/api';
-import {registryQuery,changeRegistryFilters,registryFiltersForTerm} from './registryModel.js';
+import {registryQuery,changeRegistryFilters,registryFiltersForTerm,registryRelationsForQuery} from './registryModel.js';
 const classLabel=r=>`${r.grade}年级${r.classNo}班`;
 export default function RegistryRelations({ctx}){
- const {termId,refreshKey,error:onError}=ctx;const [storedFilters,setStoredFilters]=useState({termId,view:'students',q:'',grade:'',classNo:'',subjectCode:'',cursor:null}),[state,setState]=useState(null),[error,setError]=useState(''),[columns,setColumns]=useState([]);
+ const {termId,refreshKey,error:onError}=ctx;const [storedFilters,setStoredFilters]=useState({termId,view:'students',q:'',grade:'',classNo:'',subjectCode:'',cursor:null}),[loaded,setLoaded]=useState(null),[error,setError]=useState(''),[columns,setColumns]=useState([]);
  const filters=useMemo(()=>registryFiltersForTerm(storedFilters,termId),[storedFilters,termId]);
- useEffect(()=>{if(!termId)return;const c=new AbortController();setState(null);setError('');api('/admin/report-core/registry/relations?'+registryQuery({termId,...filters}),undefined,undefined,{signal:c.signal}).then(setState).catch(e=>{if(e.name!=='AbortError'){setError(e.message);if(e.status===401)onError(e);}});return()=>c.abort();},[termId,refreshKey,onError,filters]);
+ const query=registryQuery({termId,...filters}),state=registryRelationsForQuery(loaded,query);
+ useEffect(()=>{if(!termId)return;const c=new AbortController();setError('');api('/admin/report-core/registry/relations?'+query,undefined,undefined,{signal:c.signal}).then(value=>{if(!c.signal.aborted)setLoaded({query,value});}).catch(e=>{if(e.name!=='AbortError'){setError(e.message);if(e.status===401)onError(e);}});return()=>c.abort();},[termId,refreshKey,onError,query]);
  useEffect(()=>{const c=new AbortController();api('/report-core/config'+(termId?'?termId='+termId:''),undefined,undefined,{signal:c.signal}).then(p=>setColumns(p.subjects||[])).catch(()=>{});return()=>c.abort();},[termId]);
  const change=patch=>setStoredFilters(f=>changeRegistryFilters(registryFiltersForTerm(f,termId),patch));
  const subjectName=code=>{const found=columns.find(s=>(typeof s==='object'?s.code:s)===code);return found?.name||({MORAL:'道德与法治',CHINESE:'语文',MATH:'数学',SCIENCE:'科学',ENGLISH:'英语',PE:'体育与健康',MUSIC:'音乐',FINE_ART:'美术',INFORMATION_TECHNOLOGY:'信息科技',LABOR:'劳动',INTEGRATED_PRACTICE:'综合实践活动',LOCAL_COURSE:'地方课程'})[code]||code;};

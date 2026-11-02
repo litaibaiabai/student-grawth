@@ -6,8 +6,35 @@
 
 | 文件 | 用途 | 项目根目录命令 |
 |---|---|---|
+| runThreeRoleDemo.js | 可见Chrome中执行三角色鼠标闭环，自动启动自有20080/20081服务、截图与录像 | `npm --prefix backend run demo:browser` |
 | runAdminClosureDemo.js | 同时启动本地前后端，页面19981、API19980 | `node backend/scripts/runAdminClosureDemo.js` |
 | verifyAdminSimplification.js | 当前v4完整闭环验收；使用正式表外层事务回滚并检查八表hash，不启动页面 | `node backend/scripts/verifyAdminSimplification.js` |
+
+### 三角色鼠标演示
+
+安装Node22依赖（包含开发依赖）、录像编码器与本机Google Chrome后，从项目根执行：
+
+```sh
+npm --prefix backend ci --include=dev
+npm --prefix frontend ci
+node backend/node_modules/playwright/cli.js install ffmpeg
+npm --prefix backend run demo:browser
+```
+
+默认目标2027–2028第一学期；未初始化时执行完整闭环，已有发布报告时自动改为**已有结果回放**，不会重发卡或重复日常记录。页面顶部显示当前角色、操作与预期结果，橙色圆圈显示鼠标位置。账号密码从本机`DEMO_PASSWORD`或现有开发密码列读取，只保存在内存中。缺少匹配的虚构账号或密码不正确时，在导入前停止，不改账号密码。
+
+```sh
+# 完整演示：仅限尚未初始化且没有日常事实的学期
+npm --prefix backend run demo:browser -- --mode full --academic-year 2027-2028 --semester 1
+# 同一学期完成后，只查看三角色的现有结果
+npm --prefix backend run demo:browser -- --mode replay --academic-year 2027-2028 --semester 1
+# 无人值守验收，结束即关闭浏览器、服务并完成录像
+npm --prefix backend run demo:browser -- --exit-after
+```
+
+每次运行产物在`output/report-core/three-role-browser-demo/<学年>-<学期>/<时间>/`：`report.json`记录每步预期及PASS/FAIL，`screenshots/`保存步骤截图，`video/`保存WebM录像，`inputs/`保存本次五表与两教师成绩工作簿，完整模式先备份八张正式表至`backups/`。二维码截图和PDF属于本机演示资料，不提交Git。默认成功后停在学生报告页，`Ctrl+C`关闭并结束录像；`--exit-after`自动关闭。停止的只是本次启动的Chrome和服务，原19981服务不受影响。端口冲突时可指定`--api-port`和`--web-port`，不自动终止别人的进程。
+
+完整模式通过页面上传、点击、选星、真实播放故事、教师评审及确认发布写入正式业务表；不通过API或SQL造结果。未完成且已初始化的学期拒绝盲目重跑，保留失败步骤与截图供核对，不重置卡片。仅当所有日常事实步骤已PASS、失败位于寄语审核及后续发布阶段时，可用`--resume <原report.json绝对路径>`继续；脚本核对同一学期与连续PASS记录，跳过已完成日常事实，并检查已有报告版本以避免重复发布。原失败报告与录像保留，新报告以`resumedFrom`及每步`sourceReport`关联；在不同阶段中断需先核对页面状态，不提供任意跳步。未来日期仅使用本机演示时钟并有页面提示，真实学期日期与审计时间不改。
 
 全部安全回归：`npm --prefix backend run test:admin-simplification`。只核对账号导入、密码保持及隐私边界时：`node --test backend/__tests__/admin_simplification_registry.test.js`。验收期间暂停其他业务写入，避免真实操作干扰回滚前后的hash比较。历史默认测试集合可能建临时库，不用于当前开发验收。
 

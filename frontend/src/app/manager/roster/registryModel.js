@@ -2,3 +2,5 @@ export function registryQuery({termId,view='students',q='',grade='',classNo='',s
 export const changeRegistryFilters=(state,patch)=>({...state,...patch,cursor:null});
 
 export function registryFiltersForTerm(state,termId){return String(state.termId)===String(termId)?state:{...state,termId,cursor:null};}
+
+export const registryRelationsForQuery=(loaded,query)=>loaded?.query===query?loaded.value:null;
