@@ -309,7 +309,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
     asyncRoute(async (req, res) =>
       ok(
         res,
-        await publish.getPublishedReport({
+        await require('../services/reportCorePublishedReports').getPublishedReport({
           ...context(req),
           termId: req.query.termId,
           studentId: req.query.studentId || req.actor.id,
@@ -320,7 +320,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
   r.get(
     "/report-core/reports/:id/print",
     asyncRoute(async (req, res) => {
-      const result = await publish.getPublishedReport({
+      const result = await require('../services/reportCorePublishedReports').getPublishedReport({
         ...context(req),
         termId: req.query.termId,
         studentId: req.query.studentId || req.actor.id,

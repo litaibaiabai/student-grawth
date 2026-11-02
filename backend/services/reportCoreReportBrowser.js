@@ -11,7 +11,7 @@ async function dataset(c,actor,termId){
  const roster=await resolveTermRoster({connection:c,schoolId:actor.schoolId,termId,teacherId:actor.id});
  const ids=new Set(roster.map(e=>String(e.student_id))),blocking=await getBlockingMaterials({connection:c,schoolId:actor.schoolId,termId,config:term.evaluation_config}),materials=new Map();
  for(const r of blocking){const key=String(r.student_id);if(!ids.has(key))continue;if(!materials.has(key))materials.set(key,[]);materials.get(key).push(r);}
- const [reports]=await c.query("SELECT student_id,version,release_version,source_revision FROM term_report WHERE school_id=? AND term_id=? AND status='PUBLISHED' AND release_version=? ORDER BY version",[actor.schoolId,termId,term.active_release_version||0]);
+ const reports=await require('./reportCorePublishedReports').listLatestPublishedReports(c,{schoolId:actor.schoolId,termId});
  const published=new Map(reports.filter(r=>ids.has(String(r.student_id))).map(r=>[String(r.student_id),r]));
  return {term,teaching,roster,materials,published};
 }
@@ -21,7 +21,7 @@ function summarize(e,data){
  const fields=policyFor(data.term.evaluation_config).fields.filter(f=>!f.jsonPath),byColumn=new Map(fields.map(f=>[f.column,f]));
  const stars={1:0,2:0,3:0,missing:0},grades={};let gradeMissingCount=0;
  for(const key of new Set(data.term.evaluation_config.applicableFields||fields.map(f=>f.column))){const f=byColumn.get(key);if(!f)continue;const value=e[key];if(f.valueType==='star'){if([1,2,3].includes(Number(value)))stars[Number(value)]++;else stars.missing++;}if(f.valueType==='grade'){if(['A','B','C','D'].includes(value))grades[value]=(grades[value]||0)+1;else gradeMissingCount++;}}
- return {studentId:sid,studentNumber:e.student_number,name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot,currentRevision:String(e.revision),publishedVersion:published?Number(published.version):null,releaseVersion:published?Number(published.release_version):null,sectionProgress:completion.sectionProgress,starCounts:stars,gradeCounts:grades,gradeMissingCount,missingCount:completion.missingItems.length,hasMissing:completion.missingItems.length>0,isConfirmed:confirmed,isPublished:!!published,canViewDetail:true,canViewFull:head,canConfirm:head&&data.term.release_status==='IDLE'&&!completion.missingItems.length,canEditComment:head&&data.term.release_status==='IDLE'};
+ return {studentId:sid,studentNumber:e.student_number,name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot,currentRevision:String(e.revision),publishedVersion:published?Number(published.version):null,releaseVersion:published?Number(published.release_version):null,sectionProgress:completion.sectionProgress,starCounts:stars,gradeCounts:grades,gradeMissingCount,missingCount:completion.missingItems.length,hasMissing:completion.missingItems.length>0,isConfirmed:confirmed,isPublished:!!published,canViewDetail:true,canViewFull:head,canConfirm:head&&data.term.release_status==='IDLE'&&['COLLECTING','RECONCILING'].includes(data.term.business_phase)&&!completion.missingItems.length,canEditComment:head&&data.term.release_status==='IDLE'&&['COLLECTING','RECONCILING'].includes(data.term.business_phase)};
 }
 const countsOf=rows=>({total:rows.length,ready:rows.filter(r=>!r.hasMissing).length,missing:rows.filter(r=>r.hasMissing).length,confirmed:rows.filter(r=>r.isConfirmed).length,published:rows.filter(r=>r.isPublished).length});
 async function listReportClasses({pool,actor,termId}){
@@ -50,7 +50,7 @@ async function getReportDetail({pool,actor,studentKey,version='current',scope='d
   if(parse(permission.evaluation.section_meta).roster?.included===false)fail(404,'学生已明确排除本学期名单');
   let model,html,revision,fingerprint,templateVersion,ruleVersion,configVersion,releaseVersion=null,publishedVersion=null,missingItems=[];
   if(version==='published'){
-   const [[row]]=await c.query("SELECT * FROM term_report WHERE school_id=? AND term_id=? AND student_id=? AND status='PUBLISHED' AND release_version=? ORDER BY version DESC LIMIT 1",[actor.schoolId,studentKey.termId,studentKey.studentId,term.active_release_version||0]);if(!row)fail(404,'学校尚未发布该学生报告');
+   const row=await require('./reportCorePublishedReports').findLatestPublishedReport(c,{schoolId:actor.schoolId,termId:studentKey.termId,studentId:studentKey.studentId});if(!row)fail(404,'等待班主任确认该学生报告');
    const snapshot=parse(row.snapshot_json);
    if(scope==='detail'){if(!['CORE_V1','CORE_V2'].includes(snapshot.schemaVersion))fail(422,'此历史格式不支持安全明细查看，请由班主任查看完整版');validateFrozenSnapshot(snapshot,row);html=snapshot.renderedDetailHtml;model=detailModel(snapshot);}
    else {if(snapshot.renderedDetailHtml)validateFrozenSnapshot(snapshot,row);html=require('./reportRenderService').renderPrintableA4({reportData:snapshot});model={...snapshot};delete model.renderedHtml;delete model.renderedDetailHtml;delete model.renderedDetailHash;}
@@ -64,7 +64,7 @@ async function getReportDetail({pool,actor,studentKey,version='current',scope='d
    if(scope==='detail')model=detailModel(model);
    html=require('./reportRenderService').renderPrintableA4({reportData:model,renderScope:scope==='full'?'FULL':'DETAIL_ONLY',draftLabel:'当前草稿'});
   }
-  return {model,html,documentKey:reportDocumentKey({studentKey,viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion,releaseVersion}),viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion:configVersion===null?null:String(configVersion),releaseVersion,publishedVersion,missingItems,permissions:{canPrint:true,canReadFull:permission.head,canConfirm:version==='current'&&permission.head&&term.release_status==='IDLE'&&!missingItems.length,canEditComment:version==='current'&&permission.head&&term.release_status==='IDLE'}};
+  return {model,html,documentKey:reportDocumentKey({studentKey,viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion,releaseVersion}),viewVersion:version,scope,revision,fingerprint,templateVersion,ruleVersion,configVersion:configVersion===null?null:String(configVersion),releaseVersion,publishedVersion,missingItems,permissions:{canPrint:true,canReadFull:permission.head,canConfirm:version==='current'&&permission.head&&term.release_status==='IDLE'&&['COLLECTING','RECONCILING'].includes(term.business_phase)&&!missingItems.length,canEditComment:version==='current'&&permission.head&&term.release_status==='IDLE'&&['COLLECTING','RECONCILING'].includes(term.business_phase)}};
  });
 }
 module.exports={listReportClasses,listReportStudents,getReportDetail,validateFrozenSnapshot};

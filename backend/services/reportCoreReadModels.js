@@ -81,7 +81,7 @@ async function getWorkspace(args) {
     const ids=new Set(roster.map(e=>String(e.student_id)));
     const blocking=(await getBlockingMaterials({connection:c,schoolId:actor.schoolId,termId,config:term.evaluation_config})).filter(r=>ids.has(String(r.student_id)));
     const byStudent=new Map();for(const r of blocking){const id=String(r.student_id);if(!byStudent.has(id))byStudent.set(id,[]);byStudent.get(id).push(r);}
-    const [published]=await c.query("SELECT student_id FROM term_report WHERE school_id=? AND term_id=? AND release_version=? AND status='PUBLISHED'",[actor.schoolId,termId,term.active_release_version||0]);
+    const published=await require('./reportCorePublishedReports').listLatestPublishedReports(c,{schoolId:actor.schoolId,termId});
     const publishedIds=new Set(published.map(r=>String(r.student_id))), tasks=[], classes=new Map();
     const counts={academicExpected:0,academicComplete:0,total:roster.length,missingStudents:0,confirmed:0,published:0,pendingMaterials:blocking.length,failedStories:blocking.filter(r=>r.source_type==='STORY'&&r.status==='FAILED').length};
     const fingerprint=require('./reportCoreEvaluation').reportFingerprint;

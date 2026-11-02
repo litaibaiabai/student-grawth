@@ -411,7 +411,8 @@ async function confirmReport({
         "UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=?,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=?,section_meta=JSON_SET(COALESCE(section_meta,JSON_OBJECT()),'$.layoutReview',CAST(? AS JSON)) WHERE id=?",
         [actor.id, fingerprint, JSON.stringify(layoutReview), e.id],
       );
-      return { result: { confirmedRevision: String(e.revision), fingerprint }, auditContext:{studentId:String(studentKey.studentId),confirmedRevision:String(e.revision),termId:String(studentKey.termId)} };
+      const published=await require('./reportCorePublishedReports').publishConfirmedReport(c,{actor,studentKey,term,evaluation:e,fingerprint});
+      return { result: { confirmedRevision: String(e.revision), fingerprint, ...published }, auditContext:{studentId:String(studentKey.studentId),confirmedRevision:String(e.revision),termId:String(studentKey.termId)} };
     },
   );
 }
