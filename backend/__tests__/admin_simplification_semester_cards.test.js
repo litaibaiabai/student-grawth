@@ -41,3 +41,12 @@ test('real MySQL term FOR UPDATE excludes a second connection until rollback',as
  try{await a.beginTransaction();await a.query('SELECT id FROM academic_year WHERE school_id=1 AND id=2 FOR UPDATE');await b.query('SET innodb_lock_wait_timeout=1');await b.beginTransaction();await assert.rejects(b.query('SELECT id FROM academic_year WHERE school_id=1 AND id=2 FOR UPDATE'),{code:'ER_LOCK_WAIT_TIMEOUT'});await a.rollback();await b.query('SELECT id FROM academic_year WHERE school_id=1 AND id=2 FOR UPDATE');}
  finally{await a.rollback();await b.rollback();a.release();b.release();await p.end();}
 });
+test('registry course or date changes invalidate an open initialization confirmation',async()=>withFormalRollback(async({pool,connection:c})=>{
+ const args=await setup(pool,c),registry=require('../services/reportCoreRegistry');
+ for(const change of [()=>{args.f.rows.任教关系.find(r=>r[1]===3&&r[2]==='语文')[3]=args.f.other;},()=>{args.f.rows.学期[1][4]='2029-02-01';}]){
+  const displayed=await svc.getSemesterCardSettings(args);change();const preview=await registry.previewRegistry({...args,buffer:args.f.buffer()});await registry.commitRegistry({...args,previewToken:preview.previewToken,command:command()});
+  await assert.rejects(svc.initializeSemesterCards({...args,expectedRevision:displayed.revision,command:command()}),{statusCode:409});
+  assert.equal((await svc.getSemesterCardSettings(args)).generatedTotal,0);
+ }
+ const refreshed=await svc.getSemesterCardSettings(args);assert.equal((await svc.initializeSemesterCards({...args,expectedRevision:refreshed.revision,command:command()})).result.generatedTotal,1800);
+}));

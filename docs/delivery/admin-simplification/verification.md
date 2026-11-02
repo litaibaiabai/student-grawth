@@ -4,11 +4,11 @@
 
 ## 自动验收
 
-Node22。使用 `npm --prefix backend run test:admin-simplification`：33/33通过（含完整闭环与演示时钟测试）；仅原有 student_growth 八表，外层事务ROLLBACK并逐表比对行hash。文件级串行，另保留真实两连接行锁竞争用例。**不要运行历史backend默认npm test**：其中保留的旧临时库测试不适用于当前开发约束，未运行也不声称通过。
+Node22。使用 `npm --prefix backend run test:admin-simplification`：35/35通过（含完整闭环与演示时钟测试）；仅原有 student_growth 八表，外层事务ROLLBACK并逐表比对行hash。文件级串行，另保留真实两连接行锁竞争用例。**不要运行历史backend默认npm test**：其中保留的旧临时库测试不适用于当前开发约束，未运行也不声称通过。
 
 `node backend/scripts/verifyAdminSimplification.js`独立入口与同名闭环测试调用相同真实业务服务：先拒绝缺表文件，再导入2教师/3班/1学生/18课程；1515张卡（1080+435），领卡1+直评1、自评11、完整听故事1、写故事1、人工荣誉认定1、两教师60个字段Excel导入及体测、过程结算、寄语审核、班主任确认发布；94字段两页，任课教师明细无私有寄语，四类统计一致，结束八表存储行不变。该入口不调用旧setup、不创建临时库。
 
-前端 `npm test`、`npm run lint`、`npm run build`覆盖学期卡查询、初始化空态、发布身份及切换隔离、关系预览、对话框取消焦点，以及发布后进入当前数据复核。最终前端36/36通过，lint零警告、构建成功。
+前端 `npm test`、`npm run lint`、`npm run build`覆盖学期卡查询、初始化空态、发布身份及切换隔离、关系预览、对话框取消焦点，以及发布后进入当前数据复核。最终前端37/37通过，lint零警告、构建成功。
 
 ## 问题→修复→验证
 
@@ -19,7 +19,7 @@ Node22。使用 `npm --prefix backend run test:admin-simplification`：33/33通�
 | 真实页面触发预览变量TDZ | 提取纯作用域选择函数，移除自引用 | RED→GREEN，MCP课程页恢复 |
 | 取消初始化后焦点回到导航 | 共享确认框保存触发元素引用 | MCP Esc取消后焦点回初始化按钮 |
 | 发布后教师仅能读旧快照，无法重新审核更正 | 完整已发布报告增加“核对当前数据”入口 | 新reportReview用例RED→GREEN；MCP当前1星→版本2 |
-| 回滚测试与真实浏览器听故事心跳同时写入，hash断言报警 | 停止演示写入后串行验收，不削弱哈希断言 | 空闲后端33/33通过；所有新增测试行回滚 |
+| 回滚测试与真实浏览器听故事心跳同时写入，hash断言报警 | 停止演示写入后串行验收，不削弱哈希断言 | 空闲后端35/35通过；所有新增测试行回滚 |
 | 多个正式表测试文件并发造成fixture锁序死锁 | 文件级串行，SQL错误毒化后禁止继续操作 | 显式两连接竞争保留；安全套件通过 |
 | 旧API已删除但应用惯例是410 | 沿用既有410 Gone | 实际HTTP退役面测试 |
 
@@ -30,3 +30,15 @@ Node22。使用 `npm --prefix backend run test:admin-simplification`：33/33通�
 三角色操作路径和每步预期见 [MCP脚本](mcp-demo.md)。桌面与390px布局、错误定位、搜索空态、Esc取消、旧学期锁定、教师已用卡无二维码及实际PDF下载均已实测。关键截图和PDF保存在本机忽略目录，不把取消或跳过算作初始化成功。
 
 生产默认不使用演示时钟，只有本地启动器显式参数启用；页面明确标识日期，采集真实日期不被篡改。保留历史恢复脚本/旧测试资产是自动审批拒绝超范围删除后的安全处理，产品运行入口已清理，其旧功能不再暴露。
+
+## 整分支独立审阅修复
+
+审阅范围 bbfdcb6..d32650e，独立审阅者未修改代码或数据库。无Critical；两项Important：初始化旧确认未覆盖导入后的课程/日期变化、调班遗漏原班排名重算。另将分页游标问题按用户实际影响提升为Important：正常翻页后切学期导致整个关系页422，且错误态没有返回第一页入口。
+
+三项均在同一修复批次先复现RED再GREEN：
+
+- registry course or date changes invalidate an open initialization confirmation：现有未初始化学期每次有效重导入同时推进卡配置版本，学期锁内CAS拒绝旧确认；同文件幂等重放不改变版本。
+- moving an evaluated student rebuilds both old and new class process rankings：收集旧班和新班，对两班学生重新投影；名单变化触发故事统计刷新，当前确认失效，旧发布快照不改动。
+- a later page cursor cannot cross into another semester query：列表状态按学期推导，跨学期查询清除游标，保留同学期分页。
+
+定向后端14/14、前端2/2通过，随后重跑全部安全套件。无延期小项，不再重复派发审阅。
