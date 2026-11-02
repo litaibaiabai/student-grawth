@@ -359,8 +359,8 @@ export default function ClassReports({
       });
       ctx.notify(
         currentDetail.current?.documentKey === document.documentKey
-          ? '班主任确认已保存'
-          : `已保存${document.model.student.name}的确认`,
+          ? '已确认并发布，学生可查看'
+          : `已确认并发布${document.model.student.name}的报告，学生可查看`,
       );
       setReload((n) => n + 1);
       ctx.refresh();
@@ -398,7 +398,7 @@ export default function ClassReports({
               <h2>{detail.model.student.name} · 六育评价报告</h2>
             </div>}
             toolbarActions={<>
-              {detail.viewVersion === 'current' && detail.permissions.canReadFull && <button className="primary" disabled={busy || !canConfirm} onClick={confirm}>确认本份报告</button>}
+              {detail.viewVersion === 'current' && detail.permissions.canReadFull && <button className="primary" disabled={busy || !canConfirm} onClick={confirm}>确认并发布本份报告</button>}
               <button onClick={returnToClass}>返回班级列表</button>
             </>}
           />

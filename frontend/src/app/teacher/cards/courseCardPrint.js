@@ -1,7 +1,7 @@
 export async function printCourseCards(popup, model) {
   if (popup.closed) return;
   const doc = popup.document;
-  doc.title = `${model.title} · ${model.monthKey}积分卡`;
+  doc.title = `${model.title} · ${model.termName}积分卡`;
   doc.documentElement.lang = 'zh-CN';
   const style = doc.createElement('style');
   style.textContent = `
@@ -15,7 +15,7 @@ export async function printCourseCards(popup, model) {
   doc.head.append(style);
   doc.body.replaceChildren();
   const toolbar = doc.createElement('div'); toolbar.className = 'print-toolbar';
-  const title = doc.createElement('strong'); title.textContent = `${model.title} · ${model.monthKey} · ${model.rows.length} 张`;
+  const title = doc.createElement('strong'); title.textContent = `${model.title} · ${model.termName} · ${model.rows.length} 张`;
   const button = doc.createElement('button'); button.textContent = '打印'; button.onclick = () => popup.print();
   toolbar.append(title, button); doc.body.append(toolbar);
   const grid = doc.createElement('main'); grid.className = 'print-grid';
@@ -24,7 +24,7 @@ export async function printCourseCards(popup, model) {
     const img = doc.createElement('img'); img.src = row.qrDataUrl; img.alt = `卡号 ${row.id} 的领取二维码`;
     const info = doc.createElement('div');
     const heading = doc.createElement('h2'); heading.textContent = model.title;
-    const meta = doc.createElement('p'); meta.textContent = `${model.monthKey} · 每卡 1 分`;
+    const meta = doc.createElement('p'); meta.textContent = `${model.termName} · 每卡 1 分`;
     const number = doc.createElement('p'); number.textContent = `卡号 ${row.id}`;
     const hint = doc.createElement('small'); hint.textContent = '本班学生扫码领取 · 仅可领取一次';
     info.append(heading, meta, number, hint); card.append(img, info); grid.append(card);

@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {publishedDocumentKey,reportEmptyMessage} from './publishedReportModel.js';
+test('report identity follows its published student version and never a draft revision',()=>{const r={termId:'2',studentId:'4',id:'10',version:1};assert.equal(publishedDocumentKey(r),publishedDocumentKey({...r,currentRevision:999,activeReleaseVersion:20}));assert.notEqual(publishedDocumentKey(r),publishedDocumentKey({...r,id:'11',version:2}));assert.notEqual(publishedDocumentKey(r),publishedDocumentKey({...r,studentId:'5'}));assert.equal(publishedDocumentKey(null),null);assert.equal(reportEmptyMessage(),'等待班主任确认');});

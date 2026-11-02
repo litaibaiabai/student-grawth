@@ -1,7 +1,6 @@
 .course-cards-page{--course-ink:#254d3d;--course-muted:#7b8874;--course-border:#dfe5d7;max-width:1320px;margin:auto}
 .course-page-top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px}
 .course-location{display:flex;align-items:center;gap:12px;font-size:12px;color:#8a957f}.course-location strong{font-weight:500;color:#56704f}
-.core-app .course-month{display:flex;align-items:center;gap:9px;margin:0;color:#5b7252}.course-month>svg{width:18px;height:18px;flex-shrink:0}.core-app .course-month select{margin:0;width:160px;background:#fffef9;border-color:var(--course-border,#dfe5d7);font-size:13px;padding:8px 10px;min-height:40px}
 .course-welcome{padding:0;background:none;border:0}
 .course-eyebrow{color:#6b8061;font-size:11px;letter-spacing:2px}.course-welcome h2{font-family:'Songti SC','SimSun',serif;font-size:23px;font-weight:500;letter-spacing:1px;line-height:1.4;margin:0 0 7px}.course-welcome p{margin:0;font-size:13px;color:#74816d}
 .course-overview{display:flex;align-items:center;gap:22px;padding:18px 2px;font-size:12px;color:#7e8c75}.course-overview b{font-size:20px;font-weight:500;color:#345d43;margin-right:7px;font-variant-numeric:tabular-nums}.course-overview i{height:22px;width:1px;background:#dfe5d8}.course-overview button{margin-left:auto;font-size:12px;background:none;border:0;color:#7b8c70;padding:8px 12px}
@@ -83,3 +82,4 @@
   .core-app[data-page="cards-manage"] .course-overview{gap:10px;row-gap:4px;font-size:10px}
   .core-app[data-page="cards-manage"] .course-list-heading>span{font-size:9px}
 }
+.course-filterbar{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 20px}.core-app .course-filterbar label{display:flex;align-items:center;gap:9px;font-size:12px;color:#718166}.core-app .course-filterbar select{margin:0;width:auto;min-width:160px}
