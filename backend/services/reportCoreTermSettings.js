@@ -5,7 +5,7 @@ const subjects=['MORAL','CHINESE','MATH','SCIENCE','ENGLISH','PE','MUSIC','FINE_
 const day=v=>v instanceof Date?v.toISOString().slice(0,10):v?String(v).slice(0,10):null;
 const versions=t=>({config:String(t.config_version),rule:String(t.rule_version)});
 const requireManager=a=>{if(a.role!=='manager')fail(403,'仅管理员配置学期');};
-function monthsOf(t){const months=[],start=day(t.start_date).slice(0,7),end=day(t.end_date).slice(0,7);let current=start;while(current<=end&&months.length<120){months.push(current);const [y,m]=current.split('-').map(Number);current=`${m===12?y+1:y}-${String(m===12?1:m+1).padStart(2,'0')}`;}return months;}
+const {monthsOf}=require('./termDates');
 const classKey=r=>`${r.grade}:${r.classNo}`;
 const relationKey=r=>`${r.grade}:${r.classNo}:${r.teacherId}:${r.subjectCode}`;
 const compact=r=>({teacherId:String(r.teacherId??r.teacher_id),grade:r.grade,classNo:r.classNo??r.class_no,subjectCode:r.subjectCode??r.subject_code,enabled:!!r.enabled,isHeadTeacher:!!(r.isHeadTeacher??r.is_head_teacher)});

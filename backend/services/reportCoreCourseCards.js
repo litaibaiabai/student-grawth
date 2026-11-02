@@ -7,17 +7,9 @@ const { fail, stableHash, getSchoolMonthBounds, schoolDayStart, collectionCutoff
 const { assignments } = require('./authorizationService');
 const { isV2, catalog } = require('./reportCoreV2Policy');
 const { encryptToken, decryptToken, tokenHash } = require('./cardCredentials');
-const { monthsOf } = require('./reportCoreTermSettings');
+const { monthsOf } = require('./termDates');
 
-const subjects = [
-  ['MORAL', '道德与法治'], ['CHINESE', '语文'], ['MATH', '数学'],
-  ['SCIENCE', '科学'], ['ENGLISH', '英语'], ['PE', '体育与健康'],
-  ['MUSIC', '音乐'], ['FINE_ART', '美术'], ['INFORMATION_TECHNOLOGY', '信息科技'],
-  ['LABOR', '劳动'], ['INTEGRATED_PRACTICE', '综合实践活动'], ['LOCAL_COURSE', '地方课程'],
-].map(([subjectCode, subjectName]) => ({
-  subjectCode, subjectName,
-  category: catalog.cardCatalog.find(c => c.code === (subjectCode === 'MORAL' ? 'MORAL_SUBJECT_PROCESS' : `${subjectCode}_PROCESS`)),
-}));
+const {subjects}=require('./semesterCardPolicy');
 const subjectByCode = new Map(subjects.map(s => [s.subjectCode, s]));
 const courseKey = a => `${a.grade}:${a.class_no}:${a.subject_code}`;
 const quotaKey = (actor, termId, monthKey, a) => ['COURSE_QUOTA', actor.schoolId, String(termId), monthKey, courseKey(a)];

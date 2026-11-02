@@ -2,13 +2,7 @@
 // tables, inside one enclosing transaction that is ALWAYS rolled back.
 const assert=require('node:assert/strict'),bcrypt=require('bcrypt');
 const {createDbPool}=require('../db');
-function rollbackOnlyPool(c){
- let aborted=false;
- const check=()=>{if(aborted)throw Error('Verification transaction aborted; further database operations are forbidden');};
- const query=async(sql,args)=>{check();try{return sql.startsWith('SET TRANSACTION ISOLATION LEVEL')?[[]]:await c.query(sql,args);}catch(error){aborted=true;throw error;}};
- const connection={query,beginTransaction:async()=>check(),commit:async()=>check(),rollback:async()=>{},release:()=>{}};
- return{query,getConnection:async()=>{check();return connection;}};
-}
+const {rollbackOnlyPool}=require('../__tests__/helpers/formalRollback');
 async function verifyDevelopmentPasswords(){
  const pool=createDbPool({database:'student_growth'}),c=await pool.getConnection();let server;
  const oldEnvironment=process.env.NODE_ENV;

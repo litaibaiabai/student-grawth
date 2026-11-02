@@ -100,4 +100,4 @@ async function restoreAdminDemoIntoFormal({apply=false,outputDir}={}) {
   finally{await c.query('SET FOREIGN_KEY_CHECKS=1').catch(()=>{});c.release();await pool.end();}
 }
 if(require.main===module)restoreAdminDemoIntoFormal({apply:process.argv.includes('--apply')}).then(r=>console.log(JSON.stringify(r,null,2))).catch(e=>{console.error(e.message);process.exitCode=1;});
-module.exports={restoreAdminDemoIntoFormal};
+module.exports={restoreAdminDemoIntoFormal,backupFormal};
