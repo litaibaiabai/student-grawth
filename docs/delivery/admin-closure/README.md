@@ -51,6 +51,16 @@ node backend/scripts/runAdminClosureDemo.js
 
 ## 本次验收结果
 
+### 恢复持久演示环境
+
+原临时演示库被移除后，已从完整闭环回归夹具恢复独立的 `liuyu_report_pilot_admin_demo_v3`。它与业务库分离，包含虚构师生、班级和已发布报告，四个账号统一使用演示密码。恢复已存在的环境请显式指定清单：
+
+```sh
+ADMIN_DEMO_MANIFEST=output/report-core/admin-closure/liuyu_report_pilot_admin_demo_v3/manifest.json node backend/scripts/runAdminClosureDemo.js
+```
+
+不带清单启动仍会创建只有管理员的新库，教师和学生需要实际导入。启动器只额外允许上述专用持久库名，不允许指向业务库。清单和数据库是本机运行数据，不随Git提交。
+
 后端全套 238 项：237 通过、0 失败、1 项既有性能测试显式跳过；前端 30/30，lint/build 通过。最终卡片权限和安全审计窄范围回归各 21/21；完整真实 HTTP 闭环在最终修复后再次通过。MCP 实际完成三角色 30 步，学生已发布报告 94/94 展示位置对账通过。
 
 演示入口：[本地演示](http://localhost:19981)，演示完成时停留在林小禾本人已发布版本 1。服务需保持运行；恢复方法见上文。2026-11-02 用户追加授权后，完整代码集成到 `feature-six-education-v3`，提交与推送以该分支为准；没有部署生产环境。本机配置、数据库备份和运行证据不进入代码提交。

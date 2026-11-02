@@ -8,7 +8,7 @@ async function runAdminClosureDemo({manifestFile,apiPort=19980,webPort=19981}={}
  for(const port of [apiPort,webPort])if(!Number.isInteger(port)||port<1024||port>65535)throw Error('Use valid local ports');
  if(apiPort===webPort)throw Error('API and web ports must differ');
  const manifest=manifestFile?JSON.parse(await fs.readFile(manifestFile,'utf8')):await seedAdminClosureDemo({database:`liuyu_report_test_admin_demo_${Date.now()}`});
- if(!/^liuyu_report_test_admin_demo_[a-z0-9_]+$/.test(manifest.database||''))throw Error('Only isolated admin demo databases are allowed');
+ if(manifest.database!=='liuyu_report_pilot_admin_demo_v3'&&!/^liuyu_report_test_admin_demo_[a-z0-9_]+$/.test(manifest.database||''))throw Error('Only isolated admin demo databases are allowed');
  const directory=manifestFile?path.dirname(path.resolve(manifestFile)):manifest.outputDir;
  const pool=createDbPool({database:manifest.database});let server,vite;
  const close=async()=>{vite?.kill('SIGTERM');if(server)await new Promise(resolve=>server.close(resolve));await pool.end();};
