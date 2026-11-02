@@ -49,7 +49,8 @@ async function seedAdminClosureDemo({database,outputDir,password='Demo-pass-2026
   return {...manifest,outputDir:root};
  }finally{await pool.end();}
 }
-if(require.main===module)seedAdminClosureDemo({database:process.env.ADMIN_DEMO_DB||`liuyu_report_test_admin_demo_${Date.now()}`,outputDir:process.env.ADMIN_DEMO_OUTPUT,password:process.env.ADMIN_DEMO_PASSWORD||'Demo-pass-2026'})
+if(require.main===module&&!process.env.ADMIN_DEMO_DB){console.error('开发演示统一使用 student_growth；本脚本不再默认创建数据库。请先运行 restoreAdminDemoIntoFormal.js 预检，再按需 --apply 还原。');process.exitCode=1;}
+else if(require.main===module)seedAdminClosureDemo({database:process.env.ADMIN_DEMO_DB,outputDir:process.env.ADMIN_DEMO_OUTPUT,password:process.env.ADMIN_DEMO_PASSWORD||'Demo-pass-2026'})
  .then(r=>console.log(JSON.stringify({database:r.database,termId:r.termId,outputDir:r.outputDir,initialState:r.initialState})))
  .catch(error=>{console.error(error.message);process.exitCode=1;});
 module.exports={seedAdminClosureDemo};

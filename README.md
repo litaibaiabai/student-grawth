@@ -107,7 +107,7 @@ npm --prefix frontend run dev
 
 前端开发前将 `frontend/.env.example` 复制为 `frontend/.env`，设置 `VITE_API_TARGET=http://127.0.0.1:后端端口`，与 `backend/.env` 的 `PORT` 一致。Vite会读取该变量；旧 `VITE_API_SERVER` 不配置开发代理。若终端出现 `http proxy error / ECONNREFUSED`，先检查后端是否运行和两侧端口是否一致。修改 `.env` 后重启前端开发服务。
 
-`REPORT_DB_NAME=student_growth` 为当前正式库名，必须是新版六表结构；启动时会核验并拒绝旧44表或不完整结构。隔离测试仍使用 `liuyu_report_test_*` 临时库，测试结束后清理。已有学校切换先运行`node backend/scripts/migrateReportCore.js`只读audit，再审核映射与备份；不得把初始化当升级脚本。学年/起止日期和模板在学期配置页只读，首次学校建档按初始化配置完成。
+`REPORT_DB_NAME=student_growth` 为当前正式库名，管理员闭环版本使用现有八张业务表；启动时会核验并拒绝旧44表或不完整结构。隔离测试仍使用 `liuyu_report_test_*` 临时库，测试结束后清理。已有学校切换先运行`node backend/scripts/migrateReportCore.js`只读audit，再审核映射与备份；不得把初始化当升级脚本。学年/起止日期和模板在学期配置页只读，首次学校建档按初始化配置完成。
 
 ## 验证
 
@@ -173,3 +173,14 @@ yarn dev
 node --test backend/__tests__/report_core_written_stories.test.js
 npm --prefix frontend run test:student-written-stories
 ```
+
+
+### 当前开发数据入口（2026-11-02）
+
+开发/演示统一使用 `student_growth` 正式表。原有数据已完整备份，再按用户要求还原可演示的数据；不使用两套并行运行数据，也不在日常启动时创建临时库或表。
+
+```sh
+node backend/scripts/runAdminClosureDemo.js
+```
+
+访问 http://localhost:19981。默认启动不执行seed或数据还原。备份与事务还原说明见 [正式库还原记录](docs/delivery/admin-closure/formal-database.md)。上述历史自动化测试隔离说明不代表当前开发服务连接方式。

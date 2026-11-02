@@ -29,37 +29,25 @@ REPORT_DB_NAME=student_growth node backend/scripts/migrateAdminClasses.js
 
 迁移默认只读，重复apply不重复建表/回填。检查脚本验证已知表、字段类型、自增与默认值、索引、CHECK和复合外键。存在未知结构或负责人冲突时拒绝apply。本机实际升级前已完整备份并恢复验证，原七表行数保持一致；证据见 verification.md。
 
-## 独立测试数据
+## 当前开发与演示：统一正式库
 
-```sh
-node backend/scripts/seedAdminClosureDemo.js
-```
+按2026-11-02用户最新要求，已先备份原有正式数据，再用可演示数据还原 `student_growth` 的现有八张表。开发服务不再维护第二套演示数据，也不自动创建数据库或临时表。
 
-脚本每次创建全新的 `liuyu_report_test_admin_demo_*`；拒绝覆盖已有库。可用 `ADMIN_DEMO_DB` 明确指定符合此命名规则的新库。输出仅写本机忽略目录，账号文件权限为600。初始仅管理员与完整V2学期；2名教师、3个班级、1名学生、60项教师成绩/体测的导入文件和明确标注虚构的奖状作为输入，业务结果均需通过实际操作产生。
-
-测试数据库与本机 `student_growth` 分离；不向业务库混入演示师生，不调用付费模型。完整HTTP自动化和MCP界面演示分别记录，不相互冒充。
-
-## 启动独立演示
+日常启动：
 
 ```sh
 node backend/scripts/runAdminClosureDemo.js
 ```
 
-默认创建新的演示起点，API绑定127.0.0.1:19980，网页为http://localhost:19981。端口占用会报错，不结束其他服务。用ADMIN_DEMO_MANIFEST可恢复指定演示库；不会自动清空已有状态。Ctrl+C只关闭本脚本启动的服务，保留演示库与证据。
+默认直接连接 `student_growth`、学校1，API为127.0.0.1:19980，网页为http://localhost:19981。端口占用会报错，不结束其他服务；重启不会清空或重新seed数据。旧演示库清单会被明确拒绝。
 
-演示寄语使用明确标注“演示固定文案，未经AI生成”的固定响应，教师需改写后审核；奖状由教师人工核对。它不代表生产ASR/OCR/LLM服务已经接通。讲故事录音数量与正式评分分开，未评分不伪造报告分数。
+`seedAdminClosureDemo.js` 不再无参数创建数据库。其显式隔离回归夹具接口属于历史自动化工具，日常开发不调用它。当前配置没有把测试清理/删库逻辑指向正式库；本次验收只读取还原后的正式数据，没有创建测试库或表。
+
+需要再次还原时，先阅读[正式库还原记录](formal-database.md)。`restoreAdminDemoIntoFormal.js` 默认只读预检，只有显式 `--apply` 才在新备份完成后替换数据；它不是日常启动步骤。
+
+演示寄语仍明确标注固定演示响应并由教师改写审核，奖状由教师人工核对；本次未调用付费模型。
 
 ## 本次验收结果
-
-### 恢复持久演示环境
-
-原临时演示库被移除后，已从完整闭环回归夹具恢复独立的 `liuyu_report_pilot_admin_demo_v3`。它与业务库分离，包含虚构师生、班级和已发布报告，四个账号统一使用演示密码。恢复已存在的环境请显式指定清单：
-
-```sh
-ADMIN_DEMO_MANIFEST=output/report-core/admin-closure/liuyu_report_pilot_admin_demo_v3/manifest.json node backend/scripts/runAdminClosureDemo.js
-```
-
-不带清单启动仍会创建只有管理员的新库，教师和学生需要实际导入。启动器只额外允许上述专用持久库名，不允许指向业务库。清单和数据库是本机运行数据，不随Git提交。
 
 后端全套 238 项：237 通过、0 失败、1 项既有性能测试显式跳过；前端 30/30，lint/build 通过。最终卡片权限和安全审计窄范围回归各 21/21；完整真实 HTTP 闭环在最终修复后再次通过。MCP 实际完成三角色 30 步，学生已发布报告 94/94 展示位置对账通过。
 

@@ -2,20 +2,22 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
 const {createDbPool}=require('../db');
-const {seedAdminClosureDemo}=require('./seedAdminClosureDemo');
 
 async function runAdminClosureDemo({manifestFile,apiPort=19980,webPort=19981}={}) {
  for(const port of [apiPort,webPort])if(!Number.isInteger(port)||port<1024||port>65535)throw Error('Use valid local ports');
  if(apiPort===webPort)throw Error('API and web ports must differ');
- const manifest=manifestFile?JSON.parse(await fs.readFile(manifestFile,'utf8')):await seedAdminClosureDemo({database:`liuyu_report_test_admin_demo_${Date.now()}`});
- if(manifest.database!=='liuyu_report_pilot_admin_demo_v3'&&!/^liuyu_report_test_admin_demo_[a-z0-9_]+$/.test(manifest.database||''))throw Error('Only isolated admin demo databases are allowed');
- const directory=manifestFile?path.dirname(path.resolve(manifestFile)):manifest.outputDir;
+ const manifest=manifestFile?JSON.parse(await fs.readFile(manifestFile,'utf8')):{database:'student_growth',schoolId:'1'};
+ if(manifest.database!=='student_growth')throw Error('Development runtime must use the existing student_growth database');
+ if(!/^[1-9]\d*$/.test(String(manifest.schoolId||'')))throw Error('Valid schoolId required');
+ const directory=manifestFile?path.dirname(path.resolve(manifestFile)):path.resolve(__dirname,'../../output/report-core/development');
+ await fs.mkdir(directory,{recursive:true,mode:0o700});
+ if(!manifestFile)await fs.writeFile(path.join(directory,'manifest.json'),JSON.stringify(manifest,null,2),{mode:0o600});
  const pool=createDbPool({database:manifest.database});let server,vite;
  const close=async()=>{vite?.kill('SIGTERM');if(server)await new Promise(resolve=>server.close(resolve));await pool.end();};
  try{
   await require('./runCoreMigrations').runCoreMigrations({connection:pool,targetDb:manifest.database});
   process.env.PUBLIC_WEB_URL=`http://localhost:${webPort}`;
-  // This explicit fixture is only part of the isolated demonstration runtime.
+  // This explicit fixture is only part of the local development runtime.
   // The generated text labels itself; no model or OCR requests are made.
   const provider={generateTermComment:async()=>({model:'DEMO_FIXED_TEXT_NO_MODEL',comment:'【演示固定文案，未经AI生成】请教师结合林小禾本学期的真实学习、合作和阅读记录，核对并改写学期寄语。'})};
   const app=require('../app').createApp({pool,schoolId:manifest.schoolId,provider});

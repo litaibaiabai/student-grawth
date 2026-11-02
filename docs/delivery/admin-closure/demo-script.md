@@ -4,7 +4,7 @@
 
 ## 环境与说明
 
-运行 `node backend/scripts/runAdminClosureDemo.js` 可创建全新的虚构起点。本次已完成演示的数据库为 `liuyu_report_test_admin_demo_1793543741445`，网页 `http://localhost:19981`，文件在 `output/report-core/admin-closure/liuyu_report_test_admin_demo_1793543741445/`。账号密码读取同目录 `local-accounts.json`，不使用真实师生账号。
+当前运行 `node backend/scripts/runAdminClosureDemo.js` 直接连接已还原的 `student_growth`，不再创建新库。下述时间戳数据库是原演示的历史证据；当前运行位置见 formal-database.md。本次已完成演示的数据库为 `liuyu_report_test_admin_demo_1793543741445`，网页 `http://localhost:19981`，文件在 `output/report-core/admin-closure/liuyu_report_test_admin_demo_1793543741445/`。账号密码读取同目录 `local-accounts.json`，不使用真实师生账号。
 
 角色顺序为管理员→教师→学生，再回到教师完成审核、管理员发布、学生/教师回看。多次切换是业务时序所需；每次通过页面退出和登录，不用注入令牌替代登录。
 
@@ -57,7 +57,7 @@
 - 步骤 07 的领取链接来自页面实际显示的二维码图像，在本地解码后交给同库学生领取；没有从业务接口获取凭证代替 MCP。链接与账号文件仅保存在本机测试目录。
 - 选择文件期间一次外部工具长时间等待导致登录超过有效期；真实页面拒绝了过期导入。重新登录、重新选择同一输入后完成预览提交，没有跳过授权。日期控件需按年/月/日分段输入，并核对值后创建新学期。
 - 本次旧学期仍为学校当前学期；新学期仅创建并查看，没有复制数据，也没有设为学校当前学期。全局切换当前学期另由隔离 HTTP 回归覆盖。
-- 完成后的演示库保留发布数据，不能直接把 01–30 当空库重复执行。复演请启动新的演示库，或用 `ADMIN_DEMO_MANIFEST` 恢复既有状态并从适当步骤继续。
+- 完成后的演示库保留发布数据，不能直接把 01–30 当空库重复执行。现在复演请使用正式库当前状态从适当步骤继续；如确需重置，先按正式库还原记录备份，不能把还原当作每次启动步骤。
 
 MCP 操作入口为 `cua.getTab`；登录、导入文件选择器、表单提交、审核和发布均通过页面控件执行。读取 DOM/截图仅用于验收和留证，没有在浏览器注入业务状态。
 
