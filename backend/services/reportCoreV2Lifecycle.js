@@ -3,6 +3,7 @@ const {isV2}=require('./reportCoreV2Policy');
 const phases=['COLLECTING','RECONCILING','FROZEN','ARCHIVED'];
 function assertV2Phase(term,{action,actor,submittedAt,now=new Date()}) {
   if(!isV2(term.evaluation_config))return;
+  if(['quota','card-plan','generate-cards','void-card','quota-batch-preview','quota-batch-commit','course-card-settings'].includes(action)&&term.evaluation_config.semesterCards&&term.evaluation_config.semesterCards.status!=='DRAFT')fail(423,'学期卡片已初始化，不允许增发、重置或删除');
   if(action==='v2-phase-change' && actor.role==='manager')return;
   // Account security and term administration do not alter frozen evaluations.
   if(actor.role==='manager' && ['admin-account-status','admin-account-password','admin-term-create','admin-term-current'].includes(action))return;

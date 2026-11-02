@@ -20,11 +20,12 @@ test('legacy migration locks issued batches without touching cards or reports',a
  await withFormalRollback(async({pool,connection:c})=>{
   const [before]=await c.query('SELECT id,status,payload_hash FROM evaluation_source_record WHERE record_kind IN (\'CARD\',\'QUOTA\') ORDER BY id');
   const [reports]=await c.query('SELECT * FROM term_report ORDER BY id');
+  const [empty]=await c.query("INSERT INTO academic_year(school_id,academic_year,semester,term_name,start_date,end_date,evaluation_config,config_version,template_version,rule_version,business_phase) VALUES(1,'9997-9998',1,'回滚空学期','9997-09-01','9998-01-31',?,'1','CORE_V2','V2_1','COLLECTING')",[JSON.stringify(require('../services/reportCoreV2Policy').createV2Config())]);
   await migrateAdminSimplification({connection:pool,targetDb:'student_growth',mode:'apply',backupDir:null});
   const [terms]=await c.query('SELECT id,evaluation_config FROM academic_year ORDER BY id');
   const parse=v=>typeof v==='string'?JSON.parse(v):v;
   assert.equal(parse(terms.find(t=>String(t.id)==='1').evaluation_config).semesterCards.status,'LEGACY_LOCKED');
-  assert.equal(parse(terms.find(t=>String(t.id)==='2').evaluation_config).semesterCards.status,'DRAFT');
+  assert.equal(parse(terms.find(t=>String(t.id)===String(empty.insertId)).evaluation_config).semesterCards.status,'DRAFT');
   assert.equal((await migrateAdminSimplification({connection:pool,targetDb:'student_growth',mode:'apply'})).changedTerms,0);
   assert.deepEqual((await c.query('SELECT id,status,payload_hash FROM evaluation_source_record WHERE record_kind IN (\'CARD\',\'QUOTA\') ORDER BY id'))[0],before);
   assert.deepEqual((await c.query('SELECT * FROM term_report ORDER BY id'))[0],reports);

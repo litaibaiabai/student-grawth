@@ -1,11 +1,15 @@
 const service = require('../services/reportCoreCourseCards');
 const { stableHash } = require('../services/reportCorePolicy');
 function mountCourseCards(router, { asyncRoute, ok }) {
+  const semester=require('../services/reportCoreSemesterCards');
+  const {requireRole}=require('../middleware/auth');
   const context = req => ({ pool:req.app.locals.pool, actor:req.actor, now:req.app.locals.clock() });
   const read = (url, method) => router.get(url, asyncRoute(async(req,res) => {
     res.setHeader('Cache-Control','private, no-store');
     ok(res,await service[method]({...req.query,...context(req)}));
   }));
+  router.get('/admin/report-core/semester-card-settings',requireRole('manager'),asyncRoute(async(req,res)=>ok(res,await semester.getSemesterCardSettings({...req.query,...context(req)}))));
+  for(const[verb,url,method]of [['put','/admin/report-core/semester-card-settings','saveSemesterCardSettings'],['post','/admin/report-core/semester-cards/initialize','initializeSemesterCards']])router[verb](url,requireRole('manager'),asyncRoute(async(req,res)=>{res.setHeader('Cache-Control','private, no-store');ok(res,await semester[method]({...req.body,...context(req),command:{requestKey:req.body.requestKey,payloadHash:stableHash(req.body)}}));}));
   read('/report-core/course-card-settings','getCourseCardSettings');
   read('/report-core/course-cards','listCourseCards');
   read('/report-core/course-cards/preview','getCourseCardPage');
