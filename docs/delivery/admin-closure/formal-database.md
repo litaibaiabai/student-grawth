@@ -44,3 +44,21 @@ node backend/scripts/runAdminClosureDemo.js
 默认直接连接现有 `student_growth`，不自动初始化、还原或创建其他库。启动时只检查结构，日常数据操作直接落入正式表。`seedAdminClosureDemo.js` 不再在无明确参数时创建数据库。
 
 如以后确实需要重新还原，先确认当前新增数据也已备份，再运行预检与显式apply；不要将apply放入日常启动命令。
+
+## 本机开发密码查看列
+
+按用户追加要求，正式 `users` 表新增可空的 `password_plain VARCHAR(255)`。原 `password` 列继续保存bcrypt哈希，认证不读取明文列。当前四个演示账号已逐一验证哈希后补入已知密码；未知历史密码不能反解，保持NULL。
+
+```sql
+SELECT username, real_name, role, password_plain FROM users;
+```
+
+```sh
+node backend/scripts/migrateDevelopmentPasswords.js          # 只读检查
+node backend/scripts/migrateDevelopmentPasswords.js --apply  # 备份后建立开发列并补已核验演示值
+node backend/scripts/verifyDevelopmentPasswords.js            # 正式表内事务验证，最终全部回滚
+```
+
+初始化账号、管理员导入和密码重置同步该列。导入预览只保留绑定学校与账号的加密信封，提交时才解密写入用户表；预览响应、登录、/me及审计不返回明文。没有此可选列的旧结构仍能工作。`NODE_ENV=production`禁用明文迁移、预览采集，并在账号密码写入时将该列置NULL。已有明文列与备份仅供本机开发，正式部署前应移除或清空，禁止将其作为生产密码存储方式。
+
+已通过实际初始化、导入、重置、bcrypt登录、/me和审计隐私验证；所有验证数据使用现有正式表的单一事务，最终回滚，未建立任何测试数据库或临时表。

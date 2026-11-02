@@ -28,6 +28,7 @@ async function changeAccount(args, kind) {
     const tokenVersion = user.token_version + 1;
     if (kind === 'status') await c.query('UPDATE users SET status=?,token_version=? WHERE school_id=? AND id=?', [args.status, tokenVersion, args.actor.schoolId, args.accountId]);
     else await c.query('UPDATE users SET password=?,token_version=? WHERE school_id=? AND id=?', [await bcrypt.hash(args.password, 12), tokenVersion, args.actor.schoolId, args.accountId]);
+    if(kind==='password')await require('./developmentPasswords').writePassword(c,args.actor.schoolId,args.accountId,args.password);
     const result = { accountId: String(user.id), status: kind === 'status' ? args.status : user.status, tokenVersion, ...(kind === 'password' ? { passwordChanged: true } : {}) };
     await addSource(c, { schoolId: args.actor.schoolId, termId: args.termId, actorId: args.actor.id, kind: 'AUDIT', status: 'COMMITTED', key: ['ADMIN_ACCOUNT', kind, args.actor.id, args.command.requestKey], payload: { action: kind === 'status' ? 'ACCOUNT_STATUS' : 'ACCOUNT_PASSWORD', accountId: String(user.id), reason, diffs: kind === 'status' ? [{ field: 'status', before: user.status, after: args.status }] : [{ field: 'passwordChanged', before: false, after: true }], tokenVersionBefore: user.token_version, tokenVersionAfter: tokenVersion } });
     return { result };

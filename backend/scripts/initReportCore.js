@@ -34,6 +34,7 @@ async function initializeSchool({ pool, schoolId, password, demo = false }) {
         [schoolId, username, hash, name, role],
       );
       ids[username] = String(r.insertId);
+      await require('../services/developmentPasswords').writePassword(c,schoolId,ids[username],password);
     }
     const config = {
       requiredMonths: ["2026-10"],

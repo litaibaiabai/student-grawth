@@ -39,6 +39,7 @@ async function validateAdminRows(c,actor,term,kind,rows){
    const action=!u?'NEW':stableHash(before)===stableHash(after)?'UNCHANGED':'UPDATE';
    if(action==='UNCHANGED'){counts.skipped++;continue;}
    const row={username,role:input.role,...after,grade:input.role==='student'?input.grade:null,classNo:input.role==='student'?input.classNo:null,existingId:u?String(u.id):null,expectedAccount:accountSnapshot(u),expectedRevision:e?String(e.revision):null,...(!u?{passwordHash:await bcrypt.hash(input.password,10)}:{})};
+   if(!u){const encrypted=await require('./developmentPasswords').previewPassword(c,actor.schoolId,username,input.password);if(encrypted)row.developmentPasswordCipher=encrypted;}
    normalized.push(row);diffs.push({rowNo,username,studentId:input.role==='student'?row.existingId:null,action,before,after,hasInitialPassword:!u});counts[action==='NEW'?'created':'updated']++;continue;
   }
   const values={};
@@ -179,7 +180,7 @@ async function commitImport({
            if((e?String(e.revision):null)!==row.expectedRevision)fail(409,'预览后学籍已变化，请重新预览');
           }
           if(id){if(term.is_current||row.role==='teacher')await c.query('UPDATE users SET real_name=?,grade=?,class_no=? WHERE id=? AND school_id=?',[row.real_name,row.grade,row.classNo,id,actor.schoolId]);}
-          else{const [r]=await c.query('INSERT INTO users(school_id,username,password,real_name,role,grade,class_no) VALUES(?,?,?,?,?,?,?)',[actor.schoolId,row.username,row.passwordHash,row.real_name,row.role,term.is_current?row.grade:null,term.is_current?row.classNo:null]);id=String(r.insertId);}
+          else{const [r]=await c.query('INSERT INTO users(school_id,username,password,real_name,role,grade,class_no) VALUES(?,?,?,?,?,?,?)',[actor.schoolId,row.username,row.passwordHash,row.real_name,row.role,term.is_current?row.grade:null,term.is_current?row.classNo:null]);id=String(r.insertId);const dev=require('./developmentPasswords');await dev.writePassword(c,actor.schoolId,id,dev.readPreview(actor.schoolId,row.username,row.developmentPasswordCipher));}
           if (row.role === "student") {
             await c.query(
               "INSERT INTO student_term_evaluation(school_id,term_id,student_id,student_name_snapshot,grade_snapshot,class_no_snapshot,template_version,rule_version) VALUES(?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE student_name_snapshot=VALUES(student_name_snapshot),grade_snapshot=VALUES(grade_snapshot),class_no_snapshot=VALUES(class_no_snapshot)",
