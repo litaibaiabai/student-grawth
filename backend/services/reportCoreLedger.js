@@ -59,7 +59,7 @@ async function snapshot(args, run) {
     const asOf = iso(args.asOf || args.now || new Date()); if (!asOf) fail(422, '截至时间不合法');
     const [[clock]] = await c.query("SELECT payload_json FROM evaluation_source_record WHERE school_id=? AND business_key=?", [args.actor.schoolId, stableHash(['SOURCE_CLOCK_BASELINE', args.actor.schoolId, 'UTC_V1'])]);
     const baseline = clock ? parse(clock.payload_json) : null;
-    const [metadata] = await c.query("SELECT id,parent_id,actor_id,record_kind,month_key,payload_json,revision,created_at FROM evaluation_source_record WHERE school_id=? AND term_id=? AND owner_teacher_id=? AND month_key>=? AND month_key<=? AND record_kind IN ('QUOTA','AUDIT') ORDER BY id", [args.actor.schoolId, f.termId, f.ownerId, f.monthFrom, f.monthTo]);
+    const [metadata] = await c.query("SELECT id,parent_id,actor_id,record_kind,month_key,payload_json,revision,created_at FROM evaluation_source_record WHERE school_id=? AND term_id=? AND owner_teacher_id=? AND ((month_key>=? AND month_key<=?) OR (month_key IS NULL AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode'))='COURSE_SEMESTER')) AND record_kind IN ('QUOTA','AUDIT') ORDER BY id", [args.actor.schoolId, f.termId, f.ownerId, f.monthFrom, f.monthTo]);
     const context = { c, actor: args.actor, f, asOf, baseline, metadata, owner: owners[0], currentSnapshot: !args.asOf, signal:args.signal,disconnected:()=>!!args.response?.destroyed };
     const result = await run(context);
     await c.commit(); return result;
@@ -68,7 +68,7 @@ async function snapshot(args, run) {
 function project(source, ctx) {
   const p = parse(source.payload_json), category = catalog.cardCatalog.find(c => c.targetColumn === source.target_key);
   const paper = source.record_kind === 'CARD';
-  const created = resolveSourceInstant({ ...source, payload: {}, payload_json: {} }, ctx.baseline);
+  const created = p.mode==='COURSE_SEMESTER'&&iso(p.generatedAt) ? {occurredAt:iso(p.generatedAt),timeBasis:'UTC'} : resolveSourceInstant({ ...source, payload: {}, payload_json: {} }, ctx.baseline);
   if (created.occurredAt && created.occurredAt > ctx.asOf) return null;
   const occurred = resolveSourceInstant(source, ctx.baseline);
   const usedAt = paper ? iso(p.usedAt) : null;
@@ -82,7 +82,7 @@ function project(source, ctx) {
   const reverse = source.reverse_id ? resolveSourceInstant({ id: source.reverse_id, created_at: source.reverse_created_at, payload_json: source.reverse_payload, record_kind: 'REVERSAL' }, ctx.baseline) : null;
   const reverseUnknown = !!reverse && !reverse.occurredAt && !ctx.currentSnapshot;
   const reversed = !!reverse && (reverse.occurredAt ? reverse.occurredAt <= ctx.asOf : ctx.currentSnapshot);
-  const attributionMonth = paper ? source.month_key : occurred.occurredAt ? schoolMonth(occurred.occurredAt) : null;
+  const attributionMonth = paper ? source.month_key || (p.mode==='COURSE_SEMESTER' ? schoolMonth(usedAt || iso(source.valid_from)) : null) : occurred.occurredAt ? schoolMonth(occurred.occurredAt) : null;
   const studentId = paper && !redeemed ? null : source.student_id ? String(source.student_id) : null;
   return {
     id: String(source.id), kind: source.record_kind, sourceMode: paper ? 'paper' : 'direct', quotaId: source.parent_id ? String(source.parent_id) : null,
@@ -109,7 +109,7 @@ async function* scan(ctx) {
     e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,u.real_name student_name,u.username student_number,
     r.id reverse_id,r.created_at reverse_created_at,r.payload_json reverse_payload,ru.real_name reverse_actor_name
     FROM (
-      SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND source_type='CARD' AND record_kind='CARD' AND owner_teacher_id=? AND month_key>=? AND month_key<=?
+      SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND source_type='CARD' AND record_kind='CARD' AND owner_teacher_id=? AND ((month_key>=? AND month_key<=?) OR (month_key IS NULL AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode'))='COURSE_SEMESTER'))
       UNION ALL
       SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND source_type='CARD' AND record_kind='DIRECT' AND actor_id=? AND ?=0
     ) owned JOIN evaluation_source_record s ON s.id=owned.id
@@ -168,6 +168,7 @@ function quotaValues(ctx) {
   for (const q of ctx.metadata.filter(r => r.record_kind === 'QUOTA')) {
     const p = parse(q.payload_json), created = resolveSourceInstant(q, ctx.baseline).occurredAt;
     if (created && created > ctx.asOf) continue;
+    if(['COURSE_SUBJECT','COURSE_SEMESTER'].includes(p.mode)){quota+=p.quotaTotal;planned+=p.quotaTotal;addPlans([{grade:p.grade,classNo:p.classNo,classTotal:p.quotaTotal,items:[{categoryCode:p.categoryCode,count:p.quotaTotal}]}]);continue;}
     if (ctx.currentSnapshot) { quota += p.quotaTotal; planned += (p.plans || []).reduce((n, v) => n + v.classTotal, 0); addPlans(p.plans); continue; }
     const changes = events.filter(a => String(a.parent_id) === String(q.id) && a.p.action === 'QUOTA_CHANGE' && a.at && a.at <= ctx.asOf);
     const plans = events.filter(a => String(a.parent_id) === String(q.id) && a.p.action === 'PLAN_SAVE' && a.at && a.at <= ctx.asOf);

@@ -42,7 +42,7 @@ async function initializeSemesterCards({pool,actor,termId,expectedRevision,comma
  const start=schoolDayStart(term.start_date),end=collectionCutoff(term);if(+start>=+end||+now>=+end)fail(423,'学期采集已结束或日期无效');
  const resolved=resolveSemesterQuotas(term.evaluation_config);let generated=0;
  for(const a of courses){const subject=resolved.subjects.find(s=>s.subjectCode===a.subject_code),total=subject.effectiveTotal;if(!total)continue;
- const payload={mode:'COURSE_SEMESTER',grade:a.grade,classNo:a.class_no,subjectCode:subject.subjectCode,subjectName:subject.subjectName,categoryCode:subject.categoryCode,quotaTotal:total};
+ const payload={mode:'COURSE_SEMESTER',occurredAt:now.toISOString(),generatedAt:now.toISOString(),grade:a.grade,classNo:a.class_no,subjectCode:subject.subjectCode,subjectName:subject.subjectName,categoryCode:subject.categoryCode,quotaTotal:total};
  const quotaId=await addSource(c,{schoolId:actor.schoolId,termId,ownerId:a.teacher_id,actorId:actor.id,sourceType:'CARD',kind:'QUOTA',subjectCode:subject.subjectCode,status:'CONFIRMED',key:['SEMESTER_COURSE_QUOTA',actor.schoolId,String(termId),a.grade,a.class_no,a.subject_code],payload});
  let batch=[];
  for(let ordinal=1;ordinal<=total;ordinal++){

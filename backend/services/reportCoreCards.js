@@ -317,7 +317,7 @@ async function redeemCard({ pool, actor, token, command, now = new Date() }) {
       );
       if (row.token_hash !== tokenHash(token)) fail(409, '卡片凭据已更新');
       const p = parse(row.payload_json);
-      if (p.mode === 'COURSE_SUBJECT') {
+      if (['COURSE_SUBJECT','COURSE_SEMESTER'].includes(p.mode)) {
         const [[current]] = await c.query("SELECT a.teacher_id FROM teacher_teaching_assignment a JOIN users u ON u.school_id=a.school_id AND u.id=a.teacher_id AND u.status=0 AND u.role='teacher' WHERE a.school_id=? AND a.term_id=? AND a.grade=? AND a.class_no=? AND a.subject_code=? AND a.teacher_id=? AND a.enabled=1 FOR SHARE",[actor.schoolId,s.term_id,p.grade,p.classNo,p.subjectCode,row.owner_teacher_id]);
         if (!current) fail(409, '任课配置已变化，卡片失效');
       }
@@ -328,8 +328,8 @@ async function redeemCard({ pool, actor, token, command, now = new Date() }) {
         fail(422, "不在有效期");
       p.usedAt = now.toISOString();
       await c.query(
-        "UPDATE evaluation_source_record SET status='USED',student_id=?,payload_json=?,revision=revision+1 WHERE id=?",
-        [actor.id, JSON.stringify(p), s.id],
+        "UPDATE evaluation_source_record SET status='USED',student_id=?,payload_json=?,effective_at=?,submitted_at=COALESCE(submitted_at,?),revision=revision+1 WHERE id=?",
+        [actor.id, JSON.stringify(p), now, now, s.id],
       );
       return {
         result: { sourceId: String(s.id), pointsCredited: 1 },

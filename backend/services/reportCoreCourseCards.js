@@ -98,75 +98,25 @@ async function replaceCourseQuotaOwners(c, {schoolId,termId,grade,classNo,before
     for (const {month_key} of months) await adoptCourseQuota(c,schoolId,termId,month_key,{grade,class_no:classNo,subject_code:code},next.get(code)||null,true);
   }
 }
-async function syncCourseCards({ pool, actor, termId, monthKey, command, now = new Date() }) {
-  teacherOnly(actor);
-  const currentMonth = schoolMonth(now);
-  if (monthKey !== undefined && monthKey !== currentMonth) fail(422, '仅可自动生成当前月份卡片');
-  return withMutation({ pool, actor, termId, command, action:'generate-cards', termLock:'exclusive', readCommitted:true }, async (c, term) => {
-    checkTerm(term); checkMonth(term, currentMonth);
-    const bounds = getSchoolMonthBounds(currentMonth);
-    const start = new Date(Math.max(+bounds.startInclusive, +schoolDayStart(term.start_date)));
-    const end = new Date(Math.min(+bounds.endExclusive, +collectionCutoff(term)));
-    if (+now < +start || +now >= +end) fail(423, '当前不在学期卡片发放期');
-    const teaching = await assignments(actor, termId, c);
-    const resolved = resolveCourseCardQuotas(term.evaluation_config);
-    let generated = 0;
-    for (const a of teaching) {
-      const subject = subjectByCode.get(a.subject_code);
-      const total = resolved.bySubject.get(a.subject_code)?.effectiveMonthlyTotal;
-      if (!subject) continue;
-      if (await adoptCourseQuota(c,actor.schoolId,termId,currentMonth,a,actor.id)) continue;
-      if (!Number.isInteger(total) || total <= 0) continue;
-      const key = quotaKey(actor, termId, currentMonth, a);
-      // A locking read observes batches committed while this request waited for the term lock.
-      const [[existing]] = await c.query('SELECT id FROM evaluation_source_record WHERE school_id=? AND business_key=? FOR UPDATE', [actor.schoolId, stableHash(key)]);
-      if (existing) continue;
-      const payload = { mode:'COURSE_SUBJECT', grade:a.grade, classNo:a.class_no, subjectCode:a.subject_code, subjectName:subject.subjectName, categoryCode:subject.category.code, quotaTotal:total };
-      const quotaId = await addSource(c, { schoolId:actor.schoolId, termId, ownerId:actor.id, actorId:actor.id, sourceType:'CARD', kind:'QUOTA', monthKey:currentMonth, subjectCode:a.subject_code, status:'CONFIRMED', key, payload });
-      for (let ordinal=1; ordinal<=total; ordinal++) {
-        const token = crypto.randomBytes(32).toString('base64url');
-        await addSource(c, {
-          schoolId:actor.schoolId, termId, ownerId:actor.id, actorId:actor.id,
-          sourceType:'CARD', kind:'CARD', parentId:quotaId, monthKey:currentMonth,
-          target:subject.category.targetColumn, subjectCode:a.subject_code,
-          ordinal, status:'UNUSED', delta:1, validFrom:start, validUntil:end,
-          tokenHash:tokenHash(token), tokenCipher:encryptToken(token, `CORE_V1:${actor.schoolId}:${quotaId}:${ordinal}`),
-          key:['COURSE_CARD',quotaId,ordinal], payload:{ ...payload, quotaId, serial:ordinal },
-        });
-      }
-      generated += total;
-    }
-    return { result:{ monthKey:currentMonth, generated } };
-  });
+async function semesterQuotas(c,schoolId,termId){return(await c.query("SELECT id,payload_json FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind='QUOTA' AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode')) IN ('COURSE_SUBJECT','COURSE_SEMESTER') ORDER BY id",[schoolId,termId]))[0];}
+async function listCourseCards({pool,actor,termId,now=new Date()}){
+ teacherOnly(actor);const term=await getTerm(pool,actor.schoolId,termId);checkTerm(term);
+ const quotas=await semesterQuotas(pool,actor.schoolId,termId),state=require('./semesterCardPolicy').semesterState(term.evaluation_config);
+ const initializationStatus=state.status==='DRAFT'&&quotas.length?'LEGACY_LOCKED':state.status;
+ if(initializationStatus==='DRAFT')return{initializationStatus,courses:[]};
+ const teaching=(await assignments(actor,termId,pool)).filter(a=>subjectByCode.has(a.subject_code));
+ const [stats]=await pool.query("SELECT parent_id,COUNT(*) total,SUM(status='USED') used,SUM(status='UNUSED' AND valid_from<=? AND valid_until>?) available FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind='CARD' GROUP BY parent_id",[now,now,actor.schoolId,termId]);
+ const courses=teaching.map(a=>{const subject=subjectByCode.get(a.subject_code),matching=quotas.filter(q=>{const p=parse(q.payload_json);return p.grade===a.grade&&p.classNo===a.class_no&&p.subjectCode===a.subject_code;});const ids=new Set(matching.map(q=>String(q.id))),count=stats.filter(r=>ids.has(String(r.parent_id))).reduce((n,r)=>({total:n.total+Number(r.total),used:n.used+Number(r.used),available:n.available+Number(r.available)}),{total:0,used:0,available:0});return{key:courseKey(a),grade:a.grade,classNo:a.class_no,subjectCode:a.subject_code,subjectName:subject.subjectName,quotaId:matching[0]?String(matching[0].id):null,...count};});
+ return{initializationStatus,courses,termName:term.term_name};
 }
-async function listCourseCards({ pool, actor, termId, monthKey, now = new Date() }) {
-  teacherOnly(actor);
-  const term = await getTerm(pool, actor.schoolId, termId); checkTerm(term); checkMonth(term, monthKey);
-  const teaching = (await assignments(actor, termId, pool)).filter(a => subjectByCode.has(a.subject_code));
-  const resolved = resolveCourseCardQuotas(term.evaluation_config);
-  const [quotas] = await pool.query("SELECT id,payload_json FROM evaluation_source_record WHERE school_id=? AND term_id=? AND month_key=? AND record_kind='QUOTA' AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode'))='COURSE_SUBJECT'", [actor.schoolId,termId,monthKey]);
-  const [stats] = await pool.query("SELECT parent_id,SUM(status IN ('USED','UNUSED')) total,SUM(status='USED') used,SUM(status='UNUSED' AND valid_from<=? AND valid_until>?) available FROM evaluation_source_record WHERE school_id=? AND term_id=? AND month_key=? AND record_kind='CARD' GROUP BY parent_id", [now,now,actor.schoolId,termId,monthKey]);
-  const courses = teaching.sort((a,b) => a.grade-b.grade || a.class_no-b.class_no || subjects.findIndex(s=>s.subjectCode===a.subject_code)-subjects.findIndex(s=>s.subjectCode===b.subject_code)).map(a => {
-    const subject = subjectByCode.get(a.subject_code);
-    const settings = resolved.bySubject.get(a.subject_code);
-    const matching = quotas.filter(q => { const p=parse(q.payload_json); return p.grade===a.grade && p.classNo===a.class_no && p.subjectCode===a.subject_code; });
-    const quota = matching[0];
-    const count = stats.filter(s=>matching.some(q=>String(q.id)===String(s.parent_id))).reduce((sum,s)=>({total:sum.total+Number(s.total),used:sum.used+Number(s.used),available:sum.available+Number(s.available)}),{total:0,used:0,available:0});
-    return { key:courseKey(a), grade:a.grade, classNo:a.class_no, subjectCode:a.subject_code, subjectName:subject.subjectName,
-      quotaId:quota ? String(quota.id) : null, configuredTotal:settings.effectiveMonthlyTotal, usesDefault:settings.usesDefault,
-      total:Number(count?.total || 0), used:Number(count?.used || 0), available:Number(count?.available || 0) };
-  });
-  const currentMonth = schoolMonth(now);
-  return { courses, monthKey, currentMonth, months:monthsOf(term), canSync:monthsOf(term).includes(currentMonth) && term.business_phase==='COLLECTING' && term.release_status==='IDLE' && +now>=+schoolDayStart(term.start_date) && +now<+collectionCutoff(term) };
-}
-async function readScope({ pool, actor, termId, monthKey, grade, classNo, subjectCode }) {
-  teacherOnly(actor);
-  const term = await getTerm(pool,actor.schoolId,termId); checkTerm(term); checkMonth(term,monthKey);
-  const teaching = await assignments(actor,termId,pool);
-  const assignment = teaching.find(a => a.grade===Number(grade) && a.class_no===Number(classNo) && a.subject_code===subjectCode);
-  if (!assignment || !subjectByCode.has(subjectCode)) fail(403, '不在当前任教课程范围');
-  const quotas = await courseQuotas(pool,actor.schoolId,termId,monthKey,assignment);
-  return { quotas, subject:subjectByCode.get(subjectCode), grade:Number(grade), classNo:Number(classNo) };
+async function readScope({pool,actor,termId,grade,classNo,subjectCode}){
+ teacherOnly(actor);const term=await getTerm(pool,actor.schoolId,termId);checkTerm(term);
+ const teaching=await assignments(actor,termId,pool),assignment=teaching.find(a=>a.grade===Number(grade)&&a.class_no===Number(classNo)&&a.subject_code===subjectCode);
+ if(!assignment||!subjectByCode.has(subjectCode))fail(403,'不在当前任教课程范围');
+ const all=await semesterQuotas(pool,actor.schoolId,termId),state=require('./semesterCardPolicy').semesterState(term.evaluation_config);
+ if(state.status==='DRAFT'&&!all.length)fail(422,'等待管理员初始化本学期卡片');
+ const quotas=all.filter(q=>{const p=parse(q.payload_json);return p.grade===Number(grade)&&p.classNo===Number(classNo)&&p.subjectCode===subjectCode;});
+ return{quotas,subject:subjectByCode.get(subjectCode),grade:Number(grade),classNo:Number(classNo),termName:term.term_name};
 }
 async function scopeRows(args) {
   const scope = await readScope(args);
@@ -198,7 +148,7 @@ async function getCourseCardPrint(args) {
   const now=args.now || new Date(), scope=await scopeRows(args);
   const rows=scope.rows.filter(r=>available(r,now));
   if (!rows.length) fail(422,'当前课程没有可打印的有效卡片');
-  return { title:`${scope.grade}年级${scope.classNo}班 · ${scope.subject.subjectName}`, monthKey:args.monthKey,
+  return { title:`${scope.grade}年级${scope.classNo}班 · ${scope.subject.subjectName}`, termName:scope.termName,
     rows:await Promise.all(rows.map(r=>publicCard(r,now))) };
 }
 async function buildCourseCardPdf(args) {
@@ -215,12 +165,12 @@ async function buildCourseCardPdf(args) {
         doc.roundedRect(x,y,265,145,8).strokeColor('#c6d3c8').stroke();
         doc.image(Buffer.from(card.qrDataUrl.split(',')[1],'base64'),x+8,y+25,{width:108});
         doc.fillColor('#214b3c').fontSize(12).text(`${scope.subject.subjectName}积分卡`,x+120,y+16,{width:136});
-        doc.fontSize(9).text(`${scope.grade}年级${scope.classNo}班\n${rows[i].teacher_name}\n${args.monthKey} · 每卡 1 分\n卡号 ${card.id}`,x+120,y+43,{width:136,lineGap:5});
+        doc.fontSize(9).text(`${scope.grade}年级${scope.classNo}班\n${rows[i].teacher_name}\n${scope.termName} · 每卡 1 分\n卡号 ${card.id}`,x+120,y+43,{width:136,lineGap:5});
         doc.fontSize(8).fillColor('#65776a').text('本班学生扫码领取 · 仅可领取一次',x+12,y+127,{width:240,align:'center'});
       }
       doc.end();
     } catch (error) { doc.destroy(error); }
   });
-  return { stream:doc, cardCount:rows.length, filename:`${scope.grade}年级${scope.classNo}班-${scope.subject.subjectName}-${args.monthKey}积分卡.pdf` };
+  return { stream:doc, cardCount:rows.length, filename:`${scope.grade}年级${scope.classNo}班-${scope.subject.subjectName}-${scope.termName}积分卡.pdf` };
 }
-module.exports = { replaceCourseQuotaOwners, getCourseCardSettings, saveCourseCardSettings, syncCourseCards, listCourseCards, getCourseCardPage, getCourseCardPrint, buildCourseCardPdf };
+module.exports = { replaceCourseQuotaOwners, getCourseCardSettings, saveCourseCardSettings,  listCourseCards, getCourseCardPage, getCourseCardPrint, buildCourseCardPdf };

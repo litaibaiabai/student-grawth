@@ -14,7 +14,7 @@ function mountCourseCards(router, { asyncRoute, ok }) {
   read('/report-core/course-cards','listCourseCards');
   read('/report-core/course-cards/preview','getCourseCardPage');
   read('/report-core/course-cards/print','getCourseCardPrint');
-  for (const [verb,url,method] of [['put','/report-core/course-card-settings','saveCourseCardSettings'],['post','/report-core/course-cards/sync','syncCourseCards']])
+  for (const [verb,url,method] of [['put','/report-core/course-card-settings','saveCourseCardSettings']])
     router[verb](url,asyncRoute(async(req,res) => {
       res.setHeader('Cache-Control','private, no-store');
       ok(res,await service[method]({...req.body,...context(req),command:{requestKey:req.body.requestKey,payloadHash:stableHash(req.body)}}));
