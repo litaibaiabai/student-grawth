@@ -7,7 +7,7 @@ const { assertV2Phase } = require('./reportCoreV2Lifecycle');
 const included = e => parse(e.section_meta).roster?.included !== false &&
   !['TRANSFERRED_OUT', 'NOT_APPLICABLE'].includes(parse(e.section_meta).enrollment?.status);
 function teacherOnly(actor) {
-  if (actor.role !== 'teacher') fail(403, '仅班主任可处理学期寄语');
+  if (actor.role !== 'teacher') fail(403, '仅班主任可处理班主任寄语');
 }
 function validId(id) {
   if (!/^[1-9]\d*$/.test(String(id))) fail(422, '学生或学期编号不合法');
@@ -21,7 +21,7 @@ function assertEditable(term, actor) {
 }
 function validateComment(comment) {
   if (typeof comment !== 'string' || !comment.trim() || [...comment.trim()].length > 1000)
-    fail(422, '请填写1至1000字的学期寄语');
+    fail(422, '请填写1至1000字的班主任寄语');
   return comment.trim();
 }
 async function snapshot(connection, fn) {

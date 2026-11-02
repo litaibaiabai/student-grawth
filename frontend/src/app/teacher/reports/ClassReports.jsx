@@ -86,7 +86,7 @@ export default function ClassReports({
     () =>
       !edit.current.dirty ||
       window.confirm(
-        '学期寄语尚未保存，离开会放弃本次修改。是否离开？',
+        '班主任寄语尚未保存，离开会放弃本次修改。是否离开？',
       ),
     [],
   );

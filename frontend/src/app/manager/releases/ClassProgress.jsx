@@ -33,7 +33,7 @@ export default function ClassProgress({
     current = data?.classes.find(c => `${c.grade}:${c.classNo}` === selected);
   const missing = data?.missing.filter(s => !selected || `${s.grade}:${s.classNo}` === selected) || [];
   const fieldLabel = k => ctx.catalog.fields.find(f => f.column === k)?.label || {
-    teacher_comment: '学期寄语',
+    teacher_comment: '班主任寄语',
     confirmation: '班主任确认',
     materials: '待处理材料'
   }[k] || k;

@@ -123,3 +123,11 @@ html{font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothin
 .student-bottomnav{grid-template-columns:repeat(4,minmax(0,1fr))}.student-bottomnav button{min-width:0;padding-inline:4px}
 
 .student-account .account-menu>button:first-child{margin-top:0}
+
+/* UI fixes: stable feedback and imports before data browsing. */
+.app-toast.feedback{position:fixed;top:22px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:20px;max-width:calc(100vw - 32px);margin:0;padding:14px 18px;box-shadow:0 8px 30px #244b3226;border:1px solid #b8cfa8}
+.app-toast button{padding:2px 8px;border:0;background:transparent;font-size:22px;color:inherit}
+.admin-template-actions{margin:0 0 18px}.admin-import{border:1px solid #d9e4d0;background:#f8faf4;border-radius:14px;padding:20px;margin-bottom:28px}.source-pagination{display:flex;justify-content:center;align-items:center;gap:16px;padding:20px;border-top:1px solid #e0e7d7;margin-top:20px}
+.student-bottomnav{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:699px){.student-bottomnav button{font-size:12px;padding-inline:2px}.student-bottomnav{padding-inline:6px}.app-toast.feedback{top:12px;width:max-content}.admin-import{padding:16px}}
+@media print{.app-toast{display:none!important}}

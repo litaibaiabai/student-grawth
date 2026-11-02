@@ -51,7 +51,13 @@ export default function ReportCoreApp() {
     setNotice(message);
     setError("");
   }, []);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(""), 6000);
+    return () => clearTimeout(timer);
+  }, [notice]);
   const reportError = useCallback((e) => {
+    setNotice("");
     setError(e.message);
     if (e.status === 401) {
       localStorage.removeItem("REPORT_CORE_TOKEN");
@@ -441,8 +447,9 @@ export default function ReportCoreApp() {
             </div>
           )}
           {notice && (
-            <div role="status" className="feedback success">
-              {notice}
+            <div role="status" aria-live="polite" aria-atomic="true" className="feedback success app-toast">
+              <span>{notice}</span>
+              <button aria-label="关闭消息提示" onClick={() => setNotice("")}>×</button>
             </div>
           )}
           {busy && (
@@ -547,12 +554,9 @@ export default function ReportCoreApp() {
                 <ManagerView tab={tab} ctx={ctx} />
               )}
 
-              {sourceNext !== null &&
-                ["stories", "awards", "reviews"].includes(tab) && (
-                  <button onClick={ctx.loadMoreSources}>
-                    加载更多材料与记录
-                  </button>
-                )}
+              {sourceNext !== null && ["stories", "awards"].includes(tab) && catalog.schemaVersion !== 'SIX_EDU_V2' && (
+                <div className="source-pagination"><button disabled={busy} onClick={ctx.loadMoreSources}>加载下一批记录</button></div>
+              )}
             </div>
           )}
         </RoleShell>

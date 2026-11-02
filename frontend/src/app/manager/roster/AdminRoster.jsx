@@ -120,7 +120,6 @@ export default function AdminRoster({ ctx }) {
               按模板批量维护，教师账号无需填写班级。已有账号密码保持不变。学籍更正可能使班主任确认失效并重算班级排名，提交前请核对差异。
             </p>
           </div>
-          <button onClick={template}>下载模板</button>
         </div>
         <nav className="evaluation-tabs" aria-label="账号类型">
           {[
@@ -136,6 +135,44 @@ export default function AdminRoster({ ctx }) {
             </button>
           ))}
         </nav>
+        <div className="actions admin-template-actions"><button onClick={template}>下载{role === 'student' ? '学生学籍' : '教师账号'}模板</button></div>
+      <section className="admin-import" aria-label="批量导入账号">
+        <div className="section-heading">
+          <h2>批量导入{role === 'student' ? '学生学籍' : '教师账号'}</h2>
+          <small>上传 → 预览差异 → 确认导入</small>
+        </div>
+        <label className="upload-zone">
+          选择填写好的模板
+          <input
+            aria-label="学籍账号文件"
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            onChange={(e) => {
+              if (e.target.files?.[0]) load(e.target.files[0]);
+              e.target.value = '';
+            }}
+          />
+          <small>
+            {fileName
+              ? `${fileName} · ${rows.length} 行`
+              : '支持Excel或CSV，每批最多1000行；不会显示或导出密码。'}
+          </small>
+        </label>
+        {error && <p role="alert">{error}</p>}
+        <ImportReview
+          ctx={ctx}
+          kind="ROSTER"
+          rows={rows}
+          inputVersion={inputVersion}
+          inputBusy={fileReading}
+          onCommitted={(sentRows, sentVersion) => {
+            if (version.current !== sentVersion) return;
+            markInput();
+            setRows([]);
+          }}
+        />
+      </section>
+
         <div className="admin-filterbar">
           <label>
             姓名或账号
@@ -234,42 +271,6 @@ export default function AdminRoster({ ctx }) {
         <Pager view={view} />
         {maintenanceMessage&&<p role="status" className="feedback success">{maintenanceMessage}</p>}
         {maintenance&&<AccountMaintenance key={`${ctx.termId}:${maintenance.account.id}:${maintenance.mode}`} ctx={ctx} {...maintenance} onDirty={setMaintenanceDirty} onClose={()=>{setMaintenance(null);setMaintenanceDirty(false);}} onDone={message=>{setMaintenance(null);setMaintenanceDirty(false);setMaintenanceMessage(message);}}/>}
-      </section>
-      <section className="panel">
-        <div className="section-heading">
-          <h2>批量导入{role === 'student' ? '学生学籍' : '教师账号'}</h2>
-          <small>上传 → 预览差异 → 确认导入</small>
-        </div>
-        <label className="upload-zone">
-          选择填写好的模板
-          <input
-            aria-label="学籍账号文件"
-            type="file"
-            accept=".xlsx,.xls,.csv"
-            onChange={(e) => {
-              if (e.target.files?.[0]) load(e.target.files[0]);
-              e.target.value = '';
-            }}
-          />
-          <small>
-            {fileName
-              ? `${fileName} · ${rows.length} 行`
-              : '支持Excel或CSV，每批最多1000行；不会显示或导出密码。'}
-          </small>
-        </label>
-        {error && <p role="alert">{error}</p>}
-        <ImportReview
-          ctx={ctx}
-          kind="ROSTER"
-          rows={rows}
-          inputVersion={inputVersion}
-          inputBusy={fileReading}
-          onCommitted={(sentRows, sentVersion) => {
-            if (version.current !== sentVersion) return;
-            markInput();
-            setRows([]);
-          }}
-        />
       </section>
       <ImportHistory ctx={ctx} kind="ROSTER" />
     </>

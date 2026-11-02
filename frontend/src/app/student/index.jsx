@@ -28,12 +28,7 @@ export function StudentView({ tab, ctx }) {
       {tab === 'cards' && <Cards ctx={ctx} />}
       {tab === 'awards' && <AwardUpload ctx={ctx} />}
       {tab === 'stories' && (isV2 ? <StoryActivities ctx={ctx} /> : <StoryForm ctx={ctx} />)}
-      {tab === 'self' && (
-        <>
-          <SelfEvaluation ctx={ctx} />
-          <button onClick={() => ctx.navigate('report')}>六育报告</button>
-        </>
-      )}
+      {tab === 'self' && <SelfEvaluation ctx={ctx} />}
       {tab === 'report' && <PublishedReport ctx={ctx} />}
     </>
   );

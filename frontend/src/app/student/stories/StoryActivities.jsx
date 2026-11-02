@@ -8,7 +8,7 @@ export default function StoryActivities({ ctx }) {
   const writeGuard = useRef(null);
   const registerGuard = useCallback(guard => { writeGuard.current = guard; }, []);
   return <>
-    <header className="story-activity-heading"><p className="kicker">故事让成长有声</p><h2>我的故事活动</h2>
+    <header className="story-activity-heading"><p className="kicker">故事让成长有声</p><h2>云美故事</h2>
       <nav className="evaluation-tabs" aria-label="故事活动类型">
         {[
           ['LISTEN', '听故事'], ['WRITE', '写故事'], ['TELL', '讲故事'],

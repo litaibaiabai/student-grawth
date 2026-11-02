@@ -30,9 +30,8 @@ export default function SubjectCardQuota({ ctx }) {
     }catch(e){setError(e.message);if(e.status===401)onError(e);}finally{setBusy(false);}
   };
   const effectiveTotal=subjectCode=>Number(values[subjectCode]==='' ? defaultValue : values[subjectCode]);
-  const projected=valid ? settings.subjects.reduce((n,s)=>n+effectiveTotal(s.subjectCode)*s.courseCount,0) : null;
   return <section className="panel subject-quota-page">
-    <div className="subject-quota-heading"><div><span className="course-eyebrow">课程积分卡 · 自动月配</span><h2>按学科设置每班月额度</h2><p>配置一次，系统根据教师任教课程，为每个班级分别准备学科积分卡。</p></div><div className="subject-quota-estimate"><strong>{projected===null?'—':projected.toLocaleString()}</strong><span>张 / 月 · 按当前任教课程预计</span></div></div>
+    <div className="subject-quota-heading"><div><span className="course-eyebrow">课程积分卡 · 自动月配</span><h2>按学科设置每班月额度</h2><p>配置一次，系统根据教师任教课程，为每个班级分别准备学科积分卡。</p></div></div>
     <div className="subject-quota-example"><UIIcon name="book" /><p>例如：语文设置 <b>60 张</b>，同一教师任教三个语文班，则<b>每班各生成 60 张，共 180 张</b>。</p></div>
     {error && <div className="feedback error" role="alert">{error}<button disabled={busy} onClick={()=>{if(!dirty||window.confirm('重新读取会放弃未保存的额度，是否继续？'))setRevision(n=>n+1);}}>重新读取</button></div>}
     {!settings ? <p role="status">{error?'暂时无法读取学科配置。':'正在读取学科月额度…'}</p> : <>

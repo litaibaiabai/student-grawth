@@ -80,7 +80,7 @@ export default function Cards({ ctx }) {
   return (
     <section className="panel claim-card">
       <p className="kicker">小小卡片 · 大大进步</p>
-      <h2>扫一扫，收获成长分</h2>
+      <h2>领取积分</h2>
       <p className="claim-intro">扫描老师发放的积分卡，确认后计入对应学科的过程表现。</p>
       <ol className="claim-steps" aria-label="领分步骤">
         <li className={!card ? 'active' : ''}><span>1</span>扫描二维码</li>

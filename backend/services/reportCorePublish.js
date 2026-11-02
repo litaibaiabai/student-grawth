@@ -36,7 +36,7 @@ async function getReadiness({ pool, actor, termId }) {
     const classKey = `${e.grade_snapshot}:${e.class_no_snapshot}`;
     if (heads !== null && !heads.get(classKey) && !blockedClasses.has(classKey)) {
       blockedClasses.add(classKey);
-      missing.push({field:'responsibleTeacher',grade:e.grade_snapshot,classNo:e.class_no_snapshot,reason:'班级需要本校启用的负责教师'});
+      missing.push({field:'responsibleTeacher',grade:e.grade_snapshot,classNo:e.class_no_snapshot,reason:'班级需要本校启用的班主任'});
     }
     const items = evaluateCompletion({evaluation:e,config:term.evaluation_config,blockingMaterials:byStudent.get(String(e.student_id))||[]}).missingItems;
     missing.push(
@@ -302,7 +302,7 @@ async function activateRelease(args) {
       fenceGuard(term, args.releaseKey, args.fence);
       if (term.release_status !== "READY") fail(422, "尚未准备完成");
       const readiness = await getReadiness({pool:c,actor:args.actor,termId:args.termId});
-      if (!readiness.complete) fail(409, '负责教师或报告确认状态已变化');
+      if (!readiness.complete) fail(409, '班主任或报告确认状态已变化');
       const manifest = parse(term.release_manifest);
       const [[count]] = await c.query(
         "SELECT COUNT(*) n FROM term_report WHERE school_id=? AND term_id=? AND release_key=? AND status='PREPARED'",

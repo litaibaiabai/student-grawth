@@ -156,7 +156,7 @@ async function decideCertificate({
           f?.sourceType !== "CERTIFICATE" &&
           !["sports_specialties", "art_specialties"].includes(target)
         )
-          fail(422, "不是奖状生成字段");
+          fail(422, "不是上传奖状字段");
         let value = manualOutputs?.[target];
         if (value !== undefined && !reason?.trim()) fail(422, "人工认定需理由");
         if (value === undefined) {

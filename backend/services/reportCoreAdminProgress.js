@@ -26,7 +26,7 @@ async function getProgress({ pool, actor, termId, grade, classNo }) {
     for (const e of roster) {
       const studentId = String(e.student_id), pending = byStudent.get(studentId) || [];
       const completion = evaluateCompletion({ evaluation: e, config: term.evaluation_config, blockingMaterials: pending });
-      if (heads !== null && !heads.get(`${e.grade_snapshot}:${e.class_no_snapshot}`)) completion.missingItems.push({field:'responsibleTeacher',reason:'班级需要本校启用的负责教师'});
+      if (heads !== null && !heads.get(`${e.grade_snapshot}:${e.class_no_snapshot}`)) completion.missingItems.push({field:'responsibleTeacher',reason:'班级需要本校启用的班主任'});
       const confirmed = require('./authorizationService').responsibleReviewValid(heads,e) && e.status === 'CONFIRMED' && String(e.confirmed_revision) === String(e.revision) && e.approval_fingerprint === require('./reportCoreEvaluation').reportFingerprint(e, term);
       const key = `${e.grade_snapshot}:${e.class_no_snapshot}`;
       if (!classes.has(key)) classes.set(key, { grade: e.grade_snapshot, classNo: e.class_no_snapshot, ...empty() });

@@ -95,6 +95,7 @@ export default function SelfEvaluation({ ctx }) {
       base = view;
     setSaving(true);
     setMessage('');
+    ctx.notify('');
     try {
       await api(
         `/report-core/forms/${actorId}`,

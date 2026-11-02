@@ -81,8 +81,8 @@ export default function CourseCards({ ctx }) {
   const courses = data?.courses || [];
   const total = courses.reduce((n,c) => n+c.total,0), remaining = courses.reduce((n,c) => n+c.available,0);
   const monthFilter = (
-    <label className="course-month"><UIIcon name="calendar" /><span className="sr-only">领卡月份</span>
-      <select aria-label="领卡月份" value={month} disabled={loading || !!action} onChange={e => { setMonth(e.target.value); setCourseKey(''); setData(null); }}>
+    <label className="course-month"><UIIcon name="calendar" /><span className="sr-only">打印月份</span>
+      <select aria-label="打印月份" value={month} disabled={loading || !!action} onChange={e => { setMonth(e.target.value); setCourseKey(''); setData(null); }}>
         {(data?.months || [month]).map(m => <option key={m} value={m}>{prettyMonth(m)}</option>)}
       </select>
     </label>
@@ -99,7 +99,7 @@ export default function CourseCards({ ctx }) {
             <div className="course-detail-name"><span className="course-eyebrow">{courseLabel(course)} · {prettyMonth(month)}</span><h2 tabIndex={-1} ref={titleRef}>{course.subjectName}<span>积分卡</span></h2><p>共 {course.total} 张 · 待领取 {course.available} 张 · 已领取 {course.used} 张</p></div>
             <div className="course-export-actions">
               <button disabled={!!action || !course.available} onClick={() => run('download', () => download(`/report-core/course-cards/pdf?${scope}`, `${courseLabel(course)}-${course.subjectName}-${month}积分卡.pdf`))}><UIIcon name="upload" />{action==='download' ? '正在下载…' : '下载 PDF'}</button>
-              <button className="primary" disabled={!!action || !course.available} onClick={print}><UIIcon name="report" />{action==='print' ? '准备打印…' : '打印卡片'}</button>
+              <button className="primary" disabled={!!action || !course.available} onClick={print}><UIIcon name="report" />{action==='print' ? '准备打印…' : '打印积分卡'}</button>
             </div>
           </section>
           <section className="course-preview-panel">

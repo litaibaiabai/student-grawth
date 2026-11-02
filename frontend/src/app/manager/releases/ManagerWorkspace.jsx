@@ -79,7 +79,7 @@ export default function ManagerWorkspace({ ctx }) {
   const fieldLabel = (key) =>
     ctx.catalog.fields.find((f) => f.column === key)?.label ||
     ({
-      teacher_comment: '学期寄语',
+      teacher_comment: '班主任寄语',
       confirmation: '班主任确认',
       materials: '待处理材料',
       self_conduct_text: '品行美自述',

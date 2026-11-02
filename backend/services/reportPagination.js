@@ -1,5 +1,5 @@
 const {catalog}=require('./reportCorePolicy');
-const narrativeLabels={self_conduct_text:'品行美',self_wisdom_text:'智慧美',self_health_text:'健康美',self_art_text:'艺术美',self_labor_text:'劳动美',semester_highlights:'本学期最大收获与活动',next_term_goals:'下学期努力目标',teacher_comment:'学期寄语',family_message:'家长寄语'};
+const narrativeLabels={self_conduct_text:'品行美',self_wisdom_text:'智慧美',self_health_text:'健康美',self_art_text:'艺术美',self_labor_text:'劳动美',semester_highlights:'本学期最大收获与活动',next_term_goals:'下学期努力目标',teacher_comment:'班主任寄语',family_message:'家长寄语'};
 const normalize=text=>String(text??'').replace(/\r\n?/g,'\n');
 const width=char=>char==='\t'?2:char.codePointAt(0)>=0x1f000?2:1;
 function splitText(text,{columns=80,maxLines=24}={}){

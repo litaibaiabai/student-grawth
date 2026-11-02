@@ -16,7 +16,7 @@
     {
       "viewCode": "CONDUCT_POLITENESS_OTHER_STAR",
       "column": "conduct_politeness_other_star",
-      "label": "有礼貌·他评",
+      "label": "有礼貌·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -36,7 +36,7 @@
     {
       "viewCode": "CONDUCT_INTEGRITY_OTHER_STAR",
       "column": "conduct_integrity_other_star",
-      "label": "讲信用·他评",
+      "label": "讲信用·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -56,7 +56,7 @@
     {
       "viewCode": "CONDUCT_KINDNESS_OTHER_STAR",
       "column": "conduct_kindness_other_star",
-      "label": "有爱心·他评",
+      "label": "有爱心·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -76,7 +76,7 @@
     {
       "viewCode": "CONDUCT_COMMUNICATION_OTHER_STAR",
       "column": "conduct_communication_other_star",
-      "label": "善交流·他评",
+      "label": "善交流·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -96,7 +96,7 @@
     {
       "viewCode": "CONDUCT_CIVILITY_OTHER_STAR",
       "column": "conduct_civility_other_star",
-      "label": "讲文明·他评",
+      "label": "讲文明·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -116,7 +116,7 @@
     {
       "viewCode": "CONDUCT_RESPONSIBILITY_OTHER_STAR",
       "column": "conduct_responsibility_other_star",
-      "label": "负责任·他评",
+      "label": "负责任·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -136,7 +136,7 @@
     {
       "viewCode": "CONDUCT_RULES_OTHER_STAR",
       "column": "conduct_rules_other_star",
-      "label": "守规则·他评",
+      "label": "守规则·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",
@@ -156,7 +156,7 @@
     {
       "viewCode": "CONDUCT_COOPERATION_OTHER_STAR",
       "column": "conduct_cooperation_other_star",
-      "label": "会合作·他评",
+      "label": "会合作·师评",
       "section": "conduct",
       "valueType": "star",
       "sourceType": "IMPORT",

@@ -179,7 +179,7 @@ function StudentAwards({ ctx }) {
   const canWithdraw = row => canUpload && activeStates.includes(row.status);
 
   return <div className="student-awards">
-    <header className="student-awards-heading"><div><p className="student-awards-eyebrow">我的成长手账 / 荣誉篇</p><h1>把闪光的时刻，收进成长里</h1></div><span className="student-awards-heading-icon"><UIIcon name="award"/></span></header>
+    <header className="student-awards-heading"><div><p className="student-awards-eyebrow">我的成长手账 / 荣誉篇</p><h1>上传奖状</h1></div><span className="student-awards-heading-icon"><UIIcon name="award"/></span></header>
     {message && <div className={`student-awards-feedback ${message.type}`} role={message.type === 'error' ? 'alert' : 'status'}><UIIcon name={message.type === 'error' ? 'report' : 'check'}/><span>{message.text}</span><button aria-label="关闭奖状提示" onClick={() => setMessage(null)}>×</button></div>}
     <div className="student-awards-columns">
       <section ref={uploader} className="student-awards-uploader" aria-labelledby="student-awards-upload-title">

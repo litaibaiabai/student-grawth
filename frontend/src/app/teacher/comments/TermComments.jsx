@@ -159,7 +159,7 @@ function CommentWorkspace({ ctx }) {
   const validText = !!text.trim() && [...text.trim()].length <= 1000;
   const canApprove = record?.canEdit && validText && (record.commentId || record.status === 'APPROVED') && (dirty || record.status !== 'APPROVED');
   const next = rows.find((r, index) => index > rows.findIndex(r => r.student.id === studentId) && r.status !== 'APPROVED');
-  return <section className="term-comments" aria-label="学期寄语工作台">
+  return <section className="term-comments" aria-label="班主任寄语工作台">
     {headerSlot && createPortal(<label className="term-class-picker"><span>选择班级</span><select aria-label="寄语班级" value={classKey} disabled={locked || !classes.length} onChange={e => {
         if (!mayLeave()) return;
         rosterRequest.current++; setClassKey(e.target.value); setStudentId(''); setRecord(null); setText(''); setRows([]); setSelected([]); setKeyword(''); setFilter('ALL'); setError('');
@@ -176,20 +176,20 @@ function CommentWorkspace({ ctx }) {
         <div className="term-roster-list" aria-busy={rosterLoading}>
           {rosterLoading && !rows.length ? <p className="term-list-empty">正在读取班级名册…</p> : filtered.map(row => <div key={row.student.id} className={`term-student ${row.student.id === studentId ? 'is-active' : ''}`}>
             <input type="checkbox" aria-label={`选择${row.student.name}`} disabled={locked || row.status !== 'DRAFT' || !row.canEdit} checked={selected.includes(row.student.id)} onChange={e => setSelected(ids => e.target.checked ? [...ids, row.student.id] : ids.filter(id => id !== row.student.id))} />
-            <button className="term-student-open" aria-label={`查看${row.student.name}的学期寄语`} title={`${row.student.name} · 编号 ${row.student.id}`} aria-pressed={row.student.id === studentId} disabled={locked} onClick={() => chooseStudent(row.student.id)}><span className="term-student-name"><b>{row.student.name}</b></span><span className={`term-status status-${row.status.toLowerCase()}`}>{statusNames[row.status]}</span></button>
+            <button className="term-student-open" aria-label={`查看${row.student.name}的班主任寄语`} title={`${row.student.name} · 编号 ${row.student.id}`} aria-pressed={row.student.id === studentId} disabled={locked} onClick={() => chooseStudent(row.student.id)}><span className="term-student-name"><b>{row.student.name}</b></span><span className={`term-status status-${row.status.toLowerCase()}`}>{statusNames[row.status]}</span></button>
           </div>)}
           {!rosterLoading && !filtered.length && <p className="term-list-empty">{rows.length ? '没有符合条件的学生。' : '当前班级还没有学生。'}</p>}
         </div>
         <footer className="term-batch"><button className="primary" disabled={locked || loading || !selected.length || selected.length > 100 || (selected.includes(studentId) && !validText)} onClick={() => approve(selected)}>批量审核通过（{selected.length}）</button><p>{selected.length > 100 ? '每批最多审核100名学生，请减少勾选。' : '审核后，寄语将写入学生的六育报告。'}</p></footer>
       </aside>
       <div className="term-editor-column">
-        {!studentId ? <div className="term-editor-empty"><span>02 / 核对寄语</span><PenMark /><h3>从一个名字，读懂一段成长。</h3><p>点击左侧学生，自动生成专属学期寄语。<br />你可以修改文字，也可以直接审核通过。</p></div> : <>
-          <div className="term-editor-top"><div><span>02 / 核对寄语</span><h3>{record?.student.name || rows.find(r => r.student.id === studentId)?.student.name}<small>的学期寄语</small></h3></div><span className={`term-status status-${record?.status.toLowerCase() || 'empty'}`}>{dirty ? '修改未保存' : loading ? '正在生成 / 读取' : statusNames[record?.status] || '读取中'}</span></div>
+        {!studentId ? <div className="term-editor-empty"><span>02 / 核对寄语</span><PenMark /><h3>从一个名字，读懂一段成长。</h3><p>点击左侧学生，自动生成专属班主任寄语。<br />你可以修改文字，也可以直接审核通过。</p></div> : <>
+          <div className="term-editor-top"><div><span>02 / 核对寄语</span><h3>{record?.student.name || rows.find(r => r.student.id === studentId)?.student.name}<small>的班主任寄语</small></h3></div><span className={`term-status status-${record?.status.toLowerCase() || 'empty'}`}>{dirty ? '修改未保存' : loading ? '正在生成 / 读取' : statusNames[record?.status] || '读取中'}</span></div>
           <div className="term-letter">
             <div className="term-letter-heading"><span>致正在成长的你</span><span>{ctx.term?.term_name || record?.report?.term.name}</span></div>
             {loading && <div className="term-generating" role="status"><span className="term-loading-dot" />正在读取六育报表，为这份成长落笔…</div>}
-            <label className="sr-only" htmlFor="term-comment-text">学期寄语</label>
-            <textarea id="term-comment-text" aria-label="学期寄语" aria-describedby="term-comment-hint" value={text} disabled={locked || loading || !record?.canEdit} onChange={e => setText(e.target.value)} placeholder={loading ? '寄语生成后会显示在这里，请稍候。' : '寄语暂未生成，可以重试生成，或亲自为孩子写下寄语。'} />
+            <label className="sr-only" htmlFor="term-comment-text">班主任寄语</label>
+            <textarea id="term-comment-text" aria-label="班主任寄语" aria-describedby="term-comment-hint" value={text} disabled={locked || loading || !record?.canEdit} onChange={e => setText(e.target.value)} placeholder={loading ? '寄语生成后会显示在这里，请稍候。' : '寄语暂未生成，可以重试生成，或亲自为孩子写下寄语。'} />
             <div className="term-letter-footer"><span>一份鼓励，一程相伴。</span><span className={[...text.trim()].length > 1000 ? 'term-limit-error' : ''}>{[...text.trim()].length} / 1000 字</span></div>
           </div>
           {record?.reportChanged && <p className="term-data-note">这份寄语生成后，六育数据有更新。请展开报表核对，必要时重新生成。</p>}

@@ -128,7 +128,7 @@ async function submitForm({
         const changes = {};
         for (const [key, v] of Object.entries(item.changes)) {
           if (key !== (actor.role === "student" ? "self_star" : "teacher_star"))
-            fail(403, "特长自评他评不能互改");
+            fail(403, "特长自评师评不能互改");
           if (actor.role === "teacher")
             await assertScope(
               { actor, studentKey, action: "score", fields: [col] },

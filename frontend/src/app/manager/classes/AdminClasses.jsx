@@ -82,12 +82,15 @@ export default function AdminClasses({
       setBusy(false);
     }
   };
-  return <><section className="panel admin-classes"><div className="section-heading"><div><h2>本学期班级</h2><p>通过模板导入班级，再配置负责教师与实际任课教师。</p></div><button onClick={() => writeTemplate([{
+  return <><section className="panel"><div className="section-heading"><h2>批量导入班级</h2><button onClick={() => writeTemplate([{
           年级: '',
           班级: '',
           班级名称: '',
           班主任账号: ''
-        }], '班级导入模板')}>下载班级模板</button></div><form className="admin-filterbar" onSubmit={e => {
+        }], '班级导入模板')}>下载班级模板</button></div><p>相同班级可重新导入更正班名，内容相同则跳过；教师职责请在班级详情中维护。</p><label className="upload-zone">选择班级模板<input aria-label="班级导入文件" type="file" accept=".xlsx,.xls,.csv" disabled={busy} onChange={e => {
+          if (e.target.files?.[0]) load(e.target.files[0]);
+          e.target.value = '';
+        }} /><small>年级、班级必填；支持空班级，班主任账号可留空。</small></label><div className="actions"><button disabled={busy || !rows.length} onClick={() => submit(false)}>预览班级导入</button><button className="primary" disabled={busy || !preview?.previewId || preview.errors?.length > 0} onClick={() => submit(true)}>确认班级导入</button><small>{rows.length} 行</small></div>{preview && <div><h3>班级导入差异</h3><p>新增 {preview.counts?.created || 0} · 更新 {preview.counts?.updated || 0} · 跳过 {preview.counts?.skipped || 0}</p>{preview.diffs?.map((d, i) => <p key={i}>第{d.rowNo || i + 1}行 · {className(d.after || {})} · {d.action === 'NEW' ? '新增' : d.action === 'UPDATE' ? `班名更正：${d.before?.displayName || '默认班名'} → ${d.after?.displayName || '默认班名'}` : '跳过'}</p>)}{preview.errors?.map((e, i) => <p role="alert" key={i}>第{e.rowNo}行：{e.reason}</p>)}</div>}{error && <p role="alert">{error}，输入已保留，请修正后重新预览。</p>}</section><section className="panel admin-classes"><div className="section-heading"><div><h2>本学期班级</h2><p>通过模板导入班级，再配置班主任与实际任课教师。</p></div></div><form className="admin-filterbar" onSubmit={e => {
         e.preventDefault();
         setFilters({
           q
@@ -98,10 +101,7 @@ export default function AdminClasses({
             setSelected(c.id);
             setTeacherDirty(false);
           }
-        }}><strong>{className(c)}</strong><span>负责教师 · {c.responsibleTeacherName || '待配置'}</span><small>{c.studentCount} 名学生 <b aria-hidden="true">↗</b></small></button>)}</div>{view.state && !view.state.rows.length && <p className="admin-empty">本学期还没有班级，请先导入班级模板。</p>}<Pager view={view} /></section><section className="panel"><h2>批量导入班级</h2><p>相同班级可重新导入更正班名，内容相同则跳过；教师职责请在班级详情中维护。</p><label className="upload-zone">选择班级模板<input aria-label="班级导入文件" type="file" accept=".xlsx,.xls,.csv" disabled={busy} onChange={e => {
-          if (e.target.files?.[0]) load(e.target.files[0]);
-          e.target.value = '';
-        }} /><small>年级、班级必填；支持空班级，班主任账号可留空。</small></label><div className="actions"><button disabled={busy || !rows.length} onClick={() => submit(false)}>预览班级导入</button><button className="primary" disabled={busy || !preview?.previewId || preview.errors?.length > 0} onClick={() => submit(true)}>确认班级导入</button><small>{rows.length} 行</small></div>{preview && <div><h3>班级导入差异</h3><p>新增 {preview.counts?.created || 0} · 更新 {preview.counts?.updated || 0} · 跳过 {preview.counts?.skipped || 0}</p>{preview.diffs?.map((d, i) => <p key={i}>第{d.rowNo || i + 1}行 · {className(d.after || {})} · {d.action === 'NEW' ? '新增' : d.action === 'UPDATE' ? `班名更正：${d.before?.displayName || '默认班名'} → ${d.after?.displayName || '默认班名'}` : '跳过'}</p>)}{preview.errors?.map((e, i) => <p role="alert" key={i}>第{e.rowNo}行：{e.reason}</p>)}</div>}{error && <p role="alert">{error}，输入已保留，请修正后重新预览。</p>}</section>{selected && <ClassDetail key={`${ctx.termId}:${selected}`} ctx={ctx} id={selected} onDirty={setTeacherDirty} onClose={() => {
+        }}><strong>{className(c)}</strong><span>班主任 · {c.responsibleTeacherName || '待配置'}</span><small>{c.studentCount} 名学生 <b aria-hidden="true">↗</b></small></button>)}</div>{view.state && !view.state.rows.length && <p className="admin-empty">本学期还没有班级，请先导入班级模板。</p>}<Pager view={view} /></section>{selected && <ClassDetail key={`${ctx.termId}:${selected}`} ctx={ctx} id={selected} onDirty={setTeacherDirty} onClose={() => {
       setSelected(null);
       setTeacherDirty(false);
     }} />}</>;
@@ -172,18 +172,7 @@ function ClassDetail({
     setBusy(true);
     setError('');
     try {
-      if (commit) {
-        await api(`/admin/report-core/classes/${id}/teachers/previews/${preview.previewId}/commit`, {
-          termId: ctx.termId,
-          expectedRevision: preview.revision
-        });
-        const d = await api(`/admin/report-core/classes/${id}?termId=${ctx.termId}`);
-        setDetail(d);
-        setDirty(false);
-        setPreview(null);
-        setSaved('教师配置已保存');
-        ctx.refresh();
-      } else setPreview(resultOf(await api(`/admin/report-core/classes/${id}/teachers/preview`, {
+      const checked = resultOf(await api(`/admin/report-core/classes/${id}/teachers/preview`, {
         termId: ctx.termId,
         expectedRevision: detail.class.revision,
         responsibleTeacherId: head || null,
@@ -191,7 +180,21 @@ function ClassDetail({
           subjectCode,
           teacherId
         }))
-      })));
+      }));
+      if (commit) {
+        await api(`/admin/report-core/classes/${id}/teachers/previews/${checked.previewId}/commit`, {
+          termId: ctx.termId,
+          expectedRevision: checked.revision
+        });
+        const d = await api(`/admin/report-core/classes/${id}?termId=${ctx.termId}`);
+        setDetail(d);
+        setHead(d.class.responsibleTeacherId || '');
+        setAssignments(Object.fromEntries(d.assignments.map(a => [a.subjectCode, a.teacherId])));
+        setDirty(false);
+        setPreview(null);
+        setSaved('教师配置已保存');
+        ctx.refresh();
+      } else setPreview(checked);
     } catch (e) {
       setPreview(null);
       setError(e.message);
@@ -212,8 +215,8 @@ function ClassDetail({
           setError(e.message);
           if (e.status === 401) ctx.error(e);
         }
-      }}>刷新班级版本，保留配置</button></p>}{saved && <p role="status" className="feedback success">{saved}</p>}{detail && tab === 'students' && <div className="table-scroll"><table><thead><tr><th>学生</th><th>学生标识</th></tr></thead><tbody>{detail.students.map(s => <tr key={s.studentId}><td>{s.name}</td><td>{s.studentId}</td></tr>)}</tbody></table>{!detail.students.length && <p>这个班级尚未导入学生。</p>}</div>}{detail && tab === 'teachers' && <><p>负责教师承担班主任报告审核；任课关系决定学科采集权限与月度卡，不会自动分配全部学科。</p><fieldset disabled={busy} className="admin-teacher-grid"><label className="admin-head-select">负责教师<select aria-label="负责教师" value={head} onChange={e => change(setHead, e.target.value)}>{options}</select></label>{Object.entries(subjects).map(([code, name]) => <label key={code}>{name}<select aria-label={`${name}任课教师`} value={assignments[code] || ''} onChange={e => change(setAssignments, {
+      }}>刷新班级版本，保留配置</button></p>}{saved && <p role="status" className="feedback success">{saved}</p>}{detail && tab === 'students' && <div className="table-scroll"><table><thead><tr><th>学生</th><th>学生标识</th></tr></thead><tbody>{detail.students.map(s => <tr key={s.studentId}><td>{s.name}</td><td>{s.studentId}</td></tr>)}</tbody></table>{!detail.students.length && <p>这个班级尚未导入学生。</p>}</div>}{detail && tab === 'teachers' && <><p>班主任承担班级报告审核；任课关系决定学科采集权限与月度卡，不会自动分配全部学科。</p><fieldset disabled={busy} className="admin-teacher-grid"><label className="admin-head-select">班主任<select aria-label="班主任" value={head} onChange={e => change(setHead, e.target.value)}>{options}</select></label>{Object.entries(subjects).map(([code, name]) => <label key={code}>{name}<select aria-label={`${name}任课教师`} value={assignments[code] || ''} onChange={e => change(setAssignments, {
             ...assignments,
             [code]: e.target.value
-          })}>{options}</select></label>)}</fieldset><div className="actions"><button disabled={busy || !dirty} onClick={() => run(false)}>预览教师配置</button><button className="primary" disabled={busy || !preview} onClick={() => run(true)}>确认教师配置</button></div>{preview && <div className="feedback"><h3>核对教师配置影响</h3><p>影响 {preview.impact?.studentCount || 0} 名学生；原始记录保留，权限与确认状态重新核对。</p>{preview.diffs?.map((d, i) => <div key={i}><p>负责教师：{teachers.find(t => t.id === d.before.responsibleTeacherId)?.realName || '未配置'} → {teachers.find(t => t.id === d.after.responsibleTeacherId)?.realName || '未配置'}</p><p>任课配置：{d.before.assignments.map(a => `${subjects[a.subjectCode] || a.subjectCode} · ${a.teacherName || teachers.find(t => t.id === a.teacherId)?.realName || a.teacherId}`).join('；') || '无'} → {d.after.assignments.map(a => `${subjects[a.subjectCode] || a.subjectCode} · ${teachers.find(t => t.id === a.teacherId)?.realName || a.teacherId}`).join('；') || '无'}</p></div>)}</div>}</>}</section>;
+          })}>{options}</select></label>)}</fieldset><div className="actions"><button disabled={busy || !dirty} onClick={() => run(false)}>预览教师配置</button><button className="primary" disabled={busy || !dirty || !detail} onClick={() => run(true)}>确认教师配置</button></div>{preview && <div className="feedback"><h3>核对教师配置影响</h3><p>影响 {preview.impact?.studentCount || 0} 名学生；原始记录保留，权限与确认状态重新核对。</p>{preview.diffs?.map((d, i) => <div key={i}><p>班主任：{teachers.find(t => t.id === d.before.responsibleTeacherId)?.realName || '未配置'} → {teachers.find(t => t.id === d.after.responsibleTeacherId)?.realName || '未配置'}</p><p>任课配置：{d.before.assignments.map(a => `${subjects[a.subjectCode] || a.subjectCode} · ${a.teacherName || teachers.find(t => t.id === a.teacherId)?.realName || a.teacherId}`).join('；') || '无'} → {d.after.assignments.map(a => `${subjects[a.subjectCode] || a.subjectCode} · ${teachers.find(t => t.id === a.teacherId)?.realName || a.teacherId}`).join('；') || '无'}</p></div>)}</div>}</>}</section>;
 }

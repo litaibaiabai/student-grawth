@@ -314,7 +314,7 @@
     {
       "viewCode": "CONDUCT_1_OTHER",
       "section": "conduct",
-      "label": "有礼貌·他评",
+      "label": "有礼貌·师评",
       "valueType": "star",
       "column": "conduct_politeness_other_star",
       "jsonPath": null,
@@ -337,7 +337,7 @@
     {
       "viewCode": "CONDUCT_2_OTHER",
       "section": "conduct",
-      "label": "讲文明·他评",
+      "label": "讲文明·师评",
       "valueType": "star",
       "column": "conduct_civility_other_star",
       "jsonPath": null,
@@ -360,7 +360,7 @@
     {
       "viewCode": "CONDUCT_3_OTHER",
       "section": "conduct",
-      "label": "讲信用·他评",
+      "label": "讲信用·师评",
       "valueType": "star",
       "column": "conduct_integrity_other_star",
       "jsonPath": null,
@@ -383,7 +383,7 @@
     {
       "viewCode": "CONDUCT_4_OTHER",
       "section": "conduct",
-      "label": "负责任·他评",
+      "label": "负责任·师评",
       "valueType": "star",
       "column": "conduct_responsibility_other_star",
       "jsonPath": null,
@@ -406,7 +406,7 @@
     {
       "viewCode": "CONDUCT_5_OTHER",
       "section": "conduct",
-      "label": "有爱心·他评",
+      "label": "有爱心·师评",
       "valueType": "star",
       "column": "conduct_kindness_other_star",
       "jsonPath": null,
@@ -429,7 +429,7 @@
     {
       "viewCode": "CONDUCT_6_OTHER",
       "section": "conduct",
-      "label": "守规则·他评",
+      "label": "守规则·师评",
       "valueType": "star",
       "column": "conduct_rules_other_star",
       "jsonPath": null,
@@ -452,7 +452,7 @@
     {
       "viewCode": "CONDUCT_7_OTHER",
       "section": "conduct",
-      "label": "善交流·他评",
+      "label": "善交流·师评",
       "valueType": "star",
       "column": "conduct_communication_other_star",
       "jsonPath": null,
@@ -475,7 +475,7 @@
     {
       "viewCode": "CONDUCT_8_OTHER",
       "section": "conduct",
-      "label": "会合作·他评",
+      "label": "会合作·师评",
       "valueType": "star",
       "column": "conduct_cooperation_other_star",
       "jsonPath": null,

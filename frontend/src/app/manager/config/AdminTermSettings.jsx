@@ -268,6 +268,7 @@ export default function AdminTermSettings({ ctx }) {
       : `${labels[d.field] || d.field}：${Array.isArray(d.before) ? d.before.join('、') : typeof d.before === 'object' && d.before ? '已配置旧覆盖' : (d.before ?? '未设置')} → ${Array.isArray(d.after) ? d.after.join('、') : (d.after ?? '清空')}`;
   return (
     <>
+      {isV2&&<NewTerm key={ctx.termId} ctx={ctx} source={data.term} onDirty={setNewTermDirty}/>}
       <div className="term-summary">
         <span>{data.classes.length} 个班级</span>
         <span>
@@ -1004,7 +1005,6 @@ export default function AdminTermSettings({ ctx }) {
             )}
           </section>
         )}
-      {isV2&&<NewTerm key={ctx.termId} ctx={ctx} source={data.term} onDirty={setNewTermDirty}/>}
     </>
   );
 }

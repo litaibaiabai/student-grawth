@@ -17,10 +17,10 @@ export function V2Home({ ctx }) {
       </section>
       <div className="action-pair">
         {[
-          ['stories', '故事活动', '听故事、写故事、讲故事'],
-          ['self', '学期自评', '11项表现，给自己点星星'],
-          ['cards', '扫码领分', '领取老师发放的成长卡'],
+          ['cards', '领取积分', '扫描老师发放的积分卡'],
+          ['stories', '云美故事', '听故事、写故事、讲故事'],
           ['awards', '上传奖状', '提交获奖证明，等待老师审核'],
+          ['self', '自我评价', '11项表现，给自己点星星'],
           ['report', '六育报告', '查看学校发布的学期报告'],
         ].map(([page, title, note]) => (
           <button
@@ -100,14 +100,14 @@ export default function StudentHome({ ctx }) {
       <div className="action-pair">
         <button
           className="action-tile"
-          aria-label="领取积分卡"
+          aria-label="领取积分"
           onClick={() => ctx.navigate('cards')}
         >
           <span className="tile-icon">
             <UIIcon name="scan" />
           </span>
           <span>
-            <b>领取积分卡</b>
+            <b>领取积分</b>
             <small>打开扫码链接，确认就记分</small>
           </span>
           <span className="tile-arrow">↗</span>

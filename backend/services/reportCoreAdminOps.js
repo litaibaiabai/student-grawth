@@ -1,3 +1,5 @@
+const { presentAudit } = require('./reportCoreAuditPresentation');
+const auditLabels = require('../config/reportCoreAuditLabels.json');
 const bcrypt = require('bcrypt');
 const { fail, schoolDayStart, schoolDayEnd } = require('./reportCorePolicy');
 const { getTerm, withMutation, addSource, parse } = require('./reportCoreStore');
@@ -127,7 +129,8 @@ function publicAudit(row) {
     for (const key of ['releaseVersion','total','prepared','activeVersion']) if (Number.isSafeInteger(payload[key])&&payload[key]>=0) meta[key]=payload[key];
     if (['IDLE','PREPARING','READY','FAILED'].includes(payload.releaseStatus)) meta.releaseStatus=payload.releaseStatus;
   }
-  return { id: String(row.id), type: action, createdAt: row.created_at, actorId: row.actor_id === null ? null : String(row.actor_id), actorName: row.actorName, status: row.status, diffs, metadata: meta };
+  const result = { id: String(row.id), type: action, createdAt: row.created_at, actorId: row.actor_id === null ? null : String(row.actor_id), actorName: row.actorName, status: row.status, diffs, metadata: meta };
+  return { ...result, display: presentAudit(result) };
 }
 async function auditQuery(args, all) {
   manager(args.actor);
@@ -144,7 +147,11 @@ async function auditQuery(args, all) {
   // and the safe UNKNOWN fallback for malformed/old action values.
   const displayedAction = `CASE WHEN s.record_kind='BATCH' AND s.source_type='IMPORT' AND JSON_UNQUOTE(JSON_EXTRACT(s.payload_json,'$.kind'))='ROSTER' THEN 'ROSTER_IMPORT' WHEN JSON_TYPE(JSON_EXTRACT(s.payload_json,'$.action'))='STRING' AND REGEXP_LIKE(JSON_UNQUOTE(JSON_EXTRACT(s.payload_json,'$.action')),'^[A-Za-z][A-Za-z0-9_-]{0,63}$','c') THEN JSON_UNQUOTE(JSON_EXTRACT(s.payload_json,'$.action')) ELSE 'UNKNOWN' END`;
   if (type) { sql += ` AND (${displayedAction})=?`; params.push(type); }
-  if (q) { sql += ` AND (LOCATE(?,${displayedAction})>0 OR LOCATE(?,u.real_name)>0 OR LOCATE(?,u.username)>0)`; params.push(q, q, q); }
+  if (q) {
+    const localizedTypes = Object.entries(auditLabels.actions).filter(([, label]) => label.includes(q)).map(([code]) => code);
+    sql += ` AND (LOCATE(?,${displayedAction})>0 OR LOCATE(?,u.real_name)>0 OR LOCATE(?,u.username)>0${localizedTypes.length ? ` OR (${displayedAction}) IN (${localizedTypes.map(() => '?').join(',')})` : ''})`;
+    params.push(q, q, q, ...localizedTypes);
+  }
   if (from) { sql += ' AND s.created_at>=?'; params.push(schoolDayStart(from)); }
   if (to) { sql += ' AND s.created_at<?'; params.push(schoolDayEnd(to)); }
   const [[count]] = await args.pool.query('SELECT COUNT(*) n ' + sql, params);
@@ -154,7 +161,7 @@ async function auditQuery(args, all) {
 const listAudits = args => auditQuery(args, false);
 async function exportAudits(args) {
   const { rows } = await auditQuery({ ...args, cursor: undefined }, true);
-  return csv([['id', 'createdAt', 'type', 'actorId', 'actorName', 'status', 'diffs', 'metadata'], ...rows.map(r => [r.id, r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt, r.type, r.actorId, r.actorName, r.status, JSON.stringify(r.diffs), JSON.stringify(r.metadata)])]);
+  return csv([['记录编号', '操作时间', '操作', '操作人编号', '操作人', '结果', '实际差异', '影响与详情', '操作代码', '状态代码', '差异代码（排查用）', '详情代码（排查用）'], ...rows.map(r => [r.id, r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt, r.display.type, r.actorId, r.actorName, r.display.status, r.display.diffs.join('；'), r.display.metadata.join('；'), r.type, r.status, JSON.stringify(r.diffs), JSON.stringify(r.metadata)])]);
 }
 function newTermInput(args) {
   manager(args.actor);

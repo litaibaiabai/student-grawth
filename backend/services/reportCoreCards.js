@@ -490,7 +490,7 @@ async function printSelection(c, actor, quotaId, { grade, classNo, cardIds, now 
   if (cardIds && selected.length !== cardIds.length) fail(409, '卡片范围已变化，请刷新后重试');
   if ((strict || cardIds) && selected.some(s => !printable(s, now))) fail(409, '卡片已领取、作废或失效，请刷新范围');
   const eligible = selected.filter(s => printable(s, now));
-  if (!eligible.length) fail(422, '当前范围没有可领取卡片');
+  if (!eligible.length) fail(422, '当前范围没有可打印积分卡');
   return eligible;
 }
 async function createCardPrintRequest({ pool, actor, quotaId, grade, classNo, cardIds, command, now = new Date() }) {

@@ -106,7 +106,7 @@ export default function ReviewMaterials({ ctx }) {
   }
   return (
     <section className="panel">
-      <h2>材料认定与异常复核</h2>
+      <div className="section-heading"><h2>材料认定与异常复核</h2><button onClick={ctx.refresh}>刷新材料状态</button></div>
       <p>
         系统自动评分失败时，教师按同一量规复核；奖状成果需依据实际材料认定。
       </p>
@@ -152,6 +152,7 @@ export default function ReviewMaterials({ ctx }) {
               </button>
             </div>
           ))}
+          {ctx.sourceNext !== null && <div className="source-pagination"><p>还有材料尚未载入</p><button onClick={ctx.loadMoreSources}>加载下一批材料</button></div>}
         </div>
         {selected ? (
           <div className="review-box">
