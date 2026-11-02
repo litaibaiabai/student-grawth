@@ -204,16 +204,16 @@
 
 **Interfaces:** Produces最终仅任务3、4的管理员维护API及原统计API。保留来源/CMD/AUDIT写事实、师生ledger、教师综合成绩上传、认证和公开学期读接口。`reportCorePublish.getPublishedReport`调用全部改任务6；日期改任务1；rosterImpact所需投影逻辑迁入任务3或现有projection，不保留旧手工维护服务。
 
-- [ ] **Step 1: 写失败测试。** `retired_routes_are_absent`以manager身份访问发布begin/prepare/activate/resume/cancel、readiness、phase、term-settings、手工assignments、班级imports/teachers/transfers、accounts状态/密码、terms/create/current、audits/progress、旧course-card-settings写和sync、旧quota保存/plan/generate/批量配额，全部404；新三模块API有效。`legacy_registry_import_cannot_bypass_lock`断言旧ROSTER/HEALTH/ASSIGNMENTS管理导入不再可用，教师ACADEMIC及文件体测上传仍有效。`retired_source_modules_have_no_live_imports`扫描产品代码不存在对删除文件的引用。
+- [x] **Step 1: 写失败测试。** `retired_routes_are_absent`以manager身份访问发布begin/prepare/activate/resume/cancel、readiness、phase、term-settings、手工assignments、班级imports/teachers/transfers、accounts状态/密码、terms/create/current、audits/progress、旧course-card-settings写和sync、旧quota保存/plan/generate/批量配额，全部404；新三模块API有效。`legacy_registry_import_cannot_bypass_lock`断言旧ROSTER/HEALTH/ASSIGNMENTS管理导入不再可用，教师ACADEMIC及文件体测上传仍有效。`retired_source_modules_have_no_live_imports`扫描产品代码不存在对删除文件的引用。
   ```js
   assert.equal((await fetch(base + '/admin/report-core/readiness?termId=1', {headers:managerHeaders})).status, 404);
   assert.deepEqual(danglingProductImports, []);
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_surface.test.js`，预期现存旧路由使测试失败。
-- [ ] **Step 3: 清理旧页面和路由。** 按Files清单删除；抽取实际被复用的只读工具再删除旧文件；RoleShell icons/pageTitles/ManagerModule exports与专用CSS同步清理。旧通用imports只保留教师学术/体测路径，明确拒绝旧管理员名单、职责和健康维护入口。去除旧配额生成/计划函数及无调用导出；独立单卡作废不能绕过本学期不可删除规则，合法撤回评分保留。
-- [ ] **Step 4: 清理回归和文档入口。** 删除只测试已撤功能的用例，保留并迁移授权/幂等/隐私/渲染等仍适用回归，移到安全测试集合或纯mock；更新verifyDevelopmentPasswords使用新导入、不再调用已删reset/audit服务。旧交付文档加历史说明链接新文档，不修改真实历史迁移SQL。更新package description去掉“全校统一发布”，为安全验证添加`test:admin-simplification`脚本；默认旧测试脚本若仍需建库不得在本次执行。
-- [ ] **Step 5: 验证绿灯。** surface测试PASS；`rg`检查删除组件名、旧服务require、旧接口客户端引用均无产品命中；`cd frontend && npm test && npm run lint && npm run build`成功。统计四标签名称/筛选和数据口径与重构前基线一致。
-- [ ] **Step 6: 提交。** `git add`本任务变更与删除清单；`git commit -m "refactor: remove retired administrator workflows and references"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_surface.test.js`，预期现存旧路由使测试失败。
+- [x] **Step 3: 清理旧页面和路由。** 按Files清单删除；抽取实际被复用的只读工具再删除旧文件；RoleShell icons/pageTitles/ManagerModule exports与专用CSS同步清理。旧通用imports只保留教师学术/体测路径，明确拒绝旧管理员名单、职责和健康维护入口。去除旧配额生成/计划函数及无调用导出；独立单卡作废不能绕过本学期不可删除规则，合法撤回评分保留。
+- [x] **Step 4: 清理回归和文档入口。** 删除只测试已撤功能的用例，保留并迁移授权/幂等/隐私/渲染等仍适用回归，移到安全测试集合或纯mock；更新verifyDevelopmentPasswords使用新导入、不再调用已删reset/audit服务。旧交付文档加历史说明链接新文档，不修改真实历史迁移SQL。更新package description去掉“全校统一发布”，为安全验证添加`test:admin-simplification`脚本；默认旧测试脚本若仍需建库不得在本次执行。
+- [x] **Step 5: 验证绿灯。** surface测试PASS；`rg`检查删除组件名、旧服务require、旧接口客户端引用均无产品命中；`cd frontend && npm test && npm run lint && npm run build`成功。统计四标签名称/筛选和数据口径与重构前基线一致。
+- [x] **Step 6: 提交。** `git add`本任务变更与删除清单；`git commit -m "refactor: remove retired administrator workflows and references"`。
 
 ### Task 10: 正式迁移、闭环验收、MCP三角色演示和交付
 

@@ -6,8 +6,6 @@ import ComprehensiveImport from './imports/ComprehensiveImport';
 import ReviewMaterials from './reviews/ReviewMaterials';
 import V2Reviews from './reviews/V2Reviews';
 import TermComments from './comments/TermComments';
-import CardLedger from './cards/CardLedger';
-import CardPlan from './cards/CardPlan';
 import CourseCards from './cards/CourseCards';
 import ClassReports from './reports/ClassReports';
 import Settlements from './reports/Settlements';
@@ -20,8 +18,6 @@ export {
   ReviewMaterials,
   V2Reviews,
   TermComments,
-  CardLedger,
-  CardPlan,
   CourseCards,
   ClassReports,
   Settlements,
@@ -37,7 +33,7 @@ export function TeacherView({ tab, ctx }) {
       {tab === 'reviews' &&
         (isV2 ? <V2Reviews ctx={ctx} /> : <ReviewMaterials ctx={ctx} />)}
       {tab === 'comments' && <TermComments ctx={ctx} />}
-      {tab === 'cards-manage' && (isV2 ? <CourseCards ctx={ctx} /> : <CardLedger ctx={ctx} />)}
+      {tab === 'cards-manage' && <CourseCards ctx={ctx}/>}
       {tab === 'drafts' && <ClassReports ctx={ctx} />}
       {tab === 'settlements' && <Settlements ctx={ctx} />}
     </>
@@ -56,7 +52,7 @@ export const TeacherModule = {
     imports: ComprehensiveImport,
     reviews: ReviewMaterials,
     comments: TermComments,
-    'cards-manage': CardLedger,
+    'cards-manage': CourseCards,
     drafts: ClassReports,
     settlements: Settlements,
   },

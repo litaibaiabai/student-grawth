@@ -1,7 +1,6 @@
 const multer=require('multer');
 const {stableHash,fail}=require('../services/reportCorePolicy');
 const {getTerm}=require('../services/reportCoreStore');
-const {isV2}=require('../services/reportCoreV2Policy');
 function mountV2(router,{asyncRoute,ok}) {
   const context=req=>({pool:req.app.locals.pool,actor:req.actor});
   const command=req=>({requestKey:req.body.requestKey,payloadHash:stableHash({body:req.body,params:req.params,fileHash:req.file?stableHash(req.file.buffer.toString('base64')):undefined})});
@@ -32,28 +31,22 @@ function mountV2(router,{asyncRoute,ok}) {
     router.post('/report-core/v2/comments/'+path, asyncRoute(async (req,res) =>
       ok(res, await comments[method]({...req.body,...context(req),provider:req.app.locals.provider,command:command(req)}))));
   router.get('/report-core/imports/template',asyncRoute(async(req,res)=>{
-    if(!['teacher','manager'].includes(req.actor.role))fail(403,'仅教师或管理员下载模板');
+    if(req.actor.role!=='teacher')fail(403,'仅教师下载模板');
     const term=await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId);
     res.set({'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':`attachment; filename="comprehensive-scores.xlsx"; filename*=UTF-8''${encodeURIComponent('综合成绩导入模板.xlsx')}`,'Cache-Control':'private, no-store'});
     res.send(require('../services/reportCoreV2Imports').buildScoreTemplate({termId:term.id,config:term.evaluation_config}));
   }));
   router.post('/report-core/imports/file-preview',upload.single('file'),asyncRoute(async(req,res)=>{
-    if(!['teacher','manager'].includes(req.actor.role))fail(403,'无导入权限');
+    if(req.actor.role!=='teacher')fail(403,'无导入权限');
     const term=await getTerm(req.app.locals.pool,req.actor.schoolId,req.body.termId);
     if(!req.file)fail(422,'请选择Excel文件');
-    if(req.actor.role==='teacher'){
-      if(req.body.kind&&req.body.kind!=='ACADEMIC')fail(422,'教师仅可上传综合成绩');
-      res.setHeader('Cache-Control','private, no-store');
-      return ok(res,await require('../services/reportCoreV2ImportReview').reviewV2Workbook({...context(req),termId:term.id,buffer:req.file.buffer,command:command(req)}));
-    }
-    if(!isV2(term.evaluation_config))fail(422,'请选择V2学期');
-    const rows=require('../services/reportCoreV2Imports').parseV2Workbook(req.file.buffer,{termId:term.id});
-    ok(res,await require('../services/reportCoreImports').previewImport({...context(req),termId:term.id,kind:req.body.kind||'ACADEMIC',rows,command:command(req)}));
+    if(req.body.kind&&req.body.kind!=='ACADEMIC')fail(403,'教师仅可上传综合成绩及体测');
+    res.setHeader('Cache-Control','private, no-store');
+    return ok(res,await require('../services/reportCoreV2ImportReview').reviewV2Workbook({...context(req),termId:term.id,buffer:req.file.buffer,command:command(req)}));
   }));
   router.get('/report-core/term-state',asyncRoute(async(req,res)=>{
     const term=await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId);
     ok(res,{schemaVersion:term.evaluation_config.schemaVersion||'CORE_V1',phase:term.business_phase,collectionCutoff:require('../services/reportCorePolicy').collectionCutoff(term).toISOString(),dataRevision:String(term.data_revision||0),rosterRevision:String(term.roster_revision||0)});
   }));
-  router.post('/admin/report-core/phase',asyncRoute(async(req,res)=>ok(res,await require('../services/reportCoreV2Lifecycle').changePhase({...req.body,...context(req),command:command(req)}))));
 }
 module.exports={mountV2};

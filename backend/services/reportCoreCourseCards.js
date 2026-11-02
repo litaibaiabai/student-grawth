@@ -1,102 +1,22 @@
-const crypto = require('node:crypto');
 const path = require('node:path');
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
-const { getTerm, withMutation, addSource, parse } = require('./reportCoreStore');
-const { fail, stableHash, getSchoolMonthBounds, schoolDayStart, collectionCutoff } = require('./reportCorePolicy');
+const { getTerm, parse } = require('./reportCoreStore');
+const { fail } = require('./reportCorePolicy');
 const { assignments } = require('./authorizationService');
-const { isV2, catalog } = require('./reportCoreV2Policy');
-const { encryptToken, decryptToken, tokenHash } = require('./cardCredentials');
-const { monthsOf } = require('./termDates');
+const { isV2 } = require('./reportCoreV2Policy');
+const { decryptToken } = require('./cardCredentials');
 
 const {subjects}=require('./semesterCardPolicy');
 const subjectByCode = new Map(subjects.map(s => [s.subjectCode, s]));
 const courseKey = a => `${a.grade}:${a.class_no}:${a.subject_code}`;
-const quotaKey = (actor, termId, monthKey, a) => ['COURSE_QUOTA', actor.schoolId, String(termId), monthKey, courseKey(a)];
-const schoolMonth = date => new Intl.DateTimeFormat('sv-SE', { timeZone:'Asia/Shanghai', year:'numeric', month:'2-digit' }).format(date);
 const teacherOnly = actor => { if (actor.role !== 'teacher') fail(403, '仅教师可领取本人任教课程卡片'); };
-const managerOnly = actor => { if (actor.role !== 'manager') fail(403, '仅管理员可配置学科月额度'); };
 function checkTerm(term) { if (!isV2(term.evaluation_config)) fail(422, '请选择六育 V2 学期'); }
-function checkMonth(term, monthKey) {
-  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey || '') || !monthsOf(term).includes(monthKey)) fail(422, '月份不在当前学期内');
-}
 function available(row, now) { return row.status === 'UNUSED' && +row.valid_from <= +now && +now < +row.valid_until; }
 function cardState(row, now) {
   if (row.status === 'USED') return 'used';
   if (row.status !== 'UNUSED') return 'voided';
   return available(row, now) ? 'available' : +row.valid_from > +now ? 'future' : 'expired';
-}
-function resolveCourseCardQuotas(config) {
-  const defaultMonthlyTotal = config.courseCardDefaultQuota ?? 100;
-  const bySubject = new Map(subjects.map(({ subjectCode }) => {
-    const monthlyTotal = config.courseCardQuotas?.[subjectCode] ?? null;
-    return [subjectCode, { monthlyTotal, effectiveMonthlyTotal:monthlyTotal ?? defaultMonthlyTotal, usesDefault:monthlyTotal === null }];
-  }));
-  return { defaultMonthlyTotal, bySubject };
-}
-async function getCourseCardSettings({ pool, actor, termId }) {
-  managerOnly(actor);
-  const term = await getTerm(pool, actor.schoolId, termId); checkTerm(term);
-  const [counts] = await pool.query("SELECT a.subject_code,COUNT(*) courses,COUNT(DISTINCT a.teacher_id) teachers FROM teacher_teaching_assignment a JOIN users u ON u.school_id=a.school_id AND u.id=a.teacher_id WHERE a.school_id=? AND a.term_id=? AND a.enabled=1 AND u.status=0 GROUP BY a.subject_code", [actor.schoolId, termId]);
-  const resolved = resolveCourseCardQuotas(term.evaluation_config);
-  return {
-    revision:String(term.config_version),
-    defaultMonthlyTotal:resolved.defaultMonthlyTotal,
-    canEdit:term.release_status === 'IDLE' && term.business_phase === 'COLLECTING',
-    subjects:subjects.map(s => ({
-      subjectCode:s.subjectCode, subjectName:s.subjectName,
-      monthlyTotal:resolved.bySubject.get(s.subjectCode).monthlyTotal,
-      effectiveMonthlyTotal:resolved.bySubject.get(s.subjectCode).effectiveMonthlyTotal,
-      courseCount:Number(counts.find(c => c.subject_code === s.subjectCode)?.courses || 0),
-      teacherCount:Number(counts.find(c => c.subject_code === s.subjectCode)?.teachers || 0),
-    })),
-  };
-}
-async function saveCourseCardSettings({ pool, actor, termId, expectedRevision, defaultMonthlyTotal, quotas, command }) {
-  managerOnly(actor);
-  if (defaultMonthlyTotal !== undefined && (!Number.isInteger(defaultMonthlyTotal) || defaultMonthlyTotal < 0 || defaultMonthlyTotal > 10000)) fail(422, '请填写默认每班每月 0–10000 的整数张数');
-  if (!quotas || typeof quotas !== 'object' || Array.isArray(quotas) || Object.entries(quotas).some(([code, total]) => !subjectByCode.has(code) || !Number.isInteger(total) || total < 0 || total > 10000)) fail(422, '请填写各学科每班每月 0–10000 的整数张数');
-  return withMutation({ pool, actor, termId, command, action:'course-card-settings', termLock:'exclusive' }, async (c, term) => {
-    checkTerm(term);
-    if (String(expectedRevision) !== String(term.config_version)) fail(409, '学科额度已被修改，请刷新后重试');
-    const beforeDefault = resolveCourseCardQuotas(term.evaluation_config).defaultMonthlyTotal;
-    const config = { ...term.evaluation_config, courseCardDefaultQuota:defaultMonthlyTotal ?? beforeDefault, courseCardQuotas:quotas };
-    await c.query('UPDATE academic_year SET evaluation_config=?,config_version=CAST(CAST(config_version AS UNSIGNED)+1 AS CHAR) WHERE school_id=? AND id=?', [JSON.stringify(config), actor.schoolId, termId]);
-    await addSource(c, { schoolId:actor.schoolId, termId, actorId:actor.id, kind:'AUDIT', status:'COMMITTED', key:['COURSE_CARD_SETTINGS',actor.id,command.requestKey], payload:{ action:'COURSE_CARD_SETTINGS', before:term.evaluation_config.courseCardQuotas || {}, after:quotas, beforeDefaultMonthlyTotal:beforeDefault, afterDefaultMonthlyTotal:config.courseCardDefaultQuota } });
-    return { result:{ revision:String(BigInt(term.config_version)+1n) } };
-  });
-}
-// A course/month budget belongs to the class, not the teacher. The earliest
-// persisted batch freezes the budget, including pre-upgrade teacher-keyed batches.
-async function courseQuotas(c, schoolId, termId, monthKey, a) {
-  const [rows] = await c.query("SELECT * FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind='QUOTA' AND month_key=? AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode'))='COURSE_SUBJECT' AND JSON_EXTRACT(payload_json,'$.grade')=? AND JSON_EXTRACT(payload_json,'$.classNo')=? AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.subjectCode'))=? ORDER BY id", [schoolId,termId,monthKey,a.grade,a.class_no,a.subject_code]);
-  return rows;
-}
-async function adoptCourseQuota(c, schoolId, termId, monthKey, a, ownerId, forceRotate=false) {
-  const quotas = await courseQuotas(c,schoolId,termId,monthKey,a);
-  if (!quotas.length) return false;
-  const budget = Number(parse(quotas[0].payload_json).quotaTotal);
-  const [rows] = await c.query("SELECT * FROM evaluation_source_record WHERE school_id=? AND parent_id IN (?) AND record_kind='CARD' ORDER BY id FOR UPDATE",[schoolId,quotas.map(q=>q.id)]);
-  let remaining = Math.max(0,budget-rows.filter(r=>r.status==='USED').length);
-  for (const row of rows) {
-    if (row.status !== 'UNUSED') continue;
-    if (remaining-- <= 0) {
-      await c.query("UPDATE evaluation_source_record SET status='VOID',revision=revision+1 WHERE school_id=? AND id=?",[schoolId,row.id]);
-    } else if (forceRotate || String(row.owner_teacher_id) !== String(ownerId)) {
-      const token = crypto.randomBytes(32).toString('base64url');
-      await c.query('UPDATE evaluation_source_record SET owner_teacher_id=?,token_hash=?,token_ciphertext=?,revision=revision+1 WHERE school_id=? AND id=?',[ownerId,tokenHash(token),encryptToken(token,`CORE_V1:${schoolId}:${row.parent_id}:${row.record_ordinal}`),schoolId,row.id]);
-    }
-  }
-  return true;
-}
-async function replaceCourseQuotaOwners(c, {schoolId,termId,grade,classNo,before,after}) {
-  const old = new Map(before.map(a=>[a.subject_code,String(a.teacher_id)]));
-  const next = new Map(after.map(a=>[a.subjectCode,String(a.teacherId)]));
-  for (const code of new Set([...old.keys(),...next.keys()])) {
-    if (old.get(code) === next.get(code)) continue;
-    const [months] = await c.query("SELECT DISTINCT month_key FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind='QUOTA' AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode'))='COURSE_SUBJECT' AND JSON_EXTRACT(payload_json,'$.grade')=? AND JSON_EXTRACT(payload_json,'$.classNo')=? AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.subjectCode'))=?",[schoolId,termId,grade,classNo,code]);
-    for (const {month_key} of months) await adoptCourseQuota(c,schoolId,termId,month_key,{grade,class_no:classNo,subject_code:code},next.get(code)||null,true);
-  }
 }
 async function semesterQuotas(c,schoolId,termId){return(await c.query("SELECT id,payload_json FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind='QUOTA' AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.mode')) IN ('COURSE_SUBJECT','COURSE_SEMESTER') ORDER BY id",[schoolId,termId]))[0];}
 async function listCourseCards({pool,actor,termId,now=new Date()}){
@@ -173,4 +93,4 @@ async function buildCourseCardPdf(args) {
   });
   return { stream:doc, cardCount:rows.length, filename:`${scope.grade}年级${scope.classNo}班-${scope.subject.subjectName}-${scope.termName}积分卡.pdf` };
 }
-module.exports = { replaceCourseQuotaOwners, getCourseCardSettings, saveCourseCardSettings,  listCourseCards, getCourseCardPage, getCourseCardPrint, buildCourseCardPdf };
+module.exports = { listCourseCards, getCourseCardPage, getCourseCardPrint, buildCourseCardPdf };

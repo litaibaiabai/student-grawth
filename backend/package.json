@@ -1,14 +1,15 @@
 {
   "name": "express-template",
   "version": "1.0.0",
-  "description": "学校期末六育报告核心：六类输入、评价宽表与全校统一发布",
+  "description": "学校六育评价：统一学籍导入、学期积分卡和班主任确认发布",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
     "migrate": "node scripts/runCoreMigrations.js",
     "test": "NODE_ENV=test node --test __tests__/report_core_*.test.js __tests__/health.test.js",
-    "migrate:core": "node scripts/runCoreMigrations.js"
+    "migrate:core": "node scripts/runCoreMigrations.js",
+    "test:admin-simplification": "node --test --test-concurrency=1 __tests__/admin_simplification_*.test.js __tests__/report_core_policy.test.js __tests__/report_core_v2_policy.test.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

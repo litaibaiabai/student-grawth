@@ -1,0 +1,18 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {withFormalRollback}=require('./helpers/formalRollback'),{manager,command,importRegistryFixture}=require('./helpers/registryFixture');
+const retired=[['GET','/admin/report-core/readiness?termId=1'],['POST','/admin/report-core/releases'],['GET','/admin/report-core/releases/retired?termId=1'],...['prepare','activate','resume','cancel'].map(v=>['POST','/admin/report-core/releases/retired/'+v]),['POST','/admin/report-core/phase'],['GET','/admin/report-core/term-settings?termId=1'],['POST','/admin/report-core/term-settings/preview'],['POST','/admin/report-core/assignments'],['GET','/admin/report-core/classes?termId=1'],['POST','/admin/report-core/classes/imports/preview'],['POST','/admin/report-core/classes/1/teachers/preview'],['POST','/admin/report-core/classes/transfers/preview'],['POST','/admin/report-core/accounts/2/password'],['POST','/admin/report-core/accounts/2/status'],['POST','/admin/report-core/terms/create'],['POST','/admin/report-core/terms/2/current'],['GET','/admin/report-core/audits?termId=1'],['GET','/admin/report-core/progress?termId=1'],['PUT','/report-core/course-card-settings'],['POST','/report-core/course-cards/sync'],['POST','/report-core/card-quotas'],['PATCH','/report-core/card-quotas/1/plan'],['POST','/report-core/card-quotas/1/generate'],['POST','/report-core/card-quota-batches/preview']];
+test('retired administrative and alternate card-writing routes return 410',async()=>withFormalRollback(async({pool,connection:c})=>{
+ const a=await manager(c),[[u]]=await c.query('SELECT * FROM users WHERE id=?',[a.id]),app=require('../app').createApp({pool,schoolId:'1'}),server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
+ const base='http://127.0.0.1:'+server.address().port+'/api/v1',headers={Authorization:'Bearer '+require('../middleware/auth').signToken(u),'Content-Type':'application/json'};
+ try{for(const[method,path]of retired){const res=await fetch(base+path,{method,headers,...(method==='GET'?{}:{body:JSON.stringify({termId:'2',requestKey:command().requestKey})})});assert.equal(res.status,410,method+' '+path);}
+ for(const path of ['/admin/report-core/registry/relations?termId=1','/admin/report-core/semester-card-settings?termId=2','/admin/report-core/registry/template'])assert.equal((await fetch(base+path,{headers})).status,200,path);
+ }finally{await new Promise(r=>server.close(r));}
+}));
+test('old registry import cannot bypass locks while teacher academic and physical imports still work',async()=>withFormalRollback(async({pool,connection:c})=>{
+ const args=await importRegistryFixture(pool,c),imports=require('../services/reportCoreImports');
+ for(const kind of ['ROSTER','HEALTH','ASSIGNMENTS'])await assert.rejects(imports.previewImport({...args,kind,rows:[{}],command:command()}),{statusCode:403});
+ const[[t]]=await c.query('SELECT * FROM users WHERE school_id=1 AND username=?',[args.f.teacher]),[[s]]=await c.query('SELECT id FROM users WHERE school_id=1 AND username=?',[args.f.student]);
+ const actor={id:String(t.id),schoolId:'1',role:'teacher',tokenVersion:t.token_version};
+ const p=await imports.previewImport({...args,actor,kind:'ACADEMIC',rows:[{studentId:String(s.id),values:{height_cm:150},measurement:{date:'2028-09-15'}}],command:command()});assert.equal(p.result.errors.length,0);
+ await imports.commitImport({pool,actor,batchId:p.result.batchId,expectedRevision:p.result.revision,command:command()});assert.equal(Number((await c.query('SELECT height_cm FROM student_term_evaluation WHERE term_id=? AND student_id=?',[args.termId,s.id]))[0][0].height_cm),150);
+}));

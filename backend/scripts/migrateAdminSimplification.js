@@ -12,7 +12,7 @@ async function migrateAdminSimplification({connection,targetDb,mode='check',back
  const result={ready:!blockedTerms.length&&!pending.length,changedTerms:pending.length,blockedTerms,backupPath:null};
  if(mode==='check'||!pending.length)return result;
  if(mode!=='apply'||blockedTerms.length)throw Error('Unfinished school release blocks migration');
- const backup=await require('./restoreAdminDemoIntoFormal').backupFormal(backupDir||path.resolve(__dirname,'../../output/report-core/admin-simplification/backups'));
+ const backup=await require('../services/formalDatabaseBackup').backupFormal(backupDir||path.resolve(__dirname,'../../output/report-core/admin-simplification/backups'));
  result.backupPath=backup.file;
  const c=connection.getConnection?await connection.getConnection():connection;
  try{await c.beginTransaction();const [locked]=await c.query('SELECT * FROM academic_year ORDER BY school_id,id FOR UPDATE');if(locked.some(t=>t.release_status!=='IDLE'))throw Error('Release state changed');let changed=0;

@@ -94,21 +94,6 @@ function createCoreRouter() {
       ok(res, rows);
     }),
   );
-  r.get(
-    "/admin/report-core/terms",
-    requireRole("manager"),
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        (
-          await req.app.locals.pool.query(
-            "SELECT * FROM academic_year WHERE school_id=?",
-            [req.actor.schoolId],
-          )
-        )[0],
-      ),
-    ),
-  );
   require("./reportCoreFeatures").mountFeatures(r, { asyncRoute, ok });
   require('./reportCoreViews').mountViews(r, { asyncRoute, ok });
   require('./reportCoreV2').mountV2(r, { asyncRoute, ok });
@@ -116,8 +101,6 @@ function createCoreRouter() {
   require('./reportCoreStoryRecordings').mountStoryRecordings(r, { asyncRoute, ok });
   require('./reportCoreCourseCards').mountCourseCards(r, { asyncRoute, ok });
   require('./reportCoreStatistics').mountStatistics(r, { asyncRoute, ok });
-  require('./reportCoreAdminClasses').mountAdminClasses(r, { asyncRoute, ok });
-  require('./reportCoreAdminOps').mountAdminOps(r, { asyncRoute, ok });
   require("./reportCoreRegistry").mountRegistry(r, {asyncRoute,ok});
   return r;
 }

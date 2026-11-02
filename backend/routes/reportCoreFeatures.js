@@ -1,5 +1,4 @@
 const multer = require("multer");
-const fs = require("node:fs/promises");
 const {
   stableHash,
   fail,
@@ -14,9 +13,7 @@ const cards = require("../services/reportCoreCards"),
   imports = require("../services/reportCoreImports"),
   materials = require("../services/reportCoreMaterials"),
   stories = require("../services/reportCoreStories"),
-  evaluation = require("../services/reportCoreEvaluation"),
-  publish = require("../services/reportCorePublish"),
-  admin = require("../services/reportCoreAdmin");
+  evaluation = require("../services/reportCoreEvaluation");
 function mountFeatures(r, { asyncRoute, ok }) {
   const context = (req) => ({ pool: req.app.locals.pool, actor: req.actor });
   const command = (req) => ({
@@ -68,68 +65,6 @@ function mountFeatures(r, { asyncRoute, ok }) {
   post("/report-core/settlements", (req) =>
     evaluation.settleSources(args(req)),
   );
-  r.get(
-    "/report-core/card-quotas",
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        await cards.listCards({
-          ...context(req),
-          termId: req.query.termId,
-          kind: req.query.kind,
-          offset: req.query.offset,
-        }),
-      ),
-    ),
-  );
-  post('/report-core/card-quota-batches/preview',req=>cards.previewQuotaBatch(args(req)));
-  post('/report-core/card-quota-batches/:id/commit',req=>cards.commitQuotaBatch({...args(req),batchId:req.params.id}));
-  post("/report-core/card-quotas", (req) => cards.saveQuota(args(req)));
-  r.patch(
-    "/report-core/card-quotas/:id/plan",
-    asyncRoute(async (req, res) =>
-      ok(res, await cards.savePlan({ ...args(req), quotaId: req.params.id })),
-    ),
-  );
-  post("/report-core/card-quotas/:id/generate", (req) =>
-    cards.generateCards({ ...args(req), quotaId: req.params.id }),
-  );
-  post("/report-core/card-quotas/:id/print-requests", req => cards.createCardPrintRequest({ ...args(req), quotaId: req.params.id, now: req.app.locals.clock() }));
-  r.get("/report-core/card-print-requests/:id/file", asyncRoute(async (req, res) => {
-    const file = await cards.buildCardPrintFile({ ...context(req), requestId: req.params.id, now: req.app.locals.clock() });
-    res.set({ "Content-Type": file.mimeType, "Cache-Control": "no-store", "Content-Disposition": `attachment; filename="cards.${file.mimeType === 'application/pdf' ? 'pdf' : 'zip'}"; filename*=UTF-8''${encodeURIComponent(file.filename)}` });
-    file.stream.on('error', () => res.destroy());
-    res.on('close', () => file.stream.destroy());
-    file.stream.pipe(res);
-  }));
-  r.get(
-    "/report-core/card-quotas/:id/print",
-    asyncRoute(async (req, res) => {
-      const zip = await cards.buildClassPrintZip({
-        ...context(req),
-        quotaId: req.params.id,
-        now: req.app.locals.clock(),
-      });
-      res.set({
-        "Content-Type": "application/zip",
-        "Content-Disposition": 'attachment; filename="class-cards.zip"',
-      });
-      zip.on("error", () => res.destroy());
-      zip.pipe(res);
-    }),
-  );
-  r.get(
-    "/report-core/cards/:id/token",
-    asyncRoute(async (req, res) =>
-      ok(res, {
-        token: await cards.cardToken({
-          ...context(req),
-          sourceId: req.params.id,
-          now: req.app.locals.clock(),
-        }),
-      }),
-    ),
-  );
   post("/report-core/cards/preview", (req) =>
     cards.previewCard({ ...args(req) }),
   );
@@ -137,7 +72,6 @@ function mountFeatures(r, { asyncRoute, ok }) {
     cards.redeemCard({ ...args(req), now: req.app.locals.clock() }),
   );
   post("/report-core/direct-scores", (req) => cards.directScore({ ...args(req), now: req.app.locals.clock() }));
-  post('/report-core/cards/:id/void', req => cards.voidCard({ ...args(req), sourceId: req.params.id }));
   post("/report-core/sources/:id/reverse", (req) =>
     cards.reverseSource({ ...args(req), sourceId: req.params.id }),
   );
@@ -258,53 +192,6 @@ function mountFeatures(r, { asyncRoute, ok }) {
     evaluation.confirmReports(args(req)),
   );
   r.get(
-    "/admin/report-core/readiness",
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        await publish.getReadiness({
-          ...context(req),
-          termId: req.query.termId,
-        }),
-      ),
-    ),
-  );
-  post("/admin/report-core/releases", (req) => publish.beginRelease(args(req)));
-  r.get(
-    "/admin/report-core/releases/:key",
-    asyncRoute(async (req, res) => {
-      if (req.actor.role !== "manager") fail(403, "仅管理员");
-      const term = await getTerm(
-        req.app.locals.pool,
-        req.actor.schoolId,
-        req.query.termId,
-      );
-      if (term.release_key !== req.params.key) fail(404, "批次不存在");
-      ok(res, publish.releaseInfo(term));
-    }),
-  );
-  post("/admin/report-core/releases/:key/prepare", async (req) => {
-    if (req.actor.role !== "manager") fail(403, "仅管理员");
-    const term = await getTerm(
-      req.app.locals.pool,
-      req.actor.schoolId,
-      req.body.termId,
-    );
-    if (term.release_key !== req.params.key) fail(404, "批次不存在");
-    return publish.prepareReleaseChunk({
-      ...args(req),
-      releaseKey: req.params.key,
-    });
-  });
-  for (const [action, fn] of [
-    ["activate", publish.activateRelease],
-    ["resume", publish.resumeRelease],
-    ["cancel", publish.cancelRelease],
-  ])
-    post(`/admin/report-core/releases/:key/${action}`, (req) =>
-      fn({ ...args(req), releaseKey: req.params.key }),
-    );
-  r.get(
     "/report-core/reports/current",
     asyncRoute(async (req, res) =>
       ok(
@@ -328,17 +215,6 @@ function mountFeatures(r, { asyncRoute, ok }) {
       });
       res.type("html").send(result.html);
     }),
-  );
-  r.patch(
-    "/admin/report-core/terms/:id",
-    asyncRoute(async (req, res) =>
-      ok(res, await admin.updateTerm({ ...args(req), termId: req.params.id })),
-    ),
-  );
-  post('/admin/report-core/term-settings/preview',req=>require('../services/reportCoreTermSettings').previewTermSettings(args(req)));
-  post('/admin/report-core/term-settings/previews/:id/commit',req=>require('../services/reportCoreTermSettings').commitTermSettingsPreview({...args(req),previewId:req.params.id}));
-  post("/admin/report-core/assignments", (req) =>
-    admin.saveAssignment(args(req)),
   );
   r.get(
     "/report-core/assignments",

@@ -369,15 +369,7 @@ async function getLedgerCardDetail(args) {
     return { ...found, history, asOf: ctx.asOf };
   });
 }
-async function listLedgerAudits(args) {
-  return snapshot(args, async ctx => {
-    const page = pageSpec(ctx, args, 'audits');
-    const actions = ['QUOTA_CHANGE', 'PLAN_SAVE', 'CARD_GENERATE', 'CARD_VOID', 'PRINT_REQUEST'];
-    const rows = ctx.metadata.filter(r => r.record_kind === 'AUDIT').map(r => ({ r, p: parse(r.payload_json), time: resolveSourceInstant(r, ctx.baseline) })).filter(v => actions.includes(v.p.action) && (!v.time.occurredAt || v.time.occurredAt <= ctx.asOf)).map(({ r, p, time }) => ({ id: String(r.id), action: p.action, quotaId: p.quotaId || null, sourceId: p.sourceId || null, monthKey: r.month_key, occurredAt: time.occurredAt, timeBasis: time.timeBasis, oldTotal: p.oldTotal ?? null, newTotal: p.newTotal ?? null, delta: p.delta ?? null, planVersion: p.planVersion ?? null, generated: p.generated ?? null, reason: p.reason || '' })).reverse();
-    return { rows: rows.slice(page.offset, page.offset + page.limit), total: rows.length, nextCursor: page.next(rows.length), asOf: ctx.asOf };
-  });
-}
-module.exports = { normalizeLedgerQuery, resolveSourceInstant, getLedgerSummary, listLedgerCards, listLedgerUsage, getLedgerCardDetail, listLedgerAudits };
+module.exports = { normalizeLedgerQuery, resolveSourceInstant, getLedgerSummary, listLedgerCards, listLedgerUsage, getLedgerCardDetail };
 // Export reads share the same repeatable-read snapshot and filters as the screen.
 function exportView(view = 'events') {
   if (!['monthly', 'cards', 'students', 'indicators', 'events'].includes(view)) fail(422, '导出视图不合法');
