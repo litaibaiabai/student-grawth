@@ -3,6 +3,7 @@ import { api } from '../../core/api';
 import { parseCoreLocation, formatCoreLocation } from '../../core/navigation';
 import TermReport from '../../../component/TermReport';
 import { ratingDistribution } from './reportSummary';
+import { currentReviewRoute } from './reportReview';
 import './classReports.css';
 
 function RatingDistribution({ counts, type, missing = 0 }) {
@@ -398,6 +399,7 @@ export default function ClassReports({
               <h2>{detail.model.student.name} · 六育评价报告</h2>
             </div>}
             toolbarActions={<>
+              {currentReviewRoute(route,detail) && <button onClick={() => navigate(currentReviewRoute(route,detail))}>核对当前数据</button>}
               {detail.viewVersion === 'current' && detail.permissions.canReadFull && <button className="primary" disabled={busy || !canConfirm} onClick={confirm}>确认并发布本份报告</button>}
               <button onClick={returnToClass}>返回班级列表</button>
             </>}

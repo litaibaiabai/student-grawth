@@ -187,16 +187,16 @@
 
 **Interfaces:** Consumes任务5、6。`courseCardsQuery({termId,grade,classNo,subjectCode,status,q,page})->string`不含monthKey；`canPrintSemesterCards({initializationStatus,available})->boolean`仅INITIALIZED/LEGACY_LOCKED且available>0可打印；`reportEmptyMessage()->'等待班主任确认'`；`publishedDocumentKey(report)->string|null`以termId/studentId/id/version组合识别已发布文档，无报告返回null；保留courseCardPrint现有渲染入口和二维码数据结构。
 
-- [ ] **Step 1: 写失败测试。** `semester_card_query_has_no_month_or_sync`断言URL按学期查询、不含monthKey；`uninitialized_cards_show_waiting_state`断言打印不可用；`published_empty_state_names_head_confirmation`断言空态等待班主任；`report_selection_uses_published_identity`断言同学生新reportId/version才替换当前已发布文档，不用草稿revision/全校active版本代替。
+- [x] **Step 1: 写失败测试。** `semester_card_query_has_no_month_or_sync`断言URL按学期查询、不含monthKey；`uninitialized_cards_show_waiting_state`断言打印不可用；`published_empty_state_names_head_confirmation`断言空态等待班主任；`report_selection_uses_published_identity`断言同学生新reportId/version才替换当前已发布文档，不用草稿revision/全校active版本代替。
   ```js
   assert.equal(courseCardsQuery({termId:'2',page:1}).includes('monthKey'), false);
   assert.equal(reportEmptyMessage(), '等待班主任确认');
   ```
-- [ ] **Step 2: 运行红灯。** `cd frontend && node --test src/app/teacher/cards/semesterCardsModel.test.js src/app/student/report/publishedReportModel.test.js`，预期新模块缺失。
-- [ ] **Step 3: 改造教师卡片页。** 删除月份选择、默认月份、canSync effect、自动POST与月份header portal；改用学期上下文，按班级/学科筛选、卡号搜索、状态分页、预览/打印/PDF，已领取/过期无有效二维码。未初始化明确显示“等待管理员初始化本学期卡片”。教师菜单继续叫积分卡管理。切term撤销旧读取和打印预览，下载参数同任务5。
-- [ ] **Step 4: 改造报告读取。** 学生current接口按任务6读取本人最新发布快照，无报告显示“等待班主任确认”；现有快照打印/阅读直接使用冻结文档，来源更正不使它消失。班主任确认成功后教师页提示“已确认并发布，学生可查看”；任课教师冻结明细使用published版本，不显示未审核草稿为已发布。切用户/学期立即清理旧文档，晚返回不恢复。
-- [ ] **Step 5: 验证绿灯。** 上述模型测试PASS，`cd frontend && npm test && npm run lint && npm run build`。MCP验证教师页面无月份及自动发卡请求、学期切换和打印；学生在班主任确认前/后、来源更正/再次确认四个状态正确。
-- [ ] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "refactor: align teacher cards and student reports with semester workflow"`。
+- [x] **Step 2: 运行红灯。** `cd frontend && node --test src/app/teacher/cards/semesterCardsModel.test.js src/app/student/report/publishedReportModel.test.js`，预期新模块缺失。
+- [x] **Step 3: 改造教师卡片页。** 删除月份选择、默认月份、canSync effect、自动POST与月份header portal；改用学期上下文，按班级/学科筛选、卡号搜索、状态分页、预览/打印/PDF，已领取/过期无有效二维码。未初始化明确显示“等待管理员初始化本学期卡片”。教师菜单继续叫积分卡管理。切term撤销旧读取和打印预览，下载参数同任务5。
+- [x] **Step 4: 改造报告读取。** 学生current接口按任务6读取本人最新发布快照，无报告显示“等待班主任确认”；现有快照打印/阅读直接使用冻结文档，来源更正不使它消失。班主任确认成功后教师页提示“已确认并发布，学生可查看”；任课教师冻结明细使用published版本，不显示未审核草稿为已发布。切用户/学期立即清理旧文档，晚返回不恢复。
+- [x] **Step 5: 验证绿灯。** 上述模型测试PASS，`cd frontend && npm test && npm run lint && npm run build`。MCP验证教师页面无月份及自动发卡请求、学期切换和打印；学生在班主任确认前/后、来源更正/再次确认四个状态正确。
+- [x] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "refactor: align teacher cards and student reports with semester workflow"`。
 
 ### Task 9: 删除旧模块、专用接口及失效引用
 
@@ -221,19 +221,19 @@
 
 **Interfaces:** `verifyAdminSimplification()->Promise<{checks,unchangedStoredRows}>`调用任务1安全回滚工具及新业务接口，覆盖整个新学期导入→师生日常事实→报告发布。`buildAdminSimplificationFixtures({academicYear,semester,dates,credentials})->{workbook,teacherScoreWorkbook,expected}`复用现有adminClosureFixtures的60教师字段及11自评约束，不嵌入真实密码。
 
-- [ ] **Step 1: 写闭环失败测试。** `import_to_daily_records_to_published_six_education_report`断言导入2教师/3班/1学生/18课程，额度60/70/75和其余100合计1515（林1080、徐435），领卡1+直评1后相应raw=2，自评11、故事及荣誉事实、教师成绩/体测导入、结算与寄语，班主任确认后学生读取94字段两页报告；任课教师无私有寄语、四类统计与事实一致。准备故意错误文件验证全单回滚；再重试正确文件成功。
+- [x] **Step 1: 写闭环失败测试。** `import_to_daily_records_to_published_six_education_report`断言导入2教师/3班/1学生/18课程，额度60/70/75和其余100合计1515（林1080、徐435），领卡1+直评1后相应raw=2，自评11、故事及荣誉事实、教师成绩/体测导入、结算与寄语，班主任确认后学生读取94字段两页报告；任课教师无私有寄语、四类统计与事实一致。准备故意错误文件验证全单回滚；再重试正确文件成功。
   ```js
   assert.equal(initialization.result.generatedTotal, 1515);
   assert.equal(published.studentId, student.id);
   assert.equal(reportCellCount, 94);
   assert.deepEqual(afterRollbackStoredRows, beforeStoredRows);
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_closure.test.js`（本任务同时创建该测试），预期闭环未齐或fixture未实现时失败；不调用旧临时数据库setup。
-- [ ] **Step 3: 实现回滚闭环验证并完成实际迁移。** 验证脚本读取正式库，测试数据只在外层事务中可见，结束存储行hash一致。迁移先check、备份并校验SHA256，确保无blockedTerms后显式--apply；复查八表、已领卡、积分、历史报告数量与hash保持，迁移只改变目标学期配置键。记录备份路径和恢复命令但不自动还原；无新表时明确交付为数据/配置迁移，不虚构DDL。
-- [ ] **Step 4: 验证绿灯并运行安全验收命令。** `cd backend && node --test __tests__/admin_simplification_*.test.js`及`node scripts/verifyAdminSimplification.js`全部PASS；`cd frontend && npm test && npm run lint && npm run build`全部成功。需要数据库/本地端口权限时按工具申请沙箱升级，不更换测试库。每个失败先定位根因、加对应断言、修复、复跑相关用例；在verification.md逐项记录“问题→修复→验证证据”，不把取消/跳过记为通过。
-- [ ] **Step 5: 用MCP验收实际浏览器。** 使用正式student_growth上的管理员/教师/学生账号操作localhost:19981。先只读核对现有旧学期锁定及历史报告；新导入、初始化和日常行为演示使用同一学校的待初始化学期，只有完整演示数据已准备且该学期确认为待初始化才执行一次初始化，不删除或重置任何旧卡。若演示时间不在采集期，优先复用有效日期的既有演示学期；否则使用带明确演示标识、仅localhost可启用且默认关闭的固定clock运行配置，不修改正式学期真实日期或放开生产截止校验。在演示前备份，完成后保留一套可重复查看的演示结果，不创造第二学校或临时库。
-- [ ] **Step 6: 编写可复演脚本及证据。** mcp-demo.md按管理员→教师→学生顺序列出：登录、下载/上传五表、错误定位和确认、只读关系、额度60/70/75及100默认、取消再确认一次初始化、教师学期卡筛选打印、学生领取/自评/故事/奖状、教师评审/综合成绩及体测/结算/寄语/版面复核确认、学生最新报告与管理员四类统计。每步写路径、输入、MCP点击目标、预期结果及不可重做的初始化提示；为等待班主任确认→确认即发布的依赖，明确安排角色再次切换。演示发起新账号/凭证变更时遵循MCP接管规则；凭证保存在本机忽略文件，不进脚本正文。保存三个角色关键页和确认/报告截图，最终回复嵌入截图。
-- [ ] **Step 7: 交付与提交。** README写模块职责、数据流、API和清理清单；excel-format写五表精确字段/文本账号/日期/重导入/错误示例；migration与verification只记录实际结果。检查`git diff --check`与无敏感文件入库，提交`feat: verify and document simplified administrator closure`。按选定执行方式完成独立整分支审阅，修复实际问题并复验，最后普通push至origin/feature-six-education-v4，记录远端commit。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_closure.test.js`（本任务同时创建该测试），预期闭环未齐或fixture未实现时失败；不调用旧临时数据库setup。
+- [x] **Step 3: 实现回滚闭环验证并完成实际迁移。** 验证脚本读取正式库，测试数据只在外层事务中可见，结束存储行hash一致。迁移先check、备份并校验SHA256，确保无blockedTerms后显式--apply；复查八表、已领卡、积分、历史报告数量与hash保持，迁移只改变目标学期配置键。记录备份路径和恢复命令但不自动还原；无新表时明确交付为数据/配置迁移，不虚构DDL。
+- [x] **Step 4: 验证绿灯并运行安全验收命令。** `cd backend && node --test __tests__/admin_simplification_*.test.js`及`node scripts/verifyAdminSimplification.js`全部PASS；`cd frontend && npm test && npm run lint && npm run build`全部成功。需要数据库/本地端口权限时按工具申请沙箱升级，不更换测试库。每个失败先定位根因、加对应断言、修复、复跑相关用例；在verification.md逐项记录“问题→修复→验证证据”，不把取消/跳过记为通过。
+- [x] **Step 5: 用MCP验收实际浏览器。** 使用正式student_growth上的管理员/教师/学生账号操作localhost:19981。先只读核对现有旧学期锁定及历史报告；新导入、初始化和日常行为演示使用同一学校的待初始化学期，只有完整演示数据已准备且该学期确认为待初始化才执行一次初始化，不删除或重置任何旧卡。若演示时间不在采集期，优先复用有效日期的既有演示学期；否则使用带明确演示标识、仅localhost可启用且默认关闭的固定clock运行配置，不修改正式学期真实日期或放开生产截止校验。在演示前备份，完成后保留一套可重复查看的演示结果，不创造第二学校或临时库。
+- [x] **Step 6: 编写可复演脚本及证据。** mcp-demo.md按管理员→教师→学生顺序列出：登录、下载/上传五表、错误定位和确认、只读关系、额度60/70/75及100默认、取消再确认一次初始化、教师学期卡筛选打印、学生领取/自评/故事/奖状、教师评审/综合成绩及体测/结算/寄语/版面复核确认、学生最新报告与管理员四类统计。每步写路径、输入、MCP点击目标、预期结果及不可重做的初始化提示；为等待班主任确认→确认即发布的依赖，明确安排角色再次切换。演示发起新账号/凭证变更时遵循MCP接管规则；凭证保存在本机忽略文件，不进脚本正文。保存三个角色关键页和确认/报告截图，最终回复嵌入截图。
+- [x] **Step 7: 交付与提交。** README写模块职责、数据流、API和清理清单；excel-format写五表精确字段/文本账号/日期/重导入/错误示例；migration与verification只记录实际结果。检查`git diff --check`与无敏感文件入库，提交`feat: verify and document simplified administrator closure`。按选定执行方式完成独立整分支审阅，修复实际问题并复验，最后普通push至origin/feature-six-education-v4，记录远端commit。
 
 ## 自查结果与执行顺序
 

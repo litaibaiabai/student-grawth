@@ -391,6 +391,7 @@ export default function ReportCoreApp() {
   return (
     <>
       <div>
+        {import.meta.env.VITE_DEMO_DATE && <div role="status" style={{padding:"8px 20px",background:"#fff3cd",color:"#664d03"}}>本地演示日期：{import.meta.env.VITE_DEMO_DATE.slice(0,10)}（收卡、听故事使用演示时钟；审计保留实际时间）</div>}
         <RoleShell
           schemaVersion={catalog?.schemaVersion}
           actor={actor}
