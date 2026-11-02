@@ -1,6 +1,6 @@
 # 管理员 · 学生数据统计
 
-入口：管理员侧边栏 **数据统计**，地址 `#/manager/statistics?termId=<学期ID>`。保留原有发布中心默认入口。
+入口：管理员侧边栏 **数据统计**，地址 `#/manager/statistics?termId=<学期ID>`。管理员当前仅保留学籍账号管理、卡额度管理、数据统计。
 
 ## 已实现
 
@@ -37,6 +37,6 @@
 - 路由：`backend/routes/reportCoreStatistics.js`
 - 测试：`backend/__tests__/report_core_admin_statistics.test.js`
 - 页面：`frontend/src/app/manager/statistics/`
-- 设计与实施清单：`docs/superpowers/specs/2026-11-01-admin-statistics-design.md`、`docs/superpowers/plans/2026-11-01-admin-statistics.md`
+- 当前设计与实施说明：[管理员三模块交付](../admin-simplification/README.md)。旧统计设计与计划可通过Git历史查阅。
 
 独立审阅未发现实质缺陷。代码保留在现有功能分支工作区；没有部署、合并或混合提交用户既有改动。

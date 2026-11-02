@@ -12,7 +12,7 @@ node scripts/full-system-demo/run.cjs
 
 - [一键启动入口](../../../完整系统自动演示.command)
 - [参数、环境及使用说明](../../../scripts/full-system-demo/README.md)
-- [设计](../../superpowers/specs/2026-10-26-one-click-autonomous-demo-design.md) / [实施计划](../../superpowers/plans/2026-10-26-one-click-autonomous-demo.md)
+- 旧设计与实施计划已清理，可通过Git历史查阅；当前入口见[文档索引](../../README.md)。
 - [验证与修复记录](自动演示验证与修复.md)
 
 ## 已通过的自动运行

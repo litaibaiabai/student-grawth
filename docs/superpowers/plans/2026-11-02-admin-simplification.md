@@ -1,5 +1,7 @@
 # 管理员三模块与师生闭环重构 Implementation Plan
 
+> 状态：已完成，整分支审阅问题已修复；最终验证及实际演示见[验收记录](../../delivery/admin-simplification/verification.md)。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将管理员精简为学籍账号管理、卡额度管理、数据统计，同时交付教师学期卡管理和学生读取班主任确认报告的完整闭环。

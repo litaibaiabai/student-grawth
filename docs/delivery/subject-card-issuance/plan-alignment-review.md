@@ -8,7 +8,7 @@
 
 结论：**主流程基本一致，修复后可验收（With fixes）。0项Critical，3项Important。**
 
-依据：`docs/superpowers/plans/2026-10-26-subject-card-issuance.md`、`docs/superpowers/specs/2026-10-26-subject-card-issuance-design.md`。范围以本次合回清单及其必要关联为准，未将其他任务预先存在的未提交修改算成本次变更。
+依据：`2026-10-26-subject-card-issuance.md（历史文件，见Git记录）`、`2026-10-26-subject-card-issuance-design.md（历史文件，见Git记录）`。范围以本次合回清单及其必要关联为准，未将其他任务预先存在的未提交修改算成本次变更。
 
 | 计划任务 | 判断 | 主要证据与差距 |
 | --- | --- | --- |
