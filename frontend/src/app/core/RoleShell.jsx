@@ -2,7 +2,7 @@ import React from 'react';
 import {navigation,roleNames,mainPage,pageTitles} from './navigation';
 import {UIIcon} from './illustrations';
 import './tokens.css';
-const icons={self:'star',awards:'award',cards:'scan',direct:'edit',imports:'upload',reviews:'check',comments:'edit',home:'home',stories:'book',report:'report',archive:'report',workspace:'home',entry:'edit','cards-manage':'cards',drafts:'report',releases:'check',statistics:'report',roster:'people',classes:'people',audit:'report',quota:'cards',config:'settings'};
+const icons={self:'star',awards:'award',cards:'scan',direct:'edit',imports:'upload',reviews:'check',comments:'edit',home:'home',stories:'book',report:'report',archive:'report',workspace:'home',entry:'edit','cards-manage':'cards',drafts:'report',statistics:'report',roster:'people',quota:'cards'};
 function Brand({student=false}){return <div className="core-brand"><UIIcon name="cloud"/><div><strong>云美</strong><small>{student?'成长手账 · 学期评价':'综合素质发展评价'}</small></div></div>;}
 export default function RoleShell({actor,route,onNavigate,onLogout,children,header}) {
  const selected=mainPage(actor.role,route.page),links=(navigation[actor.role]||[]).map(([id,label])=>[id,label]),label=roleNames[actor.role];

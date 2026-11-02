@@ -65,15 +65,15 @@
 
 **Interfaces:** Produces `subjects:[{subjectCode,subjectName,categoryCode,targetColumn}]`，从现有CourseCards的12学科目录抽取；`resolveSemesterQuotas(config)->{defaultTotal,subjects:[{subjectCode,total,effectiveTotal,usesDefault}]}`；`day(value)->string|null`, `monthsOf(term)->string[]`。`migrateAdminSimplification({connection,targetDb,mode:'check'|'apply',backupDir})->{ready,changedTerms,blockedTerms,backupPath}`。`withFormalRollback(fn:({pool,connection})=>Promise<void>)->Promise<void>`始终回滚。
 
-- [ ] **Step 1: 写失败测试。** `legacy_batches_lock_term_without_changing_card_or_report_rows`断言存在任意旧QUOTA/CARD批次的学期成为`LEGACY_LOCKED`；无批次学期为`DRAFT`；重复迁移changedTerms为0；其他evaluation_config键保留。`rollback_pool_poisoned_after_deadlock`断言第一次查询ER_LOCK_DEADLOCK后getConnection/query均拒绝，底层调用次数=1；回滚前后八表存储行内容相等。
+- [x] **Step 1: 写失败测试。** `legacy_batches_lock_term_without_changing_card_or_report_rows`断言存在任意旧QUOTA/CARD批次的学期成为`LEGACY_LOCKED`；无批次学期为`DRAFT`；重复迁移changedTerms为0；其他evaluation_config键保留。`rollback_pool_poisoned_after_deadlock`断言第一次查询ER_LOCK_DEADLOCK后getConnection/query均拒绝，底层调用次数=1；回滚前后八表存储行内容相等。
   ```js
   assert.equal(legacyConfig.semesterCards.status, 'LEGACY_LOCKED');
   assert.deepEqual(afterCardAndReportRows, beforeCardAndReportRows);
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_migration.test.js`，预期新模块缺失；此测试不得导入旧建库助手。
-- [ ] **Step 3: 实现上述接口。** 新状态统一为`evaluation_config.semesterCards={version:1,status:'DRAFT'|'INITIALIZED'|'LEGACY_LOCKED',revision:1,defaultTotal:100,quotas:{},initializedAt:null,initializedBy:null,generatedTotal:0}`，旧配置值复制到兼容显示，不更改旧批次。apply前完整SQL备份、0600、SHA256、核实连接student_growth及八张表、事务更新配置；check无写入。遇PREPARING/READY/FAILED等未完发布列入blockedTerms并拒绝apply，不自动激活/丢弃；旧FROZEN/ARCHIVED不解冻。回滚助手拦截内部begin/commit，独占借用整个逻辑事务，任何SQL错误封闭连接；拒绝DDL、CREATE/DROP DATABASE、USE、TRUNCATE和旧setup。真实外层rollback由助手负责。
-- [ ] **Step 4: 验证绿灯。** 重跑任务测试；再运行`node scripts/migrateAdminSimplification.js`，预期只输出只读迁移清单，不执行--apply；确认没有新增库表。
-- [ ] **Step 5: 提交。** `git add`本任务Files内已修改文件；`git commit -m "refactor: define semester card state and safe formal verification"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_migration.test.js`，预期新模块缺失；此测试不得导入旧建库助手。
+- [x] **Step 3: 实现上述接口。** 新状态统一为`evaluation_config.semesterCards={version:1,status:'DRAFT'|'INITIALIZED'|'LEGACY_LOCKED',revision:1,defaultTotal:100,quotas:{},initializedAt:null,initializedBy:null,generatedTotal:0}`，旧配置值复制到兼容显示，不更改旧批次。apply前完整SQL备份、0600、SHA256、核实连接student_growth及八张表、事务更新配置；check无写入。遇PREPARING/READY/FAILED等未完发布列入blockedTerms并拒绝apply，不自动激活/丢弃；旧FROZEN/ARCHIVED不解冻。回滚助手拦截内部begin/commit，独占借用整个逻辑事务，任何SQL错误封闭连接；拒绝DDL、CREATE/DROP DATABASE、USE、TRUNCATE和旧setup。真实外层rollback由助手负责。
+- [x] **Step 4: 验证绿灯。** 重跑任务测试；再运行`node scripts/migrateAdminSimplification.js`，预期只输出只读迁移清单，不执行--apply；确认没有新增库表。
+- [x] **Step 5: 提交。** `git add`本任务Files内已修改文件；`git commit -m "refactor: define semester card state and safe formal verification"`。
 
 ### Task 2: 单一五工作表契约、模板及Excel解析
 
@@ -83,15 +83,15 @@
 
 标准对象字段固定：term为`{academicYear,semester,termName,startDate,endDate,collectionDeadline,nextRegistrationDate,makeCurrent}`；teachers行为`{sheet,rowNo,username,realName,initialPassword}`；classes行为`{sheet,rowNo,grade,classNo,headTeacherUsername,displayName}`；students行为`{sheet,rowNo,username,realName,grade,classNo,initialPassword}`；assignments行为`{sheet,rowNo,grade,classNo,subjectCode,teacherUsername}`。模板密码列表头统一为“初始密码”，“新账号必填”是说明文字，不属于表头；学生账号表头精确为“学号/账号”。可选字段默认值沿用设计表。
 
-- [ ] **Step 1: 写失败测试。** `template_roundtrips_five_sheets`断言工作表恰为学期、教师、班级、学生、任教关系；`text_ids_and_dates_are_preserved`断言`00123`不变、2028-02-29正确；`reject_ambiguous_workbooks`覆盖缺表/重名表头/公式/非法日期/两行学期/未知学科、定位字段与真实Excel行号；空白行不计数。
+- [x] **Step 1: 写失败测试。** `template_roundtrips_five_sheets`断言工作表恰为学期、教师、班级、学生、任教关系；`text_ids_and_dates_are_preserved`断言`00123`不变、2028-02-29正确；`reject_ambiguous_workbooks`覆盖缺表/重名表头/公式/非法日期/两行学期/未知学科、定位字段与真实Excel行号；空白行不计数。
   ```js
   assert.deepEqual(workbook.SheetNames, ['学期', '教师', '班级', '学生', '任教关系']);
   assert.equal(parsed.students[0].username, '00123');
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_workbook.test.js`，预期registryWorkbook不存在。
-- [ ] **Step 3: 实现接口。** 使用现有xlsx；只接收.xlsx，由路由检查扩展名与文件上限10MiB，解析器检查ZIP工作簿/必需表头、合计最多10000数据行、拒绝必需字段公式。账号单元格必须文本，数值账号报错并提示转文本，避免丢失前导零。日期接受ISO文本及Excel日期值，按工作簿1900/1904日期系统解析。年级/班级正整数；学年连续两年、学期1/2；开始日<结束日，采集截止在区间内。新密码约束留给任务3（至少10位），不把示例密码写入仓库。
-- [ ] **Step 4: 验证绿灯。** 重跑测试，PASS；模板导回解析器得到相同标准字段，输出错误不含原始密码。
-- [ ] **Step 5: 提交。** `git add backend/services/registryWorkbook.js backend/__tests__/admin_simplification_workbook.test.js && git commit -m "feat: define unified registry workbook contract"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_workbook.test.js`，预期registryWorkbook不存在。
+- [x] **Step 3: 实现接口。** 使用现有xlsx；只接收.xlsx，由路由检查扩展名与文件上限10MiB，解析器检查ZIP工作簿/必需表头、合计最多10000数据行、拒绝必需字段公式。账号单元格必须文本，数值账号报错并提示转文本，避免丢失前导零。日期接受ISO文本及Excel日期值，按工作簿1900/1904日期系统解析。年级/班级正整数；学年连续两年、学期1/2；开始日<结束日，采集截止在区间内。新密码约束留给任务3（至少10位），不把示例密码写入仓库。
+- [x] **Step 4: 验证绿灯。** 重跑测试，PASS；模板导回解析器得到相同标准字段，输出错误不含原始密码。
+- [x] **Step 5: 提交。** `git add backend/services/registryWorkbook.js backend/__tests__/admin_simplification_workbook.test.js && git commit -m "feat: define unified registry workbook contract"`。
 
 ### Task 3: 原子导入与只读关系API
 
@@ -99,17 +99,17 @@
 
 **Interfaces:** Consumes任务1、2。Produces `previewRegistry({pool,actor,buffer,now})->{previewToken,expiresAt,term,counts,diffs,errors:[]}`；`commitRegistry({pool,actor,previewToken,command,now})->MutationResult<{termId,counts}>`；`listRegistryRelations({pool,actor,termId,view:'students'|'teachers'|'classes',q,grade,classNo,subjectCode,cursor,limit})->{rows,total,nextCursor}`。counts包含teachers/classes/students/assignments四组，每组为`{created,updated,skipped}`。预览票据`sealRegistryPreview(payload,{actor,now})->string`与`openRegistryPreview(token,{actor,now})->payload`仅此业务使用。
 
-- [ ] **Step 1: 写失败测试。** `one_workbook_initializes_all_relations_atomically`在正式表回滚内断言同校唯一学期、2教师、3班、1学生、18实际任教关系及单生评价建立；班主任仅映射不自动加学科。`duplicate_import_preserves_password_and_evaluation`断言bcrypt原hash、已有自评和来源不变，遗漏行不删除；`equivalent_usernames_and_role_conflicts_rejected`含T001/t001与重音等价账号；`stale_preview_and_locked_relations_rejected`断言基线变化409、初始化后关系变更423、相同内容可幂等返回。`invalid_reference_rolls_back_everything`覆盖跨校、停用教师、重复班科、无班级及故意中途异常；预览前后八表行无变化。`preview_ticket_is_actor_bound_expiring_and_private`覆盖篡改、30分钟过期、异校/异操作者、返回值和来源事实不泄露密码。
+- [x] **Step 1: 写失败测试。** `one_workbook_initializes_all_relations_atomically`在正式表回滚内断言同校唯一学期、2教师、3班、1学生、18实际任教关系及单生评价建立；班主任仅映射不自动加学科。`duplicate_import_preserves_password_and_evaluation`断言bcrypt原hash、已有自评和来源不变，遗漏行不删除；`equivalent_usernames_and_role_conflicts_rejected`含T001/t001与重音等价账号；`stale_preview_and_locked_relations_rejected`断言基线变化409、初始化后关系变更423、相同内容可幂等返回。`invalid_reference_rolls_back_everything`覆盖跨校、停用教师、重复班科、无班级及故意中途异常；预览前后八表行无变化。`preview_ticket_is_actor_bound_expiring_and_private`覆盖篡改、30分钟过期、异校/异操作者、返回值和来源事实不泄露密码。
   ```js
   assert.equal(result.result.counts.assignments.created, 18);
   assert.equal(afterExistingUser.password, beforeExistingUser.password);
   assert.deepEqual(afterFailedCommitRows, beforeFailedCommitRows);
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_registry.test.js`，预期模块/路由缺失。
-- [ ] **Step 3: 实现服务接口。** 预览只读，AES-256-GCM票据使用JWT_SECRET派生的独立用途密钥，绑定schoolId/actorId/tokenVersion，30分钟TTL，包含文件hash、DB基线、标准行和新账号bcrypt hash（cost10），标准化载荷上限2MiB避免超过现有JSON请求限制；开发明文只以独立加密字段置于票据，提交时沿用developmentPasswords.writePassword，生产不保存。不持久化上传文件/预览明文密码。按MySQL实际collation比对账号。提交自行开事务，不用依赖已有termId的withMutation来创建目标学期：锁同校学期按ID顺序、重验actor、预览基线与卡状态，建立/更新目标学期、账号、班级、实际课程和评价，最后同事务保存IMPORT事实及CMD结果；唯一键竞争转409。只替换文件明确提供的班科教师，不删除遗漏关系；班主任存school_class.responsible_teacher_id。已有学期不能借导入修改固定评分规则；发卡后拒绝日期/归属/任教变更。整份重复文件返回前次结果，仍复核当前操作者身份；现有密码永不重置。
-- [ ] **Step 4: 挂载路由。** `GET /admin/report-core/registry/template`返回xlsx；`POST /admin/report-core/registry/preview`接multipart file；`POST /admin/report-core/registry/commit`接previewToken/requestKey；`GET /admin/report-core/registry/relations`接查询条件。全部requireRole(manager)、private,no-store；错误不回显票据或密码；每页25/50/100并沿用绑定过滤条件的cursor。返回关系行仅安全身份和班级/学科，不返回users整行。
-- [ ] **Step 5: 验证绿灯。** 重跑任务测试，全部PASS且rollback后无残留行；HTTP教师/学生访问403，跨校ID不泄露，分页切换条件拒绝旧cursor。
-- [ ] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: import term registry atomically from one workbook"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_registry.test.js`，预期模块/路由缺失。
+- [x] **Step 3: 实现服务接口。** 预览只读，AES-256-GCM票据使用JWT_SECRET派生的独立用途密钥，绑定schoolId/actorId/tokenVersion，30分钟TTL，包含文件hash、DB基线、标准行和新账号bcrypt hash（cost10），标准化载荷上限2MiB避免超过现有JSON请求限制；开发明文只以独立加密字段置于票据，提交时沿用developmentPasswords.writePassword，生产不保存。不持久化上传文件/预览明文密码。按MySQL实际collation比对账号。提交自行开事务，不用依赖已有termId的withMutation来创建目标学期：锁同校学期按ID顺序、重验actor、预览基线与卡状态，建立/更新目标学期、账号、班级、实际课程和评价，最后同事务保存IMPORT事实及CMD结果；唯一键竞争转409。只替换文件明确提供的班科教师，不删除遗漏关系；班主任存school_class.responsible_teacher_id。已有学期不能借导入修改固定评分规则；发卡后拒绝日期/归属/任教变更。整份重复文件返回前次结果，仍复核当前操作者身份；现有密码永不重置。
+- [x] **Step 4: 挂载路由。** `GET /admin/report-core/registry/template`返回xlsx；`POST /admin/report-core/registry/preview`接multipart file；`POST /admin/report-core/registry/commit`接previewToken/requestKey；`GET /admin/report-core/registry/relations`接查询条件。全部requireRole(manager)、private,no-store；错误不回显票据或密码；每页25/50/100并沿用绑定过滤条件的cursor。返回关系行仅安全身份和班级/学科，不返回users整行。
+- [x] **Step 5: 验证绿灯。** 重跑任务测试，全部PASS且rollback后无残留行；HTTP教师/学生访问403，跨校ID不泄露，分页切换条件拒绝旧cursor。
+- [x] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: import term registry atomically from one workbook"`。
 
 ### Task 4: 管理员一次性生成全学期二维码卡
 
@@ -117,17 +117,17 @@
 
 **Interfaces:** Consumes任务1状态及任务3关系。Produces `getSemesterCardSettings({pool,actor,termId})->{status,revision,defaultTotal,subjects,teacherCount,courseCount,plannedTotal,generatedTotal,usedTotal,unusedTotal,canEdit}`；`saveSemesterCardSettings({pool,actor,termId,expectedRevision,defaultTotal,quotas,command})->MutationResult<{revision}>`；`initializeSemesterCards({pool,actor,termId,expectedRevision,command,now})->MutationResult<{status:'INITIALIZED',generatedTotal,teacherCount,courseCount}>`。subjects额外包含实际课程/教师数量。
 
-- [ ] **Step 1: 写失败测试。** `three_chinese_classes_generate_180_for_one_teacher`断言60×3=180，不按月份乘；`defaults_blank_zero_and_invalid_quotas`断言默认100、空白继承、0不发，负数/小数/NaN/10001/未知科目422；`initialization_is_atomic_once_and_replayable`断言成功后新请求423、原requestKey返回原结果、hash不同409、额度写423，中途失败无卡及状态残留；`empty_or_disabled_assignments_cannot_initialize`不锁死空学期。`term_dates_define_validity`断言上海首日00:00含、截止次日00:00不含。`concurrent_attempts_have_one_logical_winner`在独占借用的回滚池中并发调用，断言一次成功及一次423；另以两条真实连接在现有学期行验证FOR UPDATE阻塞，双方只回滚，明确此项验证锁行为而非真实提交竞态。
+- [x] **Step 1: 写失败测试。** `three_chinese_classes_generate_180_for_one_teacher`断言60×3=180，不按月份乘；`defaults_blank_zero_and_invalid_quotas`断言默认100、空白继承、0不发，负数/小数/NaN/10001/未知科目422；`initialization_is_atomic_once_and_replayable`断言成功后新请求423、原requestKey返回原结果、hash不同409、额度写423，中途失败无卡及状态残留；`empty_or_disabled_assignments_cannot_initialize`不锁死空学期。`term_dates_define_validity`断言上海首日00:00含、截止次日00:00不含。`concurrent_attempts_have_one_logical_winner`在独占借用的回滚池中并发调用，断言一次成功及一次423；另以两条真实连接在现有学期行验证FOR UPDATE阻塞，双方只回滚，明确此项验证锁行为而非真实提交竞态。
   ```js
   assert.equal(chineseCards.length, 180);
   assert.equal(replayed.result.generatedTotal, initialized.result.generatedTotal);
   assert.equal(state.semesterCards.status, 'INITIALIZED');
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_semester_cards.test.js`，预期semester service缺失。
-- [ ] **Step 3: 实现服务。** withMutation使用学期exclusive锁，先校验manager、SIX_EDU_V2、DRAFT及expectedRevision；保存只改semesterCards配置并递增revision。初始化在锁内重读启用教师和实际班科，创建`QUOTA.payload.mode='COURSE_SEMESTER'`、按班科唯一业务键`['SEMESTER_COURSE_QUOTA',schoolId,termId,grade,classNo,subjectCode]`；卡沿用CARD、parent_id、record_ordinal、token_hash与现有CORE_V1加密AAD，month_key置NULL，有效期取学期日期。每卡delta=1，subject和target来自任务1目录。全量卡及INITIALIZED状态同事务提交；配置请求不自动发卡。旧卡state为LEGACY_LOCKED时只读汇总，拒绝初始化。以服务端状态阻断旧savePlan/generate/void等对已初始化学期的替代变更，合法撤回奖励事实仍保留原有审计规则。
-- [ ] **Step 4: 挂载API。** 管理员`GET/PUT /admin/report-core/semester-card-settings`及`POST /admin/report-core/semester-cards/initialize`；PUT接expectedRevision/defaultTotal/quotas，POST接expectedRevision。没有reset/delete路由。初始化响应只含汇总，不泄露卡token。
-- [ ] **Step 5: 验证绿灯。** 重跑任务测试PASS；SQL断言所有卡owner与班科一致、无重复ordinal、state与卡片完整性一致。批量发卡使用有界批量INSERT并保持单事务；不加未证实必要的新表/索引。
-- [ ] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: initialize all semester cards exactly once"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_semester_cards.test.js`，预期semester service缺失。
+- [x] **Step 3: 实现服务。** withMutation使用学期exclusive锁，先校验manager、SIX_EDU_V2、DRAFT及expectedRevision；保存只改semesterCards配置并递增revision。初始化在锁内重读启用教师和实际班科，创建`QUOTA.payload.mode='COURSE_SEMESTER'`、按班科唯一业务键`['SEMESTER_COURSE_QUOTA',schoolId,termId,grade,classNo,subjectCode]`；卡沿用CARD、parent_id、record_ordinal、token_hash与现有CORE_V1加密AAD，month_key置NULL，有效期取学期日期。每卡delta=1，subject和target来自任务1目录。全量卡及INITIALIZED状态同事务提交；配置请求不自动发卡。旧卡state为LEGACY_LOCKED时只读汇总，拒绝初始化。以服务端状态阻断旧savePlan/generate/void等对已初始化学期的替代变更，合法撤回奖励事实仍保留原有审计规则。
+- [x] **Step 4: 挂载API。** 管理员`GET/PUT /admin/report-core/semester-card-settings`及`POST /admin/report-core/semester-cards/initialize`；PUT接expectedRevision/defaultTotal/quotas，POST接expectedRevision。没有reset/delete路由。初始化响应只含汇总，不泄露卡token。
+- [x] **Step 5: 验证绿灯。** 重跑任务测试PASS；SQL断言所有卡owner与班科一致、无重复ordinal、state与卡片完整性一致。批量发卡使用有界批量INSERT并保持单事务；不加未证实必要的新表/索引。
+- [x] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: initialize all semester cards exactly once"`。
 
 ### Task 5: 教师卡片读取、打印与学生领卡改为学期模式
 
@@ -135,16 +135,16 @@
 
 **Interfaces:** Preserves `listCourseCards`, `getCourseCardPage`, `getCourseCardPrint`, `buildCourseCardPdf`现有参数，移除必填monthKey，统一按termId+grade+classNo+subjectCode读取。列表新增`{initializationStatus,courses}`；courses保留key、grade、classNo、subjectCode、subjectName、total、used、available，不再返回canSync。保留previewCard/redeemCard的token调用契约。
 
-- [ ] **Step 1: 写失败测试。** `teacher_reads_only_initialized_owned_semester_courses`断言未初始化空列表、打印422，越班越科403；`changing_month_never_creates_cards`跨月查询/打印后CARD数量不变；`used_card_has_no_claim_url_or_qr`与重复领取拒绝；`legacy_month_cards_remain_readable_without_regeneration`覆盖多个旧月批次按学期合并；`semester_mode_enforces_class_on_redemption`断言异班学生403、合法学生只加1分；`admin_four_statistics_use_facts_not_generation`断言生成180但仅领取1时奖励数=1。截止日边界覆盖前述有效期。
+- [x] **Step 1: 写失败测试。** `teacher_reads_only_initialized_owned_semester_courses`断言未初始化空列表、打印422，越班越科403；`changing_month_never_creates_cards`跨月查询/打印后CARD数量不变；`used_card_has_no_claim_url_or_qr`与重复领取拒绝；`legacy_month_cards_remain_readable_without_regeneration`覆盖多个旧月批次按学期合并；`semester_mode_enforces_class_on_redemption`断言异班学生403、合法学生只加1分；`admin_four_statistics_use_facts_not_generation`断言生成180但仅领取1时奖励数=1。截止日边界覆盖前述有效期。
   ```js
   assert.equal(usedCard.claimUrl, null);
   assert.equal(usedCard.qrDataUrl, null);
   assert.equal(afterReadCardCount, beforeReadCardCount);
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_card_reading.test.js`，预期缺monthKey或新mode未校验失败。
-- [ ] **Step 3: 改造读取和领取。** 新mode及COURSE_SUBJECT旧mode都执行同样班级/学科/owner权限，教师页按学期聚合历史月批次并保留唯一卡ID；二维码有效性和PDF/打印服务复用原实现，按批次与ordinal稳定排序。NULL month_key的学期卡统计不被月过滤无意排除，日期筛选继续使用实际领取effective_at；绝不把生成数作为奖励数。删除syncCourseCards实现与导出、教师sync写路由；旧设置写接口由任务9清除。
-- [ ] **Step 4: 验证绿灯。** 重跑任务测试PASS；预览二维码/PDF与实际领卡token一致；读取、筛选和打印前后存储行不变。
-- [ ] **Step 5: 提交。** `git add`本任务Files内实际改动；`git commit -m "refactor: read print and redeem semester course cards"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_card_reading.test.js`，预期缺monthKey或新mode未校验失败。
+- [x] **Step 3: 改造读取和领取。** 新mode及COURSE_SUBJECT旧mode都执行同样班级/学科/owner权限，教师页按学期聚合历史月批次并保留唯一卡ID；二维码有效性和PDF/打印服务复用原实现，按批次与ordinal稳定排序。NULL month_key的学期卡统计不被月过滤无意排除，日期筛选继续使用实际领取effective_at；绝不把生成数作为奖励数。删除syncCourseCards实现与导出、教师sync写路由；旧设置写接口由任务9清除。
+- [x] **Step 4: 验证绿灯。** 重跑任务测试PASS；预览二维码/PDF与实际领卡token一致；读取、筛选和打印前后存储行不变。
+- [x] **Step 5: 提交。** `git add`本任务Files内实际改动；`git commit -m "refactor: read print and redeem semester course cards"`。
 
 ### Task 6: 班主任确认即发布，师生读取单生最新快照
 
@@ -152,17 +152,17 @@
 
 **Interfaces:** Produces `publishConfirmedReport(c,{actor,studentKey,term,evaluation,fingerprint})->{reportId,version,publishedAt}`，必须使用调用方事务且不commit；`findLatestPublishedReport(c,{schoolId,termId,studentId,reportId?})->row|null`；`getPublishedReport({pool,actor,termId,studentId,reportId?})->原current接口格式|null`。confirmReport原参数不变，result增加reportId/version/publishedAt；保留确认前的revision、fingerprint、FULL版面复核和必填校验。
 
-- [ ] **Step 1: 写失败测试。** `head_confirmation_publishes_only_this_student`断言CONFIRMED及PUBLISHED同事务、第二个未完学生不阻断、学期不FROZEN；插入快照失败则确认也回滚。`student_reads_latest_published_excluding_prepared`构造旧release_version大于新版本、PREPARED版本更大，仍选最新PUBLISHED的version；含显式旧reportId打印。`correction_keeps_old_snapshot_until_reconfirmation`断言内容更正后草稿失效但旧快照hash不变，再确认版本+1。`confirmation_retry_does_not_duplicate_snapshot`涵盖相同command及相同fingerprint新command；`teacher_detail_never_leaks_head_comment`检查JSON/HTML均无寄语；`wrong_head_and_stale_layout_rejected`覆盖换班主任/旧documentKey/来源更新。
+- [x] **Step 1: 写失败测试。** `head_confirmation_publishes_only_this_student`断言CONFIRMED及PUBLISHED同事务、第二个未完学生不阻断、学期不FROZEN；插入快照失败则确认也回滚。`student_reads_latest_published_excluding_prepared`构造旧release_version大于新版本、PREPARED版本更大，仍选最新PUBLISHED的version；含显式旧reportId打印。`correction_keeps_old_snapshot_until_reconfirmation`断言内容更正后草稿失效但旧快照hash不变，再确认版本+1。`confirmation_retry_does_not_duplicate_snapshot`涵盖相同command及相同fingerprint新command；`teacher_detail_never_leaks_head_comment`检查JSON/HTML均无寄语；`wrong_head_and_stale_layout_rejected`覆盖换班主任/旧documentKey/来源更新。
   ```js
   assert.equal(published.id, confirmation.result.reportId);
   assert.equal(published.snapshot.fingerprint, confirmation.result.fingerprint);
   assert.equal(afterCorrectionPublished.id, published.id);
   ```
-- [ ] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_publishing.test.js`，预期没有确认即发布行为。
-- [ ] **Step 3: 实现冻结发布。** 在confirmReport已有学期/学生锁中，更新确认后调用publishConfirmedReport；按学生所有历史MAX(version)+1，source_revision/fingerprint绑定来源。release_key=stableHash(['HEAD_CONFIRM',schoolId,termId,studentId,revision,fingerprint])，release_version使用该学生新version，仅作兼容元数据，不改全校active_release_version。同fingerprint和来源revision已有PUBLISHED则复用。快照复用现有renderPrintableA4渲染FULL/DETAIL_ONLY、renderedDetailHash/snapshot_hash与94字段；published_at非空满足约束，DETAIL去私有字段。current、print、教师报告列表/明细和工作台published计数都用统一单生最新PUBLISHED查询，不再按全校release过滤。
-- [ ] **Step 4: 调整生命周期。** 新导入学期标记`reportPublicationMode:'HEAD_CONFIRM'`，不依赖管理员phase切换；仍按上海采集截止控制学生新增/直评/领卡，教师核对、结算、寄语及确认在截止后可用。历史FROZEN/ARCHIVED保持只读；既有发布接口由任务9删除。来源更正沿用现有投影使审核失效，不更改term_report。confirmReports逐个成功后立即可见，保留partial成功/blocked返回语义。
-- [ ] **Step 5: 验证绿灯。** 重跑任务测试PASS；用实际报告渲染检查94字段与两页结构，DETAIL_ONLY不带班主任评语；按学生school/term范围读取，学生访问别人报告403。
-- [ ] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: publish student report on head teacher confirmation"`。
+- [x] **Step 2: 运行红灯。** `cd backend && node --test __tests__/admin_simplification_publishing.test.js`，预期没有确认即发布行为。
+- [x] **Step 3: 实现冻结发布。** 在confirmReport已有学期/学生锁中，更新确认后调用publishConfirmedReport；按学生所有历史MAX(version)+1，source_revision/fingerprint绑定来源。release_key=stableHash(['HEAD_CONFIRM',schoolId,termId,studentId,revision,fingerprint])，release_version使用该学生新version，仅作兼容元数据，不改全校active_release_version。同fingerprint和来源revision已有PUBLISHED则复用。快照复用现有renderPrintableA4渲染FULL/DETAIL_ONLY、renderedDetailHash/snapshot_hash与94字段；published_at非空满足约束，DETAIL去私有字段。current、print、教师报告列表/明细和工作台published计数都用统一单生最新PUBLISHED查询，不再按全校release过滤。
+- [x] **Step 4: 调整生命周期。** 新导入学期标记`reportPublicationMode:'HEAD_CONFIRM'`，不依赖管理员phase切换；仍按上海采集截止控制学生新增/直评/领卡，教师核对、结算、寄语及确认在截止后可用。历史FROZEN/ARCHIVED保持只读；既有发布接口由任务9删除。来源更正沿用现有投影使审核失效，不更改term_report。confirmReports逐个成功后立即可见，保留partial成功/blocked返回语义。
+- [x] **Step 5: 验证绿灯。** 重跑任务测试PASS；用实际报告渲染检查94字段与两页结构，DETAIL_ONLY不带班主任评语；按学生school/term范围读取，学生访问别人报告403。
+- [x] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: publish student report on head teacher confirmation"`。
 
 ### Task 7: 三模块管理员界面与统一导入工作台
 
@@ -170,16 +170,16 @@
 
 **Interfaces:** Consumes任务3、4API。`AdminRegistry({ctx})`和`SemesterCardQuota({ctx})`沿用ctx.termId/error/notify/navigate/refresh/reloadTerms约定；在index.jsx新增`ctx.selectTerm(nextTermId:string)->void`，执行离开检查、setTermId及当前路由更新。成功导入先await ctx.reloadTerms()再ctx.selectTerm(result.termId)，不向现有单参数navigate传入未定义选项。`buildInitializeSummary(settings)->{teacherCount,courseCount,total,warning}`；`registryQuery({view,q,grade,classNo,subjectCode,cursor})->string`；前端不重复维护Excel字段契约，下载和说明来自任务3模板契约。
 
-- [ ] **Step 1: 写失败测试。** navigation断言manager恰为`[['roster','学籍账号管理'],['quota','卡额度管理'],['statistics','数据统计']]`，旧releases/classes/config/audit路由回roster；保留学生5菜单及教师6菜单。模型断言默认100、60×3=180、0不生成、INITIALIZED/LEGACY_LOCKED不可初始化；查询变更清cursor，切term清预览。
+- [x] **Step 1: 写失败测试。** navigation断言manager恰为`[['roster','学籍账号管理'],['quota','卡额度管理'],['statistics','数据统计']]`，旧releases/classes/config/audit路由回roster；保留学生5菜单及教师6菜单。模型断言默认100、60×3=180、0不生成、INITIALIZED/LEGACY_LOCKED不可初始化；查询变更清cursor，切term清预览。
   ```js
   assert.deepEqual(navigation.manager.map(x => x[1]), ['学籍账号管理', '卡额度管理', '数据统计']);
   assert.equal(routeForRole({role:'manager',page:'releases'}, 'manager').page, 'roster');
   ```
-- [ ] **Step 2: 运行红灯。** `cd frontend && node --test src/app/core/navigation.test.js src/app/manager/roster/registryModel.test.js src/app/manager/quota/semesterQuotaModel.test.js`，预期旧导航断言失败/新模块缺失。
-- [ ] **Step 3: 实现学籍界面。** 以已展示静态预览的绿色米白视觉落地，单文件→跨表检查→差异确认；错误带工作表/行/字段，失败可重新选择，确认前不写数据。学生/教师/班级三个只读视角、姓名账号/年级/班级/学科筛选及分页；不提供手工账号、班级、关系维护。成功后刷新学期列表并切到返回termId；支持无可选学期时直接上传初始化文件。所有读取AbortController，晚返回不覆盖新学期状态；上传/提交期间防重复操作。
-- [ ] **Step 4: 实现额度界面。** 12学科输入、默认100、预计教师/课程/总量、只读初始化结果；只有保存配置和初始化操作。初始化按钮先保存有效未保存配置，再显示服务端返回计划/版本确认框；确认文案精确为“本学期只能初始化一次，确认后不能重置或修改额度”，默认焦点取消，可Esc关闭并还原焦点。确认提交expectedRevision，409/423刷新并提示，不静默用新总量初始化。已初始化所有额度输入只读，无重置/删除入口；旧学期标注历史批次且不重新生成。
-- [ ] **Step 5: 验证绿灯。** 上述测试PASS，再`npm test && npm run lint && npm run build`。用MCP核对1440和390宽度、只读表格、键盘确认/取消、取消不请求初始化、错误与空态；窄屏仅表格容器内横向滚动。
-- [ ] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: simplify administrator workspace to three modules"`。
+- [x] **Step 2: 运行红灯。** `cd frontend && node --test src/app/core/navigation.test.js src/app/manager/roster/registryModel.test.js src/app/manager/quota/semesterQuotaModel.test.js`，预期旧导航断言失败/新模块缺失。
+- [x] **Step 3: 实现学籍界面。** 以已展示静态预览的绿色米白视觉落地，单文件→跨表检查→差异确认；错误带工作表/行/字段，失败可重新选择，确认前不写数据。学生/教师/班级三个只读视角、姓名账号/年级/班级/学科筛选及分页；不提供手工账号、班级、关系维护。成功后刷新学期列表并切到返回termId；支持无可选学期时直接上传初始化文件。所有读取AbortController，晚返回不覆盖新学期状态；上传/提交期间防重复操作。
+- [x] **Step 4: 实现额度界面。** 12学科输入、默认100、预计教师/课程/总量、只读初始化结果；只有保存配置和初始化操作。初始化按钮先保存有效未保存配置，再显示服务端返回计划/版本确认框；确认文案精确为“本学期只能初始化一次，确认后不能重置或修改额度”，默认焦点取消，可Esc关闭并还原焦点。确认提交expectedRevision，409/423刷新并提示，不静默用新总量初始化。已初始化所有额度输入只读，无重置/删除入口；旧学期标注历史批次且不重新生成。
+- [x] **Step 5: 验证绿灯。** 上述测试PASS，再`npm test && npm run lint && npm run build`。用MCP核对1440和390宽度、只读表格、键盘确认/取消、取消不请求初始化、错误与空态；窄屏仅表格容器内横向滚动。
+- [x] **Step 6: 提交。** `git add`本任务Files内实际改动；`git commit -m "feat: simplify administrator workspace to three modules"`。
 
 ### Task 8: 教师学期卡界面与学生报告阅读界面
 

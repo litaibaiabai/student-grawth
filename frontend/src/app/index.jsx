@@ -303,6 +303,7 @@ export default function ReportCoreApp() {
       }),
     refreshKey,
     reloadTerms,
+    selectTerm: nextTermId => {if(!mayLeave())return;leaveGuard.current=null;setTermId(String(nextTermId));location.hash=formatCoreLocation({role:actor.role,page:tab,termId:String(nextTermId)});},
     refresh,
     notify,
     error: reportError,
@@ -461,6 +462,8 @@ export default function ReportCoreApp() {
             <section className="panel" role="status">
               正在读取学期配置…
             </section>
+          ) : !termId && actor.role === "manager" ? (
+            <ManagerView tab="roster" ctx={ctx}/>
           ) : !termId ? (
             <section className="panel">
               <h2>尚未配置学期</h2>
