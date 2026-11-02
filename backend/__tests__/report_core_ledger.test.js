@@ -6,6 +6,7 @@ const cards = require('../services/reportCoreCards');
 const ledger = require('../services/reportCoreLedger');
 const teacher = { id: '2', schoolId: '1', role: 'teacher', tokenVersion: 1 };
 const manager = { ...teacher, id: '1', role: 'manager' };
+const cardTime = new Date('2026-10-15T00:00:00Z');
 let seq = 0;
 const command = () => ({ requestKey: 'ledger-' + ++seq, payloadHash: String(seq).padStart(64, '0') });
 async function setup(t, count = 80, quota = 100) {
@@ -24,7 +25,7 @@ async function setup(t, count = 80, quota = 100) {
 test('ledger reconciles generated/redeemed/void/reversed counts and never exposes card credentials', async t => {
   const db = await setup(t);
   for (const row of db.rawCards.slice(0, 52)) {
-    const token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId: String(row.id) });
+    const token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId: String(row.id), now: cardTime });
     await cards.redeemCard({ pool: db.pool, actor: { ...teacher, id: '3', role: 'student' }, token, now: new Date('2026-10-15T00:00:00Z'), command: command() });
   }
   for (const row of db.rawCards.slice(0, 2)) await cards.reverseSource({ pool: db.pool, actor: teacher, sourceId: String(row.id), reason: '更正', command: command() });
@@ -83,6 +84,7 @@ test('cross-month reversals belong to original month while the event keeps its a
   const direct = await cards.directScore({ pool: db.pool, actor: teacher, termId: '1', studentIds: ['3'], categoryCode: 'MORAL_PROCESS_STAR', now: new Date('2026-09-30T16:00:00Z'), command: command() });
   assert.equal(direct.result.count, 1);
   const [[row]] = await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='DIRECT'");
+  await db.pool.query("UPDATE evaluation_source_record SET created_at='2026-10-01 00:00:00' WHERE id=?", [row.id]);
   await cards.reverseSource({ pool: db.pool, actor: teacher, sourceId: String(row.id), reason: '跨月更正', command: command() });
   await db.pool.query("UPDATE evaluation_source_record SET created_at='2026-11-02 00:00:00' WHERE record_kind='REVERSAL'");
   const before = await ledger.getLedgerSummary({ pool: db.pool, actor: teacher, filters: db.filters, asOf: '2026-10-31T15:59:59Z' });
@@ -98,7 +100,7 @@ test('cross-month reversals belong to original month while the event keeps its a
 });
 test('historical asOf does not expose a future recipient or apply a later void; old unverified clock stays unknown', async t => {
   const db = await setup(t, 2, 2);
-  const token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId: String(db.rawCards[0].id) });
+  const token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId: String(db.rawCards[0].id), now: cardTime });
   await cards.redeemCard({ pool: db.pool, actor: { ...teacher, id: '3', role: 'student' }, token, now: new Date('2026-10-20T00:00:00Z'), command: command() });
   await cards.voidCard({ pool: db.pool, actor: teacher, sourceId: String(db.rawCards[1].id), expectedRevision: '1', reason: '作废', command: command() });
   await db.pool.query("UPDATE evaluation_source_record SET payload_json=JSON_SET(payload_json,'$.voidedAt','2026-10-20T01:00:00.000Z') WHERE status='VOID'");
@@ -118,7 +120,7 @@ test('historical asOf does not expose a future recipient or apply a later void; 
 test('current SQL aggregate keeps direct counts, mixed event ordering and pagination identical to exact asOf projection',async t=>{
  const db=await setup(t,2,3);
  for(let i=0;i<30;i++)await cards.directScore({pool:db.pool,actor:teacher,termId:'1',studentIds:[String(3+i%2)],categoryCode:'MORAL_PROCESS_STAR',now:new Date('2026-10-15T00:00:00Z'),command:command()});
- const token=await cards.cardToken({pool:db.pool,actor:teacher,sourceId:String(db.rawCards[0].id)});await cards.redeemCard({pool:db.pool,actor:{...teacher,id:'3',role:'student'},token,now:new Date('2026-10-16T00:00:00Z'),command:command()});
+ const token=await cards.cardToken({pool:db.pool,actor:teacher,sourceId:String(db.rawCards[0].id),now:cardTime});await cards.redeemCard({pool:db.pool,actor:{...teacher,id:'3',role:'student'},token,now:new Date('2026-10-16T00:00:00Z'),command:command()});
  const now=new Date(Date.now()+1000),args={pool:db.pool,actor:teacher,filters:db.filters,now,limit:25};
  const fast=await ledger.listLedgerUsage(args),exact=await ledger.listLedgerUsage({...args,asOf:now.toISOString()});
  assert.equal(fast.summary.direct,30);assert.deepEqual(fast,exact);

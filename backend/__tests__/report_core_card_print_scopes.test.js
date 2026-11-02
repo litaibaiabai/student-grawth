@@ -6,6 +6,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const cards = require('../services/reportCoreCards');
 const { fixture, teacher, manager, command, bytes } = require('./helpers/ledgerFixtures');
+const printTime = new Date('2026-10-20T00:00:00Z');
 async function paper(t) {
   const db = await fixture(t);
   await db.pool.query("UPDATE users SET real_name='陈老师' WHERE id=2");
@@ -17,11 +18,11 @@ async function paper(t) {
   return { ...db, quotaId, rows };
 }
 test('original card print request is auditable and produces Chinese per-class PDFs without changing credentials', async t => {
-  const db = await paper(t), args = { pool: db.pool, actor: teacher, quotaId: db.quotaId, command: command() };
+  const db = await paper(t), args = { pool: db.pool, actor: teacher, quotaId: db.quotaId, command: command(), now: printTime };
   const request = (await cards.createCardPrintRequest(args)).result;
   assert.equal(request.cardCount, 4);
   assert.equal((await cards.createCardPrintRequest(args)).result.requestId, request.requestId);
-  const file = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId });
+  const file = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId, now: printTime });
   assert.equal(file.mimeType, 'application/zip');
   const first = await bytes(file.stream);
   const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'core-print-'));
@@ -31,7 +32,7 @@ test('original card print request is auditable and produces Chinese per-class PD
   assert.deepEqual(names.sort(), ['4年级1班.pdf', '4年级2班.pdf']);
   const text = execFileSync('pdftotext', [path.join(folder, names[0]), '-'], { encoding: 'utf8' });
   assert.match(text, /陈老师/); assert.match(text, /有礼貌/);
-  const again = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId });
+  const again = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId, now: printTime });
   await bytes(again.stream);
   const [after] = await db.pool.query("SELECT token_hash FROM evaluation_source_record WHERE record_kind='CARD' ORDER BY id");
   assert.deepEqual(after.map(r => r.token_hash), db.rows.map(r => r.token_hash));
@@ -42,14 +43,14 @@ test('original card print request is auditable and produces Chinese per-class PD
 });
 test('class PDF and stale print requests enforce current unused status; old token and ZIP routes share the guard', async t => {
   const db = await paper(t);
-  const request = (await cards.createCardPrintRequest({ pool: db.pool, actor: teacher, quotaId: db.quotaId, grade: 4, classNo: 1, command: command() })).result;
+  const request = (await cards.createCardPrintRequest({ pool: db.pool, actor: teacher, quotaId: db.quotaId, grade: 4, classNo: 1, command: command(), now: printTime })).result;
   assert.equal(request.cardCount, 2);
-  const file = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId });
+  const file = await cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId, now: printTime });
   assert.equal(file.mimeType, 'application/pdf'); assert.equal((await bytes(file.stream)).subarray(0, 4).toString(), '%PDF');
-  const sourceId = String(db.rows[0].id), token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId });
+  const sourceId = String(db.rows[0].id), token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId, now: printTime });
   await cards.redeemCard({ pool: db.pool, actor: { ...teacher, id: '3', role: 'student' }, token, command: command(), now: new Date('2026-10-29T00:00:00Z') });
-  await assert.rejects(cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId }), { statusCode: 409 });
-  await assert.rejects(cards.cardToken({ pool: db.pool, actor: teacher, sourceId }), { statusCode: 409 });
+  await assert.rejects(cards.buildCardPrintFile({ pool: db.pool, actor: teacher, requestId: request.requestId, now: printTime }), { statusCode: 409 });
+  await assert.rejects(cards.cardToken({ pool: db.pool, actor: teacher, sourceId, now: printTime }), { statusCode: 409 });
   await assert.rejects(cards.createCardPrintRequest({ pool: db.pool, actor: manager, quotaId: db.quotaId, command: command() }), { statusCode: 403 });
   const expired = await cards.buildClassPrintZip({ pool: db.pool, actor: teacher, quotaId: db.quotaId, now: new Date('2026-11-02T00:00:00Z') }).catch(e => e);
   assert.equal(expired.statusCode, 422);

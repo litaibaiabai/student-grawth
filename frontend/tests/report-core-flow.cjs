@@ -83,11 +83,13 @@ const {
     await page.getByRole("radio", { name: "有礼貌·自评 2星", exact: true }).check();
     await page.route('**/api/v1/report-core/forms/3', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message:'登录已过期' }) }), { times: 1 });
     await page.getByRole('button', { name:'保存评价', exact:true }).click();
-    await page.getByRole('dialog', { name:'重新登录' }).waitFor();
-    await page.getByLabel('重新登录密码').fill('Test-pass-2026');
-    await page.getByRole('button', { name:'重新登录', exact:true }).click();
-    await page.getByRole('dialog', { name:'重新登录' }).waitFor({ state:'hidden' });
-    assert.equal(await page.getByRole('radio', { name:'有礼貌·自评 2星', exact:true }).isChecked(), true);
+    await page.getByRole('heading', { name:'账号登录', exact:true }).waitFor();
+    assert.equal(await page.getByRole('dialog', { name:'重新登录' }).count(), 0);
+    await page.getByLabel('账号', { exact:true }).fill('student');
+    await page.getByLabel('密码', { exact:true }).fill('Test-pass-2026');
+    await page.getByRole('button', { name:'登录', exact:true }).click();
+    await page.getByRole('button', { name:'开始自我评价 →', exact:true }).click();
+    await page.getByRole('radio', { name:'有礼貌·自评 2星', exact:true }).check();
     for (const width of [390,768,1440]) {
       await page.setViewportSize({ width, height:900 });
       await page.keyboard.press('Tab');

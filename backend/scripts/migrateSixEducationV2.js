@@ -8,8 +8,9 @@ async function migrateSixEducationV2({connection,targetDb,mode='check'}) {
   if(current.db!==targetDb)throw Error('Connection target mismatch');
   const [tables]=await connection.query('SHOW TABLES');
   const names=tables.map(r=>Object.values(r)[0]);
-  if(names.length<6 || names.length>7 || schema.tables.slice(0,6).some(n=>!names.includes(n)) || names.some(n=>!schema.tables.includes(n)))throw Error('Partial or legacy schema: stop; establish a verified six-table clone first');
+  if(names.length<6 || names.length>8 || schema.tables.slice(0,6).some(n=>!names.includes(n)) || names.some(n=>!schema.tables.includes(n)&&n!=='school_class'))throw Error('Partial or legacy schema: stop; establish a verified six-table clone first');
   const conflicts=[];
+  if(names.includes('school_class'))conflicts.push(...await require('./migrateAdminClasses').inspectRegistry(connection,targetDb));
   const [heads]=await connection.query('SELECT school_id,term_id,grade,class_no,COUNT(*) total FROM teacher_teaching_assignment WHERE enabled=1 AND is_head_teacher=1 GROUP BY school_id,term_id,grade,class_no HAVING COUNT(*)>1');
   for(const row of heads)conflicts.push({kind:'DUPLICATE_HEAD',...row});
   const columns={},indexes={};

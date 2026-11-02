@@ -6,6 +6,31 @@ function mountV2(router,{asyncRoute,ok}) {
   const context=req=>({pool:req.app.locals.pool,actor:req.actor});
   const command=req=>({requestKey:req.body.requestKey,payloadHash:stableHash({body:req.body,params:req.params,fileHash:req.file?stableHash(req.file.buffer.toString('base64')):undefined})});
   const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:10*1024*1024,files:1,fields:20}});
+  const writtenStories = require('../services/reportCoreWrittenStories');
+  router.get('/report-core/v2/written-stories', asyncRoute(async (req,res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    ok(res, await writtenStories.listWrittenStories({...req.query,...context(req)}));
+  }));
+  router.get('/report-core/v2/written-stories/:id', asyncRoute(async (req,res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    ok(res, await writtenStories.getWrittenStory({...context(req),termId:req.query.termId,storyId:req.params.id}));
+  }));
+  router.post('/report-core/v2/written-stories', upload.single('file'), asyncRoute(async (req,res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    ok(res, await writtenStories.submitWrittenStory({...req.body,...context(req),file:req.file,command:command(req)}));
+  }));
+  const comments = require('../services/reportCoreComments');
+  router.get('/report-core/v2/comments', asyncRoute(async (req,res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    ok(res, await comments.listComments({...req.query,...context(req)}));
+  }));
+  router.get('/report-core/v2/comments/:studentId', asyncRoute(async (req,res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    ok(res, await comments.getComment({...context(req),termId:req.query.termId,studentId:req.params.studentId}));
+  }));
+  for (const [path, method] of [['generate','generateComment'],['save','saveComment'],['approve','approveComments']])
+    router.post('/report-core/v2/comments/'+path, asyncRoute(async (req,res) =>
+      ok(res, await comments[method]({...req.body,...context(req),provider:req.app.locals.provider,command:command(req)}))));
   router.get('/report-core/imports/template',asyncRoute(async(req,res)=>{
     if(!['teacher','manager'].includes(req.actor.role))fail(403,'仅教师或管理员下载模板');
     const term=await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId);
@@ -27,7 +52,7 @@ function mountV2(router,{asyncRoute,ok}) {
   }));
   router.get('/report-core/term-state',asyncRoute(async(req,res)=>{
     const term=await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId);
-    ok(res,{schemaVersion:term.evaluation_config.schemaVersion||'CORE_V1',phase:term.business_phase,dataRevision:String(term.data_revision||0),rosterRevision:String(term.roster_revision||0)});
+    ok(res,{schemaVersion:term.evaluation_config.schemaVersion||'CORE_V1',phase:term.business_phase,collectionCutoff:require('../services/reportCorePolicy').collectionCutoff(term).toISOString(),dataRevision:String(term.data_revision||0),rosterRevision:String(term.roster_revision||0)});
   }));
   router.post('/admin/report-core/phase',asyncRoute(async(req,res)=>ok(res,await require('../services/reportCoreV2Lifecycle').changePhase({...req.body,...context(req),command:command(req)}))));
 }

@@ -9,7 +9,9 @@ const { assertScope, canManageCertificate } = require("./authorizationService");
 const { savePrivateFile, removePrivateFile } = require("../utils/privateFiles");
 async function submitCertificate({ pool, actor, termId, file, command }) {
   if (actor.role !== "student") fail(403, "仅学生本人上传");
-  const saved = await savePrivateFile(file);
+  const term=await require('./reportCoreStore').getTerm(pool,actor.schoolId,termId);
+  const v2=require('./reportCoreV2Policy').isV2(term.evaluation_config);
+  const saved = await savePrivateFile(file,v2?{maxBytes:10*1024*1024,allowPdf:true}:undefined);
   try {
     const r = await withMutation(
       {
@@ -33,6 +35,10 @@ async function submitCertificate({ pool, actor, termId, file, command }) {
           },
           c,
         );
+        if(v2) {
+          const [[duplicate]]=await c.query("SELECT id FROM evaluation_source_record WHERE school_id=? AND term_id=? AND student_id=? AND source_type='CERTIFICATE' AND status NOT IN ('REVOKED','REJECTED','SUPERSEDED') AND JSON_UNQUOTE(JSON_EXTRACT(payload_json,'$.fileHash'))=? ORDER BY id DESC LIMIT 1",[actor.schoolId,termId,actor.id,saved.fileHash]);
+          if(duplicate)return {result:{sourceId:String(duplicate.id),duplicate:true}};
+        }
         const sourceId = await addSource(c, {
           schoolId: actor.schoolId,
           termId,
@@ -50,7 +56,7 @@ async function submitCertificate({ pool, actor, termId, file, command }) {
         };
       },
     );
-    if (r.replayed) await removePrivateFile(saved.fileRef);
+    if (r.replayed || r.result.duplicate) await removePrivateFile(saved.fileRef);
     return r;
   } catch (e) {
     await removePrivateFile(saved.fileRef);
@@ -79,6 +85,7 @@ async function decideCertificate({
 }) {
   if (actor.role !== "teacher") fail(403, "仅教师审核");
   const s = await getCertificate(pool, actor, sourceId);
+  if(s.schema_version==='SIX_EDU_V2')return require('./reportCoreV2Honors').recognizeCertificate({pool,actor,source:s,expectedRevision,facts,reason,command,reject});
   return withMutation(
     {
       pool,
@@ -209,8 +216,9 @@ async function decideCertificate({
     },
   );
 }
-async function revokeCertificate({ pool, actor, sourceId, reason, command }) {
+async function revokeCertificate({ pool, actor, sourceId, reason, expectedRevision, command }) {
   const s = await getCertificate(pool, actor, sourceId);
+  if(s.schema_version==='SIX_EDU_V2')return require('./reportCoreV2Honors').recognizeCertificate({pool,actor,source:s,reason,expectedRevision,command,revoke:true});
   return withMutation(
     {
       pool,
@@ -278,7 +286,7 @@ async function applyCertificateFacts({ pool, job, leaseToken, result }) {
       await c.query(
         "UPDATE evaluation_source_record SET status='SUBMITTED',payload_json=?,revision=revision+1,lease_token=NULL,locked_until=NULL WHERE id=?",
         [
-          JSON.stringify({ ...p, facts: result, recognitionMethod: "MODEL" }),
+          JSON.stringify({ ...p, facts: job.schema_version === 'SIX_EDU_V2' ? require('./reportCoreAwardFacts').normalizeAwardFacts(result) : result, recognitionMethod: "MODEL" }),
           job.id,
         ],
       );

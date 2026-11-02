@@ -7,7 +7,8 @@ server {
     server_name __DOMAIN__;
 
     # 客户端上传限制（支持导入名单、评价佐证材料等）
-    client_max_body_size 20M;
+    # Allow a 20MiB recording plus its multipart form fields.
+    client_max_body_size 21M;
 
     # 静态前端资源目录
     root __SERVER_PATH__/backend/dist;

@@ -2,23 +2,29 @@ const { fixedFields, byColumn, narratives, subjectFor, fail, stableHash } = requ
 const { getTerm, parse } = require('./reportCoreStore');
 const sections = ['conduct','wisdom','health','art','labor','story'];
 function evaluateCompletion({ evaluation:e, config = {}, blockingMaterials = [] }) {
-  const missingItems = [], sources = parse(e.field_sources), fields = config.applicableFields || fixedFields.map(f => f.column);
+  const v2Policy = require('./reportCoreV2Policy'), v2 = v2Policy.isV2(config);
+  const currentFields = v2 ? v2Policy.fixedFields : fixedFields;
+  const currentByColumn = v2 ? v2Policy.byColumn : byColumn;
+  const missingItems = [], sources = parse(e.field_sources), fields = config.applicableFields || currentFields.map(f => f.column);
   const sectionProgress = Object.fromEntries(sections.map(s => [s,{ total:0, complete:0 }]));
   let selfTotal=0,selfComplete=0;
   for (const column of fields) {
-    const f=byColumn.get(column); if (!f) continue;
+    const f=currentByColumn.get(column); if (!f || v2 && sources[column]?.notApplicable === true) continue;
     let reason=null;
     if (f.sourceType==='CARD' && !sources[column]?.settled) reason='卡项目尚未结算';
     else if (e[column] === null || e[column] === undefined || e[column] === '') {
-      if (!(f.sourceType==='CERTIFICATE' && sources[column]?.noAward)) reason='尚未完成';
+      const storyType = v2 && f.sourceType==='STORY' ? column.match(/^story_(write|listen|tell)_star$/)?.[1]?.toUpperCase() : null;
+      const optionalStory = storyType && parse(e.story_summary)[storyType]?.participating!==true;
+      if (!optionalStory && !(f.sourceType==='CERTIFICATE' && sources[column]?.noAward)) reason='尚未完成';
     }
     if(reason) missingItems.push({field:column,reason});
     const p=sectionProgress[f.section]; if(p){p.total++;if(!reason)p.complete++;}
     if(f.sourceType==='SELF'){selfTotal++;if(!reason)selfComplete++;}
   }
-  const narrativeMissing=narratives.filter(n=>n!=='family_message' && !e[n]?.trim());
+  const requiredNarratives = v2 ? ['teacher_comment'] : narratives.filter(n => n !== 'family_message');
+  const narrativeMissing=requiredNarratives.filter(n=>!e[n]?.trim());
   for(const field of narrativeMissing) missingItems.push({field,reason:'报告文字未填写'});
-  for(const [collection,array] of [['sports_specialties',parse(e.sports_specialties)],['art_specialties',parse(e.art_specialties)]]) {
+  for(const [collection,array] of v2 ? [] : [['sports_specialties',parse(e.sports_specialties)],['art_specialties',parse(e.art_specialties)]]) {
     for(const item of Array.isArray(array)?array:[]) {
       selfTotal++;if(item.self_star)selfComplete++;
       for(const property of ['self_star','teacher_star'])if(!item[property])missingItems.push({field:collection,itemId:item.id,property,reason:property==='self_star'?'特长自评未完成':'特长教师评价未完成'});
@@ -29,12 +35,21 @@ function evaluateCompletion({ evaluation:e, config = {}, blockingMaterials = [] 
 }
 async function resolveTermRoster({connection,schoolId,termId,teacherId,studentId}) {
   let sql='SELECT e.*,u.username student_number FROM student_term_evaluation e JOIN users u ON u.school_id=e.school_id AND u.id=e.student_id WHERE e.school_id=? AND e.term_id=?';const params=[schoolId,termId];
-  if(teacherId){sql+=' AND EXISTS(SELECT 1 FROM teacher_teaching_assignment a WHERE a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot AND a.teacher_id=? AND a.enabled=1)';params.push(teacherId);}
+  if(teacherId){const teaching=await require('./authorizationService').scopeAssignments(schoolId,termId,connection,teacherId);if(!teaching.length)return [];const classes=[...new Map(teaching.map(a=>[`${a.grade}:${a.class_no}`,a])).values()];sql+=' AND ('+classes.map(()=>'(e.grade_snapshot=? AND e.class_no_snapshot=?)').join(' OR ')+')';params.push(...classes.flatMap(a=>[a.grade,a.class_no]));}
   if(studentId){sql+=' AND e.student_id=?';params.push(studentId);}
   const [rows]=await connection.query(sql+' ORDER BY e.student_id',params);
-  return rows.filter(e=>parse(e.section_meta).roster?.included!==false);
+  return rows.filter(e=>{const meta=parse(e.section_meta);return meta.roster?.included!==false&&!['TRANSFERRED_OUT','NOT_APPLICABLE'].includes(meta.enrollment?.status);});
 }
 async function getBlockingMaterials({connection,schoolId,termId,config,studentId}) {
+  if(require('./reportCoreV2Policy').isV2(config)) {
+    const [rows]=await connection.query(`SELECT i.id,i.created_at,i.student_id,i.source_type,i.status,i.month_key,i.target_key,i.parent_id
+      FROM evaluation_source_record i LEFT JOIN evaluation_source_record w ON w.school_id=i.school_id AND w.term_id=i.term_id AND w.student_id=i.student_id AND w.id=i.parent_id
+      WHERE i.school_id=? AND i.term_id=? AND i.schema_version='SIX_EDU_V2' AND i.record_kind='ITEM'
+      AND i.status IN ('QUEUED','PROCESSING','SUBMITTED','FAILED')
+      AND (i.source_type='CERTIFICATE' OR (i.source_type='STORY' AND w.record_kind='BATCH' AND w.status='SUBMITTED'
+        AND w.event_type IN ('WRITE_WORK','TELL_WORK') AND w.current_version_id=i.id))${studentId?' AND i.student_id=?':''}`,[schoolId,termId,...(studentId?[studentId]:[])]);
+    return rows;
+  }
   const [rows]=await connection.query(`SELECT i.id,i.created_at,i.student_id,i.source_type,i.status,i.month_key,i.target_key,i.parent_id FROM evaluation_source_record i
     LEFT JOIN evaluation_source_record b ON b.school_id=i.school_id AND b.id=i.parent_id
     WHERE i.school_id=? AND i.term_id=? AND i.record_kind='ITEM' AND i.status IN ('QUEUED','PROCESSING','SUBMITTED','FAILED')
@@ -58,7 +73,8 @@ async function getWorkspace(args) {
   const c=await pool.getConnection();
   try {
     await c.beginTransaction();const term=await getTerm(c,actor.schoolId,termId);
-    const [assignments]=await c.query('SELECT a.*,u.real_name FROM teacher_teaching_assignment a LEFT JOIN users u ON u.school_id=a.school_id AND u.id=a.teacher_id WHERE a.school_id=? AND a.term_id=? AND a.enabled=1',[actor.schoolId,termId]);
+    const currentFields=require('./reportCoreV2Policy').policyFor(term.evaluation_config).fields.filter(f=>!f.jsonPath),currentByColumn=new Map(currentFields.map(f=>[f.column,f]));
+    const assignments=await require('./authorizationService').scopeAssignments(actor.schoolId,termId,c);
     const mine=assignments.filter(a=>String(a.teacher_id)===actor.id);
     let roster=await resolveTermRoster({connection:c,schoolId:actor.schoolId,termId,...(actor.role==='teacher'?{teacherId:actor.id}:actor.role==='student'?{studentId:actor.id}:{})});
     roster=roster.filter(e=>(actor.role==='manager'||actor.role==='student'&&String(e.student_id)===actor.id||actor.role==='teacher'&&mine.some(a=>a.grade===e.grade_snapshot&&a.class_no===e.class_no_snapshot&&(!args.subjectCode||a.subject_code===args.subjectCode)))&&(!args.grade||e.grade_snapshot===Number(args.grade))&&(!args.classNo||e.class_no_snapshot===Number(args.classNo)));
@@ -71,7 +87,8 @@ async function getWorkspace(args) {
     const fingerprint=require('./reportCoreEvaluation').reportFingerprint;
     for(const e of roster){
       const sid=String(e.student_id), related=assignments.filter(a=>a.grade===e.grade_snapshot&&a.class_no===e.class_no_snapshot), own=related.filter(a=>String(a.teacher_id)===actor.id);
-      for(const field of fixedFields.filter(f=>f.sourceType==='IMPORT'&&(!args.subjectCode||subjectFor(f.column)===args.subjectCode)&&(term.evaluation_config.applicableFields||fixedFields.map(f=>f.column)).includes(f.column))) {
+      for(const field of currentFields.filter(f=>f.sourceType==='IMPORT'&&(!args.subjectCode||subjectFor(f.column)===args.subjectCode)&&(term.evaluation_config.applicableFields||currentFields.map(f=>f.column)).includes(f.column))) {
+        if(require('./reportCoreV2Policy').isV2(term.evaluation_config)&&parse(e.field_sources)[field.column]?.notApplicable===true)continue;
         if(actor.role==='teacher'&&!own.some(a=>a.subject_code===subjectFor(field.column)))continue;
         counts.academicExpected++;if(e[field.column]!==null&&e[field.column]!==undefined&&e[field.column]!=='')counts.academicComplete++;
       }
@@ -85,7 +102,7 @@ async function getWorkspace(args) {
       for(const m of completion.missingItems){
         if(m.field==='materials')continue;
         const specialty=['sports_specialties','art_specialties'].includes(m.field);
-        const subject=subjectFor(m.field), self=specialty?m.property==='self_star':byColumn.get(m.field)?.sourceType==='SELF'||narratives.includes(m.field)&&m.field!=='teacher_comment';
+        const subject=subjectFor(m.field), self=specialty?m.property==='self_star':currentByColumn.get(m.field)?.sourceType==='SELF'||narratives.includes(m.field)&&m.field!=='teacher_comment';
         const responsible=self?[{teacher_id:sid,real_name:e.student_name_snapshot}]:related.filter(a=>specialty?a.is_head_teacher===1||(m.field==='sports_specialties'?a.subject_code==='PE':['MUSIC','FINE_ART'].includes(a.subject_code)):m.field==='teacher_comment'||narratives.includes(m.field)?a.is_head_teacher===1:a.subject_code===subject||subject==='CONDUCT'&&a.is_head_teacher===1);
         const canHandle=actor.role==='student'?self:actor.role==='teacher'&&!self&&responsible.some(a=>String(a.teacher_id)===actor.id);
         if(actor.role==='student'&&!self || actor.role==='teacher'&&!canHandle)continue;

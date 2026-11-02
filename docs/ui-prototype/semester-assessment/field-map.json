@@ -1,0 +1,1026 @@
+{
+  "schemaVersion": "ATTACHMENT_LAYOUT_V1",
+  "exampleOnly": true,
+  "fields": [
+    {
+      "code": "CONDUCT_1_SELF",
+      "section": "conduct",
+      "label": "有礼貌·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_1_OTHER",
+      "section": "conduct",
+      "label": "有礼貌·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_2_SELF",
+      "section": "conduct",
+      "label": "讲文明·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_2_OTHER",
+      "section": "conduct",
+      "label": "讲文明·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_3_SELF",
+      "section": "conduct",
+      "label": "讲信用·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_3_OTHER",
+      "section": "conduct",
+      "label": "讲信用·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_4_SELF",
+      "section": "conduct",
+      "label": "负责任·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_4_OTHER",
+      "section": "conduct",
+      "label": "负责任·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_5_SELF",
+      "section": "conduct",
+      "label": "有爱心·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_5_OTHER",
+      "section": "conduct",
+      "label": "有爱心·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_6_SELF",
+      "section": "conduct",
+      "label": "守规则·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_6_OTHER",
+      "section": "conduct",
+      "label": "守规则·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_7_SELF",
+      "section": "conduct",
+      "label": "善交流·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_7_OTHER",
+      "section": "conduct",
+      "label": "善交流·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CONDUCT_8_SELF",
+      "section": "conduct",
+      "label": "会合作·自评",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "CONDUCT_8_OTHER",
+      "section": "conduct",
+      "label": "会合作·他评",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MORAL_LEARNING_1",
+      "section": "wisdom",
+      "label": "道德与法治·学习兴趣",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MORAL_LEARNING_2",
+      "section": "wisdom",
+      "label": "道德与法治·学习习惯",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MORAL_LEARNING_3",
+      "section": "wisdom",
+      "label": "道德与法治·学习方法",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MORAL_ABILITY_1",
+      "section": "wisdom",
+      "label": "道德与法治·认知水平",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MORAL_ABILITY_2",
+      "section": "wisdom",
+      "label": "道德与法治·实践能力",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MORAL_PROCESS",
+      "section": "wisdom",
+      "label": "道德与法治·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_LEARNING_1",
+      "section": "wisdom",
+      "label": "语文·学习兴趣",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_LEARNING_2",
+      "section": "wisdom",
+      "label": "语文·学习习惯",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_LEARNING_3",
+      "section": "wisdom",
+      "label": "语文·学习方法",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_ABILITY_1",
+      "section": "wisdom",
+      "label": "语文·积累与运用",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_ABILITY_2",
+      "section": "wisdom",
+      "label": "语文·阅读与鉴赏",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_ABILITY_3",
+      "section": "wisdom",
+      "label": "语文·表达与交流",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_ABILITY_4",
+      "section": "wisdom",
+      "label": "语文·梳理与探究",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_ABILITY_5",
+      "section": "wisdom",
+      "label": "语文·书写",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "CHINESE_PROCESS",
+      "section": "wisdom",
+      "label": "语文·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_LEARNING_1",
+      "section": "wisdom",
+      "label": "数学·学习兴趣",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_LEARNING_2",
+      "section": "wisdom",
+      "label": "数学·学习习惯",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_LEARNING_3",
+      "section": "wisdom",
+      "label": "数学·学习方法",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_ABILITY_1",
+      "section": "wisdom",
+      "label": "数学·基础知识",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_ABILITY_2",
+      "section": "wisdom",
+      "label": "数学·数学思维",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_ABILITY_3",
+      "section": "wisdom",
+      "label": "数学·信息提取",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_ABILITY_4",
+      "section": "wisdom",
+      "label": "数学·解决问题",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MATH_PROCESS",
+      "section": "wisdom",
+      "label": "数学·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_LEARNING_1",
+      "section": "wisdom",
+      "label": "科学·学习兴趣",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_LEARNING_2",
+      "section": "wisdom",
+      "label": "科学·学习习惯",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_LEARNING_3",
+      "section": "wisdom",
+      "label": "科学·学习方法",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_ABILITY_1",
+      "section": "wisdom",
+      "label": "科学·科学观念",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_ABILITY_2",
+      "section": "wisdom",
+      "label": "科学·科学思维",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_ABILITY_3",
+      "section": "wisdom",
+      "label": "科学·探究实践",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SCIENCE_PROCESS",
+      "section": "wisdom",
+      "label": "科学·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_LEARNING_1",
+      "section": "wisdom",
+      "label": "英语·学习兴趣",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_LEARNING_2",
+      "section": "wisdom",
+      "label": "英语·学习习惯",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_LEARNING_3",
+      "section": "wisdom",
+      "label": "英语·学习方法",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_ABILITY_1",
+      "section": "wisdom",
+      "label": "英语·听力素养",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_ABILITY_2",
+      "section": "wisdom",
+      "label": "英语·口语素养",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_ABILITY_3",
+      "section": "wisdom",
+      "label": "英语·书面表达",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_ABILITY_4",
+      "section": "wisdom",
+      "label": "英语·阅读能力",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ENGLISH_PROCESS",
+      "section": "wisdom",
+      "label": "英语·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "HEIGHT",
+      "section": "health",
+      "label": "身高",
+      "valueType": "number",
+      "perspective": "MEASURED",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 141,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "WEIGHT",
+      "section": "health",
+      "label": "体重",
+      "valueType": "number",
+      "perspective": "MEASURED",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 35,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "VISION_LEFT",
+      "section": "health",
+      "label": "视力 · 左",
+      "valueType": "number",
+      "perspective": "MEASURED",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 5,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "VISION_RIGHT",
+      "section": "health",
+      "label": "视力 · 右",
+      "valueType": "number",
+      "perspective": "MEASURED",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 5,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "JUMP_ROPE_1MIN",
+      "section": "health",
+      "label": "1 分钟跳绳",
+      "valueType": "number",
+      "perspective": "MEASURED",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 160,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "PE_ACADEMIC",
+      "section": "health",
+      "label": "体育与健康·学业水平",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "PE_PROCESS",
+      "section": "health",
+      "label": "体育与健康·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "FITNESS_SELF",
+      "section": "health",
+      "label": "体质健康测试·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "FITNESS_LEVEL",
+      "section": "health",
+      "label": "体质健康测试·体测水平",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "FITNESS_PROCESS",
+      "section": "health",
+      "label": "体质健康测试·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "SPORTS_SKILL_NAME",
+      "section": "health",
+      "label": "体育技能特长·项目",
+      "valueType": "text",
+      "perspective": "FACT",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "SPORTS_SKILL_SELF",
+      "section": "health",
+      "label": "体育技能特长·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "SPORTS_SKILL_TEACHER",
+      "section": "health",
+      "label": "体育技能特长·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "SPORTS_SKILL_OUTCOME",
+      "section": "health",
+      "label": "体育技能特长·成果表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "MUSIC_LEARNING_SELF",
+      "section": "art",
+      "label": "音乐·学习过程·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "MUSIC_LEARNING_TEACHER",
+      "section": "art",
+      "label": "音乐·学习过程·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MUSIC_ACADEMIC",
+      "section": "art",
+      "label": "音乐·学业水平",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MUSIC_PROCESS",
+      "section": "art",
+      "label": "音乐·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "MUSIC_SKILL_SELF",
+      "section": "art",
+      "label": "音乐·艺术技能·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "MUSIC_SKILL_TEACHER",
+      "section": "art",
+      "label": "音乐·艺术技能·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "FINE_ART_LEARNING_SELF",
+      "section": "art",
+      "label": "美术·学习过程·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "FINE_ART_LEARNING_TEACHER",
+      "section": "art",
+      "label": "美术·学习过程·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "FINE_ART_ACADEMIC",
+      "section": "art",
+      "label": "美术·学业水平",
+      "valueType": "grade",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "A",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "FINE_ART_PROCESS",
+      "section": "art",
+      "label": "美术·过程表现",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "FINE_ART_SKILL_SELF",
+      "section": "art",
+      "label": "美术·艺术技能·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "FINE_ART_SKILL_TEACHER",
+      "section": "art",
+      "label": "美术·艺术技能·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "ART_SPECIALTY_1_NAME",
+      "section": "art",
+      "label": "艺术特长项目1·项目",
+      "valueType": "text",
+      "perspective": "FACT",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_1_SELF",
+      "section": "art",
+      "label": "艺术特长项目1·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_1_TEACHER",
+      "section": "art",
+      "label": "艺术特长项目1·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_1_OUTCOME",
+      "section": "art",
+      "label": "艺术特长项目1·成果表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_2_NAME",
+      "section": "art",
+      "label": "艺术特长项目2·项目",
+      "valueType": "text",
+      "perspective": "FACT",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_2_SELF",
+      "section": "art",
+      "label": "艺术特长项目2·自我评价",
+      "valueType": "star",
+      "perspective": "SELF",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_2_TEACHER",
+      "section": "art",
+      "label": "艺术特长项目2·教师评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "ART_SPECIALTY_2_OUTCOME",
+      "section": "art",
+      "label": "艺术特长项目2·成果表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "LABOR_1_ACADEMIC",
+      "section": "labor",
+      "label": "信息科技·学业水平",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_1_EXPERIENCE",
+      "section": "labor",
+      "label": "信息科技·成果作品、实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "对信息技术兴趣浓厚。",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_2_ACADEMIC",
+      "section": "labor",
+      "label": "劳动·学业水平",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_2_EXPERIENCE",
+      "section": "labor",
+      "label": "劳动·成果作品、实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "积极参与劳动实践，劳动意识强。",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_3_ACADEMIC",
+      "section": "labor",
+      "label": "综合实践活动·学业水平",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_3_EXPERIENCE",
+      "section": "labor",
+      "label": "综合实践活动·成果作品、实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "亲身参与实践，会合作。",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_4_ACADEMIC",
+      "section": "labor",
+      "label": "地方课程·学业水平",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": 3,
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "LABOR_4_EXPERIENCE",
+      "section": "labor",
+      "label": "地方课程·成果作品、实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "会分享，积极进取。",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "STORY_READ_ASSESSMENT",
+      "section": "story",
+      "label": "我爱读故事·分项评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "SUPPLEMENTAL_REQUIREMENT",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "STORY_READ_EXPERIENCE",
+      "section": "story",
+      "label": "我爱读故事·实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "潜心课外阅读，完成必读书目，积极参与书香少年。",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "STORY_LISTEN_ASSESSMENT",
+      "section": "story",
+      "label": "我爱听故事·分项评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "SUPPLEMENTAL_REQUIREMENT",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "STORY_LISTEN_EXPERIENCE",
+      "section": "story",
+      "label": "我爱听故事·实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "潜心课外阅读，完成必读书目，积极参与书香少年。",
+      "status": "EXAMPLE"
+    },
+    {
+      "code": "STORY_TELL_ASSESSMENT",
+      "section": "story",
+      "label": "我爱讲故事·分项评价",
+      "valueType": "star",
+      "perspective": "OTHER",
+      "origin": "SUPPLEMENTAL_REQUIREMENT",
+      "sampleValue": null,
+      "status": "UNRECORDED"
+    },
+    {
+      "code": "STORY_TELL_EXPERIENCE",
+      "section": "story",
+      "label": "我爱讲故事·实践经历与表现",
+      "valueType": "text",
+      "perspective": "OTHER",
+      "origin": "REFERENCE_IMAGE",
+      "sampleValue": "潜心课外阅读，完成必读书目，积极参与书香少年。",
+      "status": "EXAMPLE"
+    }
+  ]
+}

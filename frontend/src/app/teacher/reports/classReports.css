@@ -1,0 +1,148 @@
+.report-browser {
+  --report-line: #e0e6da;
+  --report-muted: #71816b;
+  --report-star-3: #b48e43;
+  --report-star-2: #d6bd83;
+  --report-star-1: #e9dfc3;
+  --report-grade-a: #47755d;
+  --report-grade-b: #95b095;
+  --report-grade-c: #c9ae76;
+  --report-grade-d: #bc8877;
+  min-width: 0;
+}
+.report-browser-heading,
+.report-browser-intro,
+.report-class-meta,
+.report-roster-heading,
+.report-roster-footer,
+.report-pagination { display: flex; align-items: center; gap: 14px; }
+.report-browser-heading { justify-content: space-between; margin: 6px 0 20px; }
+.report-browser h2 { font: 500 24px/1.4 'Songti SC', 'SimSun', serif; margin: 0 0 6px; color: #34543b; }
+.report-browser-intro p { font-size: 13px; margin: 0; }
+.report-step { font: italic 42px/1 Georgia, serif; color: #cbd5bf; }
+.report-browser-heading > small { white-space: nowrap; }
+.report-class-search { max-width: 260px; }
+.report-class-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-bottom: 26px; }
+.report-browser .report-class-choice { position: relative; text-align: left; background: #fffefb; border: 1px solid var(--report-line); border-radius: 13px; padding: 20px 22px; min-width: 0; }
+.report-class-choice strong { display: block; font: 500 21px/1.5 'Songti SC', 'SimSun', serif; letter-spacing: 1px; padding-right: 20px; }
+.report-class-choice:hover { border-color: #94aa83; background: #f9fbf3; }
+.report-browser .report-class-choice[aria-pressed=true] { background: #edf3e5; border-color: #819c6d; box-shadow: inset 0 0 0 1px #819c6d; }
+.report-class-check { position: absolute; top: 19px; right: 20px; color: #62804e; opacity: 0; }
+.report-class-choice[aria-pressed=true] .report-class-check { opacity: 1; }
+.report-class-meta { justify-content: space-between; margin-top: 14px; }
+.report-class-meta > span { font-size: 11px; color: #637957; background: #f0f3e9; border-radius: 5px; padding: 2px 7px; }
+.report-class-choice[aria-pressed=true] .report-class-meta > span { background: #e0ead4; }
+.report-roster-panel { border: 1px solid var(--report-line); border-radius: 15px; background: white; overflow: hidden; }
+.report-roster-heading { padding: 22px 24px 16px; justify-content: space-between; }
+.report-browser .report-roster-heading h3 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+.report-roster-heading h3 small { font-weight: 400; margin-left: 12px; }
+.report-roster-heading p { margin: 0; font-size: 12px; }
+.report-roster-label { font-size: 11px; color: #849175; letter-spacing: 2px; }
+.report-roster-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 0 24px 20px; }
+.report-browser .report-roster-filters label { margin: 0; }
+.report-roster-filters .report-student-search { position: relative; flex: 1; min-width: 180px; max-width: 340px; }
+.report-student-search svg { position: absolute; left: 13px; top: 14px; width: 17px; height: 17px; color: #859276; }
+.core-app .report-browser .report-roster-filters .report-student-search input { margin: 0; padding-left: 39px; background: #fcfdf9; border-color: var(--report-line); font-size: 13px; }
+.report-browser .report-roster-filters select { margin: 0; font-size: 12px; border-color: var(--report-line); }
+.report-roster-filters button { font-size: 12px; }
+.report-browser .report-clear { border-color: transparent; background: transparent; color: #78876d; padding-left: 5px; padding-right: 5px; }
+.report-student-table-head,
+.report-student-summary { display: grid; grid-template-columns: minmax(130px, .9fr) minmax(170px, 1.15fr) minmax(205px, 1.35fr) 68px; gap: 24px; align-items: center; padding: 14px 24px; }
+.report-student-table-head { background: #f7f9f2; border-block: 1px solid #edf0e5; color: #748269; font-size: 11px; }
+.report-student-table-head small { font-size: 10px; color: #8a9580; margin-left: 6px; white-space: nowrap; }
+.report-student-summary { min-height: 110px; padding-block: 22px; border-bottom: 1px solid #edf0e5; }
+.report-student-summary:last-child { border-bottom: 0; }
+.report-student-summary:hover { background: #fcfdf8; }
+.report-student-identity { display: flex; gap: 11px; align-items: center; min-width: 0; }
+.report-student-identity > div { min-width: 0; }
+.report-student-initial { display: grid; place-items: center; flex-shrink: 0; background: #eef1e6; border-radius: 10px; width: 36px; height: 40px; font: 18px 'Songti SC', serif; color: #71815d; }
+.report-browser .report-student-name { display: block; border: 0; border-radius: 4px; padding: 6px 0; background: transparent; color: #2f513b; min-height: 36px; text-align: left; font-size: 15px; overflow-wrap: anywhere; }
+.report-student-name:hover { text-decoration: underline; text-underline-offset: 4px; }
+.report-student-identity small { display: block; font-size: 10px; color: #7e8b73; overflow-wrap: anywhere; }
+.report-rating-cell { min-width: 0; }
+.report-distribution-bar { display: flex; gap: 2px; height: 7px; border-radius: 3px; overflow: hidden; background: #edf0e7; }
+.report-distribution-bar > span { flex-basis: 0; min-width: 0; }
+.report-tone-star-3 { background: var(--report-star-3); }
+.report-tone-star-2 { background: var(--report-star-2); }
+.report-tone-star-1 { background: var(--report-star-1); }
+.report-tone-A { background: var(--report-grade-a); }
+.report-tone-B { background: var(--report-grade-b); }
+.report-tone-C { background: var(--report-grade-c); }
+.report-tone-D { background: var(--report-grade-d); }
+.report-distribution-labels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 10px; }
+.report-distribution-grades .report-distribution-labels { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.report-distribution-labels > span { white-space: nowrap; font-size: 10px; color: #728067; }
+.report-distribution-labels i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
+.report-distribution-labels b { font-size: 12px; color: #3f533c; font-weight: 500; font-variant-numeric: tabular-nums; }
+.report-browser .report-distribution-missing { display: block; margin-top: 7px; color: #977f4a; font-size: 10px; }
+.report-unrated { display: block; font-size: 11px; color: #8b9580; margin-top: 8px; }
+.report-mobile-rating-label { display: none; }
+.report-browser .report-student-open { border: 0; background: transparent; color: #617c4d; white-space: nowrap; padding: 10px 2px; font-size: 12px; }
+.report-student-open span { margin-left: 6px; }
+.report-roster-footer { justify-content: space-between; border-top: 1px solid var(--report-line); background: #fcfdf9; padding: 13px 24px; font-size: 11px; color: #79876e; flex-wrap: wrap; }
+.report-pagination { gap: 8px; flex-wrap: wrap; }
+.report-browser .report-pagination label { margin: 0; }
+.report-browser .report-pagination select { font-size: 11px; margin: 0; padding: 8px; border-color: #e0e6d8; background: white; }
+.report-pagination button { font-size: 11px; background: #fff; padding: 8px 12px; }
+.report-selection-empty { text-align: center; padding: 60px 24px 68px; }
+.report-selection-empty h3 { font: 500 21px/1.5 'Songti SC', 'SimSun', serif; margin: 0 0 9px; color: #46613b; }
+.report-selection-empty p { font-size: 12px; margin: 0; }
+.report-empty-mark { border: 1px solid #dce4d0; color: #9bab88; width: 70px; height: 70px; display: grid; place-items: center; border-radius: 50%; margin: 0 auto 22px; font: 36px 'Songti SC', serif; }
+.report-browser .report-statistics-note { display: flex; align-items: baseline; gap: 10px; margin: 14px 2px 24px; color: #7d8972; font-size: 11px; }
+.report-statistics-note b { white-space: nowrap; font-weight: 500; }
+.report-list-loading { text-align: center; padding: 44px 24px; font-size: 13px; }
+@media (max-width: 1250px) {
+  .report-student-table-head, .report-student-summary { grid-template-columns: minmax(100px, .8fr) minmax(140px, 1fr) minmax(170px, 1.2fr) 55px; gap: 18px; padding-inline: 20px; }
+  .report-student-table-head small { display: block; margin-left: 0; }
+  .report-distribution-labels b { font-size: 11px; }
+  .report-distribution-labels i { margin-right: 2px; }
+  .report-student-identity { gap: 8px; }
+}
+@media (max-width: 1000px) {
+  .report-student-table-head { display: none; }
+  .report-student-summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 22px; position: relative; padding: 19px 22px; }
+  .report-student-identity { grid-column: 1 / -1; padding-right: 75px; }
+  .report-browser .report-student-open { position: absolute; top: 16px; right: 22px; }
+  .report-mobile-rating-label { display: block; margin-bottom: 9px; font-size: 10px; color: #7c8b6e; }
+  .report-distribution-labels b { font-size: 12px; }
+}
+@media (max-width: 699px) {
+  .report-browser h2 { font-size: 22px; }
+  .report-browser-heading { align-items: flex-start; gap: 8px; }
+  .report-browser-heading > small { display: none; }
+  .report-browser-intro { gap: 10px; }
+  .report-browser-intro p { font-size: 12px; }
+  .report-step { font-size: 36px; }
+  .report-class-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .report-browser .report-class-choice { padding: 16px 13px; }
+  .report-class-choice strong { font-size: 18px; letter-spacing: 0; padding-right: 12px; }
+  .report-class-check { top: 15px; right: 10px; }
+  .report-class-meta { margin-top: 11px; gap: 5px; flex-wrap: wrap; }
+  .report-class-meta small { font-size: 10px; }
+  .report-class-meta > span { padding-inline: 5px; font-size: 10px; }
+  .report-roster-heading { padding: 18px 16px 14px; }
+  .report-roster-label { display: none; }
+  .report-browser .report-roster-heading h3 { font-size: 17px; }
+  .report-roster-filters { padding: 0 16px 18px; gap: 9px; }
+  .report-roster-filters .report-student-search { flex-basis: 100%; max-width: none; }
+  .report-roster-filters > label:not(.report-student-search) { flex: 1; }
+  .report-student-summary { padding: 16px; gap: 15px 18px; }
+  .report-browser .report-student-open { right: 16px; top: 14px; }
+  .report-rating-cell { grid-column: 1 / -1; }
+  .report-distribution-labels b { font-size: 12px; }
+  .report-mobile-rating-label { margin-bottom: 7px; }
+  .report-roster-footer { padding: 14px 16px; gap: 12px; }
+  .report-pagination { width: 100%; justify-content: flex-end; }
+  .report-pagination > label { margin-right: auto !important; }
+  .report-browser .report-statistics-note { gap: 8px; font-size: 10px; }
+  .report-selection-empty { padding: 46px 20px 52px; }
+}
+.report-toolbar-title h2 { font: 600 23px/1.5 'Songti SC', 'SimSun', serif; margin: 0; color: #254d3e; overflow-wrap: anywhere; }
+.report-toolbar-title .kicker { font-size: 10px; margin: 0 0 5px; letter-spacing: 2px; }
+.report-toolbar-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; min-width: 0; }
+.report-detail-review { margin-top: 20px; }
+@media (max-width: 699px) {
+  .report-toolbar-title h2 { font-size: 20px; }
+  .report-preview .report-toolbar .actions { width: 100%; gap: 7px; }
+  .report-preview .report-toolbar .actions button { flex: 1; font-size: 11px; padding-inline: 8px; white-space: nowrap; }
+}

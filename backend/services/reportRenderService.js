@@ -14,9 +14,10 @@ const byColumn = new Map(
 );
 function renderPrintableA4({ reportData: m, renderScope='FULL', draftLabel }) {
   if(!['FULL','DETAIL_ONLY'].includes(renderScope))throw Error('Invalid report scope');
-  if(renderScope==='DETAIL_ONLY'&&m.schemaVersion!=='CORE_V1')require('./reportCorePolicy').fail(422,'历史格式不支持安全明细');
+  if(renderScope==='DETAIL_ONLY'&&!['CORE_V1','CORE_V2'].includes(m.schemaVersion))require('./reportCorePolicy').fail(422,'历史格式不支持安全明细');
   if(renderScope==='FULL'&&m.renderedHtml)return m.renderedHtml;
   if(renderScope==='DETAIL_ONLY'&&m.renderedDetailHtml)return m.renderedDetailHtml;
+  if(m.schemaVersion==='CORE_V2')return require('./reportRenderV2').renderV2({model:m,renderScope,draftLabel});
   if (m.schemaVersion !== "CORE_V1")
     return `<!doctype html><meta charset="UTF-8"><title>历史报告</title><h1>历史报告</h1><pre>${escape(JSON.stringify(m, null, 2))}</pre>`;
   const continuation=createContinuationPlan(m,renderScope);

@@ -277,6 +277,17 @@ async function settleSources({
 }
 module.exports = { getEvaluationView, submitForm, settleSources };
 function buildReportModel({ evaluation: e, config, studentSnapshot }) {
+  if(require('./reportCoreV2Policy').isV2(config)) {
+    const {fixedFields,catalog,computeBMI}=require('./reportCoreV2Policy');
+    return {
+      schemaVersion:'CORE_V2',renderVersion:require('./reportRenderService').RENDER_VERSION,
+      student:studentSnapshot||{id:String(e.student_id),name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot},term:{},
+      values:{...Object.fromEntries(fixedFields.map(f=>[f.column,e[f.column]??null])),story_summary:parse(e.story_summary),bmi:computeBMI(e.height_cm==null?null:Number(e.height_cm),e.weight_kg==null?null:Number(e.weight_kg))},
+      narratives:{teacher_comment:e.teacher_comment||''},
+      honors:(parse(e.honor_summary).items||[]).map(item=>({name:item.name,region:item.region,level:item.level})),
+      policySnapshot:config,sourceSummary:parse(e.field_sources),displayFieldCount:catalog.fields.length,
+    };
+  }
   const values = Object.fromEntries(
     fixedFields.map((f) => [f.column, e[f.column] ?? null]),
   );
@@ -400,7 +411,7 @@ async function confirmReport({
         "UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=?,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=?,section_meta=JSON_SET(COALESCE(section_meta,JSON_OBJECT()),'$.layoutReview',CAST(? AS JSON)) WHERE id=?",
         [actor.id, fingerprint, JSON.stringify(layoutReview), e.id],
       );
-      return { result: { confirmedRevision: String(e.revision), fingerprint } };
+      return { result: { confirmedRevision: String(e.revision), fingerprint }, auditContext:{studentId:String(studentKey.studentId),confirmedRevision:String(e.revision),termId:String(studentKey.termId)} };
     },
   );
 }

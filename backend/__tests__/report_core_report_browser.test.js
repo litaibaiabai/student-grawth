@@ -51,3 +51,14 @@ test('DETAIL_ONLY layout approval cannot confirm the full current report',async 
 });
 test('report student summaries distinguish same-name classmates and search school numbers rather than database IDs',async t=>{const db=await fixture(t);await db.pool.query("UPDATE student_term_evaluation SET class_no_snapshot=1,student_name_snapshot='同名学生'");await db.pool.query("UPDATE users SET username=CASE id WHEN 3 THEN '000031' WHEN 4 THEN '000041' ELSE username END");const all=await browser.listReportStudents({pool:db.pool,actor:teacher,termId:'1'});assert.deepEqual(all.rows.map(r=>r.studentNumber).sort(),['000031','000041']);const filtered=await browser.listReportStudents({pool:db.pool,actor:teacher,termId:'1',keyword:'000041'});assert.equal(filtered.total,1);assert.equal(filtered.rows[0].studentId,'4');});
 test('report page size binds cursors and each assigned class exposes ready counts',async t=>{const db=await fixture(t);const classes=await browser.listReportClasses({pool:db.pool,actor:teacher,termId:'1'});assert.equal(classes.rows[0].counts.ready,1);for(let id=5;id<33;id++){await db.pool.query("INSERT INTO users(id,school_id,username,password,real_name,role) SELECT ?,1,?,password,'分页同学','student' FROM users WHERE id=3",[id,'paging'+id]);await db.pool.query("INSERT INTO student_term_evaluation(school_id,term_id,student_id,student_name_snapshot,grade_snapshot,class_no_snapshot,template_version,rule_version) VALUES(1,1,?,'分页同学',4,1,'CORE_V1','1')",[id]);}const args={pool:db.pool,actor:teacher,termId:'1'},first=await browser.listReportStudents({...args,limit:25});assert.ok(first.nextCursor);await assert.rejects(browser.listReportStudents({...args,limit:50,cursor:first.nextCursor}),{statusCode:422});assert.equal((await browser.listReportStudents({...args,limit:50})).rows.length,30);});
+test('V2 summaries count current-term grade and star fields once and keep unrated items separate', async t => {
+ const {createV2TestDb}=require('./helpers/reportCoreV2Db');
+ const applicableFields=['conduct_politeness_self_star','music_learning_self_star','fitness_self_star','conduct_integrity_self_star','math_regular_grade','math_final_grade','math_overall_grade','math_regular_grade'];
+ const db=await createV2TestDb(t,{applicableFields});
+ await db.pool.query("UPDATE student_term_evaluation SET conduct_politeness_self_star=3,music_learning_self_star=2,fitness_self_star=1,math_regular_grade='A',math_final_grade='B' WHERE student_id=3");
+ const list=await browser.listReportStudents({pool:db.pool,actor:teacher,termId:'1',grade:4,classNo:1});
+ const student=list.rows.find(row=>row.studentId==='3');
+ assert.deepEqual(student.starCounts,{1:1,2:1,3:1,missing:1});
+ assert.deepEqual(student.gradeCounts,{A:1,B:1});
+ assert.equal(student.gradeMissingCount,1);
+});

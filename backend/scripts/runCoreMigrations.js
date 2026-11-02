@@ -22,9 +22,10 @@ async function runCoreMigrations({ connection, targetDb, mode = "check" }) {
   const [rows] = await connection.query("SHOW TABLES");
   const names = rows.map((r) => Object.values(r)[0]);
   if (names.length) {
-    if(names.length===7 && names.includes('story_content')) {
+    if((names.length===7 || names.length===8 && names.includes('school_class')) && names.includes('story_content')) {
       const result=await require('./migrateSixEducationV2').migrateSixEducationV2({connection,targetDb});
       if(!result.ready)throw Error('V2 schema fingerprint mismatch: run explicit clone upgrade');
+      if(names.includes('school_class') && !(await require('./migrateAdminClasses').migrateAdminClasses({connection,targetDb})).ready)throw Error('Admin class schema fingerprint mismatch');
       return {tables:names,unchanged:true,version:result.version};
     }
     if (names.length !== 6 || tables.some((t) => !names.includes(t)))

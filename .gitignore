@@ -1,6 +1,8 @@
 node_modules/
 .DS_Store
 .env
+.env.local
+.env.*.local
 dist/
 coverage/
 .superpowers/
@@ -14,6 +16,7 @@ backend/private/
 # Local automatic demo credentials, browser traces and fictional run evidence
 output/full-system-demo/
 output/report-core/
+output/
 
 # Python compiler caches are never source artifacts
 __pycache__/

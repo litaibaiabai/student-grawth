@@ -20,7 +20,9 @@ async function getReadiness({ pool, actor, termId }) {
   const rows=await resolveTermRoster({connection:pool,schoolId:actor.schoolId,termId});
   const blocking=await getBlockingMaterials({connection:pool,schoolId:actor.schoolId,termId,config:term.evaluation_config});
   const byStudent=new Map();for(const row of blocking){const id=String(row.student_id);if(!byStudent.has(id))byStudent.set(id,[]);byStudent.get(id).push(row);}
+  const heads = await require("./authorizationService").responsibleTeachers(pool,term);
   const missing = [];
+  const blockedClasses = new Set();
   let confirmed = 0;
   for (const e of rows) {
     if (!e.id) {
@@ -31,11 +33,17 @@ async function getReadiness({ pool, actor, termId }) {
       });
       continue;
     }
+    const classKey = `${e.grade_snapshot}:${e.class_no_snapshot}`;
+    if (heads !== null && !heads.get(classKey) && !blockedClasses.has(classKey)) {
+      blockedClasses.add(classKey);
+      missing.push({field:'responsibleTeacher',grade:e.grade_snapshot,classNo:e.class_no_snapshot,reason:'班级需要本校启用的负责教师'});
+    }
     const items = evaluateCompletion({evaluation:e,config:term.evaluation_config,blockingMaterials:byStudent.get(String(e.student_id))||[]}).missingItems;
     missing.push(
       ...items.map((i) => ({ ...i, studentId: String(e.student_id) })),
     );
     if (
+      !require("./authorizationService").responsibleReviewValid(heads,e) ||
       e.status !== "CONFIRMED" ||
       String(e.confirmed_revision) !== String(e.revision) ||
       e.approval_fingerprint !== reportFingerprint(e, term)
@@ -73,6 +81,7 @@ async function releaseMutation({ pool, actor, termId, command, action }, fn) {
   if (!command?.requestKey) fail(400, "缺少请求键");
   const c = await pool.getConnection();
   try {
+    await c.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
     await c.beginTransaction();
     const [[row]] = await c.query(
       "SELECT * FROM academic_year WHERE school_id=? AND id=? FOR UPDATE",
@@ -113,7 +122,7 @@ async function releaseMutation({ pool, actor, termId, command, action }, fn) {
         actor.id,
         key,
         command.payloadHash,
-        JSON.stringify({ action }),
+        JSON.stringify({ action, termId:String(termId), releaseKey:r.releaseKey, releaseVersion:r.releaseVersion, fence:r.fence, total:r.total, prepared:r.prepared, activeVersion:r.activeVersion, releaseStatus:r.status }),
         JSON.stringify(r),
       ],
     );
@@ -131,6 +140,7 @@ async function beginRelease(args) {
     { ...args, action: "begin-release" },
     async (c, term) => {
       if (term.release_status !== "IDLE") fail(423, "已有发布正在准备");
+      if(require('./reportCoreV2Policy').isV2(term.evaluation_config)&&term.business_phase!=='RECONCILING')fail(422,'请先结束采集并进入核对阶段，再准备全校报告');
       const readiness = await getReadiness({
         pool: c,
         actor: args.actor,
@@ -235,6 +245,7 @@ async function prepareReleaseChunk({
       model.templateVersion = term.template_version;
       model.ruleVersion = term.rule_version;
       model.configVersion = String(term.config_version);
+      model.releaseVersion = Number(term.release_target_version);
       model.fingerprint = s.fingerprint;
       const renderedDetailHtml=renderPrintableA4({reportData:model,renderScope:'DETAIL_ONLY'});
       const snapshot=JSON.parse(JSON.stringify({...model,renderedHtml:renderPrintableA4({reportData:model}),renderedDetailHtml,renderedDetailHash:stableHash(renderedDetailHtml)}));
@@ -243,7 +254,7 @@ async function prepareReleaseChunk({
         [term.school_id, termId, s.studentId],
       );
       await c.query(
-        "INSERT INTO term_report(school_id,term_id,student_id,version,release_version,release_key,schema_version,template_version,rule_version,source_revision,approval_fingerprint,snapshot_json,snapshot_hash,status) VALUES(?,?,?,?,?,?,'CORE_V1',?,?,?,?,?,?,'PREPARED')",
+        "INSERT INTO term_report(school_id,term_id,student_id,version,release_version,release_key,schema_version,template_version,rule_version,source_revision,approval_fingerprint,snapshot_json,snapshot_hash,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,'PREPARED')",
         [
           term.school_id,
           termId,
@@ -251,6 +262,7 @@ async function prepareReleaseChunk({
           Number(max.n || 0) + 1,
           term.release_target_version,
           releaseKey,
+          model.schemaVersion,
           term.template_version,
           term.rule_version,
           e.revision,
@@ -289,6 +301,8 @@ async function activateRelease(args) {
     async (c, term) => {
       fenceGuard(term, args.releaseKey, args.fence);
       if (term.release_status !== "READY") fail(422, "尚未准备完成");
+      const readiness = await getReadiness({pool:c,actor:args.actor,termId:args.termId});
+      if (!readiness.complete) fail(409, '负责教师或报告确认状态已变化');
       const manifest = parse(term.release_manifest);
       const [[count]] = await c.query(
         "SELECT COUNT(*) n FROM term_report WHERE school_id=? AND term_id=? AND release_key=? AND status='PREPARED'",
@@ -317,7 +331,7 @@ async function activateRelease(args) {
         [term.school_id, term.id, args.releaseKey],
       );
       await c.query(
-        "UPDATE academic_year SET active_release_version=release_target_version,release_status='IDLE',released_at=UTC_TIMESTAMP(6) WHERE id=?",
+        `UPDATE academic_year SET active_release_version=release_target_version,release_status='IDLE',released_at=UTC_TIMESTAMP(6)${require('./reportCoreV2Policy').isV2(term.evaluation_config)?",business_phase='FROZEN'":''} WHERE id=?`,
         [term.id],
       );
       return releaseInfo({

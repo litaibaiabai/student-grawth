@@ -1,2 +1,2 @@
-import ReportCoreApp from './app/reportCore';
+import ReportCoreApp from './app/index.jsx';
 export default ReportCoreApp;

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node --test src/app/reportCore/*.test.js",
+    "test": "node --test 'src/app/**/*.test.js'",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -16,9 +16,15 @@
     "test:report-core-preview": "node tests/report-core-preview.cjs",
     "test:report-core-inputs": "node tests/report-core-inputs.cjs",
     "test:report-core-followups": "node tests/report-core-followups.cjs",
-    "test:dev-proxy": "node --test tests/vite-proxy.cjs"
+    "test:dev-proxy": "node --test tests/vite-proxy.cjs",
+    "test:api-cache": "node --test tests/api-cache.cjs",
+    "test:report-core-v2": "node tests/report-core-v2.cjs",
+    "test:report-core-v2-print": "node tests/report-core-v2-print.cjs",
+    "test:report-core-comments": "node --test tests/report-core-comments.cjs",
+    "test:student-written-stories": "node tests/student-written-stories.cjs"
   },
   "dependencies": {
+    "jsqr": "^1.4.0",
     "react": "18",
     "react-dom": "18",
     "xlsx": "^0.18.5"

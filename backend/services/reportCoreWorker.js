@@ -52,6 +52,7 @@ function startCoreWorker({
         const result = await provider.extractCertificate({
           fileBytes: bytes,
           mime: job.payload.mime,
+          schemaVersion: job.schema_version,
         });
         await require("./reportCoreMaterials").applyCertificateFacts({
           pool,

@@ -222,7 +222,7 @@ async function listCards({ pool, actor, termId, kind, offset = 0 }) {
   const load = async (type) =>
     (
       await pool.query(
-        "SELECT id,parent_id,student_id,owner_teacher_id,record_kind,month_key,target_key,status,payload_json,revision FROM evaluation_source_record WHERE school_id=? AND term_id=? AND record_kind=? AND (?='manager' OR owner_teacher_id=?) ORDER BY id DESC LIMIT 100 OFFSET ?",
+        "SELECT s.id,s.parent_id,s.student_id,s.owner_teacher_id,s.record_kind,s.month_key,s.target_key,s.status,s.payload_json,s.revision FROM evaluation_source_record s WHERE s.school_id=? AND s.term_id=? AND s.record_kind=? AND (?='manager' OR (s.owner_teacher_id=? AND (COALESCE(JSON_UNQUOTE(JSON_EXTRACT(s.payload_json,'$.mode')),'')<>'COURSE_SUBJECT' OR EXISTS(SELECT 1 FROM teacher_teaching_assignment a WHERE a.school_id=s.school_id AND a.term_id=s.term_id AND a.teacher_id=s.owner_teacher_id AND a.enabled=1 AND a.grade=JSON_EXTRACT(s.payload_json,'$.grade') AND a.class_no=JSON_EXTRACT(s.payload_json,'$.classNo') AND a.subject_code=JSON_UNQUOTE(JSON_EXTRACT(s.payload_json,'$.subjectCode')))))) ORDER BY s.id DESC LIMIT 100 OFFSET ?",
         [
           actor.schoolId,
           termId,
@@ -315,7 +315,12 @@ async function redeemCard({ pool, actor, token, command, now = new Date() }) {
         "SELECT * FROM evaluation_source_record WHERE id=? FOR UPDATE",
         [s.id],
       );
+      if (row.token_hash !== tokenHash(token)) fail(409, '卡片凭据已更新');
       const p = parse(row.payload_json);
+      if (p.mode === 'COURSE_SUBJECT') {
+        const [[current]] = await c.query("SELECT a.teacher_id FROM teacher_teaching_assignment a JOIN users u ON u.school_id=a.school_id AND u.id=a.teacher_id AND u.status=0 AND u.role='teacher' WHERE a.school_id=? AND a.term_id=? AND a.grade=? AND a.class_no=? AND a.subject_code=? AND a.teacher_id=? AND a.enabled=1 FOR SHARE",[actor.schoolId,s.term_id,p.grade,p.classNo,p.subjectCode,row.owner_teacher_id]);
+        if (!current) fail(409, '任课配置已变化，卡片失效');
+      }
       if (e.grade_snapshot !== p.grade || e.class_no_snapshot !== p.classNo)
         fail(403, "非发行班级");
       if (row.status !== "UNUSED") fail(409, "卡片已领取或失效");

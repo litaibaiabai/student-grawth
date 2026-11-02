@@ -149,7 +149,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
   );
   const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 10 },
+    limits: { fileSize: 10 * 1024 * 1024, files: 1, fields: 10 },
   });
   r.post(
     "/report-core/certificates",
@@ -225,6 +225,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
         ...context(req),
         termId: req.query.termId,
         studentId: req.query.studentId,
+        grade: req.query.grade, classNo: req.query.classNo,
         offset: req.query.offset,
         sourceId:req.query.sourceId, monthKey: req.query.monthKey, sourceType: req.query.sourceType, recordKind: req.query.recordKind, latest: req.query.latest,
       });
@@ -343,7 +344,9 @@ function mountFeatures(r, { asyncRoute, ok }) {
     "/report-core/assignments",
     asyncRoute(async (req, res) => {
       let rows;
-      if (req.actor.role === "manager") {
+      if (req.actor.role === "manager" && (await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId)).evaluation_config.adminClassRegistryVersion===1) {
+        rows=await require('../services/authorizationService').scopeAssignments(req.actor.schoolId,req.query.termId,req.app.locals.pool);
+      } else if (req.actor.role === "manager") {
         [rows] = await req.app.locals.pool.query(
           "SELECT a.*,u.real_name FROM teacher_teaching_assignment a JOIN users u ON u.id=a.teacher_id WHERE a.school_id=? AND a.term_id=?",
           [req.actor.schoolId, req.query.termId],

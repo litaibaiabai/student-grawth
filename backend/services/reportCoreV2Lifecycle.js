@@ -4,6 +4,8 @@ const phases=['COLLECTING','RECONCILING','FROZEN','ARCHIVED'];
 function assertV2Phase(term,{action,actor,submittedAt,now=new Date()}) {
   if(!isV2(term.evaluation_config))return;
   if(action==='v2-phase-change' && actor.role==='manager')return;
+  // Account security and term administration do not alter frozen evaluations.
+  if(actor.role==='manager' && ['admin-account-status','admin-account-password','admin-term-create','admin-term-current'].includes(action))return;
   if(!['COLLECTING','RECONCILING'].includes(term.business_phase))fail(423,'学期已冻结，仅可走受控更正');
   const correction=/decision|revoke|reverse|settle|confirm|import|comment|work-result|worker|review|library|classic/.test(action);
   if(term.business_phase==='RECONCILING' && (actor.role==='student' || !correction))fail(423,'采集已截止，当前仅可核对与更正');

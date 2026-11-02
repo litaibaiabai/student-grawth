@@ -2,7 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const { requireAuth, requireRole, signToken } = require("../middleware/auth");
 const { fail, stableHash } = require("../services/reportCorePolicy");
-const { assignments } = require("../services/authorizationService");
 const asyncRoute = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res)).catch(next);
 const ok = (res, data) => res.json({ code: 200, message: "成功", data });
@@ -48,7 +47,10 @@ function createCoreRouter() {
   );
   r.get(
     "/me",
-    asyncRoute(async (req, res) => ok(res, req.actor)),
+    asyncRoute(async (req, res) => {
+      const [[profile]] = await req.app.locals.pool.query('SELECT username,real_name FROM users WHERE school_id=? AND id=?',[req.actor.schoolId,req.actor.id]);
+      ok(res, {...req.actor, username:profile.username, real_name:profile.real_name});
+    }),
   );
   r.get(
     "/report-core/config",
@@ -74,25 +76,21 @@ function createCoreRouter() {
       const termId = req.query.termId;
       const offset = Math.max(0, Number(req.query.offset) || 0);
       const pool = req.app.locals.pool;
-      let rows;
-      if (req.actor.role === "student") {
-        [rows] = await pool.query(
-          "SELECT student_id,student_name_snapshot,grade_snapshot,class_no_snapshot,revision,status FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id=?",
-          [req.actor.schoolId, termId, req.actor.id],
-        );
-      } else if (req.actor.role === "manager") {
-        [rows] = await pool.query(
-          "SELECT student_id,student_name_snapshot,grade_snapshot,class_no_snapshot,revision,status FROM student_term_evaluation WHERE school_id=? AND term_id=? ORDER BY student_id LIMIT 100 OFFSET ?",
-          [req.actor.schoolId, termId, offset],
-        );
-      } else {
-        const a = await assignments(req.actor, termId, pool);
-        if (!a.length) return ok(res, []);
-        [rows] = await pool.query(
-          "SELECT DISTINCT e.student_id,e.student_name_snapshot,e.grade_snapshot,e.class_no_snapshot,e.revision,e.status FROM student_term_evaluation e JOIN teacher_teaching_assignment a ON a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot WHERE a.teacher_id=? AND a.enabled=1 AND e.school_id=? AND e.term_id=? ORDER BY e.student_id LIMIT 100 OFFSET ?",
-          [req.actor.id, req.actor.schoolId, termId, offset],
-        );
-      }
+      const roster = await require('../services/reportCoreReadModels').resolveTermRoster({
+        connection: pool,
+        schoolId: req.actor.schoolId,
+        termId,
+        ...(req.actor.role === 'teacher' ? { teacherId: req.actor.id } : req.actor.role === 'student' ? { studentId: req.actor.id } : {})
+      });
+      const rows = roster.slice(req.actor.role === 'student' ? 0 : offset, req.actor.role === 'student' ? undefined : offset + 100).map(e => ({
+        student_id: e.student_id,
+        student_number: e.student_number,
+        student_name_snapshot: e.student_name_snapshot,
+        grade_snapshot: e.grade_snapshot,
+        class_no_snapshot: e.class_no_snapshot,
+        revision: e.revision,
+        status: e.status
+      }));
       ok(res, rows);
     }),
   );
@@ -114,6 +112,12 @@ function createCoreRouter() {
   require("./reportCoreFeatures").mountFeatures(r, { asyncRoute, ok });
   require('./reportCoreViews').mountViews(r, { asyncRoute, ok });
   require('./reportCoreV2').mountV2(r, { asyncRoute, ok });
+  require('./reportCoreListening').mountListening(r, { asyncRoute, ok });
+  require('./reportCoreStoryRecordings').mountStoryRecordings(r, { asyncRoute, ok });
+  require('./reportCoreCourseCards').mountCourseCards(r, { asyncRoute, ok });
+  require('./reportCoreStatistics').mountStatistics(r, { asyncRoute, ok });
+  require('./reportCoreAdminClasses').mountAdminClasses(r, { asyncRoute, ok });
+  require('./reportCoreAdminOps').mountAdminOps(r, { asyncRoute, ok });
   return r;
 }
 module.exports = { createCoreRouter, asyncRoute, ok };

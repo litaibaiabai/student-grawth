@@ -49,24 +49,10 @@ async function initializeSchool({ pool, schoolId, password, demo = false }) {
     );
     const termId = String(r.insertId);
     if (demo) {
-      for (const code of [
-        "MORAL",
-        "CHINESE",
-        "MATH",
-        "SCIENCE",
-        "ENGLISH",
-        "PE",
-        "MUSIC",
-        "FINE_ART",
-        "INFORMATION_TECHNOLOGY",
-        "LABOR",
-        "INTEGRATED_PRACTICE",
-        "LOCAL_COURSE",
-        "STORY",
-      ])
+      for (const code of ["CHINESE", "MATH"])
         await c.query(
-          "INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) VALUES(?,?,?,4,1,?,1)",
-          [schoolId, termId, ids.teacher, code],
+          "INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) VALUES(?,?,?,4,1,?,?)",
+          [schoolId, termId, ids.teacher, code, code === "CHINESE" ? 1 : 0],
         );
       for (const name of ["student", "student2"])
         await c.query(

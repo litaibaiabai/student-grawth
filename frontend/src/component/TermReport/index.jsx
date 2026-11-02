@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-export default function TermReport({html,documentKey,printScope='FULL',onLayout,onReady,focusSection}) {
+export default function TermReport({html,documentKey,printScope='FULL',onLayout,onReady,focusSection,toolbarTitle,toolbarActions}) {
  const frame=useRef(null),callbacks=useRef({onLayout,onReady,focusSection}),latest=useRef(null);
  callbacks.current={onLayout,onReady};
  const token=useMemo(()=>({id:crypto.randomUUID(),source:html,scope:printScope,key:documentKey||crypto.randomUUID(),active:true,probe:null,observer:null}),[html,documentKey,printScope]);latest.current=token;
@@ -11,7 +11,7 @@ export default function TermReport({html,documentKey,printScope='FULL',onLayout,
   // Screen preview grows with its contents; the original print CSS and frozen HTML stay intact.
   const screenStyle=d.createElement('style');screenStyle.media='screen';screenStyle.textContent='.paper{height:auto}';d.head.append(screenStyle);
   const resize=()=>{if(current(t,element))setHeight(Math.ceil(d.body.getBoundingClientRect().bottom+(d.defaultView?.scrollY||0))+30);};resize();t.observer?.disconnect();t.observer=new ResizeObserver(resize);t.observer.observe(d.body);
-  const probe=document.createElement('iframe');t.probe?.remove();t.probe=probe;probe.setAttribute('aria-hidden','true');probe.tabIndex=-1;probe.style.cssText='position:fixed;left:-10000px;top:0;width:1123px;height:900px;visibility:hidden';probe.sandbox='allow-same-origin';
+  const probe=document.createElement('iframe');t.probe?.remove();t.probe=probe;probe.setAttribute('aria-hidden','true');probe.tabIndex=-1;probe.style.cssText='position:fixed;left:-10000px;top:0;width:1123px;height:900px;visibility:hidden';if(d.documentElement.dataset.reportSchema==='CORE_V2')probe.style.width='1587px';probe.sandbox='allow-same-origin';
   probe.onload=async()=>{
    try {
     if(!current(t,element))return;const doc=probe.contentDocument;const style=doc.createElement('style');
@@ -28,5 +28,5 @@ export default function TermReport({html,documentKey,printScope='FULL',onLayout,
  };
  useEffect(()=>{if(!ready||ready.key!==token.key||!token.active||!['conduct','wisdom','health','art','labor','story'].includes(focusSection))return;const element=frame.current?.contentDocument?.querySelector(`[data-section="${focusSection}"]`);if(element){element.setAttribute('tabindex','-1');element.focus({preventScroll:true});element.scrollIntoView({block:'start'});}},[focusSection,ready,token]);
  const usable=ready?.key===token.key&&token.active;
- return <div className="report-preview"><div className="report-toolbar"><span>{printScope==='FULL'?'完整报告':'六育明细'} · {usable?(ready.pageCount?`共 ${ready.pageCount} 页`:'历史版式，页数以打印面板为准'):'正在核对打印版面…'}</span><div className="actions"><button disabled={!usable||ready.overflow} onClick={()=>ready.print()}>打印</button><button disabled={!usable||ready.overflow} onClick={()=>{setHint('请在打印面板中选择“另存为 PDF”。');ready.print();}}>导出PDF</button></div></div>{usable&&ready.overflow&&<p role="alert">版面超出纸张，请调整后再打印。</p>}{hint&&<p role="status">{hint}</p>}<iframe key={token.id} title="六育评价报告" ref={frame} sandbox="allow-same-origin allow-modals" srcDoc={html} onLoad={event=>measure(event.currentTarget)} style={{width:'100%',height,border:0}}/></div>;
+ return <div className="report-preview"><div className="report-toolbar"><div className="report-toolbar-summary">{toolbarTitle || <span>{printScope==='FULL'?'完整报告':'六育明细'} · {usable?(ready.pageCount?`共 ${ready.pageCount} 页`:'历史版式，页数以打印面板为准'):'正在核对打印版面…'}</span>}</div><div className="actions"><button disabled={!usable||ready.overflow} onClick={()=>ready.print()}>打印</button><button disabled={!usable||ready.overflow} onClick={()=>{setHint('请在打印面板中选择“另存为 PDF”。');ready.print();}}>导出PDF</button>{toolbarActions}</div></div>{usable&&ready.overflow&&<p role="alert">版面超出纸张，请调整后再打印。</p>}{hint&&<p role="status">{hint}</p>}<iframe key={token.id} title="六育评价报告" ref={frame} sandbox="allow-same-origin allow-modals" srcDoc={html} onLoad={event=>measure(event.currentTarget)} style={{width:'100%',height,border:0}}/></div>;
 }

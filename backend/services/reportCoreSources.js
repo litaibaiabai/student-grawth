@@ -19,6 +19,7 @@ async function listSources({
   actor,
   termId,
   studentId,
+  grade, classNo,
   monthKey, sourceType, recordKind, sourceId, latest = false,
   offset = 0,
   limit = 100,
@@ -32,14 +33,22 @@ async function listSources({
     params.push(actor.id);
   }
   if (actor.role === "teacher") {
-    filter +=
-      " AND ((s.student_id IS NULL AND (s.owner_teacher_id=? OR s.actor_id=?)) OR EXISTS (SELECT 1 FROM student_term_evaluation e JOIN teacher_teaching_assignment a ON a.school_id=e.school_id AND a.term_id=e.term_id AND a.grade=e.grade_snapshot AND a.class_no=e.class_no_snapshot WHERE e.school_id=s.school_id AND e.term_id=s.term_id AND e.student_id=s.student_id AND a.teacher_id=? AND a.enabled=1 AND (s.source_type<>'STORY' OR a.subject_code='STORY' OR a.is_head_teacher=1)))";
-    params.push(actor.id, actor.id, actor.id);
+    const teaching=await assignments(actor,termId,pool);
+    const classes=[...new Map(teaching.map(a=>[`${a.grade}:${a.class_no}`,{grade:a.grade,classNo:a.class_no,story:teaching.some(t=>t.grade===a.grade&&t.class_no===a.class_no&&(t.subject_code==='STORY'||t.is_head_teacher===1))}])).values()];
+    filter += " AND ((s.student_id IS NULL AND (s.owner_teacher_id=? OR s.actor_id=?))";
+    params.push(actor.id,actor.id);
+    if(classes.length){filter+=' OR EXISTS(SELECT 1 FROM student_term_evaluation e WHERE e.school_id=s.school_id AND e.term_id=s.term_id AND e.student_id=s.student_id AND ('+classes.map(()=>"(e.grade_snapshot=? AND e.class_no_snapshot=? AND (s.source_type<>'STORY' OR ?=1))").join(' OR ')+'))';params.push(...classes.flatMap(r=>[r.grade,r.classNo,r.story?1:0]));}
+    filter+=')';
   }
   if(sourceId){if(!/^[1-9]\d*$/.test(String(sourceId)))fail(422,'材料编号不合法');filter+=' AND s.id=?';params.push(sourceId);}
   if (studentId) {
     filter += " AND s.student_id=?";
     params.push(studentId);
+  }
+  if (grade !== undefined || classNo !== undefined) {
+    if (!/^[1-9]\d*$/.test(String(grade)) || !/^[1-9]\d*$/.test(String(classNo))) fail(422, '请选择完整班级');
+    filter += ' AND EXISTS (SELECT 1 FROM student_term_evaluation class_scope WHERE class_scope.school_id=s.school_id AND class_scope.term_id=s.term_id AND class_scope.student_id=s.student_id AND class_scope.grade_snapshot=? AND class_scope.class_no_snapshot=?)';
+    params.push(Number(grade), Number(classNo));
   }
   if (monthKey) { if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey))fail(422,'月份不合法');filter+=' AND s.month_key=?';params.push(monthKey); }
   if (sourceType) { if(!['CARD','IMPORT','CERTIFICATE','SELF','TEACHER','STORY'].includes(sourceType))fail(422,'来源类型不合法');filter+=' AND s.source_type=?';params.push(sourceType); }
@@ -87,6 +96,7 @@ async function listSources({
       }
     }
     const payload = parse(s.payload_json);
+    if(s.source_type==='CERTIFICATE'&&s.schema_version==='SIX_EDU_V2')payload.facts=require('./reportCoreAwardFacts').normalizeAwardFacts(payload.facts);
     delete payload.fileRef;
     delete payload.passwordHash;
     delete payload.rows;
@@ -122,8 +132,9 @@ async function listSources({
     const isTeacher=actor.role==='teacher', own=actor.role==='student'&&String(s.student_id)===actor.id;
     const allowedTargets=isTeacher&&s.source_type==='CERTIFICATE'?[...fixedFields.filter(f=>f.sourceType==='CERTIFICATE').map(f=>f.column),'sports_specialties','art_specialties'].filter((key,i,a)=>a.indexOf(key)===i&&mayReadField(scope,key)):[];
     const storyTeacher=isTeacher&&['SUBMITTED','SCORED'].includes(s.parent_status)&&(scope?.head||scope?.assignments?.some(a=>a.subject_code==='STORY'));
-    const canRecognize=s.source_type==='CERTIFICATE'?isTeacher&&allowedTargets.length>0&&pending:s.source_type==='STORY'&&storyTeacher&&['QUEUED','PROCESSING','SUBMITTED','FAILED','SCORED'].includes(s.status);
-    out.push({ ...summary, payload, allowedTargets, canRecognize, canRetry:s.status==='FAILED'&&(s.source_type==='STORY'?storyTeacher:isTeacher&&allowedTargets.length>0), canReject:s.source_type==='CERTIFICATE'&&canRecognize, canRevoke:s.source_type==='CERTIFICATE'&&s.status!=='REVOKED'&&(own||isTeacher&&allowedTargets.length>0), canResubmit:own&&['REJECTED','FAILED','REVOKED'].includes(s.status) });
+    const canReviewAward=isTeacher&&(s.schema_version==='SIX_EDU_V2' ? scope?.head||scope?.assignments?.some(a=>a.subject_code===payload.facts?.subjectCode) : allowedTargets.length>0);
+    const canRecognize=s.source_type==='CERTIFICATE'?!!canReviewAward&&pending:s.source_type==='STORY'&&storyTeacher&&['QUEUED','PROCESSING','SUBMITTED','FAILED','SCORED'].includes(s.status);
+    out.push({ ...summary, payload, allowedTargets, canRecognize, canRetry:s.status==='FAILED'&&(s.source_type==='STORY'?storyTeacher:!!canReviewAward), canReject:s.source_type==='CERTIFICATE'&&canRecognize, canRevoke:s.source_type==='CERTIFICATE'&&s.status!=='REVOKED'&&(own||!!canReviewAward), canResubmit:own&&['REJECTED','FAILED','REVOKED'].includes(s.status) });
   }
   return {
     rows: out,

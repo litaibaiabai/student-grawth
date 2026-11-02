@@ -1,0 +1,43 @@
+{
+  "version": "ADMIN_CLOSURE_V1",
+  "tables": [
+    "users",
+    "academic_year",
+    "teacher_teaching_assignment",
+    "student_term_evaluation",
+    "evaluation_source_record",
+    "term_report",
+    "story_content",
+    "school_class"
+  ],
+  "configMarker": {
+    "adminClassRegistryVersion": 1
+  },
+  "columns": {
+    "id": "bigint unsigned",
+    "school_id": "bigint unsigned",
+    "term_id": "bigint unsigned",
+    "grade": "smallint unsigned",
+    "class_no": "smallint unsigned",
+    "display_name": "varchar(100)",
+    "responsible_teacher_id": "bigint unsigned",
+    "revision": "bigint unsigned",
+    "created_by": "bigint unsigned",
+    "updated_by": "bigint unsigned",
+    "created_at": "datetime(6)",
+    "updated_at": "datetime(6)"
+  },
+  "indexes": [
+    "PRIMARY",
+    "uk_class_school_id",
+    "uk_class_identity"
+  ],
+  "constraints": [
+    "fk_class_term",
+    "fk_class_responsible",
+    "fk_class_created",
+    "fk_class_updated",
+    "ck_class_identity",
+    "ck_class_revision"
+  ]
+}

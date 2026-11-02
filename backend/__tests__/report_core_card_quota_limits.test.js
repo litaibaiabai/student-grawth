@@ -96,7 +96,7 @@ test('void and redeem race has exactly one winner and never refunds issued quota
   const p = await plan(db, { count: 1 });
   await cards.generateCards({ pool: db.pool, actor: teacher, ...p, command: command() });
   const [[row]] = await db.pool.query("SELECT id,revision FROM evaluation_source_record WHERE record_kind='CARD'");
-  const sourceId = String(row.id), token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId });
+  const sourceId = String(row.id), token = await cards.cardToken({ pool: db.pool, actor: teacher, sourceId, now: new Date('2026-10-15T00:00:00Z') });
   await assert.rejects(cards.voidCard({ pool: db.pool, actor: manager, sourceId, expectedRevision: String(row.revision), reason: '错误', command: command() }), { statusCode: 403 });
   const outcomes = await Promise.allSettled([
     cards.voidCard({ pool: db.pool, actor: teacher, sourceId, expectedRevision: String(row.revision), reason: '重印前核对', command: command() }),

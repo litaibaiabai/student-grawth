@@ -1,0 +1,5735 @@
+{
+  "inspectedAt": "2026-10-28 Asia/Shanghai",
+  "scope": "Configured local database schema metadata only; no business records or credentials",
+  "tableCount": 44,
+  "columns": [
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "academic_year",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "semester",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "start_date",
+      "COLUMN_TYPE": "date",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "end_date",
+      "COLUMN_TYPE": "date",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "is_current",
+      "COLUMN_TYPE": "tinyint(1)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "active",
+      "COLUMN_TYPE": "tinyint(1)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "effective_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "COLUMN_NAME": "review_deadline_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "job_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "draft_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "expected_fingerprint",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "model_name",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "source",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('PENDING','RUNNING','COMPLETED','FAILED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "prompt_tokens",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "completion_tokens",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "cited_evidence",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "suggestion_text",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "error_message",
+      "COLUMN_TYPE": "varchar(255)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "month_key",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "subject_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "policy_version_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "teacher_name",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "subject_name",
+      "COLUMN_TYPE": "varchar(60)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "monthly_total",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "counts_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "category_version",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "valid_from",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "valid_until",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "review_deadline_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('GENERATING','READY','FAILED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "error_message",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "card_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('PENDING','APPROVED','REJECTED','EXPIRED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "claimed_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "reviewer_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "reviewed_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "reject_reason",
+      "COLUMN_TYPE": "varchar(255)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "request_key",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "category_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "category_version",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "category_path_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "COLUMN_NAME": "review_remark",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "month_key",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "reason_code",
+      "COLUMN_TYPE": "varchar(40)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "reason_message",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "resolved",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "COLUMN_NAME": "last_attempt_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "month_key",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "manifest_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "issues_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "manifest_hash",
+      "COLUMN_TYPE": "char(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "template_version",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('PENDING','READY','FAILED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "file_path",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "file_sha256",
+      "COLUMN_TYPE": "char(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "error_message",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "created_by",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "month_key",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "quota_n",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "allocation_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "config_version",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "created_by",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "subject_code",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "subject_name",
+      "COLUMN_TYPE": "varchar(60)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "rule_version",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "six_weight",
+      "COLUMN_TYPE": "decimal(5,4)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "process_weight",
+      "COLUMN_TYPE": "decimal(5,4)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "honor_weight",
+      "COLUMN_TYPE": "decimal(5,4)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "process_target",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "honor_target",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "rule_status",
+      "COLUMN_TYPE": "enum('DRAFT','ACTIVE','SUPERSEDED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "approved_by",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "approved_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "parent_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "category_level",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "category_code",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "category_name",
+      "COLUMN_TYPE": "varchar(100)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "score",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "description",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "sort_order",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "version",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "user_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "provider",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "tenant_id",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "external_subject",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "external_name",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "bound_by",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "token",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "parent_name",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "parent_phone",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "expires_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "revoked_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "parent_name",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "comment_text",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "proxy_by_student",
+      "COLUMN_TYPE": "tinyint(1)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "token_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "indicator_code",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "indicator_name",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "dimension",
+      "COLUMN_TYPE": "varchar(8)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "value_type",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "unit",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "is_required",
+      "COLUMN_TYPE": "tinyint(1)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "batch_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "row_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "valid_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "error_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "diff_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "payload_hash",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "COLUMN_NAME": "committed_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "event_key",
+      "COLUMN_TYPE": "varchar(120)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "title",
+      "COLUMN_TYPE": "varchar(200)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "award_level",
+      "COLUMN_TYPE": "enum('DISTRICT','CITY','PROVINCE')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "prize_level",
+      "COLUMN_TYPE": "enum('FIRST','SECOND','THIRD')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "honor_points",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('PENDING','APPROVED','REJECTED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "reviewer_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "reviewed_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "award_date",
+      "COLUMN_TYPE": "date",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "material_version",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "reject_reason",
+      "COLUMN_TYPE": "varchar(255)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "dimension_code",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "category_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "award_points",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "score_record_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "COLUMN_NAME": "rule_version",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "device_code",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "device_secret",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "location_name",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "session_token",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "device_code",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "scope",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "expires_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "revoked_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "owner_type",
+      "COLUMN_TYPE": "enum('HONOR','STORY','GROWTH_TASK')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "owner_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "version_no",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "text_content",
+      "COLUMN_TYPE": "mediumtext",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "file_ref",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "content_hash",
+      "COLUMN_TYPE": "char(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "llm_suggestion",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "created_by",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "recipient_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "message_type",
+      "COLUMN_TYPE": "enum('CLAIM_PENDING','CLAIM_RESULT','HONOR_RESULT','REPORT_PUBLISHED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "business_key",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "payload_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "state",
+      "COLUMN_TYPE": "enum('PENDING','SENT','FAILED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "attempts",
+      "COLUMN_TYPE": "tinyint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "last_error",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "scheduled_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "sent_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "actor_user_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "actor_role",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "target_type",
+      "COLUMN_TYPE": "varchar(50)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "target_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "action",
+      "COLUMN_TYPE": "varchar(50)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "old_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "new_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "request_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "client_ip",
+      "COLUMN_TYPE": "varchar(45)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "renovation_schema_migrations",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "varchar(100)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "renovation_schema_migrations",
+      "COLUMN_NAME": "checksum",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "renovation_schema_migrations",
+      "COLUMN_NAME": "applied_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "draft_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "revision_no",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "author_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "author_role",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "comment_text",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "batch_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "operator_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "total_target",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "success_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "blocked_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "blocked_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "COLUMN_NAME": "request_key",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "COLUMN_NAME": "payload_hash",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "COLUMN_NAME": "response_body",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "COLUMN_NAME": "source_revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "month_key",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "serial_no",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "category_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "token_hash",
+      "COLUMN_TYPE": "char(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "valid_from",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "valid_until",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('UNUSED','PENDING','USED','EXPIRED','VOID')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "used_student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "used_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "allocation_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "dimension_code",
+      "COLUMN_TYPE": "char(1)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "token_ciphertext",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "review_deadline_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "is_legacy_test",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "batch_code",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "points",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "category_name",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "category_version",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "COLUMN_NAME": "category_path",
+      "COLUMN_TYPE": "varchar(256)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "batch_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "operator_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "total_rows",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "insert_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "update_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "conflict_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "details_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "class_snapshot",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "dimension_code",
+      "COLUMN_TYPE": "enum('D','Z','T','M','L','G')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "category_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "source",
+      "COLUMN_TYPE": "enum('A_DIRECT','B_CARD','REVERSAL')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "delta",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "card_claim_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "original_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "operator_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "request_key",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "remark",
+      "COLUMN_TYPE": "varchar(255)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "correction_type",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "reversed_by_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "COLUMN_NAME": "correction_chain_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "month_key",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('DRAFT','SUBMITTED','REVIEWED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "current_version",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "teacher_score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "teacher_comment",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "reviewer_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "reviewed_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "ai_score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "COLUMN_NAME": "ai_suggestion",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "dimension_code",
+      "COLUMN_TYPE": "enum('D','Z','T','M','L','G')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "score_100",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('DRAFT','CONFIRMED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "batch_no",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "version",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "confirmed_by",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "confirmed_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "policy_version",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "source_revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "comprehensive_score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "six_average",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "six_dimensions",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "process_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "honor_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "missing_reasons",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "height",
+      "COLUMN_TYPE": "decimal(5,1)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "height_unit",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "weight",
+      "COLUMN_TYPE": "decimal(5,1)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "weight_unit",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "vital_capacity",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "left_vision",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "right_vision",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "fifty_run",
+      "COLUMN_TYPE": "decimal(4,1)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "sit_and_reach",
+      "COLUMN_TYPE": "decimal(4,1)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "absence_type",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "tested_at",
+      "COLUMN_TYPE": "date",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "imported_by",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "batch_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "indicator_id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "indicator_code",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "value_type",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "raw_value",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "typed_value",
+      "COLUMN_TYPE": "varchar(255)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "numeric_value",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "evaluated_by",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "evaluated_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "COLUMN_NAME": "revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "class_no",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('DRAFT','PENDING_CONFIRMATION','CONFIRMED','SUPERSEDED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "source_revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "policy_version",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "approval_fingerprint",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "draft_snapshot",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "teacher_comment",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "comment_version",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "confirmed_by",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "confirmed_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "ai_suggestion",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "COLUMN_NAME": "parent_comment",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "source_revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "profile_revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_theme_preference",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "student_theme_preference",
+      "COLUMN_NAME": "theme_id",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "student_theme_preference",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "subject_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "version",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "effective_month",
+      "COLUMN_TYPE": "varchar(7)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "monthly_total",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "ratios_bps_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "enabled",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "created_by",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "batch_id",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "UNI"
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "class_no",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "subject_code",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "row_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "valid_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "error_count",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "diff_summary",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "varchar(16)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "payload_hash",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "expected_revisions",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "COLUMN_NAME": "committed_at",
+      "COLUMN_TYPE": "timestamp",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "subject_code",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "subject_name",
+      "COLUMN_TYPE": "varchar(60)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "raw_score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "full_score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "grade_label",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "absence_type",
+      "COLUMN_TYPE": "enum('NORMAL','ABSENT','EXEMPT','POSTPONED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "batch_no",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "version",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "COLUMN_NAME": "subject_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "class_no",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "subject_code",
+      "COLUMN_TYPE": "varchar(32)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "is_head_teacher",
+      "COLUMN_TYPE": "tinyint(1)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "student_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "term_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "version",
+      "COLUMN_TYPE": "int unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "rule_version",
+      "COLUMN_TYPE": "varchar(30)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "snapshot_json",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "comprehensive_score",
+      "COLUMN_TYPE": "decimal(5,2)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "comprehensive_grade",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "teacher_comment",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "teacher_comment_draft",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "teacher_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "student_statement",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "family_message",
+      "COLUMN_TYPE": "text",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "family_source",
+      "COLUMN_TYPE": "enum('STUDENT_TRANSCRIBED','PARENT_DIRECT')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "enum('DRAFT','CONFIRMED','PUBLISHED','SUPERSEDED')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "published_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "read_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime(6)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "approval_fingerprint",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "COLUMN_NAME": "source_revision",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "token_blacklist",
+      "COLUMN_NAME": "token_hash",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "token_blacklist",
+      "COLUMN_NAME": "expires_at",
+      "COLUMN_TYPE": "datetime(3)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "school_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "username",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "password",
+      "COLUMN_TYPE": "varchar(255)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "real_name",
+      "COLUMN_TYPE": "varchar(64)",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "role",
+      "COLUMN_TYPE": "enum('student','teacher','manager')",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "class_no",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "classes",
+      "COLUMN_TYPE": "json",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "tinyint",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "external_id",
+      "COLUMN_TYPE": "varchar(128)",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "users",
+      "COLUMN_NAME": "primary_subject_id",
+      "COLUMN_TYPE": "bigint unsigned",
+      "IS_NULLABLE": "YES",
+      "COLUMN_KEY": ""
+    }
+  ],
+  "indexes": [
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "idx_school_current",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "idx_school_current",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "is_current",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "idx_school_current",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "active",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "uk_school_year_semester",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "uk_school_year_semester",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "academic_year",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "academic_year",
+      "INDEX_NAME": "uk_school_year_semester",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "semester",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "INDEX_NAME": "idx_draft",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "draft_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "INDEX_NAME": "job_id",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "job_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "ai_comment_job",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "idx_card_allocation_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "idx_card_allocation_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "idx_card_allocation_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "policy_version_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "policy_version_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "subject_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "teacher_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "term_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "uk_card_allocation_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "uk_card_allocation_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_allocation",
+      "INDEX_NAME": "uk_card_allocation_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "idx_claim_reviewer_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "reviewer_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "idx_claim_reviewer_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "idx_claim_student_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "idx_claim_student_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "uk_claim_card",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "card_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_claim",
+      "INDEX_NAME": "uk_claim_request_key",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "request_key",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "INDEX_NAME": "uk_card_issue",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "INDEX_NAME": "uk_card_issue",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "INDEX_NAME": "uk_card_issue",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "card_generation_issue",
+      "INDEX_NAME": "uk_card_issue",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "reason_code",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "INDEX_NAME": "uk_card_print_manifest",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "INDEX_NAME": "uk_card_print_manifest",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "INDEX_NAME": "uk_card_print_manifest",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "manifest_hash",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "card_print_pack",
+      "INDEX_NAME": "uk_card_print_manifest",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "template_version",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "fk_quota_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "idx_quota_teacher",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "idx_quota_teacher",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "uk_quota_school_term_month_teacher",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "uk_quota_school_term_month_teacher",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "uk_quota_school_term_month_teacher",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "card_quota_rule",
+      "INDEX_NAME": "uk_quota_school_term_month_teacher",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "INDEX_NAME": "uk_card_subject_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "card_subject",
+      "INDEX_NAME": "uk_card_subject_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "subject_code",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "fk_comp_rule_approver",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "approved_by",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "idx_comp_rule_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "idx_comp_rule_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "rule_status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "uk_comp_rule_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "uk_comp_rule_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "comprehensive_score_rule",
+      "INDEX_NAME": "uk_comp_rule_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "rule_version",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "idx_category_level_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "category_level",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "idx_category_level_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "idx_category_level_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "sort_order",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "idx_category_parent",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "parent_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "uk_category_code_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "category_code",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "edu_evaluation_category",
+      "INDEX_NAME": "uk_category_code_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "version",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "INDEX_NAME": "idx_school_user",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "INDEX_NAME": "idx_school_user",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "user_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "INDEX_NAME": "uk_school_prov_sub",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "INDEX_NAME": "uk_school_prov_sub",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "provider",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "external_identity_link",
+      "INDEX_NAME": "uk_school_prov_sub",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "external_subject",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "INDEX_NAME": "idx_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "INDEX_NAME": "idx_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "INDEX_NAME": "idx_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "family_access_token",
+      "INDEX_NAME": "token",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "token",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "INDEX_NAME": "idx_student_feedback",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "INDEX_NAME": "idx_student_feedback",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "INDEX_NAME": "idx_student_feedback",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "family_feedback_record",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "INDEX_NAME": "uk_school_term_grade_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "INDEX_NAME": "uk_school_term_grade_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "INDEX_NAME": "uk_school_term_grade_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "grade",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "grade_indicator_definition",
+      "INDEX_NAME": "uk_school_term_grade_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "indicator_code",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "INDEX_NAME": "batch_id",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "batch_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "health_import_batch",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "fk_honor_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "idx_honor_reviewer_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "reviewer_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "idx_honor_reviewer_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "idx_honor_student_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "idx_honor_student_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "idx_honor_student_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "uk_honor_event",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "uk_honor_event",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "honor_record",
+      "INDEX_NAME": "uk_honor_event",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "event_key",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "INDEX_NAME": "device_code",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "device_code",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "INDEX_NAME": "idx_school_device",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "INDEX_NAME": "idx_school_device",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "kiosk_device",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "INDEX_NAME": "idx_student_session",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "INDEX_NAME": "idx_student_session",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "INDEX_NAME": "idx_token_exp",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "session_token",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "INDEX_NAME": "idx_token_exp",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "expires_at",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "kiosk_session",
+      "INDEX_NAME": "session_token",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "session_token",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "INDEX_NAME": "idx_material_creator",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "created_by",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "INDEX_NAME": "idx_material_hash",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "content_hash",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "INDEX_NAME": "uk_material_owner_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "owner_type",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "INDEX_NAME": "uk_material_owner_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "owner_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "material_revision",
+      "INDEX_NAME": "uk_material_owner_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "version_no",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "INDEX_NAME": "idx_outbox_state_schedule",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "state",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "INDEX_NAME": "idx_outbox_state_schedule",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "scheduled_at",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "INDEX_NAME": "uk_outbox_business_key",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "recipient_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "INDEX_NAME": "uk_outbox_business_key",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "message_type",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "notification_outbox",
+      "INDEX_NAME": "uk_outbox_business_key",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "business_key",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "INDEX_NAME": "idx_audit_actor_time",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "actor_user_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "INDEX_NAME": "idx_audit_actor_time",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "created_at",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "INDEX_NAME": "idx_audit_request_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "request_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "INDEX_NAME": "idx_audit_target",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "target_type",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "INDEX_NAME": "idx_audit_target",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "target_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "operation_audit",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "renovation_schema_migrations",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "INDEX_NAME": "idx_draft_rev",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "draft_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "INDEX_NAME": "idx_draft_rev",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "revision_no",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "report_comment_revision",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "INDEX_NAME": "batch_id",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "batch_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "INDEX_NAME": "idx_school_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "INDEX_NAME": "idx_school_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "INDEX_NAME": "idx_school_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "created_at",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "report_publish_batch",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "INDEX_NAME": "idx_school_created",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "INDEX_NAME": "idx_school_created",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "created_at",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "request_idempotency",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "request_key",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "fk_card_category",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "category_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "fk_card_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_card_student_used",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "used_student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_card_student_used",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_card_teacher_month_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_card_teacher_month_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_card_teacher_month_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_reward_card_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_reward_card_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "batch_code",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "idx_reward_card_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "uk_card_allocation_serial",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "allocation_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "uk_card_allocation_serial",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "serial_no",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "reward_card",
+      "INDEX_NAME": "uk_card_token_hash",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "token_hash",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "INDEX_NAME": "batch_id",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "batch_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "INDEX_NAME": "idx_school_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "INDEX_NAME": "idx_school_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "INDEX_NAME": "idx_school_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "created_at",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "roster_import_batch",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "fk_score_category",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "category_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_operator",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "operator_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_record_orig",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "original_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_record_orig",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "source",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_student_term_dim",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_student_term_dim",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_student_term_dim",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "dimension_code",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_term_source",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "idx_score_term_source",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "source",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "uk_score_card_claim",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "card_claim_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "uk_score_request_key",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "request_key",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "score_record",
+      "INDEX_NAME": "uk_score_reversal_original",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "original_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "fk_story_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "idx_story_reviewer_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "reviewer_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "idx_story_reviewer_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "idx_story_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "idx_story_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "uk_story_student_term_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "uk_story_student_term_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "uk_story_student_term_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "story_submission",
+      "INDEX_NAME": "uk_story_student_term_month",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "month_key",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "fk_dim_score_confirmer",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "confirmed_by",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "fk_dim_score_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "idx_dim_score_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "batch_no",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "idx_dim_score_term_code",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "idx_dim_score_term_code",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "dimension_code",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "uk_student_dim_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "uk_student_dim_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "uk_student_dim_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "uk_student_dim_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "dimension_code",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "student_dimension_score",
+      "INDEX_NAME": "uk_student_dim_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "version",
+      "SEQ_IN_INDEX": 5
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "idx_school_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "idx_school_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "idx_school_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "uk_student_term_policy_rev",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "uk_student_term_policy_rev",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "uk_student_term_policy_rev",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "policy_version",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_evaluation_snapshot",
+      "INDEX_NAME": "uk_student_term_policy_rev",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "source_revision",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "INDEX_NAME": "idx_school_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "INDEX_NAME": "idx_school_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "INDEX_NAME": "uk_student_term_health",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_health_record",
+      "INDEX_NAME": "uk_student_term_health",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "idx_school_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "idx_school_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "idx_school_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "uk_student_term_indicator",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "uk_student_term_indicator",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_indicator_value",
+      "INDEX_NAME": "uk_student_term_indicator",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "indicator_code",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "idx_class_report",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "idx_class_report",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "idx_class_report",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "grade",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "idx_class_report",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "class_no",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "idx_confirmed",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "idx_confirmed",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "confirmed_at",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "uq_student_term_report",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "uq_student_term_report",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_report_draft",
+      "INDEX_NAME": "uq_student_term_report",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "INDEX_NAME": "idx_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "INDEX_NAME": "idx_term_student",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "INDEX_NAME": "uq_student_term",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "INDEX_NAME": "uq_student_term",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "student_term_state",
+      "INDEX_NAME": "uq_student_term",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "student_theme_preference",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "idx_subject_policy_effective",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "idx_subject_policy_effective",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "idx_subject_policy_effective",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "effective_month",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "idx_subject_policy_effective",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "version",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "uk_subject_policy_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "subject_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_card_policy",
+      "INDEX_NAME": "uk_subject_policy_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "version",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "INDEX_NAME": "batch_id",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "batch_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "INDEX_NAME": "idx_school_term_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "INDEX_NAME": "idx_school_term_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "INDEX_NAME": "idx_school_term_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_code",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "subject_import_batch",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "idx_subject_score_batch",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "batch_no",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "idx_subject_term_code",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "idx_subject_term_code",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_code",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "uk_subject_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "uk_subject_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "uk_subject_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "subject_code",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "subject_score",
+      "INDEX_NAME": "uk_subject_score_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "version",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "subject_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "INDEX_NAME": "subject_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_subject",
+      "INDEX_NAME": "teacher_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_class_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_class_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_class_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "grade",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_class_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "class_no",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_class_subject",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "subject_code",
+      "SEQ_IN_INDEX": 5
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_teacher_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_teacher_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "idx_teacher_term",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "uq_assignment",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "uq_assignment",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "uq_assignment",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "uq_assignment",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "grade",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "uq_assignment",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "class_no",
+      "SEQ_IN_INDEX": 5
+    },
+    {
+      "TABLE_NAME": "teacher_teaching_assignment",
+      "INDEX_NAME": "uq_assignment",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "subject_code",
+      "SEQ_IN_INDEX": 6
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "fk_report_teacher",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "teacher_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "idx_report_student_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "idx_report_student_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "idx_report_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "idx_report_term_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "uk_term_report_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "uk_term_report_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "student_id",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "uk_term_report_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "term_id",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "term_report",
+      "INDEX_NAME": "uk_term_report_version",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "version",
+      "SEQ_IN_INDEX": 4
+    },
+    {
+      "TABLE_NAME": "token_blacklist",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "token_hash",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_school_role_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_school_role_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "role",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_school_role_status",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "status",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_student_grade_class",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_student_grade_class",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "grade",
+      "SEQ_IN_INDEX": 2
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_student_grade_class",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "class_no",
+      "SEQ_IN_INDEX": 3
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "idx_user_external_id",
+      "NON_UNIQUE": 1,
+      "COLUMN_NAME": "external_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "PRIMARY",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "uk_user_school_username",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "school_id",
+      "SEQ_IN_INDEX": 1
+    },
+    {
+      "TABLE_NAME": "users",
+      "INDEX_NAME": "uk_user_school_username",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "username",
+      "SEQ_IN_INDEX": 2
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-const {fail,fixedFields,byColumn,stableHash}=require('./reportCorePolicy');
+const {fail,stableHash}=require('./reportCorePolicy');
+const {policyFor}=require('./reportCoreV2Policy');
 const {getTerm,parse}=require('./reportCoreStore');
 const {assignments,assertScope}=require('./authorizationService');
 const {resolveTermRoster,getBlockingMaterials,evaluateCompletion,pagination}=require('./reportCoreReadModels');
@@ -17,9 +18,10 @@ async function dataset(c,actor,termId){
 function summarize(e,data){
  const sid=String(e.student_id),completion=evaluateCompletion({evaluation:e,config:data.term.evaluation_config,blockingMaterials:data.materials.get(sid)||[]});
  const head=data.teaching.some(a=>a.grade===e.grade_snapshot&&a.class_no===e.class_no_snapshot&&a.is_head_teacher===1),confirmed=e.status==='CONFIRMED'&&String(e.confirmed_revision)===String(e.revision)&&e.approval_fingerprint===reportFingerprint(e,data.term),published=data.published.get(sid);
- const stars={1:0,2:0,3:0,missing:0},grades={};
- for(const key of data.term.evaluation_config.applicableFields||fixedFields.map(f=>f.column)){const f=byColumn.get(key);if(!f)continue;const value=e[key];if(f.valueType==='star'){if([1,2,3].includes(Number(value)))stars[Number(value)]++;else stars.missing++;}if(f.valueType==='grade'&&value)grades[value]=(grades[value]||0)+1;}
- return {studentId:sid,studentNumber:e.student_number,name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot,currentRevision:String(e.revision),publishedVersion:published?Number(published.version):null,releaseVersion:published?Number(published.release_version):null,sectionProgress:completion.sectionProgress,starCounts:stars,gradeCounts:grades,missingCount:completion.missingItems.length,hasMissing:completion.missingItems.length>0,isConfirmed:confirmed,isPublished:!!published,canViewDetail:true,canViewFull:head,canConfirm:head&&data.term.release_status==='IDLE'&&!completion.missingItems.length,canEditComment:head&&data.term.release_status==='IDLE'};
+ const fields=policyFor(data.term.evaluation_config).fields.filter(f=>!f.jsonPath),byColumn=new Map(fields.map(f=>[f.column,f]));
+ const stars={1:0,2:0,3:0,missing:0},grades={};let gradeMissingCount=0;
+ for(const key of new Set(data.term.evaluation_config.applicableFields||fields.map(f=>f.column))){const f=byColumn.get(key);if(!f)continue;const value=e[key];if(f.valueType==='star'){if([1,2,3].includes(Number(value)))stars[Number(value)]++;else stars.missing++;}if(f.valueType==='grade'){if(['A','B','C','D'].includes(value))grades[value]=(grades[value]||0)+1;else gradeMissingCount++;}}
+ return {studentId:sid,studentNumber:e.student_number,name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot,currentRevision:String(e.revision),publishedVersion:published?Number(published.version):null,releaseVersion:published?Number(published.release_version):null,sectionProgress:completion.sectionProgress,starCounts:stars,gradeCounts:grades,gradeMissingCount,missingCount:completion.missingItems.length,hasMissing:completion.missingItems.length>0,isConfirmed:confirmed,isPublished:!!published,canViewDetail:true,canViewFull:head,canConfirm:head&&data.term.release_status==='IDLE'&&!completion.missingItems.length,canEditComment:head&&data.term.release_status==='IDLE'};
 }
 const countsOf=rows=>({total:rows.length,ready:rows.filter(r=>!r.hasMissing).length,missing:rows.filter(r=>r.hasMissing).length,confirmed:rows.filter(r=>r.isConfirmed).length,published:rows.filter(r=>r.isPublished).length});
 async function listReportClasses({pool,actor,termId}){
@@ -40,7 +42,7 @@ function validateFrozenSnapshot(snapshot,row){
  if(!snapshot.renderedDetailHtml||!snapshot.renderedDetailHash)fail(422,'此历史报告尚无安全冻结明细，请由班主任查看完整版');
  if(stableHash(snapshot.renderedDetailHtml)!==snapshot.renderedDetailHash||stableHash(snapshot)!==row.snapshot_hash)fail(409,'报告快照校验失败，请联系管理员核对');
 }
-function detailModel(model){return {renderVersion:model.renderVersion,schemaVersion:model.schemaVersion,student:model.student,term:model.term,values:model.values,sportsSpecialties:model.sportsSpecialties||[],artSpecialties:model.artSpecialties||[],templateVersion:model.templateVersion,ruleVersion:model.ruleVersion,configVersion:model.configVersion,fingerprint:model.fingerprint};}
+function detailModel(model){return {renderVersion:model.renderVersion,schemaVersion:model.schemaVersion,student:model.student,term:model.term,values:model.values,sourceSummary:Object.fromEntries(Object.entries(model.sourceSummary||{}).filter(([,v])=>v?.notApplicable===true).map(([key])=>[key,{notApplicable:true}])),sportsSpecialties:model.sportsSpecialties||[],artSpecialties:model.artSpecialties||[],templateVersion:model.templateVersion,ruleVersion:model.ruleVersion,configVersion:model.configVersion,fingerprint:model.fingerprint};}
 async function getReportDetail({pool,actor,studentKey,version='current',scope='detail'}){
  teacherOnly(actor);if(!studentKey||!['termId','studentId'].every(key=>/^[1-9]\d*$/.test(String(studentKey[key]))))fail(422,'学生或学期编号不合法');if(!['current','published'].includes(version)||!['detail','full'].includes(scope))fail(422,'报告版本或范围不合法');
  return readSnapshot(pool,async c=>{
@@ -50,7 +52,7 @@ async function getReportDetail({pool,actor,studentKey,version='current',scope='d
   if(version==='published'){
    const [[row]]=await c.query("SELECT * FROM term_report WHERE school_id=? AND term_id=? AND student_id=? AND status='PUBLISHED' AND release_version=? ORDER BY version DESC LIMIT 1",[actor.schoolId,studentKey.termId,studentKey.studentId,term.active_release_version||0]);if(!row)fail(404,'学校尚未发布该学生报告');
    const snapshot=parse(row.snapshot_json);
-   if(scope==='detail'){if(snapshot.schemaVersion!=='CORE_V1')fail(422,'此历史格式不支持安全明细查看，请由班主任查看完整版');validateFrozenSnapshot(snapshot,row);html=snapshot.renderedDetailHtml;model=detailModel(snapshot);}
+   if(scope==='detail'){if(!['CORE_V1','CORE_V2'].includes(snapshot.schemaVersion))fail(422,'此历史格式不支持安全明细查看，请由班主任查看完整版');validateFrozenSnapshot(snapshot,row);html=snapshot.renderedDetailHtml;model=detailModel(snapshot);}
    else {if(snapshot.renderedDetailHtml)validateFrozenSnapshot(snapshot,row);html=require('./reportRenderService').renderPrintableA4({reportData:snapshot});model={...snapshot};delete model.renderedHtml;delete model.renderedDetailHtml;delete model.renderedDetailHash;}
    revision=String(row.source_revision);fingerprint=row.approval_fingerprint;templateVersion=row.template_version;ruleVersion=row.rule_version;configVersion=snapshot.configVersion??null;releaseVersion=Number(row.release_version);publishedVersion=Number(row.version);
   }else {

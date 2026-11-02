@@ -49,7 +49,7 @@ async function addSource(c, s) {
   return String(r.insertId);
 }
 async function executeMutation(
-  { pool, actor, termId, studentIds = [], command, action, termLock = 'shared' },
+  { pool, actor, termId, studentIds = [], command, action, termLock = 'shared', readCommitted = false, schoolAccountLock = false },
   mutate,
 ) {
   if (
@@ -89,7 +89,14 @@ async function executeMutation(
   }
   const c = await pool.getConnection();
   try {
+    // Only this transaction changes isolation. School-wide projections must see
+    // predecessors committed while waiting for their exclusive term lock.
+    if (readCommitted) await c.query('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
     await c.beginTransaction();
+    if (schoolAccountLock) {
+      const [terms] = await c.query('SELECT id,release_status FROM academic_year WHERE school_id=? ORDER BY id FOR UPDATE',[actor.schoolId]);
+      if (terms.some(t=>t.release_status !== 'IDLE')) fail(423, '学校发布期间暂停账号维护');
+    }
     const observed=await getTerm(c,actor.schoolId,termId);
     const v2=require('./reportCoreV2Policy').isV2(observed.evaluation_config);
     const term = await getTerm(c, actor.schoolId, termId, v2?'exclusive':termLock);
@@ -170,7 +177,7 @@ async function executeMutation(
         actor.id,
         key,
         command.payloadHash,
-        JSON.stringify({ action, requestKey: command.requestKey }),
+        JSON.stringify({ action, requestKey: command.requestKey, ...(changed.auditContext || {}) }),
         JSON.stringify(response),
       ],
     );

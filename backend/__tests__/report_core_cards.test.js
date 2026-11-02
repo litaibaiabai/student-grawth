@@ -74,6 +74,7 @@ test("quota restricts generation; same class concurrent redemption credits only 
     pool: db.pool,
     actor,
     sourceId: list[0].id,
+    now: new Date('2026-10-28T00:00:00Z'),
   });
   const race = await Promise.allSettled(
     ["3", "4"].map((id) =>
@@ -107,7 +108,7 @@ test("quota restricts generation; same class concurrent redemption credits only 
     }),
     { statusCode: 409 },
   );
-  const zip = await cards.buildClassPrintZip({ pool: db.pool, actor, quotaId });
+  const zip = await cards.buildClassPrintZip({ pool: db.pool, actor, quotaId, now: new Date('2026-10-28T00:00:00Z') });
   const chunks = [];
   for await (const chunk of zip) chunks.push(chunk);
   assert.equal(Buffer.concat(chunks).subarray(0, 2).toString(), "PK");

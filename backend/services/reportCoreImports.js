@@ -15,6 +15,7 @@ async function validateAdminRows(c,actor,term,kind,rows){
  const v2=require('./reportCoreV2Policy').isV2(term.evaluation_config);
  if(v2 && rows?.length>500)fail(422,'每批最多500名学生');
  if(actor.role!=='manager')fail(403,'仅管理员导入学籍与体测');
+ if(term.evaluation_config.adminClassRegistryVersion===1&&kind==='HEALTH')fail(403,'增强版体测由教师学科导入维护');
  if(!['ROSTER','HEALTH'].includes(kind)||!Array.isArray(rows)||!rows.length||rows.length>1000)fail(422,'导入类型或行数不合法');
  const normalized=[],errors=[],diffs=[],seen=new Set();const counts={created:0,updated:0,skipped:0,errors:0};
  for(let index=0;index<rows.length;index++){
@@ -26,6 +27,7 @@ async function validateAdminRows(c,actor,term,kind,rows){
    if(!['student','teacher'].includes(input.role))error('role','仅支持学生或教师模板');
    if(typeof input.real_name!=='string'||!input.real_name.trim()||input.real_name.length>100)error('real_name','姓名不能为空且不超过100字');
    if(input.role==='student'&&(!Number.isInteger(input.grade)||input.grade<1||!Number.isInteger(input.classNo)||input.classNo<1))error('classNo','学生需要合法年级和班级');
+   if(term.evaluation_config.adminClassRegistryVersion===1&&input.role==='student'){const [[cls]]=await c.query('SELECT id FROM school_class WHERE school_id=? AND term_id=? AND grade=? AND class_no=?',[actor.schoolId,term.id,input.grade||0,input.classNo||0]);if(!cls)error('classNo','请先导入目标班级');}
    if(seen.has(username))error('username','同批账号重复');seen.add(username);
    const [[u]]=await c.query('SELECT id,role,real_name,grade,class_no,status FROM users WHERE school_id=? AND username=?',[actor.schoolId,username]);
    if(u&&u.role!==input.role)error('role','已有账号角色不一致，不能变更角色');
@@ -147,6 +149,7 @@ async function commitImport({
       command,
       action: "import-commit",
       termLock:p.kind==='ROSTER'?'exclusive':'shared',
+      readCommitted:p.kind==='ROSTER',
     },
     async (c, term) => {
       const [[current]] = await c.query(
@@ -161,15 +164,18 @@ async function commitImport({
       if (!Array.isArray(p.rows)) fail(409, "导入预览已失效，请重新预览");
       if(require('./reportCoreV2Policy').isV2(term.evaluation_config) && (p.configVersion!==term.config_version || p.rosterRevision!==String(term.roster_revision)))fail(409,'预览后配置或名单已变化');
       const changed = {},
-        updatedStudentIds = [];
+        updatedStudentIds = [], rosterClasses = [];
+      if(term.evaluation_config.adminClassRegistryVersion===1&&p.kind==='HEALTH')fail(403,'增强版体测由教师学科导入维护');
       for (let i = 0; i < p.rows.length; i++) {
         const row = p.rows[i];
         if (p.kind === "ROSTER") {
           const [[account]]=await c.query('SELECT id,role,real_name,grade,class_no,status FROM users WHERE school_id=? AND username=? FOR UPDATE',[actor.schoolId,row.username]);
           if(stableHash(accountSnapshot(account))!==stableHash(row.expectedAccount))fail(409,'预览后账号已变化，请重新预览');
+          if(term.evaluation_config.adminClassRegistryVersion===1&&row.role==='student'){const [[cls]]=await c.query('SELECT id FROM school_class WHERE school_id=? AND term_id=? AND grade=? AND class_no=?',[actor.schoolId,term.id,row.grade,row.classNo]);if(!cls)fail(422,'请先导入目标班级');rosterClasses.push({grade:row.grade,classNo:row.classNo});}
           let id=row.existingId;
           if(id&&row.role==='student'){
-           const [[e]]=await c.query('SELECT revision FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id=? FOR UPDATE',[actor.schoolId,batch.term_id,id]);
+           const [[e]]=await c.query('SELECT revision,grade_snapshot,class_no_snapshot FROM student_term_evaluation WHERE school_id=? AND term_id=? AND student_id=? FOR UPDATE',[actor.schoolId,batch.term_id,id]);
+           if(e)rosterClasses.push({grade:e.grade_snapshot,classNo:e.class_no_snapshot});
            if((e?String(e.revision):null)!==row.expectedRevision)fail(409,'预览后学籍已变化，请重新预览');
           }
           if(id){if(term.is_current||row.role==='teacher')await c.query('UPDATE users SET real_name=?,grade=?,class_no=? WHERE id=? AND school_id=?',[row.real_name,row.grade,row.classNo,id,actor.schoolId]);}
@@ -191,7 +197,7 @@ async function commitImport({
             changed[id] = [];
             updatedStudentIds.push(id);
           }
-          if(p.diffs?.[i])p.diffs[i].studentId=row.role==='student'?id:null;
+          if(p.diffs?.[i])Object.assign(p.diffs[i],{studentId:row.role==='student'?id:null,accountId:id,role:row.role});
           await addSource(c, {
             schoolId: actor.schoolId,
             termId: batch.term_id,
@@ -241,6 +247,7 @@ async function commitImport({
         changed[row.studentId] = Object.keys(row.values);
         updatedStudentIds.push(row.studentId);
       }
+      if(term.evaluation_config.adminClassRegistryVersion===1&&p.kind==='ROSTER'&&updatedStudentIds.length)Object.assign(changed,await require('./reportCoreAdminClasses').rosterImpact(c,term,actor,rosterClasses));
       const safePayload = { kind: p.kind, rowCount:p.inputRowCount||p.rows.length,counts:p.counts,commitDiffs:p.diffs||[] };
       await c.query(
         "UPDATE evaluation_source_record SET status='COMMITTED',payload_json=?,revision=revision+1 WHERE id=?",
