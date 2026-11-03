@@ -286,8 +286,8 @@ function buildReportModel({ evaluation: e, config, studentSnapshot }) {
     const bmiRes=evaluateBMI({
       height:h,
       weight:w,
-      gender:e.gender||meta.gender||studentSnapshot?.gender,
-      birthDate:e.birth_date||meta.birthDate||studentSnapshot?.birthDate,
+      gender:e.gender||meta.gender||sources.height_cm?.gender||studentSnapshot?.gender,
+      birthDate:e.birth_date||meta.birthDate||sources.height_cm?.birthDate||studentSnapshot?.birthDate,
       measurementDate,
       grade:e.grade_snapshot||studentSnapshot?.grade,
       standard:process.env.BMI_EVALUATION_STANDARD||'WS_T_2018'

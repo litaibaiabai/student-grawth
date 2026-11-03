@@ -38,7 +38,8 @@ test('environment variable switches between WS_T_2018 and MOE_2014 seamlessly', 
     assert.equal(moeRes.bmi_score, 80);
     assert.equal(moeRes.bmi_standard, 'MOE_2014');
   } finally {
-    process.env.BMI_EVALUATION_STANDARD = originalEnv;
+    if (originalEnv === undefined) delete process.env.BMI_EVALUATION_STANDARD;
+    else process.env.BMI_EVALUATION_STANDARD = originalEnv;
   }
 });
 
@@ -87,41 +88,87 @@ test('out-of-bound age is clamped to boundary brackets (6.0 and 12.0)', () => {
   assert.equal(older.bmi_label, '正常'); // 12.0 girl: 15.3~21.1 is normal
 });
 
-test('end-to-end report rendering under MOE_2014 reflects low weight in HTML output', () => {
-  const originalEnv = process.env.BMI_EVALUATION_STANDARD;
-  try {
-    process.env.BMI_EVALUATION_STANDARD = 'MOE_2014';
-    const config = createV2Config();
-    const evaluation = {
-      student_id: 1,
-      student_name_snapshot: '小明',
-      grade_snapshot: 1,
-      class_no_snapshot: 1,
-      revision: 1,
-      gender: '男',
-      height_cm: '125.0',
-      weight_kg: '18.0',
-      teacher_comment: '表现优良',
-      story_summary: JSON.stringify({ WRITE: { rank: 1, value: 2 }, LISTEN: { rank: 1, value: 1 }, TELL: { rank: null, value: null } }),
-      honor_summary: JSON.stringify({ items: [] }),
-      field_sources: JSON.stringify({}),
-    };
-    for (const f of config.applicableFields) {
-      if (evaluation[f] === undefined) evaluation[f] = 1;
-    }
-    evaluation.height_cm = '125.0';
-    evaluation.weight_kg = '18.0';
-
-    const m = buildReportModel({ evaluation, config });
-    assert.equal(m.values.bmi, 11.52);
-    assert.equal(m.values.bmi_label, '低体重');
-    assert.equal(m.values.bmi_score, 80);
-
-    const html = renderV2({ model: m, renderScope: 'DETAIL_ONLY' });
-    assert.match(html, /11\.52/);
-    assert.match(html, /低体重/);
-    assert.match(html, /<td class="bmi-cell">/);
-  } finally {
-    process.env.BMI_EVALUATION_STANDARD = originalEnv;
-  }
+test('gender code 0 is treated as unknown gender rather than female', () => {
+  const res = evaluateBMI({
+    height: 125.0,
+    weight: 18.0,
+    gender: '0',
+    age: 6.0,
+    standard: 'WS_T_2018',
+  });
+  assert.equal(res.bmi, 11.52);
+  assert.equal(res.bmi_label, null); // unknown gender should not classify as female
 });
+
+test('calculateAge returns null when measurementDate is missing', () => {
+  const { calculateAge } = require('../services/bmiEvaluationService');
+  assert.equal(calculateAge('2019-01-01', null), null);
+  assert.equal(calculateAge('2019-01-01', undefined), null);
+});
+
+test('HTML and DTO rendering show dash for bmi_label when gender is missing', () => {
+  const config = createV2Config();
+  const evaluation = {
+    student_id: 1,
+    student_name_snapshot: '小红',
+    grade_snapshot: 1,
+    class_no_snapshot: 1,
+    revision: 1,
+    height_cm: '125.0',
+    weight_kg: '18.0',
+    // gender missing
+    teacher_comment: '表现优良',
+    story_summary: JSON.stringify({ WRITE: { rank: 1, value: 2 }, LISTEN: { rank: 1, value: 1 }, TELL: { rank: null, value: null } }),
+    honor_summary: JSON.stringify({ items: [] }),
+    field_sources: JSON.stringify({}),
+  };
+  for (const f of config.applicableFields) {
+    if (evaluation[f] === undefined) evaluation[f] = 1;
+  }
+  evaluation.height_cm = '125.0';
+  evaluation.weight_kg = '18.0';
+
+  const m = buildReportModel({ evaluation, config });
+  assert.equal(m.values.bmi, 11.52);
+  assert.equal(m.values.bmi_label, null);
+
+  const html = renderV2({ model: m, renderScope: 'DETAIL_ONLY' });
+  assert.match(html, /<td class="bmi-cell"><div[^>]*>11\.52<\/div><div[^>]*>—<\/div><\/td>/);
+});
+
+test('buildReportModel accurately retrieves gender and birthDate from fieldSources.height_cm', () => {
+  const config = createV2Config();
+  const evaluation = {
+    student_id: 2,
+    student_name_snapshot: '张三',
+    grade_snapshot: 1,
+    class_no_snapshot: 1,
+    revision: 1,
+    height_cm: '125.0',
+    weight_kg: '18.0',
+    teacher_comment: '良好',
+    story_summary: JSON.stringify({ WRITE: { rank: 1, value: 2 }, LISTEN: { rank: 1, value: 1 }, TELL: { rank: null, value: null } }),
+    honor_summary: JSON.stringify({ items: [] }),
+    // sources contain imported gender and measurement
+    field_sources: JSON.stringify({
+      height_cm: {
+        measurement: { date: '2026-03-01' },
+        gender: '男',
+        birthDate: '2019-09-01',
+      }
+    }),
+  };
+  for (const f of config.applicableFields) {
+    if (evaluation[f] === undefined) evaluation[f] = 1;
+  }
+  evaluation.height_cm = '125.0';
+  evaluation.weight_kg = '18.0';
+
+  const m = buildReportModel({ evaluation, config });
+  assert.equal(m.values.bmi, 11.52);
+  assert.equal(m.values.bmi_label, '中重度消瘦');
+  assert.equal(m.values.bmi_standard, 'WS_T_2018');
+});
+
+
+

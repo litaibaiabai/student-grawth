@@ -24,7 +24,7 @@ function inspectZip(buffer,{maxBytes=50*1024*1024}={}) {
   }
   return entries;
 }
-const metadata={'学期标识':'termId','模板版本':'templateVersion','账号':'username','学号':'username','姓名':'real_name','年级':'grade','班级':'classNo','测量日期':'measurementDate','视力制式':'visionStandard','数据提供教师':'providedByTeacherId','性别':'gender','gender':'gender','出生日期':'birthDate','生日':'birthDate','birthDate':'birthDate',studentId:'studentId',username:'username',real_name:'real_name',grade:'grade',classNo:'classNo',termId:'termId',templateVersion:'templateVersion'};
+const metadata={'学期标识':'termId','模板版本':'templateVersion','账号':'username','学号':'username','姓名':'real_name','年级':'grade','班级':'classNo','测量日期':'measurementDate','视力制式':'visionStandard','数据提供教师':'providedByTeacherId','性别':'gender','gender':'gender','出生日期':'birthDate','出生年月':'birthDate','生日':'birthDate','birthDate':'birthDate',studentId:'studentId',username:'username',real_name:'real_name',grade:'grade',classNo:'classNo',termId:'termId',templateVersion:'templateVersion'};
 function normalizeMeasurement(input,values) {
   const health=['height_cm','weight_kg','vision_left','vision_right','jump_rope_1min'];
   if(!health.some(k=>values[k]!==null && values[k]!==undefined))return null;

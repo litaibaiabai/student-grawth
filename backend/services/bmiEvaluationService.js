@@ -53,8 +53,8 @@ const MOE_2014_TABLE = {
 function normalizeGender(gender) {
   if (!gender) return null;
   const g = String(gender).trim().toUpperCase();
-  if (['M', 'MALE', '男', '1'].includes(g)) return 'male';
-  if (['F', 'FEMALE', '女', '2', '0'].includes(g)) return 'female';
+  if (['M', 'MALE', '男', '1', '男生'].includes(g)) return 'male';
+  if (['F', 'FEMALE', '女', '2', '女生'].includes(g)) return 'female';
   return null;
 }
 
@@ -73,9 +73,9 @@ function inferAgeFromGrade(grade) {
 }
 
 function calculateAge(birthDate, measurementDate) {
-  if (!birthDate) return null;
+  if (!birthDate || !measurementDate) return null;
   const b = new Date(birthDate);
-  const m = measurementDate ? new Date(measurementDate) : new Date();
+  const m = new Date(measurementDate);
   if (Number.isNaN(b.getTime()) || Number.isNaN(m.getTime()) || m <= b) return null;
   return (m - b) / (365.2425 * 24 * 3600 * 1000);
 }
@@ -87,7 +87,8 @@ function alignHalfYearAge(age) {
 }
 
 function evaluateBMI({ height, weight, gender, age, birthDate, measurementDate, grade, standard }) {
-  const activeStandard = standard || process.env.BMI_EVALUATION_STANDARD || 'WS_T_2018';
+  const envStd = process.env.BMI_EVALUATION_STANDARD;
+  const activeStandard = standard || (envStd && envStd !== 'undefined' ? envStd : 'WS_T_2018');
   const bmi = computeBMI(height, weight);
   if (bmi === null) {
     return { bmi: null, bmi_label: null, bmi_score: null, bmi_standard: activeStandard };
@@ -160,3 +161,4 @@ module.exports = {
   WS_T_2018_TABLE,
   MOE_2014_TABLE,
 };
+

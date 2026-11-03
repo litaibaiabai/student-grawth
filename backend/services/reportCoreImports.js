@@ -38,7 +38,7 @@ async function validateAcademicRows(c,actor,term,rows) {
       }
       if(errors.length>start)continue;
       if(!Object.keys(values).length){skipped++;continue;}
-      normalized.push({studentId:id,values,expectedRevision:String(scope.evaluation.revision),...(v2?{measurement:input.measurement,providedByTeacherId:input.providedByTeacherId||actor.id}: {})});
+      normalized.push({studentId:id,values,expectedRevision:String(scope.evaluation.revision),...(v2?{measurement:input.measurement,gender:input.gender||null,birthDate:input.birthDate||null,providedByTeacherId:input.providedByTeacherId||actor.id}: {})});
     }catch(error){if(!error.statusCode)throw error;errors.push({rowNo,field:'studentId',reason:error.message});}
   }
   return {normalized,errors,counts:{created:0,updated:normalized.length,skipped,errors:errors.length}};
@@ -149,7 +149,7 @@ async function commitImport({
           actorId: actor.id,
           status: "COMMITTED",
           key: ["IMPORT_ROW", batchId, i],
-          payload: { rowNo: i + 1, values: row.values, previousValues,measurement:row.measurement,providedByTeacherId:row.providedByTeacherId },
+          payload: { rowNo: i + 1, values: row.values, previousValues,measurement:row.measurement,gender:row.gender,birthDate:row.birthDate,providedByTeacherId:row.providedByTeacherId },
         });
         changed[row.studentId] = Object.keys(row.values);
         updatedStudentIds.push(row.studentId);

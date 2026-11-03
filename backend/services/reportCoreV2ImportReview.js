@@ -1,5 +1,5 @@
 const {parseV2Workbook,normalizeMeasurement}=require('./reportCoreV2Imports');
-const {computeBMI,evaluateBMI,isV2,policyFor}=require('./reportCoreV2Policy');
+const {evaluateBMI,isV2,policyFor}=require('./reportCoreV2Policy');
 const {getTerm,parse}=require('./reportCoreStore');
 const {resolveTermRoster}=require('./reportCoreReadModels');
 const {assertScope}=require('./authorizationService');
