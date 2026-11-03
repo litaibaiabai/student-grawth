@@ -85,3 +85,4 @@ test('evaluateBMI handles missing fields gracefully without throwing', () => {
   assert.equal(noGender.bmi, 15.0);
   assert.equal(noGender.bmi_label, null);
 });
+
