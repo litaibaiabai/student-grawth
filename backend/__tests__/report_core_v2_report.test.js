@@ -11,6 +11,7 @@ function fixture(){
   honor_summary:JSON.stringify({items:[{name:'阅读小达人',region:'区级',level:'一等奖',points:2}]}),field_sources:JSON.stringify({fitness_self_star:{notApplicable:true,reason:'免测'}})};
  for(const f of catalog.fields.filter(f=>!f.jsonPath))evaluation[f.column]=f.valueType==='star'?2:f.valueType==='grade'?'A':f.valueType==='number'?12:'5.0';
  evaluation.jump_rope_1min=0;
+ evaluation.gender='女';
  evaluation.height_cm='142.0';evaluation.weight_kg='34.5';
  return {config,evaluation};
 }
@@ -19,6 +20,8 @@ test('V2 DTO contains the current 94 positions, story summaries and zero without
  assert.equal(m.schemaVersion,'CORE_V2');assert.equal(m.displayFieldCount,94);
  assert.equal(m.values.math_regular_grade,'A');assert.equal(m.values.jump_rope_1min,0);
  assert.equal(m.values.story_summary.WRITE.value,2);assert.equal(m.values.bmi,17.11);
+ assert.equal(m.values.bmi_label,'正常');
+ assert.equal(m.values.bmi_standard,'WS_T_2018');
  assert.equal(m.honors[0].name,'阅读小达人');assert.equal(m.honors[0].region,'区级');assert.ok(!Object.hasOwn(m.narratives,'self_conduct_text'));
  const term={evaluation_config:config,template_version:'CORE_V2',rule_version:'V2_1',config_version:1};
  assert.notEqual(reportFingerprint(evaluation,term),reportFingerprint({...evaluation,math_regular_grade:'B'},term));

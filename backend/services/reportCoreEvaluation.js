@@ -278,11 +278,31 @@ async function settleSources({
 module.exports = { getEvaluationView, submitForm, settleSources };
 function buildReportModel({ evaluation: e, config, studentSnapshot }) {
   if(require('./reportCoreV2Policy').isV2(config)) {
-    const {fixedFields,catalog,computeBMI}=require('./reportCoreV2Policy');
+    const {fixedFields,catalog,evaluateBMI}=require('./reportCoreV2Policy');
+    const h=e.height_cm==null?null:Number(e.height_cm),w=e.weight_kg==null?null:Number(e.weight_kg);
+    const meta=parse(e.section_meta);
+    const sources=parse(e.field_sources);
+    const measurementDate=sources.height_cm?.measurement?.date||meta.measurementDate||null;
+    const bmiRes=evaluateBMI({
+      height:h,
+      weight:w,
+      gender:e.gender||meta.gender||studentSnapshot?.gender,
+      birthDate:e.birth_date||meta.birthDate||studentSnapshot?.birthDate,
+      measurementDate,
+      grade:e.grade_snapshot||studentSnapshot?.grade,
+      standard:process.env.BMI_EVALUATION_STANDARD||'WS_T_2018'
+    });
     return {
       schemaVersion:'CORE_V2',renderVersion:require('./reportRenderService').RENDER_VERSION,
       student:studentSnapshot||{id:String(e.student_id),name:e.student_name_snapshot,grade:e.grade_snapshot,classNo:e.class_no_snapshot},term:{},
-      values:{...Object.fromEntries(fixedFields.map(f=>[f.column,e[f.column]??null])),story_summary:parse(e.story_summary),bmi:computeBMI(e.height_cm==null?null:Number(e.height_cm),e.weight_kg==null?null:Number(e.weight_kg))},
+      values:{
+        ...Object.fromEntries(fixedFields.map(f=>[f.column,e[f.column]??null])),
+        story_summary:parse(e.story_summary),
+        bmi:bmiRes.bmi,
+        bmi_label:bmiRes.bmi_label,
+        bmi_score:bmiRes.bmi_score,
+        bmi_standard:bmiRes.bmi_standard
+      },
       narratives:{teacher_comment:e.teacher_comment||''},
       honors:(parse(e.honor_summary).items||[]).map(item=>({name:item.name,region:item.region,level:item.level})),
       policySnapshot:config,sourceSummary:parse(e.field_sources),displayFieldCount:catalog.fields.length,
