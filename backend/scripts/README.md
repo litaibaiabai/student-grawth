@@ -63,12 +63,17 @@ ADMIN_DEMO_NOW=2027-02-15T00:00:00.000Z node backend/scripts/runAdminClosureDemo
 |---|---|
 | runCoreMigrations.js | 启动器和正式服务使用的核心表结构检查；`REPORT_DB_NAME`指定库，`--apply`仅用于相应结构初始化。含时间契约切换维护选项 |
 | migrateAdminSimplification.js | 当前v4的semesterCards配置迁移，固定正式库student_growth；`node backend/scripts/migrateAdminSimplification.js`只读检查，`--apply`先备份 |
+| migrateFaceAuth.js | 人脸登录users四列迁移；默认只读check，`--apply`先SQL备份，不建立新库表，不预填模板 |
+| setupFaceModels.js | `--install`下载并校验固定模型及本地浏览器WASM；`--init-local`仅首次生成私有开发密钥文件，不覆盖已有密钥 |
+| verifyFaceModels.js | 真实模型加载与纯色无脸输入拒绝smoke；不采集摄像头，不代表真人或防伪验收 |
 | migrateSixEducationV2.js | 六育V2结构检查/升级，核心检查器仍调用；另有来源资产审计入口，调用独立的reportCoreSourceAudit服务 |
 | migrateAdminClasses.js | school_class及相关职责数据约束检查，核心检查器仍调用 |
 | upgradeCoreLedgerIndex.js | 可选台账索引升级；目标库受脚本安全规则限制，不能把旧索引升级当正常启动 |
 | buildBuiltinStoryAudio.js | macOS素材制作工具，依赖`say`、ffmpeg、ffprobe；重生成100篇内置故事音频及catalog，会覆盖素材，不是启动前置步骤 |
 
 仍在使用的来源及附件核验已独立保存在 `backend/services/reportCoreSourceAudit.js`，由V2检查器的`--audit-sources`入口调用，不再依赖旧库搬迁脚本。
+
+人脸登录首次安装、密钥和生产开关见[人脸登录说明](../../docs/delivery/face-login/README.md)。所有生物模板默认为空，必须本人密码验证并同意后采集。
 
 数据库备份实现保留在 `backend/services/formalDatabaseBackup.js`，当前迁移仍调用。恢复使用SQL备份，见[迁移与恢复说明](../../docs/delivery/admin-simplification/migration.md)，不依赖已删除的旧演示库。
 

@@ -1,0 +1,206 @@
+.face-login-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  background: #edf1e8;
+  border-radius: 14px;
+  margin: 20px 0;
+}
+.face-login-tabs button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #6d806d;
+  padding: 10px;
+}
+.face-login-tabs button[aria-selected="true"] {
+  background: #fffdf7;
+  box-shadow: 0 2px 8px #23352c12;
+  color: #245d4c;
+}
+.face-intro,
+.face-privacy {
+  color: #72806e;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.face-welcome {
+  text-align: center;
+  padding: 22px 20px;
+  margin: 12px 0 20px;
+  background: #f4f6ed;
+  border: 1px solid #d7e0cc;
+  border-radius: 18px;
+}
+.face-welcome > span {
+  display: block;
+  font-size: 60px;
+  color: #7a9477;
+  line-height: 1.4;
+}
+.face-welcome strong {
+  font-family: "Songti SC", serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #355c49;
+}
+.face-welcome p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #7b8976;
+}
+.face-capture {
+  text-align: center;
+}
+.face-view {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background: #163a30;
+  border-radius: 20px;
+  margin: 16px 0;
+}
+.face-view video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.face-oval {
+  position: absolute;
+  inset: 12% 25%;
+  border: 2px solid #e7ecd6;
+  border-radius: 50%;
+  box-shadow: 0 0 0 130px #0b201b4a;
+  pointer-events: none;
+}
+.face-live-dot {
+  position: absolute;
+  bottom: 10px;
+  left: 14px;
+  color: #fff8dc;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.face-progress {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+}
+.face-progress i {
+  width: 28px;
+  height: 4px;
+  background: #dfe6d7;
+  border-radius: 4px;
+}
+.face-progress .done {
+  background: #528369;
+}
+.face-capture p {
+  color: #496c54;
+  min-height: 24px;
+  font-size: 14px;
+}
+.face-capture [role="alert"] {
+  color: #a24e3f;
+}
+.face-modal-shade {
+  position: fixed;
+  inset: 0;
+  background: #142f285c;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.face-settings {
+  width: min(540px, 100%);
+  max-height: 92vh;
+  overflow: auto;
+  box-shadow: 0 24px 90px #122d2830;
+  padding: 28px;
+  background: #fffdf7;
+  border-radius: 22px;
+}
+.face-settings header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+.face-settings h2 {
+  font:
+    27px "Songti SC",
+    serif;
+  color: #345d4d;
+  margin: 8px 0 20px;
+}
+.face-settings header > button {
+  font-size: 24px;
+  line-height: 1;
+  padding: 6px 12px;
+}
+.face-settings label {
+  display: grid;
+  gap: 9px;
+  margin: 18px 0;
+  color: #4a6553;
+  font-size: 14px;
+}
+.face-settings input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d6dfce;
+  border-radius: 10px;
+  background: #fff;
+}
+.face-settings .face-consent {
+  display: flex;
+  align-items: start;
+  line-height: 1.7;
+  font-size: 12px;
+}
+.face-consent input {
+  margin-top: 4px;
+  flex-shrink: 0;
+  accent-color: #3d765f;
+}
+.face-settings .actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.face-settings .actions button {
+  padding: 12px 16px;
+}
+.face-account-settings {
+  font-size: 12px;
+  padding: 6px 9px;
+}
+.face-settings .kicker {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #8b987d;
+}
+@media (max-width: 600px) {
+  .face-settings {
+    padding: 20px;
+  }
+  .face-modal-shade {
+    padding: 12px;
+  }
+  .face-view {
+    border-radius: 14px;
+  }
+}
+
+.core-app .face-settings .face-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.core-app .face-settings input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin-top: 3px;
+}

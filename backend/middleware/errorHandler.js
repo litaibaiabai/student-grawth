@@ -13,7 +13,12 @@ class AppError extends Error {
 }
 
 const errorHandler = (err, req, res, next) => {
-  console.error(`[Error] ${err.name}: ${err.message}`);
+  const facePath=/\/(?:auth|me)\/face(?:\/|$)/i.test(req.originalUrl||'');
+  const bodyError=err.type==='entity.too.large'||err.type==='entity.parse.failed';
+  if(facePath||bodyError)console.error(JSON.stringify({event:'face_auth_failed',userId:req.actor?.id||null,status:Number(err.status||err.code)||500,at:new Date().toISOString()}));
+  else console.error(`[Error] ${err.name}: ${err.message}`);
+  if(err.type==='entity.too.large')return res.status(413).json({code:413,message:'提交数据超出大小限制'});
+  if(err.type==='entity.parse.failed')return res.status(400).json({code:400,message:'请求格式无效'});
 
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({

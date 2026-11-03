@@ -1,6 +1,6 @@
 # 人脸登录扩展设计
 
-状态：待用户确认完整设计。分支feature-six-education-v4-face；现有React、Express、MySQL、JWT架构不替换。
+状态：用户已确认并继续实施；代码、正式表迁移及自动回归已完成，真人与攻击样本验收待完成。分支feature-six-education-v4-face；现有React、Express、MySQL、JWT架构不替换。
 
 ## 已确认的用户要求
 
@@ -69,4 +69,4 @@ Express是唯一认证裁决者，不接受浏览器提交的“已匹配”、�
 
 ## 设计审阅
 
-独立builder check已完成：没有影响实施计划的未决问题。推理前后的事务顺序、nonce占用状态、具体输入上限及密钥轮换操作在实施计划中细化。本文仍待用户确认；尚未安装依赖、修改产品代码、迁移正式库或采集人脸。
+独立builder check及实现后的独立代码审阅已完成；已修复审阅发现的公开失败差异、错误日志脱敏、摄像头超时资源清理和断开请求取消窗口问题。正式库仅为users增加四列，现有账号均未绑定人脸；未采集真人。运行、密钥轮换、回归证据和验收边界见[交付说明](../../delivery/face-login/README.md)及[验证记录](../../delivery/face-login/verification.md)。

@@ -7,6 +7,8 @@ import {
   routeForRole,
 } from "./core/navigation";
 import RoleShell from "./core/RoleShell";
+import FaceLogin from "./auth/face/FaceLogin";
+import FaceSettings from "./auth/face/FaceSettings";
 import { StudentModule, StudentView } from "./student";
 import { TeacherModule, TeacherView } from "./teacher";
 import { ManagerModule, ManagerView } from "./manager";
@@ -15,6 +17,19 @@ import "./core/style.css";
 export { StudentModule, TeacherModule, ManagerModule };
 
 export default function ReportCoreApp() {
+  const [loginMode, setLoginMode] = useState("password"),
+    [faceSettings, setFaceSettings] = useState(false);
+  const completeLogin = useCallback((data) => {
+    localStorage.setItem("REPORT_CORE_TOKEN", data.token);
+    setCatalog(null);
+    setSources([]);
+    setStudents([]);
+    setAssignments([]);
+    setTab(nav[data.user.role][0][0]);
+    setActor(data.user);
+    setPassword("");
+    setFaceSettings(false);
+  }, []);
   const [actor, setActor] = useState(null),
     [boot, setBoot] = useState(true),
     [username, setUsername] = useState(""),
@@ -35,8 +50,8 @@ export default function ReportCoreApp() {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const termListRequest = useRef(null);
-  const actorIdentity=useRef(actor?.id);
-  actorIdentity.current=actor?.id;
+  const actorIdentity = useRef(actor?.id);
+  actorIdentity.current = actor?.id;
   const leaveGuard = useRef(null);
   const loadedScope = useRef(null);
   const mayLeave = useCallback(
@@ -79,20 +94,29 @@ export default function ReportCoreApp() {
     }
   }, []);
   const reloadTerms = useCallback(async () => {
-    const identity=actor?.id;
-    if(!identity)return;
+    const identity = actor?.id;
+    if (!identity) return;
     termListRequest.current?.abort();
-    const controller=new AbortController();
-    termListRequest.current=controller;
+    const controller = new AbortController();
+    termListRequest.current = controller;
     try {
-      const rows=await api('/report-core/terms',undefined,undefined,{signal:controller.signal});
-      if(!controller.signal.aborted && actorIdentity.current===identity)setTerms(rows);
-    } catch(e) {
-      if(e.name!=='AbortError' && actorIdentity.current===identity)reportError(e);
+      const rows = await api("/report-core/terms", undefined, undefined, {
+        signal: controller.signal,
+      });
+      if (!controller.signal.aborted && actorIdentity.current === identity)
+        setTerms(rows);
+    } catch (e) {
+      if (e.name !== "AbortError" && actorIdentity.current === identity)
+        reportError(e);
       throw e;
     }
-  },[actor?.id,reportError]);
-  useEffect(()=>()=>{termListRequest.current?.abort();},[actor?.id]);
+  }, [actor?.id, reportError]);
+  useEffect(
+    () => () => {
+      termListRequest.current?.abort();
+    },
+    [actor?.id],
+  );
   const run = async (fn) => {
     setBusy(true);
     setError("");
@@ -150,15 +174,17 @@ export default function ReportCoreApp() {
     }
     Promise.all([
       allStudents(termId, { signal: controller.signal }),
-      api(`/report-core/sources?termId=${termId}&page=1`, undefined, undefined, {
+      api(
+        `/report-core/sources?termId=${termId}&page=1`,
+        undefined,
+        undefined,
+        {
+          signal: controller.signal,
+        },
+      ),
+      api(`/report-core/assignments?termId=${termId}`, undefined, undefined, {
         signal: controller.signal,
       }),
-      api(
-        `/report-core/assignments?termId=${termId}`,
-        undefined,
-        undefined,
-        { signal: controller.signal },
-      ),
       api(`/report-core/config?termId=${termId}`, undefined, undefined, {
         signal: controller.signal,
       }),
@@ -270,8 +296,7 @@ export default function ReportCoreApp() {
       ),
       chosen =
         available.find((a) => a.subject_code === subjectCode) || available[0];
-    if (chosen)
-      setTeacherScope({ classKey, subjectCode: chosen.subject_code });
+    if (chosen) setTeacherScope({ classKey, subjectCode: chosen.subject_code });
   };
   const ctx = {
     actor,
@@ -303,7 +328,16 @@ export default function ReportCoreApp() {
       }),
     refreshKey,
     reloadTerms,
-    selectTerm: nextTermId => {if(!mayLeave())return;leaveGuard.current=null;setTermId(String(nextTermId));location.hash=formatCoreLocation({role:actor.role,page:tab,termId:String(nextTermId)});},
+    selectTerm: (nextTermId) => {
+      if (!mayLeave()) return;
+      leaveGuard.current = null;
+      setTermId(String(nextTermId));
+      location.hash = formatCoreLocation({
+        role: actor.role,
+        page: tab,
+        termId: String(nextTermId),
+      });
+    },
     refresh,
     notify,
     error: reportError,
@@ -337,67 +371,101 @@ export default function ReportCoreApp() {
         </section>
         <section className="login-form">
           <p className="kicker">欢迎回到学期评价</p>
-          <h2>账号登录</h2>
+          <h2>{loginMode === "password" ? "账号登录" : "人脸登录"}</h2>
           <p>学生、教师及管理员使用学校分配的账号。</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              run(async () => {
-                const data = await api("/auth/login", { username, password });
-                localStorage.setItem("REPORT_CORE_TOKEN", data.token);
-                setCatalog(null);
-                setSources([]);
-                setStudents([]);
-                setAssignments([]);
-                setTab(nav[data.user.role][0][0]);
-                setActor(data.user);
-                setPassword("");
-              });
-            }}
-          >
-            <label>
-              账号
-              <input
-                autoComplete="username"
-                aria-label="账号"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              密码
-              <input
-                autoComplete="current-password"
-                type="password"
-                aria-label="密码"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </label>
-            {error && (
-              <p role="alert" className="feedback error">
-                {error}
-              </p>
-            )}
-            <button className="primary" disabled={busy} type="submit">
-              登录
-            </button>
-          </form>
+          <div className="face-login-tabs" role="tablist" aria-label="登录方式">
+            {[
+              ["password", "账号密码"],
+              ["face", "人脸登录"],
+            ].map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                role="tab"
+                aria-selected={loginMode === value}
+                onClick={() => {
+                  setLoginMode(value);
+                  setPassword("");
+                  setError("");
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {loginMode === "face" ? (
+            <FaceLogin
+              username={username}
+              onUsername={setUsername}
+              onLogin={completeLogin}
+            />
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                run(async () => {
+                  const data = await api("/auth/login", { username, password });
+                  completeLogin(data);
+                });
+              }}
+            >
+              <label>
+                账号
+                <input
+                  autoComplete="username"
+                  aria-label="账号"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </label>
+              <label>
+                密码
+                <input
+                  autoComplete="current-password"
+                  type="password"
+                  aria-label="密码"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </label>
+              {error && (
+                <p role="alert" className="feedback error">
+                  {error}
+                </p>
+              )}
+              <button className="primary" disabled={busy} type="submit">
+                登录
+              </button>
+            </form>
+          )}
         </section>
       </div>
     );
   return (
     <>
       <div>
-        {import.meta.env.VITE_DEMO_DATE && <div role="status" style={{padding:"8px 20px",background:"#fff3cd",color:"#664d03"}}>本地演示日期：{import.meta.env.VITE_DEMO_DATE.slice(0,10)}（收卡、听故事使用演示时钟；审计保留实际时间）</div>}
+        {import.meta.env.VITE_DEMO_DATE && (
+          <div
+            role="status"
+            style={{
+              padding: "8px 20px",
+              background: "#fff3cd",
+              color: "#664d03",
+            }}
+          >
+            本地演示日期：{import.meta.env.VITE_DEMO_DATE.slice(0, 10)}
+            （收卡、听故事使用演示时钟；审计保留实际时间）
+          </div>
+        )}
         <RoleShell
           schemaVersion={catalog?.schemaVersion}
           actor={actor}
           route={{ page: tab }}
           term={terms.find((t) => String(t.id) === termId)}
           onNavigate={navigate}
+          onFaceSettings={() => setFaceSettings(true)}
           header={
             <>
               <select
@@ -420,7 +488,9 @@ export default function ReportCoreApp() {
                   </option>
                 ))}
               </select>
-              {actor.role === "teacher" && tab === "comments" && <span id="term-comment-class-filter" />}
+              {actor.role === "teacher" && tab === "comments" && (
+                <span id="term-comment-class-filter" />
+              )}
               <button onClick={refresh}>刷新</button>
             </>
           }
@@ -438,6 +508,9 @@ export default function ReportCoreApp() {
             });
           }}
         >
+          {faceSettings && (
+            <FaceSettings onClose={() => setFaceSettings(false)} />
+          )}
           {error && (
             <div role="alert" className="feedback error">
               {error}
@@ -449,9 +522,16 @@ export default function ReportCoreApp() {
             </div>
           )}
           {notice && (
-            <div role="status" aria-live="polite" aria-atomic="true" className="feedback success app-toast">
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="feedback success app-toast"
+            >
               <span>{notice}</span>
-              <button aria-label="关闭消息提示" onClick={() => setNotice("")}>×</button>
+              <button aria-label="关闭消息提示" onClick={() => setNotice("")}>
+                ×
+              </button>
             </div>
           )}
           {busy && (
@@ -464,7 +544,7 @@ export default function ReportCoreApp() {
               正在读取学期配置…
             </section>
           ) : !termId && actor.role === "manager" ? (
-            <ManagerView tab="roster" ctx={ctx}/>
+            <ManagerView tab="roster" ctx={ctx} />
           ) : !termId ? (
             <section className="panel">
               <h2>尚未配置学期</h2>
@@ -480,87 +560,91 @@ export default function ReportCoreApp() {
               key={`${actor.id}:${termId}`}
               aria-busy={busy}
             >
-              {actor.role === "teacher" && teacherScope && !['reviews', 'comments', 'cards-manage', 'drafts'].includes(tab) && (
-                <div className="context-bar">
-                  <div className="context-controls">
-                    <span className="context-label">当前工作范围</span>
-                    <select
-                      aria-label="选择班级"
-                      value={teacherScope.classKey}
-                      onChange={(e) =>
-                        changeScope(e.target.value, teacherScope.subjectCode)
-                      }
-                    >
-                      {[
-                        ...new Set(
-                          assignments.map((a) => `${a.grade}:${a.class_no}`),
-                        ),
-                      ].map((c) => (
-                        <option key={c} value={c}>
-                          {c.replace(":", "年级")}班
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      aria-label="选择任教学科"
-                      value={teacherScope.subjectCode}
-                      onChange={(e) =>
-                        changeScope(teacherScope.classKey, e.target.value)
-                      }
-                    >
-                      {[
-                        ...new Set(
-                          assignments
-                            .filter(
-                              (a) =>
-                                `${a.grade}:${a.class_no}` ===
-                                teacherScope.classKey,
-                            )
-                            .map((a) => a.subject_code),
-                        ),
-                      ].map((code) => (
-                        <option key={code} value={code}>
-                          {({
-                            MORAL: "道德与法治",
-                            CHINESE: "语文",
-                            MATH: "数学",
-                            SCIENCE: "科学",
-                            ENGLISH: "英语",
-                            PE: "体育与健康",
-                            MUSIC: "音乐",
-                            FINE_ART: "美术",
-                            INFORMATION_TECHNOLOGY: "信息科技",
-                            LABOR: "劳动",
-                            INTEGRATED_PRACTICE: "综合实践活动",
-                            CLASS_HEAD: "班级负责人",
-                            LOCAL_COURSE: "地方课程",
-                            STORY: "故事",
-                          })[code] || code}
-                        </option>
-                      ))}
-                    </select>
+              {actor.role === "teacher" &&
+                teacherScope &&
+                !["reviews", "comments", "cards-manage", "drafts"].includes(
+                  tab,
+                ) && (
+                  <div className="context-bar">
+                    <div className="context-controls">
+                      <span className="context-label">当前工作范围</span>
+                      <select
+                        aria-label="选择班级"
+                        value={teacherScope.classKey}
+                        onChange={(e) =>
+                          changeScope(e.target.value, teacherScope.subjectCode)
+                        }
+                      >
+                        {[
+                          ...new Set(
+                            assignments.map((a) => `${a.grade}:${a.class_no}`),
+                          ),
+                        ].map((c) => (
+                          <option key={c} value={c}>
+                            {c.replace(":", "年级")}班
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        aria-label="选择任教学科"
+                        value={teacherScope.subjectCode}
+                        onChange={(e) =>
+                          changeScope(teacherScope.classKey, e.target.value)
+                        }
+                      >
+                        {[
+                          ...new Set(
+                            assignments
+                              .filter(
+                                (a) =>
+                                  `${a.grade}:${a.class_no}` ===
+                                  teacherScope.classKey,
+                              )
+                              .map((a) => a.subject_code),
+                          ),
+                        ].map((code) => (
+                          <option key={code} value={code}>
+                            {{
+                              MORAL: "道德与法治",
+                              CHINESE: "语文",
+                              MATH: "数学",
+                              SCIENCE: "科学",
+                              ENGLISH: "英语",
+                              PE: "体育与健康",
+                              MUSIC: "音乐",
+                              FINE_ART: "美术",
+                              INFORMATION_TECHNOLOGY: "信息科技",
+                              LABOR: "劳动",
+                              INTEGRATED_PRACTICE: "综合实践活动",
+                              CLASS_HEAD: "班级负责人",
+                              LOCAL_COURSE: "地方课程",
+                              STORY: "故事",
+                            }[code] || code}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <small>
+                      {tab === "drafts"
+                        ? "班级报告可浏览全部负责班级"
+                        : "下次打开会记住当前范围"}
+                    </small>
                   </div>
-                  <small>
-                    {tab === "drafts"
-                      ? "班级报告可浏览全部负责班级"
-                      : "下次打开会记住当前范围"}
-                  </small>
-                </div>
-              )}
+                )}
 
-              {actor.role === "student" && (
-                <StudentView tab={tab} ctx={ctx} />
-              )}
-              {actor.role === "teacher" && (
-                <TeacherView tab={tab} ctx={ctx} />
-              )}
-              {actor.role === "manager" && (
-                <ManagerView tab={tab} ctx={ctx} />
-              )}
+              {actor.role === "student" && <StudentView tab={tab} ctx={ctx} />}
+              {actor.role === "teacher" && <TeacherView tab={tab} ctx={ctx} />}
+              {actor.role === "manager" && <ManagerView tab={tab} ctx={ctx} />}
 
-              {sourceNext !== null && ["stories", "awards"].includes(tab) && catalog.schemaVersion !== 'SIX_EDU_V2' && (
-                <div className="source-pagination"><button disabled={busy} onClick={ctx.loadMoreSources}>加载下一批记录</button></div>
-              )}
+              {sourceNext !== null &&
+                ["stories", "awards"].includes(tab) &&
+                catalog.schemaVersion !== "SIX_EDU_V2" && (
+                  <div className="source-pagination">
+                    <button disabled={busy} onClick={ctx.loadMoreSources}>
+                      加载下一批记录
+                    </button>
+                  </div>
+                )}
             </div>
           )}
         </RoleShell>

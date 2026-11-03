@@ -17,6 +17,8 @@
 - [教师综合成绩 Excel 范本](templates/README.md)
 - [学生故事录音](delivery/student-story-recordings/README.md)
 - [学生写故事验收](delivery/student-written-stories/verification.md)
+- [人脸登录安装、绑定与安全边界](delivery/face-login/README.md)
+- [人脸登录验证记录与待验收项](delivery/face-login/verification.md)
 
 ## 数据与维护资料
 

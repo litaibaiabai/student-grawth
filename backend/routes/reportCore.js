@@ -34,7 +34,9 @@ function createCoreRouter() {
       });
     }),
   );
+  require('./faceAuth').mountFacePublic(r,{asyncRoute,ok});
   r.use(requireAuth);
+  require('./faceAuth').mountFacePrivate(r,{asyncRoute,ok});
   r.post(
     "/auth/logout",
     asyncRoute(async (req, res) => {

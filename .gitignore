@@ -21,3 +21,6 @@ output/
 # Python compiler caches are never source artifacts
 __pycache__/
 *.py[cod]
+
+# Local face models and generated WebAssembly assets
+frontend/public/face-models/

@@ -1,5 +1,6 @@
 const path = require("node:path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
+if(process.env.NODE_ENV!=='production')require('dotenv').config({path:path.join(__dirname,'private/face-auth.env')});
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -13,6 +14,7 @@ function createApp({
 } = {}) {
   if (!pool || !schoolId) throw Error("pool and SCHOOL_ID are required");
   const app = express();
+  if(process.env.TRUST_PROXY_LOOPBACK==='1')app.set('trust proxy','loopback');
   Object.assign(app.locals, {
     pool,
     provider,
@@ -69,6 +71,7 @@ if (require.main === module) {
     provider,
   });
   process.on("SIGTERM", async () => {
+    app.locals.faceWorker?.close();
     await worker.stop();
     await pool.end();
     process.exit(0);

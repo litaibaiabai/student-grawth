@@ -38,7 +38,7 @@ async function runAdminClosureDemo({manifestFile,apiPort=19980,webPort=19981,dem
   // The generated text labels itself; no model or OCR requests are made.
   const provider={generateTermComment:async()=>({model:'DEMO_FIXED_TEXT_NO_MODEL',comment:'【演示固定文案，未经AI生成】请教师结合林小禾本学期的真实学习、合作和阅读记录，核对并改写学期寄语。'})};
   const app=require('../app').createApp({pool,schoolId:manifest.schoolId,provider,...(clock?{clock}:{})});
-  server=app.listen(apiPort,'127.0.0.1');await new Promise((resolve,reject)=>{server.once('listening',resolve);server.once('error',reject);});
+  server=app.listen(apiPort,'127.0.0.1');server.on('close',()=>app.locals.faceWorker?.close());await new Promise((resolve,reject)=>{server.once('listening',resolve);server.once('error',reject);});
   const root=path.resolve(__dirname,'../..');
   vite=spawn(process.execPath,[path.join(root,'frontend/node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port',String(webPort),'--strictPort'],{cwd:path.join(root,'frontend'),env:{...process.env,VITE_API_TARGET:`http://127.0.0.1:${apiPort}`,VITE_DEMO_DATE:demoNow||''},stdio:['ignore','pipe','pipe']});
   await waitForOwnedVite(vite,webPort);
