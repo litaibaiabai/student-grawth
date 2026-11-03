@@ -1,5 +1,5 @@
 const {parseV2Workbook,normalizeMeasurement}=require('./reportCoreV2Imports');
-const {computeBMI,isV2,policyFor}=require('./reportCoreV2Policy');
+const {computeBMI,evaluateBMI,isV2,policyFor}=require('./reportCoreV2Policy');
 const {getTerm,parse}=require('./reportCoreStore');
 const {resolveTermRoster}=require('./reportCoreReadModels');
 const {assertScope}=require('./authorizationService');
@@ -21,7 +21,7 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
   for(const input of rows){
     const e=input.studentId?byId.get(input.studentId):byAccount.get(input.username),meta=e?parse(e.section_meta):{};
     const record={rowNo:input.rowNo,sheetName:input.sheetName,
-      student:{id:e?String(e.student_id):null,name:e?.student_name_snapshot||input.real_name||'未识别学生',studentNumber:e?.student_number||input.username||input.studentId||'',grade:e?.grade_snapshot??input.grade,classNo:e?.class_no_snapshot??input.classNo},
+      student:{id:e?String(e.student_id):null,name:e?.student_name_snapshot||input.real_name||'未识别学生',studentNumber:e?.student_number||input.username||input.studentId||'',grade:e?.grade_snapshot??input.grade,classNo:e?.class_no_snapshot??input.classNo,gender:input.gender||e?.gender||'',birthDate:input.birthDate||e?.birth_date||''},
       values:{...(e?Object.fromEntries(fixedFields.map(f=>[f.column,e[f.column]??null])):{}),...input.values},
       uploadedFields:Object.keys(input.values),errors:[],
       sportsSpecialties:e?parse(e.sports_specialties)||[]:[],artSpecialties:e?parse(e.art_specialties)||[]:[],
@@ -52,7 +52,19 @@ async function reviewV2Workbook({pool,actor,termId,buffer,command}) {
       if(v2)try{normalizeMeasurement(input.measurement,input.values);}catch(err){if(!err.statusCode)throw err;error(/制式/.test(err.message)?'visionStandard':'measurementDate',err.message);}
     }
     const h=Number(record.values.height_cm),w=Number(record.values.weight_kg);
-    record.values.bmi=h>0&&w>0&&Number.isFinite(h)&&Number.isFinite(w)?computeBMI(h,w):null;
+    const bmiRes=evaluateBMI({
+      height:h,
+      weight:w,
+      gender:record.student.gender||input.gender,
+      birthDate:record.student.birthDate||input.birthDate,
+      measurementDate:record.measurement?.date,
+      grade:record.student.grade,
+      standard:process.env.BMI_EVALUATION_STANDARD||'WS_T_2018'
+    });
+    record.values.bmi=bmiRes.bmi;
+    record.values.bmi_label=bmiRes.bmi_label;
+    record.values.bmi_score=bmiRes.bmi_score;
+    record.values.bmi_standard=bmiRes.bmi_standard;
     record.values.sports_specialties=record.sportsSpecialties;record.values.art_specialties=record.artSpecialties;
     students.push(record);
   }

@@ -88,3 +88,27 @@ test('duplicate and out-of-scope rows stay visible without returning unauthorize
  assert.ok(result.students[0].errors.some(e=>/重复/.test(e.reason)));assert.ok(result.students[1].errors.some(e=>/重复/.test(e.reason)));
  assert.ok(result.students[2].errors.some(e=>/任教范围/.test(e.reason)));assert.notEqual(result.students[2].values.math_regular_grade,'D');
 });
+
+test('review parses gender and birthDate columns and computes BMI with classification', async () => {
+ const wb = workbook({
+   体测录入: [
+     ['学期标识', '模板版本', '账号', '姓名', 'height_cm', 'weight_kg', '性别', '出生日期', '测量日期'],
+     ['1', 'SIX_EDU_V2', '示例学号001', '林知夏（示例）', 125, 18, '男', '2019-10-01', '2026-03-01'],
+   ]
+ });
+ const rows = parseV2Workbook(wb, { termId: '1', review: true });
+ assert.equal(rows[0].gender, '男');
+ assert.equal(rows[0].birthDate, '2019-10-01');
+
+ const mockPool = { query: async () => [[{ evaluation_config: JSON.stringify({ schemaVersion: 'SIX_EDU_V2' }) }]] };
+ const { result } = await require('../services/reportCoreV2ImportReview').reviewV2Workbook({
+   pool: mockPool,
+   actor: { id: '2', role: 'teacher', schoolId: '1' },
+   termId: '1',
+   buffer: wb,
+   command: { id: 'test-cmd' }
+ });
+ assert.equal(result.students[0].values.bmi, 11.52);
+ assert.equal(result.students[0].values.bmi_label, '中重度消瘦');
+ assert.equal(result.students[0].values.bmi_standard, 'WS_T_2018');
+});
