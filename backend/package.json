@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "migrate": "node scripts/runCoreMigrations.js",
-    "test": "NODE_ENV=test node --test __tests__/report_core_*.test.js __tests__/health.test.js",
+    "test": "NODE_ENV=test node --test __tests__/report_core_*.test.js __tests__/health.test.js __tests__/bmi_*.test.js",
     "migrate:core": "node scripts/runCoreMigrations.js",
     "test:admin-simplification": "node --test --test-concurrency=1 __tests__/admin_simplification_*.test.js __tests__/report_core_policy.test.js __tests__/report_core_v2_policy.test.js",
     "demo:browser": "node scripts/runFreshThreeRoleDemo.js",
