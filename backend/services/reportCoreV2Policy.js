@@ -51,12 +51,8 @@ function validateV2Value(column,value,config={}) {
   } else if (typeof value!=='string' || !value.trim() || [...value].length>16) fail('视力值不合法');
   return value;
 }
-function computeBMI(height,weight) {
-  if (height===null || height===undefined || weight===null || weight===undefined) return null;
-  if (!Number.isFinite(height) || height<=0 || !Number.isFinite(weight) || weight<=0) fail('BMI原始测量值不合法');
-  return Math.round(weight/(height/100)**2*100)/100;
-}
+const {computeBMI,evaluateBMI}=require('./bmiEvaluationService');
 function createV2Config() {
   return {schemaVersion:'SIX_EDU_V2',requiredMonths:[],applicableFields:fixedFields.map(f=>f.column),allowedGrades:['A','B','C','D'],certificateMappings:[],storyScoringVersion:'SIX_EDU_V2_1'};
 }
-module.exports={catalog,fixedFields,byColumn,isV2,policyFor,rankProcess,storySummary,honorLevel,validateV2Value,computeBMI,createV2Config};
+module.exports={catalog,fixedFields,byColumn,isV2,policyFor,rankProcess,storySummary,honorLevel,validateV2Value,computeBMI,evaluateBMI,createV2Config};
