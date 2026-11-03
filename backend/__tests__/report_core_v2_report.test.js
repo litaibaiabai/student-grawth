@@ -31,6 +31,9 @@ test('V2 printable detail renders each catalog position exactly once and protect
  const html=renderPrintableA4({reportData:m,renderScope:'DETAIL_ONLY'});
  assert.match(html,/data-report-schema="CORE_V2"/);assert.match(html,/size:A3 landscape/);
  assert.equal((html.match(/data-view=/g)||[]).length,94);
+ assert.match(html,/<td class="bmi-cell">/);
+ assert.match(html,/17\.11/);
+ assert.match(html,/正常/);
  for(const f of catalog.fields)assert.equal(html.split(`data-view="${f.viewCode}"`).length-1,1,f.viewCode);
  assert.match(html,/data-view="JUMP_ROPE_1MIN"[^>]*>0/);
  assert.match(html,/不适用/);assert.ok(!html.includes('alert(1)'));assert.ok(!html.includes('阅读小达人'));
