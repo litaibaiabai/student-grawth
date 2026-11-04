@@ -1,11 +1,5 @@
 .award-workspace { --award-gold:#a77c35; --award-line:#e0e6db; color:#254b3d; }
-.award-intro { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:12px 0 26px; }
 .award-workspace .award-eyebrow { color:#8a7957; font-size:11px; letter-spacing:2px; margin:0 0 10px; }
-.award-intro h2 { font-family:'Songti SC','STSong',serif; font-size:29px; font-weight:500; letter-spacing:1px; line-height:1.45; margin:0 0 10px; }
-.award-intro p { margin:0; font-size:13px; }
-.award-intro-mark { display:flex; gap:18px; align-items:center; flex-shrink:0; padding:0 20px; color:#a78c54; }
-.award-intro-mark>svg { width:51px; height:62px; stroke-width:1; }
-.award-intro-mark span { font-family:'Songti SC',serif; font-size:13px; letter-spacing:4px; line-height:2; border-left:1px solid #d9cfb6; padding-left:18px; }
 .award-steps { display:flex; list-style:none; padding:0; margin:0 0 30px; align-items:center; gap:38px; color:#9aa28f; font-size:12px; }
 .award-steps li { display:flex; gap:9px; align-items:center; position:relative; }
 .award-steps li+li::before { content:''; position:absolute; left:-29px; width:19px; height:1px; background:#d4dccd; }
@@ -25,8 +19,6 @@
 .award-class-icon { display:grid; place-items:center; width:46px; height:46px; border:1px solid #dce6d0; border-radius:50%; background:#eaf0df; color:#698661; flex-shrink:0; }
 .award-class-icon svg { width:22px; height:22px; }
 .award-class-arrow { margin-left:auto; font-size:22px; color:#8fa07e; }
-.award-scope-note { display:flex; align-items:center; gap:8px; margin:28px 0 0; border-top:1px dashed #e1e5d7; padding-top:20px; font-size:12px; color:#87927c!important; }
-.award-scope-note svg { width:17px; height:17px; }
 .award-board { border:1px solid var(--award-line); border-radius:20px; background:#fff; overflow:clip; }
 .award-board-header { display:flex; justify-content:space-between; align-items:center; padding:24px 28px 18px; gap:24px; border-bottom:1px solid var(--award-line); }
 .award-class-caption { font-size:11px; color:#84937a; letter-spacing:1px; }
@@ -38,7 +30,6 @@
 .award-overview>span { display:flex; align-items:baseline; gap:10px; font-size:12px; color:#829079; }
 .award-overview b { font-family:'Songti SC',serif; font-size:26px; color:#37533d; font-weight:500; font-variant-numeric:tabular-nums; }
 .award-overview .award-pending-count b { color:#a47832; }
-.award-overview>small { margin-left:auto; color:#9aa28e; font-size:11px; }
 .award-column-heading { display:flex; align-items:center; gap:6px; }
 .core-app .award-filter-trigger { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; min-height:28px; padding:5px; border:0; border-radius:5px; background:transparent; color:#8b987f; }
 .award-filter-trigger svg { width:15px; height:15px; }
@@ -132,14 +123,13 @@
 .award-detail-footer svg { width:16px; height:16px; }
 @media(min-width:1100px) { .award-class-card { animation:award-reveal .35s ease both; } .award-class-card:nth-child(2) { animation-delay:.05s; } .award-class-card:nth-child(3) { animation-delay:.1s; } }
 @keyframes award-reveal { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
-@media(max-width:1200px) { .award-class-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .award-class-card { padding:20px; } .award-intro h2 { font-size:25px; } .award-table td,.award-table th { padding-left:10px; padding-right:10px; } .award-table .award-select-cell { padding-left:17px; } }
-@media(max-width:800px) { .award-intro-mark { display:none; } .award-detail-body { grid-template-columns:1fr; } .award-original { border-right:0; border-bottom:1px solid #e0e5d5; } .award-original>a,.award-preview-empty { min-height:180px; } .award-original img { max-height:350px; } .award-class-grid { grid-template-columns:1fr; } .award-detail-dialog { width:calc(100vw - 24px); max-height:calc(100dvh - 24px); } }
-@media(max-width:600px) {
-  .award-intro { padding:2px 0 22px; } .award-intro h2 { font-size:23px; } .award-intro p { font-size:12px; } .award-steps { margin-bottom:20px; }
-  .award-class-section { padding:20px 16px; border-radius:15px; } .award-class-card { min-height:105px; } .award-class-card strong { font-size:23px; } .award-scope-note { align-items:flex-start; font-size:11px; }
+@media(max-width:1200px) { .award-class-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .award-class-card { padding:20px; } .award-table td,.award-table th { padding-left:10px; padding-right:10px; } .award-table .award-select-cell { padding-left:17px; } }
+@media(max-width:800px) { .award-detail-body { grid-template-columns:1fr; } .award-original { border-right:0; border-bottom:1px solid #e0e5d5; } .award-original>a,.award-preview-empty { min-height:180px; } .award-original img { max-height:350px; } .award-class-grid { grid-template-columns:1fr; } .award-detail-dialog { width:calc(100vw - 24px); max-height:calc(100dvh - 24px); } }
+@media(max-width:600px) { .award-steps { margin-bottom:20px; }
+  .award-class-section { padding:20px 16px; border-radius:15px; } .award-class-card { min-height:105px; } .award-class-card strong { font-size:23px; }
   .award-board { border-radius:15px; } .award-board-header { padding:18px 16px 16px; flex-wrap:wrap; gap:16px; } .award-board-header h3 { flex-wrap:wrap; font-size:24px; gap:7px; } .award-board-header h3 small { font-size:11px; } .award-change { padding:7px 10px; font-size:11px; white-space:nowrap; }
   .award-board-header .award-change { margin-left:auto; }
-  .award-overview { order:1; width:100%; margin:0; gap:19px; } .award-overview>span { gap:7px; font-size:11px; } .award-overview b { font-size:23px; } .award-overview>small { display:none; }
+  .award-overview { order:1; width:100%; margin:0; gap:19px; } .award-overview>span { gap:7px; font-size:11px; } .award-overview b { font-size:23px; }
   .award-table,.award-table thead,.award-table tbody { display:block; width:100%; }
   .award-table thead tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:16px; background:#f6f8f1; } .award-table th { display:block; padding:0; border:0; min-width:0; }
   .award-table th:last-child { display:none; }

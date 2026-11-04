@@ -1,5 +1,5 @@
 const sections={智美:['wisdom','智美少年'],健美:['health','健美少年'],艺美:['art','艺美少年'],劳美:['labor','劳美少年'],德美:['conduct','德美少年'],道德与法治:['wisdom','智美少年'],语文:['wisdom','智美少年'],数学:['wisdom','智美少年'],科学:['wisdom','智美少年'],英语:['wisdom','智美少年'],体育与健康:['health','健美少年'],体质健康测试:['health','健美少年'],音乐:['art','艺美少年'],美术:['art','艺美少年']};
-export const cardSubject=column=>({conduct:'CONDUCT',moral:'MORAL',chinese:'CHINESE',math:'MATH',science:'SCIENCE',english:'ENGLISH',pe:'PE',fitness:'PE',music:'MUSIC',fine:'FINE_ART',information:'INFORMATION_TECHNOLOGY',labor:'LABOR',integrated:'INTEGRATED_PRACTICE',local:'LOCAL_COURSE'})[column.split('_')[0]];
+const cardSubject=column=>({conduct:'CONDUCT',moral:'MORAL',chinese:'CHINESE',math:'MATH',science:'SCIENCE',english:'ENGLISH',pe:'PE',fitness:'PE',music:'MUSIC',fine:'FINE_ART',information:'INFORMATION_TECHNOLOGY',labor:'LABOR',integrated:'INTEGRATED_PRACTICE',local:'LOCAL_COURSE'})[column.split('_')[0]];
 export function eligibleCardCodes({catalog,assignments,studentRows,selectedStudentIds}) {
  const ids=[...new Set(selectedStudentIds.map(String))];if(!ids.length)return [];
  const students=ids.map(id=>studentRows.find(s=>String(s.student_id)===id));if(students.some(s=>!s))return [];

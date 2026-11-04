@@ -4,7 +4,7 @@ const { createCoreTestDb } = require("./helpers/reportCoreDb");
 test("draft renders every field, escapes user text and manager cannot read it; confirmation binds actual revision", async (t) => {
   const db = await createCoreTestDb(t);
   await db.seedBase();
-  const service = require("../services/reportCoreEvaluation");
+  const service = require("../services/evaluation/reportCoreEvaluation");
   const teacher = { id: "2", schoolId: "1", role: "teacher", tokenVersion: 1 },
     key = { schoolId: "1", termId: "1", studentId: "3" };
   await db.pool.query(

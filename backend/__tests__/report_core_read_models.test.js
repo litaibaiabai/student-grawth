@@ -1,9 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createCoreTestDb } = require('./helpers/reportCoreDb');
-const read = require('../services/reportCoreReadModels');
+const read = require('../services/reports/reportCoreReadModels');
 const teacher = { id:'2', schoolId:'1', role:'teacher', tokenVersion:1 }, manager = { ...teacher,id:'1',role:'manager' };
-const narratives = Object.fromEntries(require('../services/reportCorePolicy').narratives.filter(n => n !== 'family_message').map(n => [n,'已填写']));
+const narratives = Object.fromEntries(require('../services/core/reportCorePolicy').narratives.filter(n => n !== 'family_message').map(n => [n,'已填写']));
 test('completion distinguishes unsettled zero, no-award, dynamic self ratings and optional family text', () => {
   const e = { ...narratives, conduct_politeness_other_star:1, labor_experience:null, field_sources:{}, sports_specialties:[{id:'s',name:'游泳',teacher_star:3}], art_specialties:[] };
   const config = { applicableFields:['conduct_politeness_other_star','labor_experience'] };
@@ -34,7 +34,7 @@ test('new_term_account_does_not_change_old_term_manifest and disabled account do
 });
 test('removed_month_failed_item_no_longer_blocks_readiness and a draft never replaces the effective batch', async t => {
   const db=await createCoreTestDb(t);await db.seedBase();
-  const add=require('../services/reportCoreStore').addSource;
+  const add=require('../services/core/reportCoreStore').addSource;
   const base={schoolId:'1',termId:'1',studentId:'3',sourceType:'STORY',actorId:'3',monthKey:'2026-09'};
   const b=await add(db.pool,{...base,kind:'BATCH',status:'SUBMITTED',key:['batch']});
   await add(db.pool,{...base,kind:'ITEM',parentId:b,status:'FAILED',key:['item']});
@@ -44,12 +44,12 @@ test('removed_month_failed_item_no_longer_blocks_readiness and a draft never rep
 });
 test('old_month_worker_result_does_not_advance_unrelated_report_revision', async t => {
   const db=await createCoreTestDb(t);await db.seedBase();
-  const story=require('../services/reportCoreStories');let n=0;
+  const story=require('../services/stories/reportCoreStories');let n=0;
   const command=()=>({requestKey:'removed-month-'+ ++n,payloadHash:String(n).padStart(64,'0')});
   const actor={...teacher,id:'3',role:'student'};
   const b=await story.saveStoryDraft({pool:db.pool,actor,termId:'1',monthKey:'2026-10',articles:['READ','LISTEN','TELL'].map(category=>({category,text:'我读了故事并学会帮助他人。'})),command:command()});
   await story.submitStoryBatch({pool:db.pool,actor,batchId:b.result.batchId,expectedRevision:'1',command:command()});
-  const [job]=await require('../services/reportCoreWorker').claimAssessmentJobs({pool:db.pool,now:new Date(),limit:1});
+  const [job]=await require('../services/infrastructure/reportCoreWorker').claimAssessmentJobs({pool:db.pool,now:new Date(),limit:1});
   await db.pool.query("UPDATE academic_year SET evaluation_config=JSON_SET(evaluation_config,'$.requiredMonths',JSON_ARRAY()) WHERE id=1");
   const [[before]]=await db.pool.query('SELECT revision FROM student_term_evaluation WHERE student_id=3');
   await story.applyStoryResult({pool:db.pool,job,leaseToken:job.lease_token,contentHash:job.payload.contentHash,ruleVersion:'1',result:{dimensions:[20,20,20,20],total:80,evidence:[],feedback:'内容完整'}});
@@ -60,7 +60,7 @@ test('workspace material filters apply before pagination and retain real academi
  const db=await createCoreTestDb(t);await db.seedBase();
  await db.pool.query("UPDATE academic_year SET evaluation_config=JSON_SET(evaluation_config,'$.applicableFields',JSON_ARRAY('math_basic_knowledge_grade')) WHERE id=1");
  await db.pool.query("UPDATE student_term_evaluation SET math_basic_knowledge_grade='A' WHERE student_id=3");
- const add=require('../services/reportCoreStore').addSource;
+ const add=require('../services/core/reportCoreStore').addSource;
  for(let i=0;i<26;i++)await add(db.pool,{schoolId:'1',termId:'1',studentId:'3',sourceType:'CERTIFICATE',actorId:'3',kind:'ITEM',status:'SUBMITTED',key:['workspace-cert',i]});
  const result=await read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'CERTIFICATE',subjectCode:'MATH',limit:25});
  assert.equal(result.tasks.length,25);assert.ok(result.tasks.every(t=>t.type==='CERTIFICATE'));assert.ok(result.nextCursor);
@@ -69,7 +69,7 @@ test('workspace material filters apply before pagination and retain real academi
  await assert.rejects(read.getWorkspace({pool:db.pool,actor:teacher,termId:'1',taskType:'STORY',subjectCode:'MATH',cursor:result.nextCursor}),{statusCode:422});
 });
 test('specialty missing tasks name each property and route student, arts teacher and head to existing authorized editors',async t=>{
- const db=await createCoreTestDb(t);await db.seedBase();const {getWorkspace,evaluateCompletion}=require('../services/reportCoreReadModels');
+ const db=await createCoreTestDb(t);await db.seedBase();const {getWorkspace,evaluateCompletion}=require('../services/reports/reportCoreReadModels');
  await db.pool.query('UPDATE student_term_evaluation SET art_specialties=?,sports_specialties=? WHERE student_id=3',[JSON.stringify([{id:'art-1',name:'绘画',self_star:null,teacher_star:null}]),JSON.stringify([{id:'sport-1',name:'跳绳',self_star:3,teacher_star:null}])]);
  const [[u]]=await db.pool.query('SELECT password FROM users WHERE id=2');await db.pool.query("INSERT INTO users(id,school_id,username,password,real_name,role) VALUES(5,1,'arts',?,'艺术老师','teacher')",[u.password]);await db.pool.query("INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code) VALUES(1,1,5,4,1,'FINE_ART')");
  const actor=(id,role='teacher')=>({id,schoolId:'1',role,tokenVersion:1});

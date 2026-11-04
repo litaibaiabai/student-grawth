@@ -9,12 +9,10 @@ import {
 import RoleShell from "./core/RoleShell";
 import LoginPage from "./auth/LoginPage";
 import FaceSettings from "./auth/face/FaceSettings";
-import { StudentModule, StudentView } from "./student";
-import { TeacherModule, TeacherView } from "./teacher";
-import { ManagerModule, ManagerView } from "./manager";
+import { StudentView } from "./student";
+import { TeacherView } from "./teacher";
+import { ManagerView } from "./manager";
 import "./core/style.css";
-
-export { StudentModule, TeacherModule, ManagerModule };
 
 export default function ReportCoreApp() {
   const [loginMode, setLoginMode] = useState("password"),

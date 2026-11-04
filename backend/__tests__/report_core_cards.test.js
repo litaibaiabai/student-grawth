@@ -6,7 +6,7 @@ test("quota restricts generation; same class concurrent redemption credits only 
   const db = await createCoreTestDb(t);
   await db.seedBase();
   process.env.CARD_PRINT_KEY = crypto.randomBytes(32).toString("hex");
-  const cards = require("../services/reportCoreCards");
+  const cards = require("../services/cards/reportCoreCards");
   const actor = { id: "2", schoolId: "1", role: "teacher", tokenVersion: 1 };
   const manager = { ...actor, id: "1", role: "manager" };
   let n = 0;

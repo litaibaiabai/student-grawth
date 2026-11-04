@@ -1,8 +1,8 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {createAdminTestDb,command}=require('./helpers/reportCoreAdminDb');
-const classes=require('../services/reportCoreAdminClasses'),cards=require('../services/reportCoreCourseCards'),ops=require('../services/reportCoreAdminOps'),publish=require('../services/reportCorePublish');
-const {getTerm,parse}=require('../services/reportCoreStore');
+const classes=require('../services/reportCoreAdminClasses'),cards=require('../services/cards/reportCoreCourseCards'),ops=require('../services/reportCoreAdminOps'),publish=require('../services/reportCorePublish');
+const {getTerm,parse}=require('../services/core/reportCoreStore');
 const now=new Date('2026-10-20T04:00:00Z');
 const ctx=db=>({pool:db.pool,actor:db.actors.manager,termId:'1'});
 async function replacement(db,name='replace',teacherId='5'){
@@ -23,20 +23,20 @@ async function cardFixture(t){
 const token=row=>new URLSearchParams(row.claimUrl.split('?')[1]).get('card');
 test('replacement rotates old credentials, keeps USED facts and shared monthly budget across replay/removal/default edits',async t=>{
  const {db,a,b,scope}=await cardFixture(t),page=await cards.getCourseCardPage(scope);
- await require('../services/reportCoreCards').redeemCard({pool:db.pool,actor:db.actors.student,token:token(page.rows[0]),now,command:command('used')});
+ await require('../services/cards/reportCoreCards').redeemCard({pool:db.pool,actor:db.actors.student,token:token(page.rows[0]),now,command:command('used')});
  const [[before]]=await db.pool.query('SELECT * FROM evaluation_source_record WHERE id=?',[page.rows[0].id]);
  const change=await replacement(db);await classes.commitTeachers(change);await classes.commitTeachers(change);
  const settings=await cards.getCourseCardSettings(ctx(db));await cards.saveCourseCardSettings({...ctx(db),expectedRevision:settings.revision,defaultMonthlyTotal:99,quotas:{},command:command('new-default')});
  assert.equal((await cards.syncCourseCards({...b,command:command('replacement-sync')})).result.generated,0);
  const course=(await cards.listCourseCards({...b,monthKey:'2026-10'})).courses[0];
  assert.deepEqual([course.total,course.used,course.available],[3,1,2]);
- await assert.rejects(require('../services/reportCoreCards').redeemCard({pool:db.pool,actor:db.actors.other,token:token(page.rows[1]),now,command:command('old-token')}),e=>[404,409].includes(e.statusCode));
+ await assert.rejects(require('../services/cards/reportCoreCards').redeemCard({pool:db.pool,actor:db.actors.other,token:token(page.rows[1]),now,command:command('old-token')}),e=>[404,409].includes(e.statusCode));
  await assert.rejects(cards.getCourseCardPrint(scope),{statusCode:403});
- assert.equal((await require('../services/reportCoreCards').listCards({...a,kind:'QUOTA'})).filter(r=>r.payload.mode==='COURSE_SUBJECT').length,0);
+ assert.equal((await require('../services/cards/reportCoreCards').listCards({...a,kind:'QUOTA'})).filter(r=>r.payload.mode==='COURSE_SUBJECT').length,0);
  assert.deepEqual((await db.pool.query('SELECT * FROM evaluation_source_record WHERE id=?',[page.rows[0].id]))[0][0],before);
  const print=await cards.getCourseCardPrint({...scope,actor:b.actor});assert.equal(print.rows.length,2);
  await classes.commitTeachers(await replacement(db,'remove',null));
- await assert.rejects(require('../services/reportCoreCards').redeemCard({pool:db.pool,actor:db.actors.other,token:token(print.rows[0]),now,command:command('removed-token')}),e=>[404,409].includes(e.statusCode));
+ await assert.rejects(require('../services/cards/reportCoreCards').redeemCard({pool:db.pool,actor:db.actors.other,token:token(print.rows[0]),now,command:command('removed-token')}),e=>[404,409].includes(e.statusCode));
  await classes.commitTeachers(await replacement(db,'return','2'));
  assert.equal((await cards.syncCourseCards({...a,command:command('return-sync')})).result.generated,0);
  assert.equal((await cards.getCourseCardPrint(scope)).rows.length,2);
@@ -55,7 +55,7 @@ async function confirmedFixture(t){
  const db=await createAdminTestDb(t,{applicableFields:['math_regular_grade']});
  await db.pool.query("UPDATE student_term_evaluation SET math_regular_grade='A',teacher_comment='PRIVATE_COMMENT'");
  const term=await getTerm(db.pool,'1','1');
- for(const e of (await db.pool.query('SELECT * FROM student_term_evaluation'))[0])await db.pool.query("UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=2,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=? WHERE id=?",[require('../services/reportCoreEvaluation').reportFingerprint(e,term),e.id]);
+ for(const e of (await db.pool.query('SELECT * FROM student_term_evaluation'))[0])await db.pool.query("UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=2,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=? WHERE id=?",[require('../services/evaluation/reportCoreEvaluation').reportFingerprint(e,term),e.id]);
  await db.pool.query("UPDATE academic_year SET business_phase='RECONCILING'");return db;
 }
 test('disabled authoritative head blocks readiness/progress/begin; reenable restores review; unrelated disable does not invalidate',async t=>{
@@ -73,7 +73,7 @@ test('actual quota and roster producers retain allowlisted before/after and batc
  let settings=await cards.getCourseCardSettings(a);await cards.saveCourseCardSettings({...a,expectedRevision:settings.revision,quotas:{CHINESE:60},command:command('quota-before')});settings=await cards.getCourseCardSettings(a);
  await cards.saveCourseCardSettings({...a,expectedRevision:settings.revision,defaultMonthlyTotal:80,quotas:{CHINESE:70},command:command('quota-after')});
  const audit=(await ops.listAudits({...a,type:'COURSE_CARD_SETTINGS'})).rows[0];assert.ok(audit.diffs.some(d=>d.field==='defaultMonthlyTotal'&&d.before===100&&d.after===80));assert.ok(audit.diffs.some(d=>d.subjectCode==='CHINESE'&&d.before===60&&d.after===70));
- const imports=require('../services/reportCoreImports'),p=await imports.previewImport({...a,kind:'ROSTER',rows:[{username:'student',real_name:'=SAFE_NAME',role:'student',grade:4,classNo:1}],command:command('roster-audit')});
+ const imports=require('../services/imports/reportCoreImports'),p=await imports.previewImport({...a,kind:'ROSTER',rows:[{username:'student',real_name:'=SAFE_NAME',role:'student',grade:4,classNo:1}],command:command('roster-audit')});
  await imports.commitImport({...a,batchId:p.result.batchId,expectedRevision:p.result.revision,command:command('roster-audit-commit')});
  const row=(await ops.listAudits({...a,type:'ROSTER_IMPORT'})).rows[0];assert.equal(row.metadata.batchId,p.result.batchId);assert.equal(row.metadata.rowCount,1);assert.equal(row.metadata.updated,1);assert.ok(row.diffs.some(d=>d.field==='real_name'&&d.after==='=SAFE_NAME'));
  const typed=await ops.listAudits({...a,type:'ROSTER_IMPORT'}),keyword=await ops.listAudits({...a,q:'ROSTER_IMPORT'});
@@ -107,7 +107,7 @@ test('overlapping sync waits for replacement and observes current assignments wi
 test('redemption looked up before rotation rechecks credentials after its term/row lock wait', {timeout:20000},async t=>{
  const {db,scope}=await cardFixture(t),page=await cards.getCourseCardPage(scope);
  const gate=gatedPool(db.pool,sql=>sql.startsWith('SELECT * FROM academic_year')&&sql.endsWith(' FOR UPDATE'));
- const pending=require('../services/reportCoreCards').redeemCard({pool:gate.pool,actor:db.actors.student,token:token(page.rows[0]),now,command:command('waiting-redemption')});
+ const pending=require('../services/cards/reportCoreCards').redeemCard({pool:gate.pool,actor:db.actors.student,token:token(page.rows[0]),now,command:command('waiting-redemption')});
  await gate.waiting;await classes.commitTeachers(await replacement(db,'rotate-waiting'));gate.release();
  await assert.rejects(pending,{statusCode:409});
  assert.equal((await db.pool.query("SELECT COUNT(*) n FROM evaluation_source_record WHERE record_kind='CARD' AND status='USED'"))[0][0].n,'0');
@@ -115,8 +115,8 @@ test('redemption looked up before rotation rechecks credentials after its term/r
 test('legacy teacher-keyed batches reconcile once to original budget, preserve all USED owners and retire surplus',async t=>{
  const {db,a,b,scope}=await cardFixture(t);
  const [quotas]=await db.pool.query("SELECT * FROM evaluation_source_record WHERE record_kind='QUOTA'");
- await db.pool.query('UPDATE evaluation_source_record SET business_key=? WHERE id=?',[require('../services/reportCorePolicy').stableHash(['COURSE_QUOTA','1','1','2','2026-10','4:1:CHINESE']),quotas[0].id]);
- const {addSource}=require('../services/reportCoreStore');
+ await db.pool.query('UPDATE evaluation_source_record SET business_key=? WHERE id=?',[require('../services/core/reportCorePolicy').stableHash(['COURSE_QUOTA','1','1','2','2026-10','4:1:CHINESE']),quotas[0].id]);
+ const {addSource}=require('../services/core/reportCoreStore');
  const extra=await addSource(db.pool,{schoolId:'1',termId:'1',ownerId:'5',actorId:'5',sourceType:'CARD',kind:'QUOTA',monthKey:'2026-10',status:'CONFIRMED',key:['legacy-other-teacher'],payload:{...parse(quotas[0].payload_json),quotaTotal:99}});
  await addSource(db.pool,{schoolId:'1',termId:'1',ownerId:'5',actorId:'5',sourceType:'CARD',kind:'CARD',parentId:extra,monthKey:'2026-10',ordinal:1,status:'UNUSED',delta:1,tokenHash:'f'.repeat(64),tokenCipher:'legacy-cipher',validFrom:new Date('2026-10-01'),validUntil:new Date('2026-11-01'),key:['legacy-extra-card'],payload:parse(quotas[0].payload_json)});
  await classes.commitTeachers(await replacement(db,'legacy-adopt'));
@@ -143,9 +143,9 @@ test('school account lock rejects cross-term maintenance during release and acti
  assert.deepEqual((await db.pool.query("SELECT id,snapshot_json FROM term_report WHERE status='PUBLISHED'"))[0],frozen);
 });
 test('confirmation audit preserves student/revision identifiers and omits private render review data',async t=>{
- const db=await createAdminTestDb(t,{applicableFields:['math_regular_grade']}),a=ctx(db),evaluation=require('../services/reportCoreEvaluation');
+ const db=await createAdminTestDb(t,{applicableFields:['math_regular_grade']}),a=ctx(db),evaluation=require('../services/evaluation/reportCoreEvaluation');
  await db.pool.query("UPDATE student_term_evaluation SET math_regular_grade='A',teacher_comment='PRIVATE_COMMENT'");
- const studentKey={schoolId:'1',termId:'1',studentId:'3'},d=await require('../services/reportCoreReportBrowser').getReportDetail({pool:db.pool,actor:db.actors.teacher,studentKey,scope:'full'});
+ const studentKey={schoolId:'1',termId:'1',studentId:'3'},d=await require('../services/reports/reportCoreReportBrowser').getReportDetail({pool:db.pool,actor:db.actors.teacher,studentKey,scope:'full'});
  await evaluation.confirmReport({pool:db.pool,actor:db.actors.teacher,studentKey,expectedRevision:d.revision,expectedFingerprint:d.fingerprint,layoutReview:{overflow:false,fingerprint:d.fingerprint,templateVersion:d.templateVersion,renderScope:'FULL',documentKey:d.documentKey},command:command('audit-confirm')});
  const row=(await ops.listAudits({...a,type:'confirm-report'})).rows[0];assert.equal(row.metadata.studentId,'3');assert.equal(row.metadata.confirmedRevision,String(d.revision));
  const csv=await ops.exportAudits({...a,type:'confirm-report'});for(const secret of ['PRIVATE_COMMENT',d.fingerprint,d.documentKey])assert.ok(!csv.includes(secret));

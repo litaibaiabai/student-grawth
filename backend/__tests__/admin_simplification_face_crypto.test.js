@@ -5,7 +5,7 @@ const {
   sealTemplate,
   openTemplate,
   readKeys,
-} = require("../services/faceAuth/crypto");
+} = require("../services/auth/face/crypto");
 const keys = { active: "v1", values: { v1: crypto.randomBytes(32) } },
   scope = { schoolId: "1", userId: "4", version: 1 },
   value = {

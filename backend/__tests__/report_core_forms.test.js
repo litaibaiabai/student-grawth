@@ -8,7 +8,7 @@ test("self and other columns stay independent, stale forms conflict, settlement 
     submitForm,
     settleSources,
     getEvaluationView,
-  } = require("../services/reportCoreEvaluation");
+  } = require("../services/evaluation/reportCoreEvaluation");
   const actor = { id: "3", schoolId: "1", role: "student", tokenVersion: 1 },
     teacher = { ...actor, id: "2", role: "teacher" };
   const studentKey = { schoolId: "1", termId: "1", studentId: "3" };
@@ -67,7 +67,7 @@ test("self and other columns stay independent, stale forms conflict, settlement 
   assert.ok(!Object.hasOwn(view.values, "teacher_comment"));
 });
 test('late_score_after_settlement_invalidates_confirmation and award_after_no_award_requires_resolution',async t=>{
- const db=await createCoreTestDb(t);await db.seedBase();const service=require('../services/reportCoreEvaluation'),cards=require('../services/reportCoreCards'),{addSource}=require('../services/reportCoreStore');
+ const db=await createCoreTestDb(t);await db.seedBase();const service=require('../services/evaluation/reportCoreEvaluation'),cards=require('../services/cards/reportCoreCards'),{addSource}=require('../services/core/reportCoreStore');
  const teacher={id:'2',schoolId:'1',role:'teacher',tokenVersion:1};let n=0;const command=()=>({requestKey:'late-'+ ++n,payloadHash:String(n).padStart(64,'0')});
  const revisions=async()=>Object.fromEntries((await db.pool.query('SELECT student_id,revision FROM student_term_evaluation'))[0].map(e=>[e.student_id,String(e.revision)]));
  await service.settleSources({pool:db.pool,actor:teacher,termId:'1',grade:4,classNo:1,targetKeys:['conduct_politeness_other_star'],settlement:'CARD_CLOSED',expectedRevisions:await revisions(),command:command()});
@@ -78,9 +78,9 @@ test('late_score_after_settlement_invalidates_confirmation and award_after_no_aw
  const sourceId=await addSource(db.pool,{schoolId:'1',termId:'1',studentId:'3',sourceType:'CERTIFICATE',kind:'ITEM',actorId:'3',status:'SUBMITTED',key:['late-award'],payload:{facts:{}}});
  let [[e]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');const [[term]]=await db.pool.query('SELECT * FROM academic_year WHERE id=1');term.evaluation_config=typeof term.evaluation_config==='string'?JSON.parse(term.evaluation_config):term.evaluation_config;
  assert.ok((await service.missingItems(db.pool,e,term)).some(i=>i.field==='materials'));
- await require('../services/reportCoreMaterials').decideCertificate({pool:db.pool,actor:teacher,sourceId,expectedRevision:'1',facts:{},targets:['labor_outcome_grade'],manualOutputs:{labor_outcome_grade:'A'},reason:'核对奖状',command:command()});
+ await require('../services/materials/reportCoreMaterials').decideCertificate({pool:db.pool,actor:teacher,sourceId,expectedRevision:'1',facts:{},targets:['labor_outcome_grade'],manualOutputs:{labor_outcome_grade:'A'},reason:'核对奖状',command:command()});
  [[e]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');assert.equal(e.labor_outcome_grade,'A');assert.equal(e.field_sources.labor_outcome_grade.noAward,false);
- await require('../services/reportCoreMaterials').revokeCertificate({pool:db.pool,actor:{...teacher,id:'3',role:'student'},sourceId,reason:'上传错误',command:command()});
+ await require('../services/materials/reportCoreMaterials').revokeCertificate({pool:db.pool,actor:{...teacher,id:'3',role:'student'},sourceId,reason:'上传错误',command:command()});
  [[e]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');assert.ok((await service.missingItems(db.pool,e,term)).some(i=>i.field==='labor_outcome_grade'));
  await service.settleSources({pool:db.pool,actor:teacher,termId:'1',grade:4,classNo:1,targetKeys:['labor_outcome_grade'],settlement:'NO_AWARD',expectedRevisions:await revisions(),command:command()});
  [[e]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');assert.ok(!(await service.missingItems(db.pool,e,term)).some(i=>i.field==='labor_outcome_grade'));

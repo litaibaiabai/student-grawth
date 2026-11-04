@@ -29,7 +29,7 @@ async function migrateFaceAuth({
   if (mode === "check" || !missing.length)
     return { ready: !missing.length, missing };
   if (mode !== "apply") throw Error("无效迁移模式");
-  const backup = await require("../services/formalDatabaseBackup").backupFormal(
+  const backup = await require("../services/infrastructure/formalDatabaseBackup").backupFormal(
     backupDir ||
       require("node:path").resolve(
         __dirname,

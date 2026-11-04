@@ -7,7 +7,7 @@ test("imports preview then commit exact field grades and health; stale previews 
   const {
     previewImport,
     commitImport,
-  } = require("../services/reportCoreImports");
+  } = require("../services/imports/reportCoreImports");
   const teacher = { id: "2", schoolId: "1", role: "teacher", tokenVersion: 1 },
     manager = { ...teacher, id: "1", role: "manager" };
   let n = 0;
@@ -72,7 +72,7 @@ test("imports preview then commit exact field grades and health; stale previews 
   );
 });
 test('academic_import_returns_all_errors_and_keeps_blank_values',async t=>{
- const db=await createCoreTestDb(t);await db.seedBase();const service=require('../services/reportCoreImports');const actor={id:'2',schoolId:'1',role:'teacher',tokenVersion:1};let n=0;const command=()=>({requestKey:'academic-all-'+ ++n,payloadHash:String(n).padStart(64,'0')});
+ const db=await createCoreTestDb(t);await db.seedBase();const service=require('../services/imports/reportCoreImports');const actor={id:'2',schoolId:'1',role:'teacher',tokenVersion:1};let n=0;const command=()=>({requestKey:'academic-all-'+ ++n,payloadHash:String(n).padStart(64,'0')});
  const bad=await service.previewImport({pool:db.pool,actor,termId:'1',kind:'ACADEMIC',rows:[{studentId:'3',values:{math_basic_knowledge_grade:'Z',math_thinking_grade:'X'}},{studentId:'4',values:{chinese_handwriting_grade:'?'}}],command:command()});
  assert.equal(bad.result.errors.length,3);assert.equal(bad.result.batchId,null);assert.deepEqual(bad.result.errors.map(e=>e.rowNo),[1,1,2]);
  const good=await service.previewImport({pool:db.pool,actor,termId:'1',kind:'ACADEMIC',rows:[{studentId:'3',values:{math_basic_knowledge_grade:'A',math_thinking_grade:'   '}}],command:command()});
@@ -80,7 +80,7 @@ test('academic_import_returns_all_errors_and_keeps_blank_values',async t=>{
  const [[row]]=await db.pool.query('SELECT math_basic_knowledge_grade,math_thinking_grade FROM student_term_evaluation WHERE student_id=3');assert.equal(row.math_basic_knowledge_grade,'A');assert.equal(row.math_thinking_grade,null);
 });
 test('committed redacted imports replay after a lost success response without reapplying any rows',async t=>{
- const service=require('../services/reportCoreImports'),{stableHash}=require('../services/reportCorePolicy');
+ const service=require('../services/imports/reportCoreImports'),{stableHash}=require('../services/core/reportCorePolicy');
  for(const kind of ['HEALTH','ACADEMIC','ROSTER'])await t.test(kind,async t=>{
   const db=await createCoreTestDb(t);await db.seedBase();const actor={id:kind==='ACADEMIC'?'2':'1',schoolId:'1',role:kind==='ACADEMIC'?'teacher':'manager',tokenVersion:1},command=n=>({requestKey:'lost-'+kind+'-'+n,payloadHash:stableHash([kind,n])});
   const rows=kind==='HEALTH'?[{studentId:'3',values:{height_cm:143}}]:kind==='ACADEMIC'?[{studentId:'3',values:{math_basic_knowledge_grade:'A'}}]:[{username:'replay_teacher',real_name:'重试教师',role:'teacher',password:'Test-pass-2026'}];

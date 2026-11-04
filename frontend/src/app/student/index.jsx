@@ -7,18 +7,6 @@ import StoryActivities from './stories/StoryActivities';
 import StoryForm from './stories/StoryForm';
 import PublishedReport from './report/PublishedReport';
 
-export {
-  StudentHome,
-  StudentArchive,
-  V2Home,
-  SelfEvaluation,
-  AwardUpload,
-  Cards,
-  StoryActivities,
-  StoryForm,
-  PublishedReport,
-};
-
 export function StudentView({ tab, ctx }) {
   const isV2 = ctx.catalog?.schemaVersion === 'SIX_EDU_V2';
   return (
@@ -33,21 +21,3 @@ export function StudentView({ tab, ctx }) {
     </>
   );
 }
-
-// Shared module API intentionally includes this non-component export.
-// eslint-disable-next-line react-refresh/only-export-components
-export const StudentModule = {
-  role: 'student',
-  Component: StudentView,
-  views: {
-    home: StudentHome,
-    archive: StudentArchive,
-    self: SelfEvaluation,
-    awards: AwardUpload,
-    cards: Cards,
-    stories: StoryActivities,
-    report: PublishedReport,
-  },
-};
-
-export default StudentModule;

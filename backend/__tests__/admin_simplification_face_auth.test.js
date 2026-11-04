@@ -2,7 +2,7 @@ const { test } = require("node:test"),
   assert = require("node:assert/strict"),
   crypto = require("node:crypto");
 const { withFormalRollback } = require("./helpers/formalRollback");
-const { createFaceAuthService } = require("../services/faceAuth/service");
+const { createFaceAuthService } = require("../services/auth/face/service");
 const keys = { active: "one", values: { one: crypto.randomBytes(32) } };
 test("disabled face login never requires schema/models or interferes with password mode", async () => {
   const s = createFaceAuthService({
@@ -21,7 +21,7 @@ test("face descriptor policy rejects browser verdicts and repeated camera frames
   const {
     framesInput,
     descriptorInput,
-  } = require("../services/faceAuth/policy");
+  } = require("../services/auth/face/policy");
   assert.throws(
     () =>
       framesInput(

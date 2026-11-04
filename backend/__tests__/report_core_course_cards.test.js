@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const { createV2TestDb, command } = require('./helpers/reportCoreV2Db');
-const { parse } = require('../services/reportCoreStore');
+const { parse } = require('../services/core/reportCoreStore');
 const now = new Date('2026-10-20T04:00:00Z');
 let serial = 0;
 const cmd = () => command(`course-cards-${++serial}`);
@@ -13,7 +13,7 @@ async function fixture(t, { configure = true } = {}) {
   await db.pool.query('DELETE FROM teacher_teaching_assignment');
   for (const [classNo, subject] of [[1, 'CHINESE'], [2, 'CHINESE'], [1, 'MATH']])
     await db.pool.query('INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code) VALUES(1,1,2,4,?,?)', [classNo, subject]);
-  const service = require('../services/reportCoreCourseCards');
+  const service = require('../services/cards/reportCoreCourseCards');
   const base = { pool: db.pool, termId: '1', now };
   const manager = { ...base, actor: db.actors.manager };
   const teacher = { ...base, actor: db.actors.teacher };
@@ -178,7 +178,7 @@ test('redemption changes preview and print scope, adds only the subject point an
   await assert.rejects(service.getCourseCardPage({...scope,actor:db.actors.student}),{statusCode:403});
   const page = await service.getCourseCardPage(scope);
   const token = new URL(page.rows[0].claimUrl).hash.split('card=')[1];
-  await require('../services/reportCoreCards').redeemCard({...teacher,actor:db.actors.student,token,command:cmd()});
+  await require('../services/cards/reportCoreCards').redeemCard({...teacher,actor:db.actors.student,token,command:cmd()});
   const available = await service.getCourseCardPage({...scope,status:'available'});
   assert.equal(available.total,99);
   const used = await service.getCourseCardPage({...scope,status:'used'});
@@ -189,7 +189,7 @@ test('redemption changes preview and print scope, adds only the subject point an
   assert.equal(card.target_key,'chinese_process_star');
   assert.equal(String(card.student_id),'3');
   const other = await service.getCourseCardPage({...scope,classNo:2});
-  await assert.rejects(require('../services/reportCoreCards').redeemCard({...teacher,actor:db.actors.student,token:new URL(other.rows[0].claimUrl).hash.split('card=')[1],command:cmd()}),{statusCode:403});
+  await assert.rejects(require('../services/cards/reportCoreCards').redeemCard({...teacher,actor:db.actors.student,token:new URL(other.rows[0].claimUrl).hash.split('card=')[1],command:cmd()}),{statusCode:403});
   const pdf = await service.buildCourseCardPdf(scope);
   const chunks=[];for await(const chunk of pdf.stream)chunks.push(chunk);
   assert.equal(Buffer.concat(chunks).subarray(0,5).toString(),'%PDF-');

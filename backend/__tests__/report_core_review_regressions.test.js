@@ -1,7 +1,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { createCoreTestDb } = require("./helpers/reportCoreDb");
-const { addSource, getTerm } = require("../services/reportCoreStore");
+const { addSource, getTerm } = require("../services/core/reportCoreStore");
 const teacher = { id: "2", schoolId: "1", role: "teacher", tokenVersion: 1 },
   student = { ...teacher, id: "3", role: "student" };
 async function scoped(t) {
@@ -80,7 +80,7 @@ test("subject teacher source payloads redact other-subject values, historical va
   assert.equal(row.payload.previousValues.chinese_handwriting_grade, undefined);
   assert.ok(!JSON.stringify(response).includes("private narrative"));
   const view =
-    await require("../services/reportCoreEvaluation").getEvaluationView({
+    await require("../services/evaluation/reportCoreEvaluation").getEvaluationView({
       pool: db.pool,
       actor: teacher,
       studentKey: { schoolId: "1", termId: "1", studentId: "3" },
@@ -91,7 +91,7 @@ test("subject teacher source payloads redact other-subject values, historical va
 test("student cannot retrieve unpublished report drafts, including direct service calls", async (t) => {
   const db = await scoped(t);
   await assert.rejects(
-    require("../services/reportCoreEvaluation").buildReportDraft({
+    require("../services/evaluation/reportCoreEvaluation").buildReportDraft({
       pool: db.pool,
       actor: student,
       studentKey: { schoolId: "1", termId: "1", studentId: "3" },
@@ -106,7 +106,7 @@ test("head teacher is not granted unrelated academic import or card scoring perm
   );
   for (const action of ["import", "score"])
     await assert.rejects(
-      require("../services/authorizationService").assertScope(
+      require("../services/auth/authorizationService").assertScope(
         {
           actor: teacher,
           studentKey: { schoolId: "1", termId: "1", studentId: "3" },
@@ -167,7 +167,7 @@ test("teacher pending material is filtered by school/class before pagination; ow
 });
 test("a quota remains independently listable after issuing 100 cards", async (t) => {
   const db = await scoped(t);
-  const cards = require("../services/reportCoreCards");
+  const cards = require("../services/cards/reportCoreCards");
   process.env.CARD_PRINT_KEY = require("node:crypto")
     .randomBytes(32)
     .toString("hex");
@@ -257,7 +257,7 @@ test("new unsubmitted story drafts do not replace the active scored monthly revi
     payload: {},
   });
   const result =
-    await require("../services/reportCoreProjection").rebuildEvaluation({
+    await require("../services/evaluation/reportCoreProjection").rebuildEvaluation({
       connection: db.pool,
       studentKey: { schoolId: "1", termId: "1", studentId: "3" },
       targets: ["story_read_star"],
@@ -267,7 +267,7 @@ test("new unsubmitted story drafts do not replace the active scored monthly revi
 });
 test("expired last-attempt jobs become FAILED; obsolete live scoring rule releases its processing lease", async (t) => {
   const db = await scoped(t);
-  const worker = require("../services/reportCoreWorker");
+  const worker = require("../services/infrastructure/reportCoreWorker");
   const batch = await addSource(db.pool, {
     schoolId: "1",
     termId: "1",
@@ -302,7 +302,7 @@ test("expired last-attempt jobs become FAILED; obsolete live scoring rule releas
     limit: 2,
   });
   const result =
-    await require("../services/reportCoreStories").applyStoryResult({
+    await require("../services/stories/reportCoreStories").applyStoryResult({
       pool: db.pool,
       job: jobs[0],
       leaseToken: jobs[0].lease_token,
@@ -337,7 +337,7 @@ test("expired last-attempt jobs become FAILED; obsolete live scoring rule releas
   assert.equal(row.status, "FAILED");
 });
 test("registration date is rendered with the actual month and day, not Date.toString weekday slicing", () => {
-  const { renderPrintableA4 } = require("../services/reportRenderService");
+  const { renderPrintableA4 } = require("../services/reports/reportRenderService");
   const html = renderPrintableA4({
     reportData: {
       schemaVersion: "CORE_V1",
@@ -356,7 +356,7 @@ test("music teacher may evaluate art specialty while unrelated subject teachers 
   await db.pool.query(
     "UPDATE teacher_teaching_assignment SET subject_code='MUSIC'",
   );
-  const scope = await require("../services/authorizationService").assertScope(
+  const scope = await require("../services/auth/authorizationService").assertScope(
     {
       actor: teacher,
       studentKey: { schoolId: "1", termId: "1", studentId: "3" },

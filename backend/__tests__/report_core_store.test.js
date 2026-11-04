@@ -4,7 +4,7 @@ const { createCoreTestDb } = require("./helpers/reportCoreDb");
 test("mutation replays identical commands once, rejects changed payload and invalidates confirmation", async (t) => {
   const db = await createCoreTestDb(t);
   await db.seedBase();
-  const { withMutation, addSource } = require("../services/reportCoreStore");
+  const { withMutation, addSource } = require("../services/core/reportCoreStore");
   const actor = { id: "2", schoolId: "1", role: "teacher", tokenVersion: 1 };
   const args = {
     pool: db.pool,

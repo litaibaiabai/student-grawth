@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { evaluateCompletion } = require('../services/reportCoreReadModels');
+const { evaluateCompletion } = require('../services/reports/reportCoreReadModels');
 
 const config = fields => ({ schemaVersion: 'SIX_EDU_V2', applicableFields: fields });
 
@@ -52,7 +52,7 @@ test('V2 optional story activities may remain unrated, while a participating act
 
 test('V2 current pending story version blocks release even without required legacy months',async t=>{
  const {createV2TestDb}=require('./helpers/reportCoreV2Db'),db=await createV2TestDb(t);
- const {addSource}=require('../services/reportCoreStore'),{getBlockingMaterials}=require('../services/reportCoreReadModels');
+ const {addSource}=require('../services/core/reportCoreStore'),{getBlockingMaterials}=require('../services/reports/reportCoreReadModels');
  const common={schoolId:'1',termId:'1',studentId:'3',actorId:'3',schemaVersion:'SIX_EDU_V2',sourceType:'STORY'};
  const root=await addSource(db.pool,{...common,kind:'BATCH',status:'SUBMITTED',eventType:'TELL_WORK',key:['completion-work'],payload:{}});
  const pending=await addSource(db.pool,{...common,kind:'ITEM',parentId:root,status:'FAILED',eventType:'TELL_SUBMISSION',key:['completion-pending'],payload:{}});

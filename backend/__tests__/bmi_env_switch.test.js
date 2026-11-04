@@ -1,9 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { evaluateBMI } = require('../services/bmiEvaluationService');
-const { createV2Config } = require('../services/reportCoreV2Policy');
-const { buildReportModel } = require('../services/reportCoreEvaluation');
-const { renderV2 } = require('../services/reportRenderV2');
+const { evaluateBMI } = require('../services/evaluation/bmiEvaluationService');
+const { createV2Config } = require('../services/core/reportCoreV2Policy');
+const { buildReportModel } = require('../services/evaluation/reportCoreEvaluation');
+const { renderV2 } = require('../services/reports/reportRenderV2');
 
 test('environment variable switches between WS_T_2018 and MOE_2014 seamlessly', () => {
   const originalEnv = process.env.BMI_EVALUATION_STANDARD;
@@ -101,7 +101,7 @@ test('gender code 0 is treated as unknown gender rather than female', () => {
 });
 
 test('calculateAge returns null when measurementDate is missing', () => {
-  const { calculateAge } = require('../services/bmiEvaluationService');
+  const { calculateAge } = require('../services/evaluation/bmiEvaluationService');
   assert.equal(calculateAge('2019-01-01', null), null);
   assert.equal(calculateAge('2019-01-01', undefined), null);
 });

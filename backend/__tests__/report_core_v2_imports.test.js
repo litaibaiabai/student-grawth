@@ -7,7 +7,7 @@ function workbook(rows,edit) {
   XLSX.utils.book_append_sheet(wb,ws,'成绩');return XLSX.write(wb,{type:'buffer',bookType:'xlsx'});
 }
 test('server parses the actual V2 workbook, keeps zero and blocks unknown columns, formulas and oversized rows',()=>{
-  const parse=require('../services/reportCoreV2Imports').parseV2Workbook;
+  const parse=require('../services/imports/reportCoreV2Imports').parseV2Workbook;
   const headers=['学期标识','模板版本','账号','姓名','math_interest_star','math_regular_grade','jump_rope_1min','测量日期','视力制式'];
   const row=['1','SIX_EDU_V2','student','学生3',3,'A',0,'2026-10-20','5_POINT'];
   const args={termId:'1'};
@@ -19,13 +19,13 @@ test('server parses the actual V2 workbook, keeps zero and blocks unknown column
   assert.throws(()=>parse(workbook([['账号','外星字段'],['student',1]]),args),/表头/);
   assert.throws(()=>parse(workbook([headers,row],ws=>{ws.E2={t:'n',f:'1+2',v:3};}),args),/公式/);
   assert.throws(()=>parse(workbook([headers,...Array.from({length:501},()=>row)]),args),/500/);
-  const measurement=require('../services/reportCoreV2Imports').normalizeMeasurement;
+  const measurement=require('../services/imports/reportCoreV2Imports').normalizeMeasurement;
   assert.throws(()=>measurement({date:'2026-02-31'},{height_cm:141}),/日期/);
   assert.throws(()=>measurement({date:'2026-10-20'},{vision_left:'5.0'}),/制式/);
 });
 test('V2 class head imports comprehensive fields atomically, blanks keep prior values and a stale config rejects commit',async t=>{
   const {pool,actors}=await createV2TestDb(t);
-  const service=require('../services/reportCoreImports');
+  const service=require('../services/imports/reportCoreImports');
   const preview=await service.previewImport({pool,actor:actors.teacher,termId:'1',kind:'ACADEMIC',rows:[{username:'student',real_name:'学生3',values:{conduct_cooperation_other_star:3,math_regular_grade:'A',music_overall_grade:'B',jump_rope_1min:0},measurement:{date:'2026-10-20',visionStandard:'5_POINT'}}],command:command('preview')});
   assert.equal(preview.result.validCount,1);
   await service.commitImport({pool,actor:actors.teacher,batchId:preview.result.batchId,expectedRevision:'1',command:command('commit')});

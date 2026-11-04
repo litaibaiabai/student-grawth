@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {withFormalRollback}=require('./helpers/formalRollback');
 const {registryFixture,manager,command}=require('./helpers/registryFixture');
-const registry=require('../services/reportCoreRegistry'),svc=require('../services/reportCoreSemesterCards');
+const registry=require('../services/registry/reportCoreRegistry'),svc=require('../services/cards/reportCoreSemesterCards');
 async function setup(pool,c){const actor=await manager(c),f=registryFixture(),p=await registry.previewRegistry({pool,actor,buffer:f.buffer()});const r=await registry.commitRegistry({pool,actor,previewToken:p.previewToken,command:command()});return{pool,actor,termId:r.result.termId,f};}
 test('one semester generates 180 Chinese cards for three classes with full-term validity',async()=>withFormalRollback(async({pool,connection:c})=>{
  const args=await setup(pool,c);let settings=await svc.getSemesterCardSettings(args);assert.equal(settings.defaultTotal,100);assert.equal(settings.courseCount,18);
@@ -42,7 +42,7 @@ test('real MySQL term FOR UPDATE excludes a second connection until rollback',as
  finally{await a.rollback();await b.rollback();a.release();b.release();await p.end();}
 });
 test('registry course or date changes invalidate an open initialization confirmation',async()=>withFormalRollback(async({pool,connection:c})=>{
- const args=await setup(pool,c),registry=require('../services/reportCoreRegistry');
+ const args=await setup(pool,c),registry=require('../services/registry/reportCoreRegistry');
  for(const change of [()=>{args.f.rows.任教关系.find(r=>r[1]===3&&r[2]==='语文')[3]=args.f.other;},()=>{args.f.rows.学期[1][4]='2029-02-01';}]){
   const displayed=await svc.getSemesterCardSettings(args);change();const preview=await registry.previewRegistry({...args,buffer:args.f.buffer()});await registry.commitRegistry({...args,previewToken:preview.previewToken,command:command()});
   await assert.rejects(svc.initializeSemesterCards({...args,expectedRevision:displayed.revision,command:command()}),{statusCode:409});

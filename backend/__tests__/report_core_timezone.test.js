@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createCoreTestDb } = require('./helpers/reportCoreDb');
-const { withMutation } = require('../services/reportCoreStore');
+const { withMutation } = require('../services/core/reportCoreStore');
 const migrations = require('../scripts/runCoreMigrations');
 test('every new pooled connection uses UTC before its first business query', async t => {
   const db = await createCoreTestDb(t);

@@ -64,9 +64,9 @@ if (require.main === module) {
   const pool = createDbPool({ database: process.env.REPORT_DB_NAME });
   (async () => {
   await require("./scripts/runCoreMigrations").runCoreMigrations({ connection: pool, targetDb: process.env.REPORT_DB_NAME, mode: "check" });
-  const provider = require("./services/reportCoreProvider").createProvider();
+  const provider = require("./services/infrastructure/reportCoreProvider").createProvider();
   const app = createApp({ pool, provider });
-  const worker = require("./services/reportCoreWorker").startCoreWorker({
+  const worker = require("./services/infrastructure/reportCoreWorker").startCoreWorker({
     pool,
     provider,
   });

@@ -24,7 +24,7 @@ test('assignment handover is atomic, normalizes all subjects and cannot silently
  const noop=await preview(db,'assignments',{assignments:[{teacherId:'2',grade:4,classNo:1,subjectCode:'MATH',enabled:true}]});assert.equal(noop.result.noop,true);
 });
 test('date and aggregate-rule changes do not requeue scoring, but actual rubric changes reject late results',async t=>{
- const db=await createCoreTestDb(t);await db.seedBase();const stories=require('../services/reportCoreStories'),worker=require('../services/reportCoreWorker');const student={...actor,id:'3',role:'student'};
+ const db=await createCoreTestDb(t);await db.seedBase();const stories=require('../services/stories/reportCoreStories'),worker=require('../services/infrastructure/reportCoreWorker');const student={...actor,id:'3',role:'student'};
  const b=await stories.saveStoryDraft({pool:db.pool,actor:student,termId:'1',monthKey:'2026-10',articles:['READ','LISTEN','TELL'].map(category=>({category,text:'我学会了认真倾听与分享自己的理解。'})),command:command()});await stories.submitStoryBatch({pool:db.pool,actor:student,batchId:b.result.batchId,expectedRevision:'1',command:command()});const [job]=await worker.claimAssessmentJobs({pool:db.pool,now:new Date(),limit:1});
  await commit(db,await preview(db,'rules',{cardTarget:3,requiredMonths:['2026-10']}));await commit(db,await preview(db,'registration',{date:'2027-02-22'}));
  const score={dimensions:[20,20,20,20],total:80,evidence:[],feedback:'内容完整'};const applied=await stories.applyStoryResult({pool:db.pool,job,leaseToken:job.lease_token,contentHash:job.payload.contentHash,ruleVersion:'1',result:score});assert.equal(applied.result.applied,true);assert.ok(!applied.result.requeued);

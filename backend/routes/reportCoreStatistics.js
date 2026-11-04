@@ -1,5 +1,5 @@
 const { requireRole } = require('../middleware/auth');
-const { getAdminStatistics, getStudentRewardRecords } = require('../services/reportCoreAdminStatistics');
+const { getAdminStatistics, getStudentRewardRecords } = require('../services/statistics/reportCoreAdminStatistics');
 
 function mountStatistics(router,{asyncRoute,ok}) {
   const context=req=>({pool:req.app.locals.pool,actor:req.actor});

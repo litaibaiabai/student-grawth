@@ -69,11 +69,11 @@ function secure(req, res, next) {
 }
 function service(req) {
   if (!req.app.locals.faceAuthService) {
-    const { FaceWorker } = require("../services/faceAuth/worker");
+    const { FaceWorker } = require("../services/auth/face/worker");
     const worker = new FaceWorker();
     req.app.locals.faceWorker = worker;
     req.app.locals.faceAuthService =
-      require("../services/faceAuth/service").createFaceAuthService({
+      require("../services/auth/face/service").createFaceAuthService({
         pool: req.app.locals.pool,
         schoolId: req.app.locals.schoolId,
         worker,

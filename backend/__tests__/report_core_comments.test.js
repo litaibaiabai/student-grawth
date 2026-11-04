@@ -4,7 +4,7 @@ const {createV2TestDb, command} = require('./helpers/reportCoreV2Db');
 
 test('report-based comment drafts survive edits and only atomic approval updates reports', async t => {
   const db = await createV2TestDb(t), args = {pool:db.pool, actor:db.actors.teacher, termId:'1'};
-  const comments = require('../services/reportCoreComments');
+  const comments = require('../services/reports/reportCoreComments');
   await db.pool.query("UPDATE student_term_evaluation SET math_overall_grade='A',story_summary=JSON_OBJECT('WRITE',JSON_OBJECT('value',8,'rank',2)),process_summary=JSON_OBJECT('math_process_star',JSON_OBJECT('points',12,'star',3)),honor_summary=JSON_OBJECT('items',JSON_ARRAY(JSON_OBJECT('title','数学思维展示','level','校级'))),revision=5 WHERE student_id=3");
   const provider = {generateTermComment:async ({report,fields}) => {
     assert.equal(report.schemaVersion, 'SIX_EDU_V2');
@@ -40,7 +40,7 @@ test('report-based comment drafts survive edits and only atomic approval updates
 });
 
 test('comment access enforces head-teacher scope, phase, and generation-time report revisions', async t => {
-  const db=await createV2TestDb(t), comments=require('../services/reportCoreComments');
+  const db=await createV2TestDb(t), comments=require('../services/reports/reportCoreComments');
   const args={pool:db.pool,actor:db.actors.teacher,termId:'1',studentId:'3'};
   await assert.rejects(comments.getComment({...args,actor:db.actors.student}),{statusCode:403});
   await db.pool.query('UPDATE teacher_teaching_assignment SET is_head_teacher=0');

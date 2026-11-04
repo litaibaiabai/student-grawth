@@ -1,19 +1,17 @@
 const multer = require("multer");
 const {
   stableHash,
-  fail,
-  subjectFor,
-} = require("../services/reportCorePolicy");
+} = require("../services/core/reportCorePolicy");
 const {
   assertScope,
   assignments,
-} = require("../services/authorizationService");
-const { parse, getTerm } = require("../services/reportCoreStore");
-const cards = require("../services/reportCoreCards"),
-  imports = require("../services/reportCoreImports"),
-  materials = require("../services/reportCoreMaterials"),
-  stories = require("../services/reportCoreStories"),
-  evaluation = require("../services/reportCoreEvaluation");
+} = require("../services/auth/authorizationService");
+const { parse, getTerm } = require("../services/core/reportCoreStore");
+const cards = require("../services/cards/reportCoreCards"),
+  imports = require("../services/imports/reportCoreImports"),
+  materials = require("../services/materials/reportCoreMaterials"),
+  stories = require("../services/stories/reportCoreStories"),
+  evaluation = require("../services/evaluation/reportCoreEvaluation");
 function mountFeatures(r, { asyncRoute, ok }) {
   const context = (req) => ({ pool: req.app.locals.pool, actor: req.actor });
   const command = (req) => ({
@@ -155,7 +153,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
   r.get(
     "/report-core/sources",
     asyncRoute(async (req, res) => {
-      const page = await require("../services/reportCoreSources").listSources({
+      const page = await require("../services/core/reportCoreSources").listSources({
         ...context(req),
         termId: req.query.termId,
         studentId: req.query.studentId,
@@ -196,7 +194,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
     asyncRoute(async (req, res) =>
       ok(
         res,
-        await require('../services/reportCorePublishedReports').getPublishedReport({
+        await require('../services/reports/reportCorePublishedReports').getPublishedReport({
           ...context(req),
           termId: req.query.termId,
           studentId: req.query.studentId || req.actor.id,
@@ -207,7 +205,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
   r.get(
     "/report-core/reports/:id/print",
     asyncRoute(async (req, res) => {
-      const result = await require('../services/reportCorePublishedReports').getPublishedReport({
+      const result = await require('../services/reports/reportCorePublishedReports').getPublishedReport({
         ...context(req),
         termId: req.query.termId,
         studentId: req.query.studentId || req.actor.id,
@@ -221,7 +219,7 @@ function mountFeatures(r, { asyncRoute, ok }) {
     asyncRoute(async (req, res) => {
       let rows;
       if (req.actor.role === "manager" && (await getTerm(req.app.locals.pool,req.actor.schoolId,req.query.termId)).evaluation_config.adminClassRegistryVersion===1) {
-        rows=await require('../services/authorizationService').scopeAssignments(req.actor.schoolId,req.query.termId,req.app.locals.pool);
+        rows=await require('../services/auth/authorizationService').scopeAssignments(req.actor.schoolId,req.query.termId,req.app.locals.pool);
       } else if (req.actor.role === "manager") {
         [rows] = await req.app.locals.pool.query(
           "SELECT a.*,u.real_name FROM teacher_teaching_assignment a JOIN users u ON u.id=a.teacher_id WHERE a.school_id=? AND a.term_id=?",

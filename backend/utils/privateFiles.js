@@ -1,7 +1,7 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { fail } = require("../services/reportCorePolicy");
+const { fail } = require("../services/core/reportCorePolicy");
 function directory() {
   return path.resolve(
     process.env.REPORT_FILES_DIR ||

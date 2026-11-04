@@ -1,6 +1,6 @@
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || '/Users/quanta/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const { createV2TestDb } = require('../../backend/__tests__/helpers/reportCoreV2Db');
-const { addSource } = require('../../backend/services/reportCoreStore');
+const { addSource } = require('../../backend/services/core/reportCoreStore');
 const { savePrivateFile, removePrivateFile } = require('../../backend/utils/privateFiles');
 const { spawn } = require('node:child_process');
 const path = require('node:path'), fs = require('node:fs/promises'), assert = require('node:assert/strict');

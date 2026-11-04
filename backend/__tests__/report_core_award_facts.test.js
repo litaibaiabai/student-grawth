@@ -1,8 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createV2TestDb, command } = require('./helpers/reportCoreV2Db');
-const { addSource, parse } = require('../services/reportCoreStore');
-const materials = require('../services/reportCoreMaterials');
+const { addSource, parse } = require('../services/core/reportCoreStore');
+const materials = require('../services/materials/reportCoreMaterials');
 
 test('V2 approval persists only the four honor facts and accepts an empty optional review note', async t => {
   const { pool, actors } = await createV2TestDb(t);

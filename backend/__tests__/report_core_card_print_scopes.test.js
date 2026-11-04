@@ -4,7 +4,7 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const cards = require('../services/reportCoreCards');
+const cards = require('../services/cards/reportCoreCards');
 const { fixture, teacher, manager, command, bytes } = require('./helpers/ledgerFixtures');
 const printTime = new Date('2026-10-20T00:00:00Z');
 async function paper(t) {

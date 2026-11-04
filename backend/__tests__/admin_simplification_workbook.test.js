@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),XLSX=require('xlsx');
-const {buildRegistryTemplate,parseRegistryWorkbook}=require('../services/registryWorkbook');
+const {buildRegistryTemplate,parseRegistryWorkbook}=require('../services/registry/registryWorkbook');
 function edit(fn){const b=XLSX.read(buildRegistryTemplate());fn(b);return XLSX.write(b,{type:'buffer',bookType:'xlsx'});}
 test('template roundtrips five named sheets with text identities',()=>{
  const buffer=buildRegistryTemplate(),b=XLSX.read(buffer),p=parseRegistryWorkbook(buffer);

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {createCoreTestDb}=require('./helpers/reportCoreDb');
-const imports=require('../services/reportCoreImports');
+const imports=require('../services/imports/reportCoreImports');
 const actor={id:'1',schoolId:'1',role:'manager',tokenVersion:1};let seq=0;
 const command=()=>({requestKey:'admin-menu-'+ ++seq,payloadHash:String(seq).padStart(64,'0')});
 test('teacher roster needs no class, preserves passwords and rejects role switching with all row errors',async t=>{

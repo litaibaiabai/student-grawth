@@ -1,8 +1,8 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {createV2Config,catalog}=require('../services/reportCoreV2Policy');
-const {buildReportModel,reportFingerprint}=require('../services/reportCoreEvaluation');
-const {renderPrintableA4}=require('../services/reportRenderService');
+const {createV2Config,catalog}=require('../services/core/reportCoreV2Policy');
+const {buildReportModel,reportFingerprint}=require('../services/evaluation/reportCoreEvaluation');
+const {renderPrintableA4}=require('../services/reports/reportRenderService');
 
 function fixture(){
  const config=createV2Config();
@@ -55,7 +55,7 @@ test('V2 publication freezes the current DTO and safe detail with the V2 schema'
  const {evaluation}=fixture(),keys=catalog.fields.filter(f=>!f.jsonPath).map(f=>f.column);
  const sources=Object.fromEntries(catalog.fields.filter(f=>f.sourceType==='CARD').map(f=>[f.column,{settled:true}]));
  await db.pool.query(`UPDATE student_term_evaluation SET ${keys.map(k=>'`'+k+'`=?').join(',')},teacher_comment=?,story_summary=?,field_sources=?`,[...keys.map(k=>evaluation[k]),'PRIVATE_COMMENT',evaluation.story_summary,JSON.stringify(sources)]);
- const browser=require('../services/reportCoreReportBrowser'),review=require('../services/reportCoreEvaluation'),publish=require('../services/reportCorePublish');
+ const browser=require('../services/reports/reportCoreReportBrowser'),review=require('../services/evaluation/reportCoreEvaluation'),publish=require('../services/reportCorePublish');
  for(const studentId of ['3','4']){
   const studentKey={schoolId:'1',termId:'1',studentId};
   const report=await browser.getReportDetail({pool:db.pool,actor:db.actors.teacher,studentKey,scope:'full'});

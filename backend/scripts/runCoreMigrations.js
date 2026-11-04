@@ -1,8 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { createDbPool, dbConfig } = require("../db");
-const { addSource, parse } = require('../services/reportCoreStore');
-const { stableHash } = require('../services/reportCorePolicy');
+const { addSource, parse } = require('../services/core/reportCoreStore');
+const { stableHash } = require('../services/core/reportCorePolicy');
 const tables = [
   "users",
   "academic_year",

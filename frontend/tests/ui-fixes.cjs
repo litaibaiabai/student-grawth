@@ -101,7 +101,7 @@ test('UI01–UI14: imports, direct teacher save, version conflict, terminology, 
   await page.setViewportSize({width:1440,height:1000});
   // Populate enough records to exercise the review page beyond its first UI page.
   const ids=[];
-  for(let i=0;i<23;i++)ids.push(String(await require('../../backend/services/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:'3',actorId:'3',sourceType:'CERTIFICATE',kind:'ITEM',status:'SUBMITTED',schemaVersion:'SIX_EDU_V2',key:['ui-review',i],payload:{facts:{title:`测试奖状${i}`,awardRegion:'区级',awardLevel:'一等奖',subjectCode:'MATH'}}})));
+  for(let i=0;i<23;i++)ids.push(String(await require('../../backend/services/core/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:'3',actorId:'3',sourceType:'CERTIFICATE',kind:'ITEM',status:'SUBMITTED',schemaVersion:'SIX_EDU_V2',key:['ui-review',i],payload:{facts:{title:`测试奖状${i}`,awardRegion:'区级',awardLevel:'一等奖',subjectCode:'MATH'}}})));
   await login('teacher','teacher','reviews');
   await page.getByRole('button',{name:/4年级1班/}).click();
   await page.locator('[data-award-id]').first().waitFor();
@@ -121,7 +121,7 @@ test('UI01–UI14: imports, direct teacher save, version conflict, terminology, 
   await page.getByText('共 23 条记录 · 第 3 / 3 页',{exact:true}).waitFor();
   await page.screenshot({path:path.join(output,'ui14-review-refresh-and-pagination.png'),fullPage:true});
   await go('teacher','cards-manage');await page.getByRole('heading',{name:'打印积分卡',exact:true}).waitFor();
-  const {renderPrintableA4}=require('../../backend/services/reportRenderService');
+  const {renderPrintableA4}=require('../../backend/services/reports/reportRenderService');
   const report={schemaVersion:'CORE_V2',student:{name:'术语验收',grade:4,classNo:1},term:{academicYear:'2026-2027',semester:1},values:{},sportsSpecialties:[],artSpecialties:[],narratives:{teacher_comment:'继续保持对学习的好奇心。'},honors:[]};
   const reportPage=await browser.newPage({viewport:{width:1587,height:1123}});
   for(const schemaVersion of ['CORE_V1','CORE_V2']){

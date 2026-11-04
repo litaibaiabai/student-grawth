@@ -10,10 +10,10 @@ test(
     const db = await createCoreTestDb(t);
     await db.seedBase();
     const clockConnection=await db.pool.getConnection();try{await require('../scripts/runCoreMigrations').recordUtcCutover({connection:clockConnection,targetDb:db.name,schoolId:'1',verifiedLegacyOffsetMinutes:0});}finally{clockConnection.release();}
-    const p = require("../services/reportCorePolicy");
-    const e = require("../services/reportCoreEvaluation");
+    const p = require("../services/core/reportCorePolicy");
+    const e = require("../services/evaluation/reportCoreEvaluation");
     const pub = require("../services/reportCorePublish");
-    const { getTerm } = require("../services/reportCoreStore");
+    const { getTerm } = require("../services/core/reportCoreStore");
     const [[u]] = await db.pool.query("SELECT password FROM users LIMIT 1");
     const total = 3000;
     for (let start = 5; start < total + 3; start += 500) {
@@ -83,7 +83,7 @@ test(
       for(const code of ['MORAL','CHINESE','MATH','SCIENCE','ENGLISH','PE','MUSIC','FINE_ART','INFORMATION_TECHNOLOGY','LABOR','INTEGRATED_PRACTICE','LOCAL_COURSE','STORY'])await db.pool.query('INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) VALUES(1,1,?,4,?,?,?)',[teachers[i],i%60+1,code,i<60?1:0]);
     }
     const actor={id:'1',schoolId:'1',role:'manager',tokenVersion:1},command=n=>({requestKey:'perf-'+n,payloadHash:p.stableHash(n)}),teacher=index=>({id:String(teachers[index]),schoolId:'1',role:'teacher',tokenVersion:1});
-    const cards=require('../services/reportCoreCards'),ledger=require('../services/reportCoreLedger'),browser=require('../services/reportCoreReportBrowser'),read=require('../services/reportCoreReadModels');
+    const cards=require('../services/cards/reportCoreCards'),ledger=require('../services/cards/reportCoreLedger'),browser=require('../services/reports/reportCoreReportBrowser'),read=require('../services/reports/reportCoreReadModels');
     const quota=await cards.saveQuota({pool:db.pool,actor,termId:'1',teacherId:'2',monthKey:'2026-10',total:100,command:command('quota')});
     const plan=await cards.savePlan({pool:db.pool,actor:teacher(0),quotaId:quota.result.quotaId,expectedRevision:'1',plans:[{grade:4,classNo:1,classTotal:100,items:[{categoryCode:'CONDUCT_POLITENESS_OTHER_STAR',count:100}]}],command:command('plan')});
     await cards.generateCards({pool:db.pool,actor:teacher(0),quotaId:quota.result.quotaId,expectedRevision:plan.result.revision,command:command('generate')});
@@ -102,7 +102,7 @@ test(
     await measure('ledgerEventList',i=>ledger.listLedgerUsage({...ledgerArgs(i),groupBy:'event'}));
     for(const [name,filter] of [['ledgerClassFilter',i=>({grade:4,classNo:i%60+1})],['ledgerStudentFilter',i=>({studentId:String(3+(i%60)*50)})],['ledgerIndicatorFilter',()=>({categoryCode:'CONDUCT_POLITENESS_OTHER_STAR'})]])await measure(name,i=>ledger.listLedgerUsage({...ledgerArgs(i),filters:{...ledgerArgs(i).filters,...filter(i)},groupBy:'event'}));
     // One ordinary reversal per teacher must not disable the grouped list path.
-    for(let i=0;i<50;i++){const [[source]]=await db.pool.query("SELECT id,student_id,target_key FROM evaluation_source_record WHERE actor_id=? AND record_kind='DIRECT' AND school_id=1 AND term_id=1 ORDER BY id LIMIT 1",[teachers[i]]);await require('../services/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:source.student_id,actorId:String(teachers[i]),sourceType:'CARD',kind:'REVERSAL',originalId:source.id,target:source.target_key,status:'CONFIRMED',delta:-1,key:['perf-reversal',i],payload:{reason:'disposable single reversal',occurredAt:new Date().toISOString()}});}
+    for(let i=0;i<50;i++){const [[source]]=await db.pool.query("SELECT id,student_id,target_key FROM evaluation_source_record WHERE actor_id=? AND record_kind='DIRECT' AND school_id=1 AND term_id=1 ORDER BY id LIMIT 1",[teachers[i]]);await require('../services/core/reportCoreStore').addSource(db.pool,{schoolId:'1',termId:'1',studentId:source.student_id,actorId:String(teachers[i]),sourceType:'CARD',kind:'REVERSAL',originalId:source.id,target:source.target_key,status:'CONFIRMED',delta:-1,key:['perf-reversal',i],payload:{reason:'disposable single reversal',occurredAt:new Date().toISOString()}});}
     for(const groupBy of ['student','indicator'])await measure('ledgerGrouped_'+groupBy,i=>ledger.listLedgerUsage({...ledgerArgs(i),groupBy}));
     await measure('ledgerAfterSingleReversal',i=>ledger.listLedgerUsage({...ledgerArgs(i),filters:{...ledgerArgs(i).filters,grade:4,classNo:i%60+1},groupBy:'event'}));
     await measure('ordinaryDirectWrite',i=>cards.directScore({pool:db.pool,actor:teacher(0),termId:'1',studentIds:[String(3+i)],categoryCode:'CONDUCT_POLITENESS_OTHER_STAR',reason:'',command:command('write-'+i)}),1500);

@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {stableHash}=require('../../services/reportCorePolicy');
+const {stableHash}=require('../../services/core/reportCorePolicy');
 const tables=['users','academic_year','story_content','teacher_teaching_assignment','school_class','evaluation_source_record','student_term_evaluation','term_report'];
 function rollbackOnlyPool(c){
  let aborted=false,tail=Promise.resolve(),ordinal=0;

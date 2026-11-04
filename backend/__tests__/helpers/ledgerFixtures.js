@@ -1,6 +1,6 @@
 const { createCoreTestDb } = require('./reportCoreDb');
 const { recordUtcCutover } = require('../../scripts/runCoreMigrations');
-const { normalizeLedgerQuery } = require('../../services/reportCoreLedger');
+const { normalizeLedgerQuery } = require('../../services/cards/reportCoreLedger');
 const teacher = { id: '2', schoolId: '1', role: 'teacher', tokenVersion: 1 };
 const manager = { ...teacher, id: '1', role: 'manager' };
 let sequence = 0;

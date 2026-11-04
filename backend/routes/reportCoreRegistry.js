@@ -1,8 +1,8 @@
 const multer=require('multer');
 const {requireRole}=require('../middleware/auth');
-const {stableHash,fail}=require('../services/reportCorePolicy');
-const service=require('../services/reportCoreRegistry');
-const {buildRegistryTemplate,registryColumns}=require('../services/registryWorkbook');
+const {stableHash,fail}=require('../services/core/reportCorePolicy');
+const service=require('../services/registry/reportCoreRegistry');
+const {buildRegistryTemplate,registryColumns}=require('../services/registry/registryWorkbook');
 function mountRegistry(router,{asyncRoute,ok}){
  const base='/admin/report-core/registry',guard=requireRole('manager');
  const context=req=>({pool:req.app.locals.pool,actor:req.actor,now:req.app.locals.clock()});

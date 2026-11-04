@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const {createCoreTestDb}=require('./helpers/reportCoreDb');const service=require('../services/reportCoreEvaluation');
+const {createCoreTestDb}=require('./helpers/reportCoreDb');const service=require('../services/evaluation/reportCoreEvaluation');
 test('self view exposes applicable self fields and freeze reason without writable teacher fields',async t=>{
  const db=await createCoreTestDb(t);await db.seedBase();const args={pool:db.pool,actor:{id:'3',schoolId:'1',role:'student',tokenVersion:1},studentKey:{schoolId:'1',termId:'1',studentId:'3'}};
  const v=await service.getEvaluationView(args);assert.equal(v.applicableSelfFields.length,13);assert.equal(v.editable,true);assert.deepEqual(v.sportsSpecialties,[]);assert.deepEqual(v.artSpecialties,[]);assert.ok(!v.allowedFields.includes('teacher_comment'));

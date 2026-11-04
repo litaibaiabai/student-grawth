@@ -1,5 +1,5 @@
 const bcrypt=require('bcrypt');
-const {parse}=require('../../services/reportCoreStore');
+const {parse}=require('../../services/core/reportCoreStore');
 function normalizeDemoOptions(input={}){
  const mode=input.mode||'auto',academicYear=input.academicYear||'2027-2028',semester=Number(input.semester||1);
  if(!['auto','full','replay'].includes(mode))throw Error('mode仅支持auto、full、replay');

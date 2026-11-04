@@ -1,8 +1,8 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'/Users/quanta/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const {createV2TestDb,command}=require('../../backend/__tests__/helpers/reportCoreV2Db');
-const {claimAssessmentJobs}=require('../../backend/services/reportCoreWorker');
-const materials=require('../../backend/services/reportCoreMaterials');
-const {parse,addSource}=require('../../backend/services/reportCoreStore');
+const {claimAssessmentJobs}=require('../../backend/services/infrastructure/reportCoreWorker');
+const materials=require('../../backend/services/materials/reportCoreMaterials');
+const {parse,addSource}=require('../../backend/services/core/reportCoreStore');
 const {spawn}=require('node:child_process'),{once}=require('node:events');
 const path=require('node:path'),fs=require('node:fs/promises'),os=require('node:os'),assert=require('node:assert/strict');
 (async()=>{

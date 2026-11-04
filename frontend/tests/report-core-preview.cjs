@@ -8,7 +8,7 @@ const { chromium } = require(
 );
 const {
   renderPrintableA4,
-} = require("../../backend/services/reportRenderService");
+} = require("../../backend/services/reports/reportRenderService");
 const policy = require("../../backend/config/reportCorePolicy.json");
 (async () => {
   const b = await chromium.launch({ headless: true, channel: "chrome" });

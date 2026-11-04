@@ -9,7 +9,7 @@ test('retired administrative and alternate card-writing routes return 410',async
  }finally{await new Promise(r=>server.close(r));}
 }));
 test('old registry import cannot bypass locks while teacher academic and physical imports still work',async()=>withFormalRollback(async({pool,connection:c})=>{
- const args=await importRegistryFixture(pool,c),imports=require('../services/reportCoreImports');
+ const args=await importRegistryFixture(pool,c),imports=require('../services/imports/reportCoreImports');
  for(const kind of ['ROSTER','HEALTH','ASSIGNMENTS'])await assert.rejects(imports.previewImport({...args,kind,rows:[{}],command:command()}),{statusCode:403});
  const[[t]]=await c.query('SELECT * FROM users WHERE school_id=1 AND username=?',[args.f.teacher]),[[s]]=await c.query('SELECT id FROM users WHERE school_id=1 AND username=?',[args.f.student]);
  const actor={id:String(t.id),schoolId:'1',role:'teacher',tokenVersion:t.token_version};

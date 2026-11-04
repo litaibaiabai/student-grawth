@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createV2TestDb } = require('./helpers/reportCoreV2Db');
-const { addSource } = require('../services/reportCoreStore');
+const { addSource } = require('../services/core/reportCoreStore');
 
 async function fixture(t, config) {
   const db = await createV2TestDb(t, config);
@@ -13,7 +13,7 @@ async function fixture(t, config) {
 
 test('student reward statistics use redeemed cards, remove reversals and retain zero-record students', async t => {
   const { args, source, pool } = await fixture(t);
-  const { getAdminStatistics, getStudentRewardRecords } = require('../services/reportCoreAdminStatistics');
+  const { getAdminStatistics, getStudentRewardRecords } = require('../services/statistics/reportCoreAdminStatistics');
   await source({ sourceType:'CARD',kind:'DIRECT',delta:1,target:'chinese_process_star',actorId:'2' });
   const reversed = await source({ sourceType:'CARD',kind:'DIRECT',delta:1,target:'math_process_star',subjectCode:'MATH' });
   await source({ sourceType:'CARD',kind:'REVERSAL',delta:-1,originalId:reversed,target:'math_process_star' });
@@ -41,7 +41,7 @@ test('student reward statistics use redeemed cards, remove reversals and retain 
 test('self statistics use applicable student star items and keep completion and rating denominators independent', async t => {
   const fields=['conduct_politeness_self_star','conduct_integrity_self_star','conduct_kindness_self_star'];
   const {args,pool} = await fixture(t,{applicableFields:fields});
-  const {getAdminStatistics}=require('../services/reportCoreAdminStatistics');
+  const {getAdminStatistics}=require('../services/statistics/reportCoreAdminStatistics');
   await pool.query('UPDATE student_term_evaluation SET conduct_politeness_self_star=3,conduct_integrity_self_star=2,conduct_politeness_other_star=1 WHERE student_id=3');
   await pool.query('UPDATE student_term_evaluation SET conduct_politeness_self_star=1,conduct_integrity_self_star=3,conduct_kindness_self_star=2 WHERE student_id=4');
   const result=await getAdminStatistics({...args,tab:'self',state:'COMPLETE',keyword:'学生4'});
@@ -59,7 +59,7 @@ test('self statistics use applicable student star items and keep completion and 
 
 test('reward subject metadata is grouped independently even when target keys match', async t => {
   const {args,source}=await fixture(t);
-  const {getAdminStatistics}=require('../services/reportCoreAdminStatistics');
+  const {getAdminStatistics}=require('../services/statistics/reportCoreAdminStatistics');
   await source({sourceType:'CARD',kind:'DIRECT',delta:1,target:'chinese_process_star',payload:{subjectCode:'CHINESE'}});
   await source({sourceType:'CARD',kind:'DIRECT',delta:1,target:'chinese_process_star',payload:{subjectCode:'MATH'}});
   await source({sourceType:'CARD',kind:'DIRECT',delta:1,target:'conduct_politeness_other_star'});
@@ -70,7 +70,7 @@ test('reward subject metadata is grouped independently even when target keys mat
 
 test('honor uploads reconcile every processing state and expose no private material content', async t => {
   const {args,source}=await fixture(t);
-  const {getAdminStatistics}=require('../services/reportCoreAdminStatistics');
+  const {getAdminStatistics}=require('../services/statistics/reportCoreAdminStatistics');
   for (const status of ['APPROVED','QUEUED','REJECTED','REVOKED','FAILED']) await source({sourceType:'CERTIFICATE',status,payload:{fileRef:'private/certificate.jpg',text:'private original text',facts:{awardRegion:'市级'},honor:{region:'市级'}}});
   const result=await getAdminStatistics({...args,tab:'honors'});
   assert.deepEqual(result.summary,{participants:1,totalCount:5,approved:1,pending:1,rejected:1,revoked:1,failed:1});
@@ -81,7 +81,7 @@ test('honor uploads reconcile every processing state and expose no private mater
 
 test('story participation counts current recordings and root works once, independently of scoring', async t => {
   const {args,source,pool}=await fixture(t);
-  const {getAdminStatistics}=require('../services/reportCoreAdminStatistics');
+  const {getAdminStatistics}=require('../services/statistics/reportCoreAdminStatistics');
   await source({eventType:'TELL_RECORDING'});
   await source({eventType:'TELL_RECORDING',status:'REVOKED'});
   await source({eventType:'LISTEN_COMPLETE',studentId:'4'});
@@ -101,7 +101,7 @@ test('story participation counts current recordings and root works once, indepen
 
 test('statistics scope, detail search and pagination do not alter summary denominators; roles and inputs are enforced', async t => {
   const {args,pool,actors}=await fixture(t);
-  const {getAdminStatistics}=require('../services/reportCoreAdminStatistics');
+  const {getAdminStatistics}=require('../services/statistics/reportCoreAdminStatistics');
   await pool.query('UPDATE student_term_evaluation SET grade_snapshot=5,class_no_snapshot=2 WHERE student_id=4');
   const page=await getAdminStatistics({...args,tab:'cards',pageSize:1,page:2});
   assert.equal(page.rows[0].studentId,'4');

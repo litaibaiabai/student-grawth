@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const {createV2TestDb,command}=require('./helpers/reportCoreV2Db');
 test('V2 self forms expose exactly eleven stars, cannot edit imported teacher values and freeze across old endpoints',async t=>{
   const {pool,actors}=await createV2TestDb(t);
-  const api=require('../services/reportCoreEvaluation');
+  const api=require('../services/evaluation/reportCoreEvaluation');
   const key={schoolId:'1',termId:'1',studentId:'3'};
   const view=await api.getEvaluationView({pool,actor:actors.student,studentKey:key});
   assert.equal(view.allowedFields.length,11);
@@ -18,7 +18,7 @@ test('V2 self forms expose exactly eleven stars, cannot edit imported teacher va
 });
 test('V2 class head can import whole class but other teachers and managers cannot read private reports',async t=>{
   const {pool,actors}=await createV2TestDb(t);
-  const {assertScope}=require('../services/authorizationService');
+  const {assertScope}=require('../services/auth/authorizationService');
   const key={schoolId:'1',termId:'1',studentId:'3'};
   await pool.query("UPDATE teacher_teaching_assignment SET enabled=0 WHERE subject_code='MUSIC'");
   assert.equal((await assertScope({actor:actors.teacher,studentKey:key,action:'import',fields:['music_overall_grade']},pool)).head,true);

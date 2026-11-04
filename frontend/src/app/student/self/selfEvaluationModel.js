@@ -1,4 +1,4 @@
-export const selfTexts = [
+const selfTexts = [
  ['self_conduct_text','品行美自述'],['self_wisdom_text','智慧美自述'],['self_health_text','健康美自述'],['self_art_text','艺术美自述'],['self_labor_text','劳动美自述'],['semester_highlights','本学期最大收获与活动'],['next_term_goals','下学期努力目标'],
 ];
 export function buildSelfGroups(view,catalog) {

@@ -2,8 +2,8 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const {createV2TestDb,command}=require('./helpers/reportCoreV2Db');
-const {parse}=require('../services/reportCoreStore');
-const materials=require('../services/reportCoreMaterials');
+const {parse}=require('../services/core/reportCoreStore');
+const materials=require('../services/materials/reportCoreMaterials');
 const facts={title:'数学思维挑战赛',awardRegion:'市级',awardLevel:'一等奖',subjectCode:'MATH'};
 async function setup(t) {
   const db=await createV2TestDb(t);

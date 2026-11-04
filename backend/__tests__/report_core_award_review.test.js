@@ -1,8 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createV2TestDb } = require('./helpers/reportCoreV2Db');
-const { addSource } = require('../services/reportCoreStore');
-const { listSources } = require('../services/reportCoreSources');
+const { addSource } = require('../services/core/reportCoreStore');
+const { listSources } = require('../services/core/reportCoreSources');
 
 test('award review filters by the complete class before pagination', async t => {
   const { pool, actors } = await createV2TestDb(t);

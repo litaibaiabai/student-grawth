@@ -3,8 +3,6 @@ export function StarPicker({ label, value, onChange, disabled }) {
   const name = useId();
   return <fieldset className="core-stars" disabled={disabled}><legend>{label}</legend>{[1,2,3].map(n => <label key={n}><input name={name} type="radio" checked={Number(value) === n} onChange={() => onChange(n)} aria-label={`${label} ${n}星`}/><span aria-hidden="true">{'★'.repeat(n)}</span></label>)}</fieldset>;
 }
-export const StatusBadge = ({ children }) => <span className="core-badge">{children}</span>;
-export const EmptyState = ({ title, children }) => <section className="panel empty"><h2>{title}</h2><p>{children}</p></section>;
 export function ConfirmDialog({ open, title, children, onConfirm, onCancel, busy = false, returnFocusRef }) {
   const ref = useRef(null), titleId = useId();
   useEffect(() => {

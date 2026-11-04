@@ -1,6 +1,6 @@
 const multer = require('multer');
-const { stableHash } = require('../services/reportCorePolicy');
-const recordings = require('../services/reportCoreStoryRecordings');
+const { stableHash } = require('../services/core/reportCorePolicy');
+const recordings = require('../services/stories/reportCoreStoryRecordings');
 
 function mountStoryRecordings(router, { asyncRoute, ok }) {
   const context = req => ({ pool: req.app.locals.pool, actor: req.actor });

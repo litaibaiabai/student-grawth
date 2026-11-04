@@ -27,15 +27,4 @@ function createDbPool(config = {}) {
   });
   return pool;
 }
-// Legacy exports remain lazy for archived consumers; no initialization DDL or connection.
-let legacyPool;
-const getPool = () => legacyPool || (legacyPool = createDbPool());
-module.exports = {
-  createDbPool,
-  dbConfig,
-  get pool() {
-    return getPool();
-  },
-  execute: async (s, p = []) => (await getPool().execute(s, p))[0],
-  query: (s, p = []) => getPool().query(s, p),
-};
+module.exports = { createDbPool, dbConfig };

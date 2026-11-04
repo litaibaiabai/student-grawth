@@ -7,7 +7,7 @@ const path=require('node:path'),fs=require('node:fs/promises'),{spawn,execFileSy
   await db.seedBase();await db.pool.query('INSERT INTO teacher_teaching_assignment(school_id,term_id,teacher_id,grade,class_no,subject_code,is_head_teacher) SELECT school_id,term_id,teacher_id,grade,2,subject_code,is_head_teacher FROM teacher_teaching_assignment WHERE class_no=1');
   await db.pool.query('UPDATE student_term_evaluation SET class_no_snapshot=2 WHERE student_id=4');
   const c=await db.pool.getConnection();try{await require('../../backend/scripts/runCoreMigrations').recordUtcCutover({connection:c,targetDb:db.name,schoolId:'1',verifiedLegacyOffsetMinutes:0});}finally{c.release();}
-  const cards=require('../../backend/services/reportCoreCards'),actor={id:'2',schoolId:'1',role:'teacher',tokenVersion:1};let n=0;const command=()=>({requestKey:'ledger-ui-'+ ++n,payloadHash:String(n).padStart(64,'0')});
+  const cards=require('../../backend/services/cards/reportCoreCards'),actor={id:'2',schoolId:'1',role:'teacher',tokenVersion:1};let n=0;const command=()=>({requestKey:'ledger-ui-'+ ++n,payloadHash:String(n).padStart(64,'0')});
   const quotaId=(await cards.saveQuota({pool:db.pool,actor:{...actor,id:'1',role:'manager'},termId:'1',teacherId:'2',monthKey:'2026-10',total:200,command:command()})).result.quotaId;
   await cards.savePlan({pool:db.pool,actor,quotaId,expectedRevision:'1',plans:[1,2].map(classNo=>({grade:4,classNo,classTotal:classNo===1?61:60,items:[{categoryCode:'CONDUCT_POLITENESS_OTHER_STAR',count:classNo===1?61:60}]})),command:command()});
   await cards.generateCards({pool:db.pool,actor,quotaId,expectedRevision:'2',command:command()});

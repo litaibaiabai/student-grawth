@@ -26,7 +26,7 @@ test('student catalog endpoint supplies 100 playable stories without awarding po
 
 test('only a complete uninterrupted timeline earns one point and immediately updates school rank', async t => {
   const db = await createV2TestDb(t);
-  const listening = require('../services/reportCoreListening');
+  const listening = require('../services/stories/reportCoreListening');
   const args = { pool: db.pool, actor: db.actors.student, termId: '1' };
   const stories = await listening.listCatalog(args);
   let seq = 0;
@@ -65,7 +65,7 @@ test('only a complete uninterrupted timeline earns one point and immediately upd
   assert.equal(history[0].id, stories[0].id);
   assert.ok(history[0].completedAt);
   assert.equal((await listening.listHistory({...args,actor:db.actors.other})).length, 0);
-  const stats = await require('../services/reportCoreV2Statistics').loadV2Statistics(db.pool, { schoolId:'1', termId:'1' });
+  const stats = await require('../services/statistics/reportCoreV2Statistics').loadV2Statistics(db.pool, { schoolId:'1', termId:'1' });
   assert.equal(stats.storyByStudent['3'].LISTEN.value, 1);
   assert.equal(stats.storyByStudent['3'].LISTEN.rank, 1);
   await assert.rejects(beat(0, true, 0, s.sessionId, db.actors.other), { statusCode: 404 });
@@ -75,7 +75,7 @@ test('only a complete uninterrupted timeline earns one point and immediately upd
 });
 
 test('fast forwarding, offline gaps and another session cannot fill missing playback', async t => {
-  const db = await createV2TestDb(t), listening = require('../services/reportCoreListening');
+  const db = await createV2TestDb(t), listening = require('../services/stories/reportCoreListening');
   const args = { pool:db.pool, actor:db.actors.student, termId:'1' };
   const [story] = await listening.listCatalog(args);
   const now = new Date('2026-11-01T00:00:00Z');
@@ -89,7 +89,7 @@ test('fast forwarding, offline gaps and another session cannot fill missing play
 });
 
 test('normal network latency changes do not reject complete real-time playback', async t => {
-  const db = await createV2TestDb(t), listening = require('../services/reportCoreListening');
+  const db = await createV2TestDb(t), listening = require('../services/stories/reportCoreListening');
   const args = {pool:db.pool,actor:db.actors.student,termId:'1'};
   const [story] = await listening.listCatalog(args), epoch = +new Date('2026-11-01T00:00:00Z');
   const {sessionId} = (await listening.startListening({...args,storyId:story.id,now:new Date(epoch),command:command('jitter-start')})).result;
@@ -102,7 +102,7 @@ test('normal network latency changes do not reject complete real-time playback',
 });
 
 test('school rankings update other students, share ties and preserve each students history', async t => {
-  const db = await createV2TestDb(t), listening = require('../services/reportCoreListening');
+  const db = await createV2TestDb(t), listening = require('../services/stories/reportCoreListening');
   const args = {pool:db.pool,actor:db.actors.student,termId:'1'};
   const stories = await listening.listCatalog(args);
   let seq = 0;
@@ -129,7 +129,7 @@ test('school rankings update other students, share ties and preserve each studen
 });
 
 test('simultaneous completions by different students persist both scores in the report projection', async t => {
-  const db = await createV2TestDb(t), listening = require('../services/reportCoreListening');
+  const db = await createV2TestDb(t), listening = require('../services/stories/reportCoreListening');
   const args = {pool:db.pool,termId:'1'}, actors = [db.actors.student,db.actors.other];
   const [story] = await listening.listCatalog({...args,actor:actors[0]}), epoch = +new Date('2026-11-01T00:00:00Z');
   const sessions = await Promise.all(actors.map(async actor => ({actor,sessionId:(await listening.startListening({...args,actor,storyId:story.id,now:new Date(epoch),command:command('parallel-start-'+actor.id)})).result.sessionId})));

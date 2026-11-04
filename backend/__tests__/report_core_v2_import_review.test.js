@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const XLSX=require('xlsx');
-const {parseV2Workbook}=require('../services/reportCoreV2Imports');
+const {parseV2Workbook}=require('../services/imports/reportCoreV2Imports');
 const {createV2TestDb,command}=require('./helpers/reportCoreV2Db');
 const {createCoreTestDb}=require('./helpers/reportCoreDb');
 const headers=['学期标识','模板版本','账号','姓名','math_regular_grade'];
@@ -16,9 +16,9 @@ test('current-term Excel studentId templates use the same report workflow withou
 test('current-term review retains saved values, returns both students and commits through existing academic permissions',async t=>{
  const db=await createCoreTestDb(t);await db.seedBase();const actor={id:'2',role:'teacher',schoolId:'1',tokenVersion:1};
  await db.pool.query("UPDATE student_term_evaluation SET math_basic_knowledge_grade='C' WHERE student_id=3");
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor,termId:'1',buffer:workbook({学业录入:[['studentId','姓名','math_basic_knowledge_grade'],[3,'学生3',''],[4,'学生4','A']]}),command:command('current-term-preview')});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor,termId:'1',buffer:workbook({学业录入:[['studentId','姓名','math_basic_knowledge_grade'],[3,'学生3',''],[4,'学生4','A']]}),command:command('current-term-preview')});
  assert.equal(result.totalCount,2);assert.deepEqual(result.students.map(s=>s.student.id),['3','4']);assert.equal(result.students[0].values.math_basic_knowledge_grade,'C');assert.equal(result.errors.length,0);assert.ok(result.batchId);
- await require('../services/reportCoreImports').commitImport({pool:db.pool,actor,batchId:result.batchId,expectedRevision:result.revision,command:command('current-term-commit')});
+ await require('../services/imports/reportCoreImports').commitImport({pool:db.pool,actor,batchId:result.batchId,expectedRevision:result.revision,command:command('current-term-commit')});
  assert.equal((await db.pool.query('SELECT math_basic_knowledge_grade FROM student_term_evaluation WHERE student_id=4'))[0][0].math_basic_knowledge_grade,'A');
 });
 
@@ -63,7 +63,7 @@ test('review still rejects formula headers because their column mapping cannot b
 test('complete review retains blank and unknown rows, merges prefilled values and blocks the entire bad batch',async t=>{
  const {pool,actors}=await createV2TestDb(t,{applicableFields:['math_regular_grade']});
  await pool.query("UPDATE student_term_evaluation SET math_regular_grade='B' WHERE student_id=3");
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool,actor:actors.teacher,termId:'1',buffer:workbook({成绩:[headers,row('student','学生3'),row('student2','学生4'),row('unknown','未知学生','A')]}),command:command('complete-review')});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool,actor:actors.teacher,termId:'1',buffer:workbook({成绩:[headers,row('student','学生3'),row('student2','学生4'),row('unknown','未知学生','A')]}),command:command('complete-review')});
  assert.equal(result.totalCount,3);assert.equal(result.students.length,3);assert.equal(result.batchId,null);
  assert.equal(result.students[0].values.math_regular_grade,'B');assert.deepEqual(result.students[0].uploadedFields,[]);assert.deepEqual(result.students[0].errors,[]);
  assert.ok(result.students[1].errors.some(e=>e.field==='math_regular_grade'));
@@ -73,17 +73,17 @@ test('complete review retains blank and unknown rows, merges prefilled values an
 
 test('valid review keeps workbook order, zero and prefilled sources then uses the existing explicit commit',async t=>{
  const {pool,actors}=await createV2TestDb(t,{applicableFields:['math_regular_grade','jump_rope_1min']});
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool,actor:actors.teacher,termId:'1',buffer:workbook({成绩:[['学期标识','模板版本','账号','姓名','math_regular_grade','jump_rope_1min','测量日期'],['1','SIX_EDU_V2','student2','学生4','A',0,'2026-10-20'],['1','SIX_EDU_V2','student','学生3','B',12,'2026-10-20']]}),command:command('valid-review')});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool,actor:actors.teacher,termId:'1',buffer:workbook({成绩:[['学期标识','模板版本','账号','姓名','math_regular_grade','jump_rope_1min','测量日期'],['1','SIX_EDU_V2','student2','学生4','A',0,'2026-10-20'],['1','SIX_EDU_V2','student','学生3','B',12,'2026-10-20']]}),command:command('valid-review')});
  assert.deepEqual(result.students.map(s=>s.student.id),['4','3']);assert.equal(result.students[0].values.jump_rope_1min,0);assert.equal(result.errors.length,0);assert.ok(result.batchId);
  assert.equal((await pool.query('SELECT math_regular_grade FROM student_term_evaluation WHERE student_id=4'))[0][0].math_regular_grade,null);
- await require('../services/reportCoreImports').commitImport({pool,actor:actors.teacher,batchId:result.batchId,expectedRevision:result.revision,command:command('review-commit')});
+ await require('../services/imports/reportCoreImports').commitImport({pool,actor:actors.teacher,batchId:result.batchId,expectedRevision:result.revision,command:command('review-commit')});
  assert.equal((await pool.query('SELECT math_regular_grade FROM student_term_evaluation WHERE student_id=4'))[0][0].math_regular_grade,'A');
 });
 
 test('duplicate and out-of-scope rows stay visible without returning unauthorized evaluation values',async t=>{
  const {pool,actors}=await createV2TestDb(t,{applicableFields:['math_regular_grade']});
  await pool.query("UPDATE student_term_evaluation SET grade_snapshot=5,math_regular_grade='D' WHERE student_id=4");
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool,actor:actors.teacher,termId:'1',buffer:workbook({成绩:[headers,row('student','学生3','A'),row('student','学生3','B'),row('student2','学生4','A')]}),command:command('scope-review')});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool,actor:actors.teacher,termId:'1',buffer:workbook({成绩:[headers,row('student','学生3','A'),row('student','学生3','B'),row('student2','学生4','A')]}),command:command('scope-review')});
  assert.equal(result.students.length,3);assert.equal(result.batchId,null);
  assert.ok(result.students[0].errors.some(e=>/重复/.test(e.reason)));assert.ok(result.students[1].errors.some(e=>/重复/.test(e.reason)));
  assert.ok(result.students[2].errors.some(e=>/任教范围/.test(e.reason)));assert.notEqual(result.students[2].values.math_regular_grade,'D');
@@ -101,7 +101,7 @@ test('review parses gender and birthDate columns and computes BMI with classific
  assert.equal(rows[0].birthDate, '2019-10-01');
 
  const mockPool = { query: async () => [[{ evaluation_config: JSON.stringify({ schemaVersion: 'SIX_EDU_V2' }) }]] };
- const { result } = await require('../services/reportCoreV2ImportReview').reviewV2Workbook({
+ const { result } = await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({
    pool: mockPool,
    actor: { id: '2', role: 'teacher', schoolId: '1' },
    termId: '1',

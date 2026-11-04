@@ -9,5 +9,5 @@ function registryFixture({tag=crypto.randomBytes(4).toString('hex'),year='2028-2
 async function manager(c){const[[r]]=await c.query("SELECT id,token_version FROM users WHERE school_id=1 AND username='admin'");return{id:String(r.id),schoolId:'1',role:'manager',tokenVersion:r.token_version};}
 const command=()=>({requestKey:crypto.randomUUID(),payloadHash:crypto.randomBytes(32).toString('hex')});
 module.exports={registryFixture,manager,command};
-async function importRegistryFixture(pool,c,options){const actor=await manager(c),f=registryFixture(options),service=require('../../services/reportCoreRegistry'),p=await service.previewRegistry({pool,actor,buffer:f.buffer()});const r=await service.commitRegistry({pool,actor,previewToken:p.previewToken,command:command()});return{pool,actor,termId:r.result.termId,f};}
+async function importRegistryFixture(pool,c,options){const actor=await manager(c),f=registryFixture(options),service=require('../../services/registry/reportCoreRegistry'),p=await service.previewRegistry({pool,actor,buffer:f.buffer()});const r=await service.commitRegistry({pool,actor,previewToken:p.previewToken,command:command()});return{pool,actor,termId:r.result.termId,f};}
 module.exports.importRegistryFixture=importRegistryFixture;

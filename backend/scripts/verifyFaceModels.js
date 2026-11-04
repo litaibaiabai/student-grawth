@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict"),
   { execFileSync } = require("node:child_process"),
-  { FaceWorker } = require("../services/faceAuth/worker");
+  { FaceWorker } = require("../services/auth/face/worker");
 async function verifyFaceModels() {
   const w = new FaceWorker();
   try {

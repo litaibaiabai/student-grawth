@@ -3,7 +3,7 @@ const { test } = require("node:test"),
   fs = require("node:fs/promises"),
   os = require("node:os"),
   path = require("node:path");
-const { FaceWorker } = require("../services/faceAuth/worker");
+const { FaceWorker } = require("../services/auth/face/worker");
 async function fixture(fn) {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "face-worker-test-"));
   await fs.writeFile(path.join(dir, "manifest.json"), "{}");

@@ -1,5 +1,5 @@
-const { stableHash } = require('../services/reportCorePolicy');
-const listening = require('../services/reportCoreListening');
+const { stableHash } = require('../services/core/reportCorePolicy');
+const listening = require('../services/stories/reportCoreListening');
 function mountListening(router, { asyncRoute, ok }) {
   const context = req => ({ pool:req.app.locals.pool, actor:req.actor });
   const read = (url, fn) => router.get('/report-core/v2' + url, asyncRoute(async (req,res) => {

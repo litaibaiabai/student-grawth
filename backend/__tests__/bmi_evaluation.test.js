@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { computeBMI, evaluateBMI, inferAgeFromGrade, alignHalfYearAge, calculateAge } = require('../services/bmiEvaluationService');
+const { computeBMI, evaluateBMI, inferAgeFromGrade, alignHalfYearAge, calculateAge } = require('../services/evaluation/bmiEvaluationService');
 
 test('computeBMI calculates weight/(height/100)^2 rounded to 2 decimal places', () => {
   assert.equal(computeBMI(125.0, 18.0), 11.52);

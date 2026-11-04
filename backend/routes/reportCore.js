@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const { requireAuth, requireRole, signToken } = require("../middleware/auth");
-const { fail, stableHash } = require("../services/reportCorePolicy");
+const { requireAuth, signToken } = require("../middleware/auth");
+const { fail } = require("../services/core/reportCorePolicy");
 const asyncRoute = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res)).catch(next);
 const ok = (res, data) => res.json({ code: 200, message: "成功", data });
@@ -59,7 +59,7 @@ function createCoreRouter() {
     asyncRoute(async (req, res) => {
       const pool=req.app.locals.pool;
       const [terms]=await pool.query(`SELECT evaluation_config FROM academic_year WHERE school_id=? AND ${req.query.termId?'id=?':'is_current=1'} LIMIT 1`,[req.actor.schoolId,...(req.query.termId?[req.query.termId]:[])]);
-      ok(res,require('../services/reportCoreV2Policy').policyFor(terms[0]?require('../services/reportCoreStore').parse(terms[0].evaluation_config):{}));
+      ok(res,require('../services/core/reportCoreV2Policy').policyFor(terms[0]?require('../services/core/reportCoreStore').parse(terms[0].evaluation_config):{}));
     }),
   );
   r.get(
@@ -78,7 +78,7 @@ function createCoreRouter() {
       const termId = req.query.termId;
       const offset = Math.max(0, Number(req.query.offset) || 0);
       const pool = req.app.locals.pool;
-      const roster = await require('../services/reportCoreReadModels').resolveTermRoster({
+      const roster = await require('../services/reports/reportCoreReadModels').resolveTermRoster({
         connection: pool,
         schoolId: req.actor.schoolId,
         termId,

@@ -198,7 +198,7 @@ const {
 
     // Use the same original credential that was delivered in the authorized card PDF.
     const [[printedCard]]=await db.pool.query("SELECT id FROM evaluation_source_record WHERE record_kind='CARD' ORDER BY id LIMIT 1");
-    const cardToken=await require('../../backend/services/reportCoreCards').cardToken({pool:db.pool,actor:{id:'2',schoolId:'1',role:'teacher'},sourceId:String(printedCard.id)});
+    const cardToken=await require('../../backend/services/cards/reportCoreCards').cardToken({pool:db.pool,actor:{id:'2',schoolId:'1',role:'teacher'},sourceId:String(printedCard.id)});
     await nav("无卡直评");
     for (const name of ['学生3','学生4']) await page.locator('.student-checks label').filter({hasText:name}).locator('input').check();
     await page.getByRole('button',{name:'德美少年',exact:true}).click();
@@ -288,7 +288,7 @@ const {
         assert.equal(await page.getByLabel('我爱读故事1',{exact:true}).inputValue(),original);
         await page.getByRole('button',{name:'保存草稿',exact:true}).click();
         await toast('草稿已保存');
-        const stories=require('../../backend/services/reportCoreStories');
+        const stories=require('../../backend/services/stories/reportCoreStories');
         const [[u]]=await db.pool.query('SELECT token_version FROM users WHERE id=3');
         const storyArgs={pool:db.pool,actor:{id:'3',schoolId:'1',role:'student',tokenVersion:u.token_version},termId:'1',monthKey:'2026-10'};
         const current=(await stories.getStudentStoryMonth(storyArgs)).latestBatch;

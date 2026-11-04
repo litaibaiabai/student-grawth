@@ -2,8 +2,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { Writable } = require('node:stream');
 const { execFileSync } = require('node:child_process');
-const ledger = require('../services/reportCoreLedger');
-const cards = require('../services/reportCoreCards');
+const ledger = require('../services/cards/reportCoreLedger');
+const cards = require('../services/cards/reportCoreCards');
 const { fixture, teacher, command } = require('./helpers/ledgerFixtures');
 class Response extends Writable {
   constructor() { super(); this.headers = {}; this.chunks = []; this.headersSent = false; }

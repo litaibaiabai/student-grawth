@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const { resolveActorContext } = require("../services/authorizationService");
-const { fail } = require("../services/reportCorePolicy");
+const { resolveActorContext } = require("../services/auth/authorizationService");
+const { fail } = require("../services/core/reportCorePolicy");
 function secret() {
   if (!process.env.JWT_SECRET) throw Error("JWT_SECRET is required");
   return process.env.JWT_SECRET;

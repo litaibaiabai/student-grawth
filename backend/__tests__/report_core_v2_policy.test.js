@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const v2 = require('../services/reportCoreV2Policy');
+const v2 = require('../services/core/reportCoreV2Policy');
 
 test('V2 report inputs have one authority per position and self assessment has eleven values', () => {
   const c = v2.catalog;

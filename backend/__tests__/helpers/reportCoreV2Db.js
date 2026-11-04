@@ -1,6 +1,6 @@
 const {createCoreTestDb}=require('./reportCoreDb');
-const {createV2Config}=require('../../services/reportCoreV2Policy');
-const {stableHash}=require('../../services/reportCorePolicy');
+const {createV2Config}=require('../../services/core/reportCoreV2Policy');
+const {stableHash}=require('../../services/core/reportCorePolicy');
 async function createV2TestDb(t,overrides={}) {
   const db=await createCoreTestDb(t);await db.seedBase();
   await db.pool.query("UPDATE teacher_teaching_assignment SET is_head_teacher=0 WHERE subject_code<>'MORAL'");

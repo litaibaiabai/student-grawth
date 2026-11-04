@@ -8,7 +8,7 @@ const ctx=db=>({pool:db.pool,actor:db.actors.manager,termId:'1'});
 const rejects=(call,status)=>assert.rejects(call,e=>e.statusCode===status);
 const nextTerm={academicYear:'2026-2027',semester:2,termName:'2026下学期',startDate:'2027-02-15',endDate:'2027-07-15',collectionDeadline:'2027-07-01',makeCurrent:false};
 test('account CAS revokes existing tokens, hashes password and supports only school student/teacher accounts',async t=>{
- const db=await createAdminTestDb(t),a=ctx(db),auth=require('../services/authorizationService');
+ const db=await createAdminTestDb(t),a=ctx(db),auth=require('../services/auth/authorizationService');
  assert.equal((await require('../services/reportCoreAdminData').listAccounts(a)).rows[0].tokenVersion,1);
  const input={...a,accountId:'3',status:1,expectedTokenVersion:1,reason:'离校停用',command:command('disable')};
  const changed=await ops().setAccountStatus(input);assert.equal(changed.result.tokenVersion,2);
@@ -39,12 +39,12 @@ test('progress and workspace share V2 applicable fields, active enrollment, zero
  const db=await createAdminTestDb(t,{applicableFields:['math_regular_grade','jump_rope_1min','conduct_politeness_self_star']}),a=ctx(db);
  await db.pool.query("UPDATE student_term_evaluation SET teacher_comment='继续努力',math_regular_grade='A',jump_rope_1min=0,conduct_politeness_self_star=3 WHERE student_id=3");
  await db.pool.query('UPDATE student_term_evaluation SET section_meta=? WHERE student_id=4',[JSON.stringify({enrollment:{status:'TRANSFERRED_OUT'}})]);
- const m=require('../services/reportCoreReadModels'),p=await progress().getProgress(a),w=await m.getWorkspace(a);
+ const m=require('../services/reports/reportCoreReadModels'),p=await progress().getProgress(a),w=await m.getWorkspace(a);
  assert.equal(p.counts.students,1);assert.equal((await require('../services/reportCorePublish').getReadiness(a)).counts.total,1);assert.equal((await require('../services/reportCoreTermSettings').getTermSettings(a)).classes[0].studentCount,1);assert.equal(p.counts.complete,1);assert.equal(p.counts.confirmed,0);assert.equal(p.sections.health.complete,1);
  assert.equal(w.counts.total,1);assert.equal(w.counts.academicExpected,2);assert.equal(w.counts.academicComplete,2);
  assert.equal(p.classes.reduce((n,c)=>n+c.counts.students,0),p.counts.students);
- const [[term]]=await db.pool.query('SELECT * FROM academic_year WHERE id=1'),[[e]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');term.evaluation_config=require('../services/reportCoreStore').parse(term.evaluation_config);
- await db.pool.query("UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=2,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=? WHERE student_id=3",[require('../services/reportCoreEvaluation').reportFingerprint(e,term)]);
+ const [[term]]=await db.pool.query('SELECT * FROM academic_year WHERE id=1'),[[e]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');term.evaluation_config=require('../services/core/reportCoreStore').parse(term.evaluation_config);
+ await db.pool.query("UPDATE student_term_evaluation SET status='CONFIRMED',confirmed_revision=revision,confirmed_by=2,confirmed_at=UTC_TIMESTAMP(6),approval_fingerprint=? WHERE student_id=3",[require('../services/evaluation/reportCoreEvaluation').reportFingerprint(e,term)]);
  assert.equal((await progress().getProgress(a)).counts.confirmed,1);
  await db.pool.query("UPDATE student_term_evaluation SET math_regular_grade=NULL,field_sources=? WHERE student_id=3",[JSON.stringify({math_regular_grade:{notApplicable:true,reason:'不适用'}})]);
  const partial=await progress().getProgress(a);assert.equal(partial.sections.wisdom.total,0);assert.equal(partial.counts.complete,1);assert.equal(partial.counts.confirmed,0);
@@ -60,7 +60,7 @@ test('progress missing rows and CSV use same filtered model with formula-safe st
  await rejects(progress().getProgress({...a,actor:db.actors.teacher}),403);
 });
 test('audit queries whitelist public metadata, paginate/filter consistently and escape CSV formulas',async t=>{
- const db=await createAdminTestDb(t),a=ctx(db),{addSource}=require('../services/reportCoreStore');
+ const db=await createAdminTestDb(t),a=ctx(db),{addSource}=require('../services/core/reportCoreStore');
  await db.pool.query("UPDATE users SET real_name='=SUM(1)' WHERE id=1");
  for(let i=0;i<27;i++)await addSource(db.pool,{schoolId:'1',termId:'1',actorId:'1',kind:'AUDIT',status:'COMMITTED',key:['audit-safe',i],payload:{action:'ACCOUNT_STATUS',accountId:'3',reason:'例行维护',diffs:[{field:'status',before:0,after:1},{field:'teacher_comment',before:'PRIVATE_BODY',after:'PRIVATE_BODY'}],password:'PASSWORD_SECRET',token:'TOKEN_SECRET',filePath:'/private/SECRET',privateBody:'PRIVATE_BODY'}});
  const first=await ops().listAudits({...a,type:'ACCOUNT_STATUS',limit:25});assert.equal(first.total,27);assert.equal(first.rows.length,25);assert.ok(first.nextCursor);
@@ -77,7 +77,7 @@ test('new term is V2 with quota 100 and empty classes/assignments/evaluations/re
  await db.pool.query("UPDATE academic_year SET business_phase='ARCHIVED',evaluation_config=JSON_SET(evaluation_config,'$.courseCardDefaultQuota',6)");
  const created=await ops().createTerm(input),id=created.result.term.id;
  assert.notEqual(id,'1');assert.equal(created.result.term.isCurrent,false);assert.equal((await ops().createTerm(input)).replayed,true);
- const term=await require('../services/reportCoreStore').getTerm(db.pool,'1',id);assert.equal(term.evaluation_config.schemaVersion,'SIX_EDU_V2');assert.equal(term.evaluation_config.courseCardDefaultQuota,100);assert.equal(term.evaluation_config.adminClassRegistryVersion,1);assert.equal(term.rule_version,'V2_1');
+ const term=await require('../services/core/reportCoreStore').getTerm(db.pool,'1',id);assert.equal(term.evaluation_config.schemaVersion,'SIX_EDU_V2');assert.equal(term.evaluation_config.courseCardDefaultQuota,100);assert.equal(term.evaluation_config.adminClassRegistryVersion,1);assert.equal(term.rule_version,'V2_1');
  for(const table of ['school_class','teacher_teaching_assignment','student_term_evaluation','term_report'])assert.equal(Number((await db.pool.query(`SELECT COUNT(*) n FROM ${table} WHERE term_id=?`,[id]))[0][0].n),0);
  await rejects(ops().createTerm({...input,command:command('duplicate-term')}),409);
  await ops().makeTermCurrent({...a,termId:id,command:command('current')});assert.equal(String((await db.pool.query('SELECT id FROM academic_year WHERE is_current=1'))[0][0].id),id);
@@ -95,7 +95,7 @@ test('V2 settings disclose current policy instead of V1 mutable rules and worksp
  const db=await createAdminTestDb(t,{applicableFields:['conduct_politeness_self_star','math_regular_grade'],courseCardDefaultQuota:88}),a=ctx(db),settings=require('../services/reportCoreTermSettings');
  const read=await settings.getTermSettings(a);assert.equal(read.rules.schemaVersion,'SIX_EDU_V2');assert.equal(read.rules.defaultMonthlyQuota,88);assert.equal(read.rules.readOnly,true);assert.ok(!('cardTarget' in read.rules));assert.ok(!('legacyCardTargets' in read));
  await rejects(settings.previewTermSettings({...a,section:'rules',changes:{cardTarget:20,requiredMonths:['2026-10']},expectedConfigVersion:read.versions.config,expectedRuleVersion:read.versions.rule,command:command('old-rules')}),422);
- const workspace=await require('../services/reportCoreReadModels').getWorkspace({...a,actor:db.actors.student});assert.equal(workspace.tasks.length,1);assert.equal(workspace.tasks[0].fieldKey,'conduct_politeness_self_star');assert.equal(workspace.tasks[0].route.page,'self');
+ const workspace=await require('../services/reports/reportCoreReadModels').getWorkspace({...a,actor:db.actors.student});assert.equal(workspace.tasks.length,1);assert.equal(workspace.tasks[0].fieldKey,'conduct_politeness_self_star');assert.equal(workspace.tasks[0].route.page,'self');
 });
 test('HTTP routes revoke JWTs, isolate role scope, return envelopes and safe CSV headers',async t=>{
  const db=await createAdminTestDb(t,{applicableFields:['math_regular_grade']}),{signToken}=require('../middleware/auth');
@@ -127,7 +127,7 @@ test('progress retains registered empty classes with zero denominators and legac
  assert.equal((await progress().getProgress({...a,grade:5})).classes.length,1);
  await db.pool.query('UPDATE student_term_evaluation SET section_meta=? WHERE student_id=3',[JSON.stringify({roster:{included:false}})]);
  assert.equal((await progress().getProgress(a)).counts.students,1);
- const legacy=require('../services/reportCoreReadModels');await db.pool.query('UPDATE student_term_evaluation SET section_meta=? WHERE student_id=4',[JSON.stringify({})]);assert.equal((await legacy.resolveTermRoster({connection:db.pool,schoolId:'1',termId:'1'})).length,1);
+ const legacy=require('../services/reports/reportCoreReadModels');await db.pool.query('UPDATE student_term_evaluation SET section_meta=? WHERE student_id=4',[JSON.stringify({})]);assert.equal((await legacy.resolveTermRoster({connection:db.pool,schoolId:'1',termId:'1'})).length,1);
 });
 test('real class operations retain safe import, teacher assignment and transfer audit changes in JSON and CSV',async t=>{
  const db=await createAdminTestDb(t),a=ctx(db),classes=require('../services/reportCoreAdminClasses');

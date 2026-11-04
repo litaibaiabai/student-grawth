@@ -29,7 +29,7 @@ test('teacher class-first comments: automatic report-based drafts, persistence, 
   const provider={generateTermComment:async({report})=>{
     generated++;
     assert.equal(report.values.math_overall_grade,'A');
-    if(report.student.id==='10') require('../../backend/services/reportCorePolicy').fail(503, '模型服务暂不可用，请稍后重试');
+    if(report.student.id==='10') require('../../backend/services/core/reportCorePolicy').fail(503, '模型服务暂不可用，请稍后重试');
     return {comment:`${report.student.name}，这一学期，你在数学学习中交出了一份令人欣喜的答卷，在音乐与劳动实践中也展现了自己的光彩。认真投入的每一次尝试，都在悄悄积蓄成长的力量。希望你继续保持对知识的好奇，多读、多问、大胆表达，在语文学习中找到属于自己的节奏。愿你带着这份热爱，走向更加丰盈的新学期。`,model:'fixture'};
   }};
   server=require('../../backend/app').createApp({pool:db.pool,schoolId:'1',provider}).listen(apiPort,'127.0.0.1');

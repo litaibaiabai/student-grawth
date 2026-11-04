@@ -1,5 +1,5 @@
 const fs=require('node:fs'),{spawn}=require('node:child_process');
-const {stableHash}=require('../../services/reportCorePolicy');
+const {stableHash}=require('../../services/core/reportCorePolicy');
 const tables=['users','academic_year','story_content','teacher_teaching_assignment','school_class','evaluation_source_record','student_term_evaluation','term_report'];
 async function snapshot(pool){const rows={};for(const t of tables)rows[t]=(await pool.query('SELECT * FROM `'+t+'` ORDER BY id'))[0];return {rows,hashes:Object.fromEntries(tables.map(t=>[t,stableHash(JSON.parse(JSON.stringify(rows[t])))]))};}
 async function runRestorableDemo({backup,clear,run,restore,verify}){await backup();let result,error;try{await clear();result=await run();}catch(e){error=e;}finally{try{await restore();await verify();}catch(e){throw new Error('原库还原失败，必须用备份恢复：'+e.message+(error?'；演示错误：'+error.message:''));}}if(error)throw error;return result;}

@@ -1,7 +1,7 @@
-const service = require('../services/reportCoreCourseCards');
-const { stableHash } = require('../services/reportCorePolicy');
+const service = require('../services/cards/reportCoreCourseCards');
+const { stableHash } = require('../services/core/reportCorePolicy');
 function mountCourseCards(router, { asyncRoute, ok }) {
-  const semester=require('../services/reportCoreSemesterCards');
+  const semester=require('../services/cards/reportCoreSemesterCards');
   const {requireRole}=require('../middleware/auth');
   const context = req => ({ pool:req.app.locals.pool, actor:req.actor, now:req.app.locals.clock() });
   const read = (url, method) => router.get(url, asyncRoute(async(req,res) => {

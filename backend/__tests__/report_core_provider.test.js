@@ -2,7 +2,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const http = require("node:http");
 test('provider accepts API roots and explicit completion URLs without duplicating the route', async t => {
-  const {createProvider}=require('../services/reportCoreProvider');
+  const {createProvider}=require('../services/infrastructure/reportCoreProvider');
   const server=http.createServer((req,res)=>{
     res.setHeader('Content-Type','application/json');
     if(req.url!=='/compatible-mode/v1/chat/completions') {
@@ -17,14 +17,14 @@ test('provider accepts API roots and explicit completion URLs without duplicatin
   }
 });
 test('vendor account failures remain retryable without exposing billing details', async t => {
-  const {createProvider}=require('../services/reportCoreProvider');
+  const {createProvider}=require('../services/infrastructure/reportCoreProvider');
   const server=http.createServer((req,res)=>{res.writeHead(400,{'Content-Type':'application/json'});res.end(JSON.stringify({error:{code:'Arrearage',message:'Access denied'}}));}).listen(0);
   t.after(()=>server.close());
   const provider=createProvider({baseUrl:`http://127.0.0.1:${server.address().port}`,apiKey:'fixture',model:'fixture',allowLocal:true});
   await assert.rejects(provider.generateTermComment({report:{},fields:[]}),{statusCode:503,message:'生成暂时失败，请稍后重试'});
 });
 test('term comment provider uses full supplied assessment and rejects invalid drafts', async t => {
-  const { createProvider } = require('../services/reportCoreProvider');
+  const { createProvider } = require('../services/infrastructure/reportCoreProvider');
   let comment = '你在数学学习中保持专注，也在故事表达中展现了想象力。希望你继续保持好奇心，在合作中收获更多成长。';
   const server = http.createServer(async (req, res) => {
     let body = '';
@@ -46,7 +46,7 @@ test('term comment provider uses full supplied assessment and rejects invalid dr
   }
 });
 test("LLM adapter sends actual supplied text and rejects malformed scores rather than fabricating success", async (t) => {
-  const { createProvider } = require("../services/reportCoreProvider");
+  const { createProvider } = require("../services/infrastructure/reportCoreProvider");
   let invalid = false;
   const s = http
     .createServer(async (req, res) => {

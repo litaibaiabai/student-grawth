@@ -17,7 +17,7 @@ async function runThreeRoleBrowserDemo(input={}){
   try{accounts=input.bootstrapAccounts||await loadDemoAccounts(pool);state=await inspectDemoTerm(pool,options);}finally{await pool.end();}
   secrets=Object.values(accounts).map(a=>a.password);
   const previous=input.resume?JSON.parse(await fs.readFile(path.resolve(input.resume),'utf8')):null;let resumeAt=0;if(previous){resumeAt=resumeDemoFromReport(previous,require('./threeRoleDemo/steps').createDemoSteps({mode:'full'}),state,options);report.mode='full';report.resumedFrom=path.resolve(input.resume);report.steps=previous.steps.filter(r=>r.status==='PASS').map(r=>({...r,sourceReport:r.sourceReport||report.resumedFrom}));}else report.mode=classifyDemoState(state,options.mode);report.termId=state?.termId||null;
-  if(report.mode==='full'&&!previous)report.backup=await require('../services/formalDatabaseBackup').backupFormal(path.join(outputDir,'backups'));
+  if(report.mode==='full'&&!previous)report.backup=await require('../services/infrastructure/formalDatabaseBackup').backupFormal(path.join(outputDir,'backups'));
   await save();if(stopRequested)throw Error('演示已中止');
   const manifestFile=path.join(outputDir,'runtime-manifest.json');await fs.writeFile(manifestFile,JSON.stringify({database:'student_growth',schoolId:'1'}),{mode:0o600});
   runtime=await require('./runAdminClosureDemo').runAdminClosureDemo({manifestFile,apiPort:options.apiPort,webPort:options.webPort,demoNow:options.demoNow});if(stopRequested)throw Error('演示已中止');

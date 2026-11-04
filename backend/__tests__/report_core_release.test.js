@@ -21,8 +21,8 @@ test("whole-school release hides prepared reports and activates together; cancel
   await db.pool.query(
     "UPDATE student_term_evaluation SET self_conduct_text='品行',self_wisdom_text='学习',self_health_text='运动',self_art_text='唱歌',self_labor_text='劳动',semester_highlights='收获',next_term_goals='目标',teacher_comment='继续努力'",
   );
-  const { reportFingerprint } = require("../services/reportCoreEvaluation");
-  const { getTerm } = require("../services/reportCoreStore");
+  const { reportFingerprint } = require("../services/evaluation/reportCoreEvaluation");
+  const { getTerm } = require("../services/core/reportCoreStore");
   const term = await getTerm(db.pool, "1", "1");
   for (const id of ["3", "4"]) {
     const [[e]] = await db.pool.query(

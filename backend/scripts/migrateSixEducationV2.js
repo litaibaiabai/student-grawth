@@ -50,7 +50,7 @@ if(require.main===module){
   if(!safeTarget(targetDb))throw Error('Set a safe REPORT_DB_NAME target clone');
   const pool=createDbPool({database:targetDb});
   const run=process.argv.includes('--audit-sources')
-    ? require('../services/reportCoreSourceAudit').auditV2SourceAssets({connection:pool,schoolId:process.env.SCHOOL_ID,termId:process.env.MIGRATE_TERM_IDS,filesRoot:process.env.REPORT_FILES_DIR})
+    ? require('../services/core/reportCoreSourceAudit').auditV2SourceAssets({connection:pool,schoolId:process.env.SCHOOL_ID,termId:process.env.MIGRATE_TERM_IDS,filesRoot:process.env.REPORT_FILES_DIR})
     : migrateSixEducationV2({connection:pool,targetDb,mode:process.argv.includes('--apply')?'apply':'check'});
   run
     .then(result=>console.log(JSON.stringify(result,null,2)))

@@ -1,8 +1,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),bcrypt=require('bcrypt');
 const {withFormalRollback,storedHashes}=require('./helpers/formalRollback');
 const {registryFixture,manager,command}=require('./helpers/registryFixture');
-const svc=require('../services/reportCoreRegistry');
-const {openRegistryPreview}=require('../services/registryPreview');
+const svc=require('../services/registry/reportCoreRegistry');
+const {openRegistryPreview}=require('../services/registry/registryPreview');
 test('one workbook initializes all relations atomically and duplicate files do not reset passwords',async()=>withFormalRollback(async({pool,connection:c})=>{
  const actor=await manager(c),f=registryFixture(),before=await storedHashes(c);
  const preview=await svc.previewRegistry({pool,actor,buffer:f.buffer()});assert.deepEqual(await storedHashes(c),before);assert.equal(preview.counts.assignments.created,18);assert.ok(!JSON.stringify(preview).includes(f.password));
@@ -62,14 +62,14 @@ test('selecting an already initialized term never clears the sole current term',
 test('moving an evaluated student rebuilds both old and new class process rankings',async()=>withFormalRollback(async({pool,connection:c})=>{
  const actor=await manager(c),f=registryFixture();const remaining=f.student+'_stay',destination=f.student+'_dest';f.rows.学生.push([remaining,'原班同学',4,1,f.password],[destination,'新班同学',4,2,f.password]);
  const p=await svc.previewRegistry({pool,actor,buffer:f.buffer()}),termId=(await svc.commitRegistry({pool,actor,previewToken:p.previewToken,command:command()})).result.termId;
- const load=async username=>{const[[u]]=await c.query('SELECT * FROM users WHERE school_id=1 AND username=?',[username]);return{id:String(u.id),schoolId:'1',role:u.role,tokenVersion:u.token_version};},head=await load(f.teacher),moving=await load(f.student),stay=await load(remaining),dest=await load(destination),evaluation=require('../services/reportCoreEvaluation');
- const direct=ids=>require('../services/reportCoreCards').directScore({pool,actor:head,termId,studentIds:ids,categoryCode:'CHINESE_PROCESS',reason:'调班排名回归',now:new Date('2028-09-15T00:00:00Z'),command:command()});
+ const load=async username=>{const[[u]]=await c.query('SELECT * FROM users WHERE school_id=1 AND username=?',[username]);return{id:String(u.id),schoolId:'1',role:u.role,tokenVersion:u.token_version};},head=await load(f.teacher),moving=await load(f.student),stay=await load(remaining),dest=await load(destination),evaluation=require('../services/evaluation/reportCoreEvaluation');
+ const direct=ids=>require('../services/cards/reportCoreCards').directScore({pool,actor:head,termId,studentIds:ids,categoryCode:'CHINESE_PROCESS',reason:'调班排名回归',now:new Date('2028-09-15T00:00:00Z'),command:command()});
  await direct([moving.id,stay.id,dest.id]);await direct([moving.id]);
  for(const classNo of [1,2]){const[rows]=await c.query('SELECT student_id,revision FROM student_term_evaluation WHERE term_id=? AND class_no_snapshot=?',[termId,classNo]);await evaluation.settleSources({pool,actor:head,termId,grade:4,classNo,targetKeys:['chinese_process_star'],settlement:'CARD_CLOSED',expectedRevisions:Object.fromEntries(rows.map(r=>[r.student_id,String(r.revision)])),command:command()});}
  const read=async id=>(await c.query('SELECT * FROM student_term_evaluation WHERE term_id=? AND student_id=?',[termId,id]))[0][0];
  assert.equal((await read(stay.id)).chinese_process_star,2);
  const beforeStay=await read(stay.id),beforeRevision=Number(beforeStay.revision);f.rows.学生[1][3]=2;
  const next=await svc.previewRegistry({pool,actor,buffer:f.buffer()});await svc.commitRegistry({pool,actor,previewToken:next.previewToken,command:command()});
- const after=await read(stay.id),parse=require('../services/reportCoreStore').parse;assert.equal(after.chinese_process_star,3);assert.equal(parse(after.process_summary).chinese_process_star.population,1);assert.ok(Number(after.revision)>beforeRevision);assert.equal(after.status,'DRAFT');assert.notEqual(parse(after.story_summary).versions.LISTEN,parse(beforeStay.story_summary).versions.LISTEN);
+ const after=await read(stay.id),parse=require('../services/core/reportCoreStore').parse;assert.equal(after.chinese_process_star,3);assert.equal(parse(after.process_summary).chinese_process_star.population,1);assert.ok(Number(after.revision)>beforeRevision);assert.equal(after.status,'DRAFT');assert.notEqual(parse(after.story_summary).versions.LISTEN,parse(beforeStay.story_summary).versions.LISTEN);
  assert.equal(parse((await read(dest.id)).process_summary).chinese_process_star.population,2);
 }));

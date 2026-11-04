@@ -1,8 +1,8 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const XLSX=require('xlsx');
-const {buildScoreTemplate,parseV2Workbook}=require('../services/reportCoreV2Imports');
-const {createV2Config,policyFor}=require('../services/reportCoreV2Policy');
+const {buildScoreTemplate,parseV2Workbook}=require('../services/imports/reportCoreV2Imports');
+const {createV2Config,policyFor}=require('../services/core/reportCoreV2Policy');
 
 for(const [label,config] of [['current',{}],['v2',createV2Config()]]){
  test(`${label} downloadable template includes every supported score field and a parser-compatible example`,()=>{
@@ -56,7 +56,7 @@ test('template endpoint downloads an actual workbook for the selected term and r
 
 test('eight generated sample students can be reviewed without real student accounts or writable import batches',async t=>{
  const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:buildScoreTemplate({termId:'1'}),command:{requestKey:'sample-review',payloadHash:'sample-review'}});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:buildScoreTemplate({termId:'1'}),command:{requestKey:'sample-review',payloadHash:'sample-review'}});
  assert.equal(result.demonstration,true);assert.equal(result.students.length,8);assert.deepEqual(result.errors,[]);assert.equal(result.batchId,null);
  assert.equal(result.catalog.schemaVersion,'SIX_EDU_V2');
  assert.equal(result.students[0].values.math_regular_grade,'A');
@@ -67,7 +67,7 @@ test('eight generated sample students can be reviewed without real student accou
 test('blue-frame real data cannot be silently written using the old term schema',async t=>{
  const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
  const wb=XLSX.read(buildScoreTemplate({termId:'1'})),sheet=wb.Sheets.成绩;sheet.C2.v='student';sheet.D2.v='学生3';
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:{requestKey:'blue-old',payloadHash:'blue-old'}});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:{requestKey:'blue-old',payloadHash:'blue-old'}});
  assert.equal(result.batchId,null);assert.ok(result.errors.some(e=>e.field==='schemaVersion'));
 });
 
@@ -75,9 +75,9 @@ test('all sixty blue-frame fields commit after upgrade without changing self or 
  const {createV2TestDb,command}=require('./helpers/reportCoreV2Db');const db=await createV2TestDb(t);
  const wb=XLSX.read(buildScoreTemplate({termId:'1'})),sheet=wb.Sheets.成绩;
  sheet.C2.v='student';sheet.D2.v='学生3';sheet['!ref']=`A1:BP2`;
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:db.actors.teacher,termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:command('sixty-blue')});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:db.actors.teacher,termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:command('sixty-blue')});
  assert.deepEqual(result.errors,[]);assert.ok(result.batchId);assert.equal(result.students[0].uploadedFields.length,60);
- await require('../services/reportCoreImports').commitImport({pool:db.pool,actor:db.actors.teacher,batchId:result.batchId,expectedRevision:result.revision,command:command('commit-sixty')});
+ await require('../services/imports/reportCoreImports').commitImport({pool:db.pool,actor:db.actors.teacher,batchId:result.batchId,expectedRevision:result.revision,command:command('commit-sixty')});
  const [[row]]=await db.pool.query('SELECT * FROM student_term_evaluation WHERE student_id=3');
  for(const f of policyFor(createV2Config()).fields.filter(f=>f.sourceType==='IMPORT'))assert.notEqual(row[f.column],null,`${f.column} committed`);
  assert.equal(row.fitness_self_star,null);assert.equal(row.math_process_star,null);
@@ -86,6 +86,6 @@ test('all sixty blue-frame fields commit after upgrade without changing self or 
 test('a mixed sample and unknown account file cannot bypass ordinary student scope validation',async t=>{
  const {createCoreTestDb}=require('./helpers/reportCoreDb');const db=await createCoreTestDb(t);await db.seedBase();
  const wb=XLSX.read(buildScoreTemplate({termId:'1'}));wb.Sheets.成绩.C9.v='unauthorized-student';
- const {result}=await require('../services/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:{requestKey:'mixed-review',payloadHash:'mixed-review'}});
+ const {result}=await require('../services/imports/reportCoreV2ImportReview').reviewV2Workbook({pool:db.pool,actor:{id:'2',role:'teacher',schoolId:'1',tokenVersion:1},termId:'1',buffer:XLSX.write(wb,{type:'buffer',bookType:'xlsx'}),command:{requestKey:'mixed-review',payloadHash:'mixed-review'}});
  assert.equal(result.demonstration,false);assert.equal(result.batchId,null);assert.ok(result.students[7].errors.some(e=>e.field==='username'));
 });

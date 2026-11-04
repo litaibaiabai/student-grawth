@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
-const {auditV2SourceAssets}=require('../services/reportCoreSourceAudit');
+const {auditV2SourceAssets}=require('../services/core/reportCoreSourceAudit');
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 test('source audit preserves verified, changed, missing and unsafe attachment checks without writes',async()=>{
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'six-education-audit-'));

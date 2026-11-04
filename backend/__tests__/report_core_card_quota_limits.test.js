@@ -1,8 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { createCoreTestDb } = require('./helpers/reportCoreDb');
-const cards = require('../services/reportCoreCards');
-const { stableHash } = require('../services/reportCorePolicy');
+const cards = require('../services/cards/reportCoreCards');
+const { stableHash } = require('../services/core/reportCorePolicy');
 const teacher = { id: '2', schoolId: '1', role: 'teacher', tokenVersion: 1 };
 const manager = { ...teacher, id: '1', role: 'manager' };
 let seq = 0;

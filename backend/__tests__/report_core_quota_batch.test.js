@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {createCoreTestDb}=require('./helpers/reportCoreDb');
-const cards=require('../services/reportCoreCards');
+const cards=require('../services/cards/reportCoreCards');
 const actor={id:'1',schoolId:'1',role:'manager',tokenVersion:1};let seq=0;const command=()=>({requestKey:'quota-batch-'+ ++seq,payloadHash:String(seq).padStart(64,'0')});
 test('batch quota preview and commit are atomic, replay once and reject stale plan or >200 teachers',async t=>{
  const db=await createCoreTestDb(t);await db.seedBase();const [[u]]=await db.pool.query('SELECT password FROM users WHERE id=2');await db.pool.query("INSERT INTO users(id,school_id,username,password,real_name,role) VALUES(5,1,'teacher5',?,'教师5','teacher')",[u.password]);

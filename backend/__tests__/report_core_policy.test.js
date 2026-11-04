@@ -5,7 +5,7 @@ test("settled card thresholds and month-equal story means preserve boundaries", 
     cardStars,
     storyStars,
     storyMean,
-  } = require("../services/reportCorePolicy");
+  } = require("../services/core/reportCorePolicy");
   assert.deepEqual(
     [0, 4, 5, 9, 10].map((points) =>
       cardStars({ points, target: 10, settled: true }),

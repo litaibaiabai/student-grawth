@@ -191,7 +191,7 @@ test('teacher configuration grants head scope without phantom courses and retire
     role: 'teacher',
     tokenVersion: 1
   };
-  const auth = require('../services/authorizationService');
+  const auth = require('../services/auth/authorizationService');
   assert.equal((await auth.assertScope({
     actor: head,
     studentKey: {
@@ -244,7 +244,7 @@ test('transfer preserves facts, advances roster, clears confirmations and rerank
   assert.equal(students[1].status, 'DRAFT');
   assert.equal((typeof students[0].process_summary === 'string' ? JSON.parse(students[0].process_summary) : students[0].process_summary).chinese_process_star.population, 1);
   assert.equal(String((await db.pool.query('SELECT roster_revision FROM academic_year'))[0][0].roster_revision), '2');
-  const imports = require('../services/reportCoreImports');
+  const imports = require('../services/imports/reportCoreImports');
   await assert.rejects(imports.previewImport({
     ...a,
     kind: 'ROSTER',
@@ -283,7 +283,7 @@ test('responsible teacher reads class roster, report browser, workspace and comm
   const {
     resolveTermRoster,
     getWorkspace
-  } = require('../services/reportCoreReadModels');
+  } = require('../services/reports/reportCoreReadModels');
   assert.equal((await resolveTermRoster({
     connection: db.pool,
     schoolId: '1',
@@ -296,7 +296,7 @@ test('responsible teacher reads class roster, report browser, workspace and comm
     termId: '1'
   });
   assert.equal(workspace.counts.total, 2);
-  const comments = await require('../services/reportCoreComments').listComments({
+  const comments = await require('../services/reports/reportCoreComments').listComments({
     pool: db.pool,
     actor,
     termId: '1',
@@ -304,7 +304,7 @@ test('responsible teacher reads class roster, report browser, workspace and comm
     classNo: 1
   });
   assert.equal(comments.rows.length, 2);
-  const cards = await require('../services/reportCoreCourseCards').listCourseCards({
+  const cards = await require('../services/cards/reportCoreCourseCards').listCourseCards({
     pool: db.pool,
     actor,
     termId: '1',
@@ -339,7 +339,7 @@ test('roster import transfer advances same roster version, invalidates peers and
     command: command('ri-target-commit')
   });
   const before = await db.pool.query('SELECT COUNT(*) n FROM evaluation_source_record WHERE student_id=3');
-  const imports = require('../services/reportCoreImports');
+  const imports = require('../services/imports/reportCoreImports');
   const preview = await imports.previewImport({
     ...a,
     kind: 'ROSTER',
@@ -542,7 +542,7 @@ test('commit revalidates disabled teachers and stale roster; audit and scoring f
     command: command('disabled-commit')
   }), e => e.statusCode === 422);
   await db.pool.query('UPDATE users SET status=0 WHERE id=2');
-  const fact = await require('../services/reportCoreStore').addSource(db.pool, {
+  const fact = await require('../services/core/reportCoreStore').addSource(db.pool, {
     schoolId: '1',
     termId: '1',
     studentId: '3',
@@ -630,7 +630,7 @@ test('teacher validation rejects null or malformed assignment rows while enhance
     assignments,
     command: command('malformed-' + JSON.stringify(assignments))
   }), e => e.statusCode === 422);
-  const imports = require('../services/reportCoreImports'),
+  const imports = require('../services/imports/reportCoreImports'),
     p = await imports.previewImport({
       ...a,
       actor: db.actors.teacher,

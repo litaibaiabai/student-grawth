@@ -1,5 +1,5 @@
 const {test}=require('node:test');const assert=require('node:assert/strict');
-const {createCoreTestDb}=require('./helpers/reportCoreDb');const story=require('../services/reportCoreStories');const {addSource}=require('../services/reportCoreStore');
+const {createCoreTestDb}=require('./helpers/reportCoreDb');const story=require('../services/stories/reportCoreStories');const {addSource}=require('../services/core/reportCoreStore');
 const actor={id:'3',schoolId:'1',role:'student',tokenVersion:1};let n=0;const command=()=>({requestKey:'lookup-'+ ++n,payloadHash:String(n).padStart(64,'0')});
 const articles=['READ','LISTEN','TELL'].map(category=>({category,text:`${category}我理解了帮助别人的意义。`}));
 const identity=b=>({expectedBatchId:b.batchId,expectedVersion:b.version,expectedRevision:b.revision});
@@ -16,7 +16,7 @@ test('month lookup reads original submitted items beyond 100 sources and preserv
  let view=await story.getStudentStoryMonth(args);assert.equal(view.effectiveBatch.batchId,b.batchId);assert.equal(view.articles.length,3);assert.equal(view.articles[0].text,articles[0].text);
  const draft=(await story.saveStoryDraft({...args,...identity(view.latestBatch),articles:[articles[0]],command:command()})).result;
  view=await story.getStudentStoryMonth(args);assert.equal(view.draftBatch.batchId,draft.batchId);assert.equal(view.effectiveBatch.batchId,b.batchId);
- const listing=await require('../services/reportCoreSources').listSources({...args,sourceType:'STORY',recordKind:'BATCH',latest:true});assert.equal(listing.rows.length,1);assert.equal(String(listing.rows[0].id),draft.batchId);
+ const listing=await require('../services/core/reportCoreSources').listSources({...args,sourceType:'STORY',recordKind:'BATCH',latest:true});assert.equal(listing.rows.length,1);assert.equal(String(listing.rows[0].id),draft.batchId);
  assert.equal((await story.getStudentStoryMonth({...args,monthKey:'2026-11'})).latestBatch,null);
  await assert.rejects(story.getStudentStoryMonth({...args,studentId:'4'}),{statusCode:403});
  await assert.rejects(story.getStudentStoryMonth({...args,actor:{...actor,role:'teacher',id:'2'}}),{statusCode:403});

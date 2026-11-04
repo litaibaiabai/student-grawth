@@ -1,16 +1,4 @@
-/**
- * 通用错误页面组件
- * 当 React 应用出现未捕获错误时显示
- *
- * 使用方式：
- *   class App extends React.Component { ... }
- *   export default withErrorBoundary(App);
- *   // 或在 main.jsx 中:
- *   // <ErrorBoundary fallback={<ErrorFallback />}>
- *   //   <App />
- *   // </ErrorBoundary>
- */
-
+/** Catch render errors and let the user reload the current application. */
 import React from "react";
 function Result({ title, subTitle, extra }) { return <main role="alert" style={{ padding: '48px', maxWidth: 720, margin: 'auto' }}><h1>{title}</h1><p>{subTitle}</p>{extra}</main>; }
 const Button = ({ children, onClick }) => <button style={{ minHeight:44, padding:'8px 20px' }} onClick={onClick}>{children}</button>;
@@ -61,31 +49,5 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-
-/**
- * 默认错误回退 UI（供外层使用）
- */
-export const ErrorFallback = () => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-      background: "#f0f2f5"
-    }}
-  >
-    <Result
-      status="500"
-      title="页面出错"
-      subTitle="页面渲染时发生错误，请刷新重试"
-      extra={
-        <Button type="primary" onClick={() => window.location.reload()}>
-          刷新页面
-        </Button>
-      }
-    />
-  </div>
-);
 
 export default ErrorBoundary;

@@ -3,8 +3,8 @@ const assert=require('node:assert/strict');
 const {createV2TestDb,command}=require('./helpers/reportCoreV2Db');
 test('V2 certificates require human recognition, store the simplified facts once and revocation rebuilds honor summary',async t=>{
   const {pool,actors}=await createV2TestDb(t);
-  const {addSource}=require('../services/reportCoreStore');
-  const materials=require('../services/reportCoreMaterials');
+  const {addSource}=require('../services/core/reportCoreStore');
+  const materials=require('../services/materials/reportCoreMaterials');
   const sourceId=await addSource(pool,{schoolId:'1',termId:'1',studentId:'3',actorId:'3',sourceType:'CERTIFICATE',kind:'ITEM',schemaVersion:'SIX_EDU_V2',status:'SUBMITTED',payload:{facts:{},fileHash:'same-certificate',fileRef:'private-proof.png'},key:['certificate']});
   const facts={title:'少年讲故事比赛',awardRegion:'市级',awardLevel:'一等奖',subjectCode:'STORY'};
   await materials.decideCertificate({pool,actor:actors.teacher,sourceId,expectedRevision:'1',facts,reason:'已核验证书原件',command:command('decide')});
