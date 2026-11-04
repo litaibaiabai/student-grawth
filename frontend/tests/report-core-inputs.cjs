@@ -120,7 +120,7 @@ test('comment evidence opens on the left beside an editable letter, preserves dr
   const drawer=page.getByRole('region',{name:'六育报表依据',exact:true});
   assert.equal(await drawer.locator('[data-section]').count(),6);
   const assertReportFits=async()=>{
-    const fits=await drawer.locator('.term-evidence-scroll').evaluate(el=>{
+    const fits=await page.waitForFunction(el=>{
       const viewport=el.getBoundingClientRect(),report=el.querySelector('.assessment-report').getBoundingClientRect();
       const tables=[...el.querySelectorAll('.assessment-table-wrap')];
       return Math.abs((report.left+report.width/2)-(viewport.left+viewport.width/2))<2
@@ -128,8 +128,8 @@ test('comment evidence opens on the left beside an editable letter, preserves dr
         &&report.left>=viewport.left-1&&report.right<=viewport.right+1&&report.bottom<=viewport.bottom+1
         &&el.scrollHeight<=el.clientHeight+1&&el.scrollWidth<=el.clientWidth+1
         &&tables.every(table=>table.scrollWidth<=table.clientWidth+1);
-    });
-    assert.equal(fits,true,'the complete report fits within the drawer without scrollbars');
+    },await drawer.locator('.term-evidence-scroll').elementHandle());
+    assert.equal(await fits.jsonValue(),true,'the complete report fits within the drawer without scrollbars');
   };
   await assertReportFits();
 

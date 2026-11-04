@@ -24,6 +24,7 @@
 
 - [后端脚本清单与运行方式](../backend/scripts/README.md)
 - [后端 services 分类与文件索引](../backend/services/README.md)
+- [后端 services 迁移清单（2026-11-04）](delivery/code-cleanup/2026-11-04-services.md)
 - [前后端废弃代码清理及测试基线（2026-11-04）](delivery/code-cleanup/2026-11-04.md)
 
 - [六育 V2 字段映射](data/six-education-v2-field-map.json)
