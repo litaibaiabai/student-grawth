@@ -7,7 +7,7 @@ import {
   routeForRole,
 } from "./core/navigation";
 import RoleShell from "./core/RoleShell";
-import FaceLogin from "./auth/face/FaceLogin";
+import LoginPage from "./auth/LoginPage";
 import FaceSettings from "./auth/face/FaceSettings";
 import { StudentModule, StudentView } from "./student";
 import { TeacherModule, TeacherView } from "./teacher";
@@ -345,104 +345,17 @@ export default function ReportCoreApp() {
   };
   if (boot) return <div className="core-loading">正在读取学期档案…</div>;
   if (!actor)
-    return (
-      <div className="core-login">
-        <section className="login-story">
-          <span className="brand-mark">
-            云美<span>六育评价</span>
-          </span>
-          <p className="kicker">成长有迹 · 学期有声</p>
-          <h1>
-            让每一份成长
-            <br />
-            都有记录
-          </h1>
-          <p>
-            从日常的善意，到一次阅读的感悟。
-            <br />
-            共同写下这个学期的成长答卷。
-          </p>
-          <div className="six-pills">
-            {["德美", "智美", "健美", "艺美", "劳美", "故事美"].map((n) => (
-              <span key={n}>{n}</span>
-            ))}
-          </div>
-          <footer>学校期末综合素质评价</footer>
-        </section>
-        <section className="login-form">
-          <p className="kicker">欢迎回到学期评价</p>
-          <h2>{loginMode === "password" ? "账号登录" : "人脸登录"}</h2>
-          <p>学生、教师及管理员使用学校分配的账号。</p>
-          <div className="face-login-tabs" role="tablist" aria-label="登录方式">
-            {[
-              ["password", "账号密码"],
-              ["face", "人脸登录"],
-            ].map(([value, label]) => (
-              <button
-                type="button"
-                key={value}
-                role="tab"
-                aria-selected={loginMode === value}
-                onClick={() => {
-                  setLoginMode(value);
-                  setPassword("");
-                  setError("");
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {loginMode === "face" ? (
-            <FaceLogin
-              username={username}
-              onUsername={setUsername}
-              onLogin={completeLogin}
-            />
-          ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                run(async () => {
-                  const data = await api("/auth/login", { username, password });
-                  completeLogin(data);
-                });
-              }}
-            >
-              <label>
-                账号
-                <input
-                  autoComplete="username"
-                  aria-label="账号"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </label>
-              <label>
-                密码
-                <input
-                  autoComplete="current-password"
-                  type="password"
-                  aria-label="密码"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </label>
-              {error && (
-                <p role="alert" className="feedback error">
-                  {error}
-                </p>
-              )}
-              <button className="primary" disabled={busy} type="submit">
-                登录
-              </button>
-            </form>
-          )}
-        </section>
-      </div>
-    );
+    return <LoginPage
+      mode={loginMode}
+      onMode={value => { setLoginMode(value); setPassword(""); setError(""); }}
+      username={username} onUsername={setUsername}
+      password={password} onPassword={setPassword}
+      error={error} busy={busy} onLogin={completeLogin}
+      onPasswordLogin={() => run(async () => {
+        const data = await api("/auth/login", { username, password });
+        completeLogin(data);
+      })}
+    />;
   return (
     <>
       <div>

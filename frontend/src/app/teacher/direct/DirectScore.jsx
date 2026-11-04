@@ -143,7 +143,6 @@ export default function DirectScore({ ctx }) {
       <header className="direct-intro">
         <div>
           <span className="direct-eyebrow">CLASSROOM / 课堂评价</span>
-          <h2>把每一次进步，及时记下。</h2>
         </div>
         <span className="direct-point">
           <b>＋1</b> 分 / 人
@@ -339,11 +338,11 @@ export default function DirectScore({ ctx }) {
               </button>
             ))}
           </div>
-          <p className="direct-target-hint">
-            {path.studentIds.length
-              ? '按共同任教权限选择，教师评价与学业等级另行录入。'
-              : '先选学生，再选择本次要记录的表现。'}
-          </p>
+          {path.studentIds.length > 0 && (
+            <p className="direct-target-hint">
+              按共同任教权限选择，教师评价与学业等级另行录入。
+            </p>
+          )}
           <div className="direct-target-grid">
             {targets
               .slice(
@@ -410,11 +409,7 @@ export default function DirectScore({ ctx }) {
         <label className="direct-reason">
           <span>
             <em>03</em>评价说明{' '}
-            <small>
-              {ctx.catalog.schemaVersion === 'SIX_EDU_V2'
-                ? '必填'
-                : '选填'}
-            </small>
+            <small>选填</small>
           </span>
           <textarea
             aria-label="直评说明"
@@ -446,9 +441,7 @@ export default function DirectScore({ ctx }) {
               busy ||
               !path.studentIds.length ||
               !leaf ||
-              !allowed.has(leaf.id) ||
-              (ctx.catalog.schemaVersion === 'SIX_EDU_V2' &&
-                !reason.trim())
+              !allowed.has(leaf.id)
             }
             onClick={score}
           >

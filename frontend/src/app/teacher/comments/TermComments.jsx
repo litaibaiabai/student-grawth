@@ -23,6 +23,62 @@ function CommentWorkspace({ ctx }) {
   const [rosterLoading, setRosterLoading] = useState(false);
   const [studentId, setStudentId] = useState('');
   const [record, setRecord] = useState(null);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const evidencePanel = useRef(null), editorColumn = useRef(null), evidenceTrigger = useRef(null), evidenceViewport = useRef(null), evidenceFit = useRef(null);
+  const closeEvidence = useCallback(() => {
+    setEvidenceOpen(false);
+    requestAnimationFrame(() => evidenceTrigger.current?.focus());
+  }, []);
+  useEffect(() => {
+    if (!evidenceOpen) return;
+    const panel = evidencePanel.current;
+    if (!panel) return;
+    const fitReport = () => {
+      const viewport = evidenceViewport.current, fit = evidenceFit.current;
+      if (!viewport || !fit || !viewport.clientHeight) return;
+      const style = getComputedStyle(viewport);
+      const width = viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const height = viewport.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      fit.style.width = `${Math.max(620, width)}px`;
+      const scale = Math.min(1, (width - 2) / fit.offsetWidth, (height - 2) / fit.offsetHeight);
+      fit.style.zoom = String(scale);
+      fit.style.marginLeft = `${Math.max(0, (width - fit.offsetWidth * scale) / (2 * scale))}px`;
+      fit.style.marginTop = `${Math.max(0, (height - fit.offsetHeight * scale) / (2 * scale))}px`;
+    };
+    const resize = () => {
+      const editorLeft = editorColumn.current?.getBoundingClientRect().left || 0;
+      const width = window.innerWidth <= 600 ? window.innerWidth - 24
+        : window.innerWidth > 1000 ? Math.min(760, Math.max(320, editorLeft - 16))
+        : Math.min(620, window.innerWidth - 24);
+      panel.style.width = `${width}px`;
+      fitReport();
+    };
+    const escape = event => {
+      if (event.key === 'Escape') { event.preventDefault(); closeEvidence(); }
+    };
+    const dismissMobile = event => {
+      if (window.innerWidth <= 600 && !panel.contains(event.target)) {
+        event.preventDefault(); event.stopPropagation(); closeEvidence();
+      }
+    };
+    resize();
+    panel.show();
+    fitReport();
+    const observer = new ResizeObserver(fitReport);
+    observer.observe(evidenceViewport.current);
+    observer.observe(evidenceFit.current);
+    panel.focus({ preventScroll: true });
+    window.addEventListener('resize', resize);
+    document.addEventListener('keydown', escape);
+    document.addEventListener('pointerdown', dismissMobile, true);
+    return () => {
+      observer.disconnect();
+      panel.close();
+      window.removeEventListener('resize', resize);
+      document.removeEventListener('keydown', escape);
+      document.removeEventListener('pointerdown', dismissMobile, true);
+    };
+  }, [evidenceOpen, closeEvidence]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState('');
@@ -55,7 +111,7 @@ function CommentWorkspace({ ctx }) {
     if (ctx.sessionActive !== false) return;
     detailController.current?.abort();
     detailRequest.current++;
-    setLoading(false); setBusy('');
+    setLoading(false); setBusy(''); setEvidenceOpen(false);
   }, [ctx.sessionActive]);
   useEffect(() => {
     setLeaveGuard?.(() => !dirty || window.confirm('寄语尚未保存，确定离开？'));
@@ -115,7 +171,7 @@ function CommentWorkspace({ ctx }) {
     return () => { controller.abort(); counter.current++; };
   }, [studentId, termId, reload, onError, updateRecord]);
   const chooseStudent = id => {
-    if (id !== studentId && mayLeave()) { setStudentId(id); setError(''); }
+    if (id !== studentId && mayLeave()) { setEvidenceOpen(false); setStudentId(id); setError(''); }
   };
   const run = async (action, fn) => {
     if (locked) return;
@@ -159,10 +215,25 @@ function CommentWorkspace({ ctx }) {
   const validText = !!text.trim() && [...text.trim()].length <= 1000;
   const canApprove = record?.canEdit && validText && (record.commentId || record.status === 'APPROVED') && (dirty || record.status !== 'APPROVED');
   const next = rows.find((r, index) => index > rows.findIndex(r => r.student.id === studentId) && r.status !== 'APPROVED');
+  const editor = <div ref={editorColumn} className="term-editor-column">
+        {!studentId ? <div className="term-editor-empty"><span>02 / 核对寄语</span><PenMark /><h3>从一个名字，读懂一段成长。</h3></div> : <>
+          <div className="term-editor-top"><div><span>02 / 核对寄语</span><h3>{record?.student.name || rows.find(r => r.student.id === studentId)?.student.name}<small>的班主任寄语</small></h3></div><span className={`term-status status-${record?.status.toLowerCase() || 'empty'}`}>{dirty ? '修改未保存' : loading ? '正在生成 / 读取' : statusNames[record?.status] || '读取中'}</span></div>
+          <div className="term-letter">
+            <div className="term-letter-heading"><span>致正在成长的你</span><span>{ctx.term?.term_name || record?.report?.term.name}</span></div>
+            {loading && <div className="term-generating" role="status"><span className="term-loading-dot" />正在读取六育报表，为这份成长落笔…</div>}
+            <label className="sr-only" htmlFor="term-comment-text">班主任寄语</label>
+            <textarea id="term-comment-text" aria-label="班主任寄语" aria-describedby={record?.status === 'APPROVED' && !dirty ? undefined : 'term-comment-hint'} value={text} disabled={locked || loading || !record?.canEdit} onChange={e => setText(e.target.value)} placeholder={loading ? '寄语生成后会显示在这里，请稍候。' : '寄语暂未生成，可以重试生成，或亲自为孩子写下寄语。'} />
+            <div className="term-letter-footer"><span>一份鼓励，一程相伴。</span><span className={[...text.trim()].length > 1000 ? 'term-limit-error' : ''}>{[...text.trim()].length} / 1000 字</span></div>
+          </div>
+          <div className="term-editor-actions"><button disabled={locked || loading || !record?.canEdit} onClick={generate}><span aria-hidden="true">↻</span> {busy === 'generate' ? '正在生成…' : text ? '重新生成' : '重试生成'}</button>{record?.report && <button ref={evidenceTrigger} type="button" className="term-evidence-trigger" aria-label="查看六育报表依据" aria-haspopup="dialog" aria-expanded={evidenceOpen} onClick={() => evidenceOpen ? closeEvidence() : setEvidenceOpen(true)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M4 4h16v16H4zM10 4v16M14 9h3M14 13h3"/></svg><span>查看六育报表依据</span></button>}<div><button disabled={locked || loading || !record?.canEdit || !dirty || !validText} onClick={save}>{busy === 'save' ? '正在保存…' : '保存草稿'}</button><button className="primary" disabled={locked || loading || !canApprove} onClick={() => approve([studentId])}>{busy === 'approve' ? '正在审核…' : '审核通过'}</button></div></div>
+          {!(record?.status === 'APPROVED' && !dirty) && <p className="term-editor-hint" id="term-comment-hint">可直接修改生成的文字。保存草稿供稍后核对，审核通过后写入六育报告。</p>}
+          {next && <button className="term-next" disabled={locked} onClick={() => chooseStudent(next.student.id)}>继续核对下一位 <b>{next.student.name}</b><span aria-hidden="true">→</span></button>}
+        </>}
+      </div>;
   return <section className="term-comments" aria-label="班主任寄语工作台">
     {headerSlot && createPortal(<label className="term-class-picker"><span>选择班级</span><select aria-label="寄语班级" value={classKey} disabled={locked || !classes.length} onChange={e => {
         if (!mayLeave()) return;
-        rosterRequest.current++; setClassKey(e.target.value); setStudentId(''); setRecord(null); setText(''); setRows([]); setSelected([]); setKeyword(''); setFilter('ALL'); setError('');
+        setEvidenceOpen(false); rosterRequest.current++; setClassKey(e.target.value); setStudentId(''); setRecord(null); setText(''); setRows([]); setSelected([]); setKeyword(''); setFilter('ALL'); setError('');
       }}><option value="">请选择班主任负责班级</option>{classes.map(c => <option key={c.key} value={c.key}>{c.grade}年级（{c.classNo}）班</option>)}</select></label>, headerSlot)}
     {classKey && <div className="term-class-progress"><div><span>寄语审核进度</span><b>{counts.APPROVED}<small> / {rows.length} 人</small></b></div><progress aria-label="寄语审核进度" value={counts.APPROVED} max={rows.length || 1} /></div>}
     {!classes.length && <p className="term-class-empty">当前没有班主任负责班级，请联系管理员配置班主任职责。</p>}
@@ -180,26 +251,16 @@ function CommentWorkspace({ ctx }) {
           </div>)}
           {!rosterLoading && !filtered.length && <p className="term-list-empty">{rows.length ? '没有符合条件的学生。' : '当前班级还没有学生。'}</p>}
         </div>
-        <footer className="term-batch"><button className="primary" disabled={locked || loading || !selected.length || selected.length > 100 || (selected.includes(studentId) && !validText)} onClick={() => approve(selected)}>批量审核通过（{selected.length}）</button><p>{selected.length > 100 ? '每批最多审核100名学生，请减少勾选。' : '审核后，寄语将写入学生的六育报告。'}</p></footer>
+        <footer className="term-batch"><button className="primary" disabled={locked || loading || !selected.length || selected.length > 100 || (selected.includes(studentId) && !validText)} onClick={() => approve(selected)}>批量审核通过（{selected.length}）</button>{selected.length > 100 && <p>每批最多审核100名学生，请减少勾选。</p>}</footer>
       </aside>
-      <div className="term-editor-column">
-        {!studentId ? <div className="term-editor-empty"><span>02 / 核对寄语</span><PenMark /><h3>从一个名字，读懂一段成长。</h3><p>点击左侧学生，自动生成专属班主任寄语。<br />你可以修改文字，也可以直接审核通过。</p></div> : <>
-          <div className="term-editor-top"><div><span>02 / 核对寄语</span><h3>{record?.student.name || rows.find(r => r.student.id === studentId)?.student.name}<small>的班主任寄语</small></h3></div><span className={`term-status status-${record?.status.toLowerCase() || 'empty'}`}>{dirty ? '修改未保存' : loading ? '正在生成 / 读取' : statusNames[record?.status] || '读取中'}</span></div>
-          <div className="term-letter">
-            <div className="term-letter-heading"><span>致正在成长的你</span><span>{ctx.term?.term_name || record?.report?.term.name}</span></div>
-            {loading && <div className="term-generating" role="status"><span className="term-loading-dot" />正在读取六育报表，为这份成长落笔…</div>}
-            <label className="sr-only" htmlFor="term-comment-text">班主任寄语</label>
-            <textarea id="term-comment-text" aria-label="班主任寄语" aria-describedby="term-comment-hint" value={text} disabled={locked || loading || !record?.canEdit} onChange={e => setText(e.target.value)} placeholder={loading ? '寄语生成后会显示在这里，请稍候。' : '寄语暂未生成，可以重试生成，或亲自为孩子写下寄语。'} />
-            <div className="term-letter-footer"><span>一份鼓励，一程相伴。</span><span className={[...text.trim()].length > 1000 ? 'term-limit-error' : ''}>{[...text.trim()].length} / 1000 字</span></div>
-          </div>
-          {record?.reportChanged && <p className="term-data-note">这份寄语生成后，六育数据有更新。请展开报表核对，必要时重新生成。</p>}
-          {record && !record.canEdit && <p className="term-data-note">当前学期已冻结或正在发布，寄语仅供查看。</p>}
-          <div className="term-editor-actions"><button disabled={locked || loading || !record?.canEdit} onClick={generate}><span aria-hidden="true">↻</span> {busy === 'generate' ? '正在生成…' : text ? '重新生成' : '重试生成'}</button><div><button disabled={locked || loading || !record?.canEdit || !dirty || !validText} onClick={save}>{busy === 'save' ? '正在保存…' : '保存草稿'}</button><button className="primary" disabled={locked || loading || !canApprove} onClick={() => approve([studentId])}>{busy === 'approve' ? '正在审核…' : '审核通过'}</button></div></div>
-          <p className="term-editor-hint" id="term-comment-hint">{record?.status === 'APPROVED' && !dirty ? '这份寄语已写入六育报告。再次修改后，请重新审核。' : '可直接修改生成的文字。保存草稿供稍后核对，审核通过后写入六育报告。'}</p>
-          {record?.report && <details className="term-evidence"><summary><span>查看六育报表依据</span><small>德 · 智 · 健 · 艺 · 劳 · 故事</small></summary><div><StudentAssessmentReport catalog={ctx.catalog} record={record.report} term={ctx.term} showNarratives={false} /></div></details>}
-          {next && <button className="term-next" disabled={locked} onClick={() => chooseStudent(next.student.id)}>继续核对下一位 <b>{next.student.name}</b><span aria-hidden="true">→</span></button>}
-        </>}
-      </div>
+      {editor}
+      {evidenceOpen && record?.report && createPortal(
+        <dialog ref={evidencePanel} className="core-app term-comments term-evidence-panel" tabIndex={-1} aria-label="六育报表依据" aria-modal="false" onCancel={event => { event.preventDefault(); closeEvidence(); }}>
+          <section className="term-evidence-drawer" role="region" aria-label="六育报表依据">
+            <div ref={evidenceViewport} className="term-evidence-scroll"><div ref={evidenceFit} className="term-evidence-fit"><StudentAssessmentReport catalog={ctx.catalog} record={record.report} term={ctx.term} showNarratives={false} /></div></div>
+          </section>
+        </dialog>, document.body,
+      )}
     </div>}
   </section>;
 }

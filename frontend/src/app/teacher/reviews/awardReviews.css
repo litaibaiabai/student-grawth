@@ -28,25 +28,28 @@
 .award-scope-note { display:flex; align-items:center; gap:8px; margin:28px 0 0; border-top:1px dashed #e1e5d7; padding-top:20px; font-size:12px; color:#87927c!important; }
 .award-scope-note svg { width:17px; height:17px; }
 .award-board { border:1px solid var(--award-line); border-radius:20px; background:#fff; overflow:clip; }
-.award-board-header { display:flex; justify-content:space-between; align-items:center; padding:24px 28px 18px; gap:15px; }
+.award-board-header { display:flex; justify-content:space-between; align-items:center; padding:24px 28px 18px; gap:24px; border-bottom:1px solid var(--award-line); }
 .award-class-caption { font-size:11px; color:#84937a; letter-spacing:1px; }
 .award-board-header h3 { display:flex; align-items:center; gap:14px; margin:5px 0 0; font-family:'Songti SC',serif; font-size:26px; font-weight:600; letter-spacing:1px; }
 .award-board-header h3 small { font-family:'PingFang SC','Microsoft YaHei',sans-serif; font-size:12px; font-weight:400; color:#87957c; letter-spacing:0; }
 .award-change { border:1px solid #dfe6d7; font-size:12px; color:#687e58; padding:8px 14px; background:#fafbf7; }
 .award-change span { margin-left:10px; }
-.award-overview { display:flex; align-items:center; flex-wrap:wrap; gap:26px; margin:0 28px; padding:16px 0 21px; border-bottom:1px solid var(--award-line); }
+.award-overview { display:flex; align-items:center; flex-wrap:wrap; gap:26px; margin-left:auto; }
 .award-overview>span { display:flex; align-items:baseline; gap:10px; font-size:12px; color:#829079; }
 .award-overview b { font-family:'Songti SC',serif; font-size:26px; color:#37533d; font-weight:500; font-variant-numeric:tabular-nums; }
 .award-overview .award-pending-count b { color:#a47832; }
 .award-overview>small { margin-left:auto; color:#9aa28e; font-size:11px; }
-.award-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; padding:21px 28px; }
-.award-tabs { display:flex; gap:5px; border-radius:10px; padding:4px; background:#f1f4eb; }
-.award-tabs button { border:0; background:transparent; border-radius:7px; min-height:36px; font-size:12px; padding:6px 15px; color:#8a957d; }
-.award-tabs button[aria-pressed=true] { background:white; color:#315d40; box-shadow:0 1px 5px #1e3c2810; font-weight:600; }
-.core-app .award-search { margin:0; width:255px; }
-.award-search>span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
-.core-app .award-search input { margin:0; border-color:#e1e6d9; background:#fcfdf9; font-size:12px; min-height:40px; padding:10px 13px; }
-.award-search input::placeholder { color:#99a18f; }
+.award-column-heading { display:flex; align-items:center; gap:6px; }
+.core-app .award-filter-trigger { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; min-height:28px; padding:5px; border:0; border-radius:5px; background:transparent; color:#8b987f; }
+.award-filter-trigger svg { width:15px; height:15px; }
+.core-app .award-filter-trigger:hover,.core-app .award-filter-trigger.is-active { color:#315d40; background:#e3ecd9; }
+.award-filter-popover { position:fixed; inset:auto; box-sizing:border-box; width:240px; max-width:calc(100vw - 24px); margin:0; padding:16px; border:1px solid #dfe6d7; border-radius:10px; background:#fff; color:#37533d; box-shadow:0 8px 28px #243e2926; font-family:'PingFang SC','Microsoft YaHei',sans-serif; font-size:12px; text-align:left; white-space:normal; }
+.core-app .award-filter-reset { display:block; margin:12px 0 0 auto; min-height:30px; padding:4px 10px; font-size:12px; color:#56774b; background:#f6f8f1; border:1px solid #dfe6d7; }
+.award-column-filter { display:flex; flex-direction:column; gap:9px; margin:0; }
+.core-app .award-column-filter input,.core-app .award-column-filter select { width:100%; min-width:95px; margin:0; min-height:34px; padding:6px 8px; border:1px solid #dfe6d7; border-radius:6px; background:#fff; color:#37533d; font-size:11px; font-weight:400; }
+.core-app .award-column-filter input { min-width:135px; }
+.award-column-filter input::placeholder { color:#99a18f; }
+.award-table .award-empty-row td { cursor:default; }
 .award-table-scroll { overflow-x:auto; }
 .award-table { width:100%; border-spacing:0; border-collapse:collapse; text-align:left; font-size:12px; }
 .award-table th { background:#f6f8f1; color:#839079; font-weight:400; font-size:11px; padding:13px 14px; border-top:1px solid #e8ecdf; border-bottom:1px solid #e8ecdf; white-space:nowrap; }
@@ -134,12 +137,17 @@
 @media(max-width:600px) {
   .award-intro { padding:2px 0 22px; } .award-intro h2 { font-size:23px; } .award-intro p { font-size:12px; } .award-steps { margin-bottom:20px; }
   .award-class-section { padding:20px 16px; border-radius:15px; } .award-class-card { min-height:105px; } .award-class-card strong { font-size:23px; } .award-scope-note { align-items:flex-start; font-size:11px; }
-  .award-board { border-radius:15px; } .award-board-header { padding:18px 16px 10px; } .award-board-header h3 { flex-wrap:wrap; font-size:24px; gap:7px; } .award-board-header h3 small { font-size:11px; } .award-change { padding:7px 10px; font-size:11px; white-space:nowrap; }
-  .award-overview { margin:0 16px; gap:19px; padding:10px 0 16px; } .award-overview>span { gap:7px; font-size:11px; } .award-overview b { font-size:23px; } .award-overview>small { display:none; }
-  .award-tools { padding:16px; gap:12px; } .award-tabs { width:100%; } .award-tabs button { flex:1; } .core-app .award-search { width:100%; }
+  .award-board { border-radius:15px; } .award-board-header { padding:18px 16px 16px; flex-wrap:wrap; gap:16px; } .award-board-header h3 { flex-wrap:wrap; font-size:24px; gap:7px; } .award-board-header h3 small { font-size:11px; } .award-change { padding:7px 10px; font-size:11px; white-space:nowrap; }
+  .award-board-header .award-change { margin-left:auto; }
+  .award-overview { order:1; width:100%; margin:0; gap:19px; } .award-overview>span { gap:7px; font-size:11px; } .award-overview b { font-size:23px; } .award-overview>small { display:none; }
   .award-table,.award-table thead,.award-table tbody { display:block; width:100%; }
-  .award-table thead tr { display:block; } .award-table th { display:none; }
-  .award-table th.award-select-cell { display:flex; align-items:center; gap:12px; width:100%; padding:12px 16px; }
+  .award-table thead tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:16px; background:#f6f8f1; } .award-table th { display:block; padding:0; border:0; min-width:0; }
+  .award-table th:last-child { display:none; }
+  .award-table th.award-select-cell { grid-column:1/-1; }
+  .core-app .award-column-filter input,.core-app .award-column-filter select { min-width:0; }
+  .award-table tbody tr.award-empty-row { display:block; padding:0; }
+  .award-table .award-empty-row td { display:block; }
+  .award-table th.award-select-cell { display:flex; align-items:center; gap:12px; width:100%; padding:0; }
   .award-table th.award-select-cell::after { content:'全选本页待审记录'; font-size:11px; }
   .award-table tbody tr { display:grid; grid-template-columns:18px minmax(0,1fr) auto; gap:10px 12px; padding:18px 16px 8px; border-bottom:1px solid #e8ecdf; }
   .award-table td { border:0; padding:0; min-width:0; }

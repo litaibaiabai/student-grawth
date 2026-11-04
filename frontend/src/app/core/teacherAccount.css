@@ -1,0 +1,21 @@
+.role-teacher .teacher-account{display:block;margin-top:auto;padding:13px 10px 8px;border:1px solid #e0e5d8;border-radius:14px;background:#f8f8f1;box-shadow:0 3px 12px #273e2705;flex-shrink:0}
+.teacher-account-identity{display:flex;align-items:center;gap:10px;padding:0 2px 13px}
+.teacher-account .avatar-dot{width:36px;height:36px;border:1px solid #fffaf0;border-radius:12px;background:#efe0bc;color:#80633b;font-family:'Songti SC','SimSun',serif;font-size:18px;font-weight:500}
+.teacher-account-name{min-width:0;flex:1}
+.teacher-account-name strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:600;letter-spacing:.5px;line-height:1.5}
+.teacher-account-name small{margin-top:2px;font-size:10px;color:#8b967e;letter-spacing:1px}
+.teacher-account-actions{display:flex;flex-direction:column;gap:3px;border-top:1px solid #e2e6da;padding-top:6px}
+.role-teacher .teacher-account-actions button{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;min-width:0;margin:0;padding:8px 5px;border:0;border-radius:7px;background:transparent;color:#526d4e;font-size:12px;font-weight:400;text-align:left;white-space:nowrap;line-height:1.4;transition:background .15s,color .15s}
+.role-teacher .teacher-account-actions button:hover{background:#eaf0e1;color:#284e38}
+.teacher-account-actions button>svg{width:17px;height:17px;flex-shrink:0}
+.role-teacher .teacher-account-actions .teacher-account-chevron{margin-left:auto;padding-left:2px;font-size:19px;color:#97a38b;font-weight:400}
+.role-teacher .teacher-account-actions .teacher-account-logout{color:#7b8274}
+.role-teacher .teacher-account-actions .teacher-account-logout:hover{color:#915647;background:#f2e9e0}
+@media(max-width:699px){
+ .role-teacher .teacher-account{display:flex;right:12px;width:auto;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+ .role-teacher .teacher-account .teacher-account-identity{display:none}
+ .role-teacher .teacher-account .teacher-account-actions{display:flex;flex-direction:row;gap:4px;padding:0;border:0}
+ .role-teacher .teacher-account-actions button{width:40px;min-width:40px;min-height:40px;padding:10px;justify-content:center;background:#f0f3e8}
+ .role-teacher .teacher-account-actions button>span{display:none}
+ .teacher-account-actions button>svg{width:19px;height:19px}
+}
