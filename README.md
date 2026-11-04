@@ -21,7 +21,7 @@ React 18 / Vite、Express、MySQL 8。当前流程：统一 Excel 导入学期�
 - `frontend/src/app/core/`：登录、API、导航、角色外壳及共享交互。
 - `frontend/src/app/student/`、`teacher/`、`manager/`：按角色与业务组织页面和模型；管理员仅保留 roster、quota、statistics。
 - `frontend/src/component/TermReport/`：报告阅读、版面核对与打印。
-- `backend/routes/`、`backend/services/`：API、授权、统一导入、来源事实、评价投影、发布快照及统计。
+- `backend/routes/`：API 路由；[backend/services/](backend/services/README.md) 按认证、核心规则、积分卡、评价、报告、导入、材料、故事、学籍、统计和基础设施分类。
 - [backend/scripts/](backend/scripts/README.md)：启动、迁移与验证工具的用途及运行命令。
 - `docs/database/`：迁移仍使用的表结构校验契约；`sql/`：历史迁移脚本。
 
