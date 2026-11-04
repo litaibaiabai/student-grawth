@@ -247,3 +247,40 @@ test('redesigned login supports keyboard mode switching, errors, all roles and m
     if(role!=='student') await page.getByRole('button',{name:'退出登录',exact:true}).click();
   }
 });
+
+test('administrator account card keeps identity clear and settings and logout usable on mobile', async t => {
+  const {page,db}=await open(t,'teacher',true);
+  await require('../../backend/scripts/migrateAdminClasses').migrateAdminClasses({connection:db.pool,targetDb:db.name,mode:'apply'});
+  await db.pool.query("UPDATE users SET real_name='学校管理员' WHERE id=1");
+  await page.getByRole('button',{name:'退出登录',exact:true}).click();
+  await page.getByLabel('账号',{exact:true}).fill('admin');
+  await page.getByLabel('密码',{exact:true}).fill('Test-pass-2026');
+  await page.getByRole('button',{name:'登录',exact:true}).click();
+  await page.locator('.role-manager .side-account').waitFor();
+  const account=page.getByRole('region',{name:'管理员账号菜单',exact:true});
+  assert.equal(await account.count(),1);
+  await page.setViewportSize({width:1440,height:1000});
+  assert.match(await account.innerText(),/学校管理员/);
+  assert.match(await account.innerText(),/管理员账号/);
+  const settings=account.getByRole('button',{name:'人脸登录设置',exact:true}),logout=account.getByRole('button',{name:'退出登录',exact:true});
+  assert.equal((await logout.innerText()).trim(),'退出登录');
+  assert.equal(await settings.locator('span').first().evaluate(el=>{const r=new Range();r.selectNodeContents(el);return r.getClientRects().length;}),1);
+  const a=await settings.boundingBox(),b=await logout.boundingBox();
+  assert.ok(b.y>=a.y+a.height&&Math.abs(a.x-b.x)<1);
+  await settings.click();
+  await page.getByRole('dialog',{name:'人脸登录设置',exact:true}).waitFor();
+  await page.getByRole('button',{name:'关闭人脸设置',exact:true}).click();
+  await account.screenshot({path:'/tmp/liuyu-admin-account-desktop.png',animations:'disabled'});
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await settings.isVisible(),true);
+  assert.equal(await logout.isVisible(),true);
+  const mobileSettings=await settings.boundingBox(),mobileLogout=await logout.boundingBox();
+  assert.ok(mobileSettings.x+mobileSettings.width<=mobileLogout.x+1&&mobileLogout.x+mobileLogout.width<=390);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await page.screenshot({path:'/tmp/liuyu-admin-account-mobile.png',animations:'disabled'});
+  await settings.click();
+  await page.getByRole('dialog',{name:'人脸登录设置',exact:true}).waitFor();
+  await page.getByRole('button',{name:'关闭人脸设置',exact:true}).click();
+  await logout.click();
+  await page.getByRole('heading',{name:'账号登录',exact:true}).waitFor();
+});
